@@ -1,0 +1,7 @@
+# Used as redirected input for EXE2BIN
+BIOS/LOCSCR          text eol=crlf
+DEV/DISPLAY/ZERO.DAT text eol=crlf
+DEV/PRINTER/ZERO.DAT text eol=crlf
+
+# Need to be CR-LF so NOSRVBLD works correctly
+*.SKL                text eol=crlf
