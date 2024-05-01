@@ -41,3 +41,12 @@ assign.com: assgmain.obj assgparm.obj
 	link assgmain.obj+assgparm.obj,assign,,;
 	exe2bin assign.exe  assign.com
 	del assign.exe
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist assign.com del assign.com
+	@if exist assign.cl1 del assign.cl1
+	@if exist assign.cl2 del assign.cl2
+	@if exist assign.cla del assign.cla
+	@if exist assign.ctl del assign.ctl
+	@if exist assign.map del assign.map

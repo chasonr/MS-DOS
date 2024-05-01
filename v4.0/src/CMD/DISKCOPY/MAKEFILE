@@ -55,3 +55,11 @@ diskcopy.com: diskcopy.obj \
 	link @diskcopy.lnk
 	exe2bin diskcopy.exe diskcopy.com
 	del diskcopy.exe
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist diskcopy.com del diskcopy.com
+	@if exist diskcopy.cl1 del diskcopy.cl1
+	@if exist diskcopy.cl2 del diskcopy.cl2
+	@if exist diskcopy.cla del diskcopy.cla
+	@if exist diskcopy.ctl del diskcopy.ctl

@@ -21,3 +21,11 @@ driver.sys: driver.obj driver.lnk
         link @driver.lnk
         exe2bin driver.exe driver.sys
         del driver.exe
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist driver.sys del driver.sys
+	@if exist driver.cl1 del driver.cl1
+	@if exist driver.cl2 del driver.cl2
+	@if exist driver.cla del driver.cla
+	@if exist driver.ctl del driver.ctl

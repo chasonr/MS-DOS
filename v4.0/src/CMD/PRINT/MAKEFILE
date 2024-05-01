@@ -51,3 +51,15 @@ print.com: print_r.obj \
         link @print.lnk
         convert print.exe
         del print.exe
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist print.com del print.com
+	@if exist print.cl1 del print.cl1
+	@if exist print.cl2 del print.cl2
+	@if exist print.cla del print.cla
+	@if exist print.clb del print.clb
+	@if exist print.clc del print.clc
+	@if exist print.cld del print.cld
+	@if exist print.ctl del print.ctl
+	@if exist print.map del print.map

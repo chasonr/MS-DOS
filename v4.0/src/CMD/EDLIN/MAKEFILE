@@ -54,3 +54,13 @@ edlin.com:      edlin.obj edlcmd1.obj edlcmd2.obj edlmes.obj edlparse.obj \
         link @edlin.lnk
         convert edlin.exe
         del edlin.exe
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist edlin.com del edlin.com
+	@if exist edlin.cl1 del edlin.cl1
+	@if exist edlin.cl2 del edlin.cl2
+	@if exist edlin.cla del edlin.cla
+	@if exist edlin.clb del edlin.clb
+	@if exist edlin.clc del edlin.clc
+	@if exist edlin.ctl del edlin.ctl

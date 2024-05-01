@@ -79,3 +79,11 @@ join.exe: join.obj      \
   _parse.obj		\
   join.lnk
     link @join.lnk
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist join.cl1 del join.cl1
+	@if exist join.cl2 del join.cl2
+	@if exist join.cla del join.cla
+	@if exist join.ctl del join.ctl
+	@if exist join.exe del join.exe

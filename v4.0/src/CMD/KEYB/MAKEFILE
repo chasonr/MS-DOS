@@ -70,3 +70,11 @@ keyb.com: keyb.obj     \
     link @keyb.lnk
     exe2bin keyb.exe keyb.com
     del keyb.exe
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist keyb.com del keyb.com
+	@if exist keyb.cl1 del keyb.cl1
+	@if exist keyb.cl2 del keyb.cl2
+	@if exist keyb.cla del keyb.cla
+	@if exist keyb.ctl del keyb.ctl

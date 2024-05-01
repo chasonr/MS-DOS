@@ -72,3 +72,11 @@ graftabl.com: grtab.obj \
 	link @graftabl.lnk
 	exe2bin graftabl.exe graftabl.com
 	del graftabl.exe
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist graftabl.com del graftabl.com
+	@if exist graftabl.cl1 del graftabl.cl1
+	@if exist graftabl.cl2 del graftabl.cl2
+	@if exist graftabl.cla del graftabl.cla
+	@if exist graftabl.ctl del graftabl.ctl

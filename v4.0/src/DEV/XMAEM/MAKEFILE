@@ -55,3 +55,8 @@ xmaem.sys:  makefile			\
 	    indeacc.inc 		\
 	    xmaem.lnk
 	link @xmaem.lnk
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist xmaem.cl1 del xmaem.cl1
+	@if exist xmaem.sys del xmaem.sys

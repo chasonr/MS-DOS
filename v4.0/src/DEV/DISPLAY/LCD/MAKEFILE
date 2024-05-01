@@ -30,3 +30,7 @@ lcd.cpi:  font-r3.obj  437-cpi.obj  850-cpi.obj  860-cpi.obj  \
 		link @lcd.lnk
 		exe2bin font-r3.exe lcd.cpi
 		del font-r3.exe
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist lcd.cpi del lcd.cpi

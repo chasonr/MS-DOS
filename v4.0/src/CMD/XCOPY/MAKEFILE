@@ -47,3 +47,11 @@ xcopy.exe: xcopy.obj \
    xcopypar.obj \
    xcpyinit.obj
         link @xcopy.lnk
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist xcopy.cl1 del xcopy.cl1
+	@if exist xcopy.cl2 del xcopy.cl2
+	@if exist xcopy.cla del xcopy.cla
+	@if exist xcopy.ctl del xcopy.ctl
+	@if exist xcopy.exe del xcopy.exe

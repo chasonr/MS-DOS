@@ -57,3 +57,7 @@ keyboard.sys: kdfsp.obj kdfpo.obj kdffr120.obj kdffr189.obj kdfdk.obj \
 	      link @keyboard.lnk
 	      exe2bin keyboard.exe keyboard.sys
 	      del keyboard.exe
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist keyboard.sys del keyboard.sys

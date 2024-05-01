@@ -132,3 +132,19 @@ command.com:  command1.obj command2.obj rucode.obj rdata.obj init.obj iparse.obj
 	link @command.lnk
 	exe2bin command.exe command.com
 	del command.exe
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist command.com del command.com
+	@if exist command.cl1 del command.cl1
+	@if exist command.cl2 del command.cl2
+	@if exist command.cl3 del command.cl3
+	@if exist command.cl4 del command.cl4
+	@if exist command.cla del command.cla
+	@if exist command.clb del command.clb
+	@if exist command.clc del command.clc
+	@if exist command.cld del command.cld
+	@if exist command.cle del command.cle
+	@if exist command.clf del command.clf
+	@if exist command.ctl del command.ctl
+	@if exist command.map del command.map

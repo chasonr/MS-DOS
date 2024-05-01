@@ -165,3 +165,15 @@ $(dest).sys: msbio.cl1 msbio1.obj mscon.obj  msaux.obj \
 	del msbio.bin
 	del msbio.exe
 
+clean:
+	@if exist *.obj del *.obj
+	@if exist io.sys del io.sys
+	@if exist msbio.map del msbio.map
+	@if exist msload.exe del msload.exe
+	@if exist msload.map del msload.map
+	@if exist msbio.cl1 del msbio.cl1
+	@if exist msbio.cl2 del msbio.cl2
+	@if exist msbio.cl3 del msbio.cl3
+	@if exist msbio.cl4 del msbio.cl4
+	@if exist msbio.cl5 del msbio.cl5
+	@if exist msload.com del msload.com

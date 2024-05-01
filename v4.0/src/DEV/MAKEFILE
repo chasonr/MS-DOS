@@ -21,11 +21,33 @@ all:
 	$(make)
 	cd ..\xma2ems
 	$(make)
-        cd ..\vdisk
-        $(make)
-        cd ..\xmaem
-        $(make)
+	cd ..\vdisk
+	$(make)
+	cd ..\xmaem
+	$(make)
 	cd ..
 
-
-
+clean:
+	cd country
+	$(make) clean
+	cd ..\ansi
+	$(make) clean
+	cd ..\keyboard
+	$(make) clean
+	cd ..\display
+	$(make) clean
+	cd ..\printer
+	$(make) clean
+	cd ..\driver
+	$(make) clean
+	cd ..\ramdrive
+	$(make) clean
+	cd ..\smartdrv
+	$(make) clean
+	cd ..\xma2ems
+	$(make) clean
+	cd ..\vdisk
+	$(make) clean
+	cd ..\xmaem
+	$(make) clean
+	cd ..

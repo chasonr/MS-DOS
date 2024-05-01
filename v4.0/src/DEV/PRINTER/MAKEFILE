@@ -37,4 +37,14 @@ printer.sys:	cpspm10.obj cpsfont3.obj parser.obj cpspi07.obj prtint2f.obj
 	$(make)
 	cd ..
 
-
+clean:
+	@if exist *.obj del *.obj
+	@if exist printer.sys del printer.sys
+	@if exist printer.cl1 del printer.cl1
+	@if exist printer.cl2 del printer.cl2
+	@if exist printer.cla del printer.cla
+	@if exist printer.ctl del printer.ctl
+	@if exist printer.map del printer.map
+	cd 5202
+	$(make) clean
+	cd ..

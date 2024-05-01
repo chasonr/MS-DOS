@@ -62,3 +62,13 @@ recover.com: recover.obj recproc.obj recinit.obj \
 	     recover.lnk makefile
 	link @recover.lnk
 	convert recover.exe
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist recover.com del recover.com
+	@if exist recover.cl1 del recover.cl1
+	@if exist recover.cl2 del recover.cl2
+	@if exist recover.cla del recover.cla
+	@if exist recover.ctl del recover.ctl
+	@if exist recover.exe del recover.exe
+	@if exist recover.map del recover.map

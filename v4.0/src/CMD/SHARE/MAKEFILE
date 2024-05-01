@@ -65,3 +65,12 @@ share.exe: share.ctl gshare.obj gshare2.obj sharesr.obj $(inc)\nibdos.obj \
            $(inc)\const2.obj $(inc)\msdata.obj $(inc)\msdosme.obj sharelnk.obj \
            share.lnk
            link @share.lnk
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist share.cl1 del share.cl1
+	@if exist share.cl2 del share.cl2
+	@if exist share.cla del share.cla
+	@if exist share.ctl del share.ctl
+	@if exist share.exe del share.exe
+	@if exist share.map del share.map

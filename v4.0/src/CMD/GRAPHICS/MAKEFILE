@@ -62,3 +62,13 @@ graphics.com: graphics.obj grint2fh.obj grpattrn.obj grctrl.obj grcpsd.obj \
 	  link @graphics.lnk
 	  exe2bin graphics.exe graphics.com
 	  del graphics.exe
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist graphics.com del graphics.com
+	@if exist graphics.cl1 del graphics.cl1
+	@if exist graphics.cl2 del graphics.cl2
+	@if exist graphics.cla del graphics.cla
+	@if exist graphics.clb del graphics.clb
+	@if exist graphics.clc del graphics.clc
+	@if exist graphics.ctl del graphics.ctl

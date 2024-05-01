@@ -50,4 +50,15 @@ lcd.cpi:
 	$(make)
 	cd ..
 
-
+clean:
+	@if exist *.obj del *.obj
+	@if exist display.sys del display.sys
+	@if exist display.cl1 del display.cl1
+	@if exist display.cl2 del display.cl2
+	@if exist display.cla del display.cla
+	@if exist display.ctl del display.ctl
+	cd ega
+	$(make) clean
+	cd ..\lcd
+	$(make) clean
+	cd ..

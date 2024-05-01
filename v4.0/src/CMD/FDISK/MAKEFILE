@@ -110,5 +110,18 @@ fdisk.exe : fdisk.obj reboot.obj bootrec.obj fdboot.obj \
 	cd $(inc)
 	nmake
 	cd $(here)
-        link @fdisk.lnk
+	link @fdisk.lnk
 
+clean:
+	@if exist *.obj del *.obj
+	@if exist fdboot.bin del fdboot.bin
+	@if exist fdboot.inc del fdboot.inc
+	@if exist fdisk5.cl1 del fdisk5.cl1
+	@if exist fdiskm.c del fdiskm.c
+	@if exist fdisk.cl1 del fdisk.cl1
+	@if exist fdisk.cl2 del fdisk.cl2
+	@if exist fdisk.cla del fdisk.cla
+	@if exist fdisk.clb del fdisk.clb
+	@if exist fdisk.ctl del fdisk.ctl
+	@if exist fdisk.exe del fdisk.exe
+	@if exist fdisk.map del fdisk.map

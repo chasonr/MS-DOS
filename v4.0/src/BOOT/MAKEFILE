@@ -23,3 +23,9 @@ msboot.bin: msboot.obj
 	dbof msboot.bin boot.inc 7c00 200
 	copy boot.inc $(inc)
 	del boot.inc
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist msboot.exe del msboot.exe
+	@if exist boot.cl1 del boot.cl1
+	@if exist msboot.bin del msboot.bin

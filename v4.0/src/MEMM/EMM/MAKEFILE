@@ -92,4 +92,14 @@ emmdata.obj:	emmdata.asm $(AINC)
 
 emminc.obj:	emminc.asm $(AINC)
 		$(MASM) $(AFLAGS) emminc.asm,emminc.obj,emminc.lst;
-
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist emm40.cod del emm40.cod
+	@if exist emmdata.lst del emmdata.lst
+	@if exist emmdisp.lst del emmdisp.lst
+	@if exist emmfunct.cod del emmfunct.cod
+	@if exist emminc.lst del emminc.lst
+	@if exist emmlib.lib del emmlib.lib
+	@if exist emmp.lst del emmp.lst
+	@if exist emmsup.lst del emmsup.lst

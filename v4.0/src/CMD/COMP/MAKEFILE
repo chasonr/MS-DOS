@@ -50,3 +50,12 @@ comp.com: comp1.obj \
         link @comp.lnk
         exe2bin comp.exe comp.com
         del comp.exe
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist comp.com del comp.com
+	@if exist comp.cl1 del comp.cl1
+	@if exist comp.cl2 del comp.cl2
+	@if exist comp.cla del comp.cla
+	@if exist comp.ctl del comp.ctl
+	@if exist comp.map del comp.map

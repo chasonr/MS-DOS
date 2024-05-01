@@ -34,4 +34,12 @@ mem.obj:        mem.c                           \
 mem.exe:        mem.obj  _msgret.obj _parse.obj
                         link mem+_msgret+_parse,,,$(lib)\mem;
 
-
+clean:
+	@if exist *.obj del *.obj
+	@if exist mem.cl1 del mem.cl1
+	@if exist mem.cl2 del mem.cl2
+	@if exist mem.cla del mem.cla
+	@if exist mem.clb del mem.clb
+	@if exist mem.ctl del mem.ctl
+	@if exist mem.exe del mem.exe
+	@if exist mem.map del mem.map

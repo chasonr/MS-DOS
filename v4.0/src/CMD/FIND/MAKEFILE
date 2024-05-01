@@ -32,3 +32,11 @@ findmes.obj: findmes.asm
 
 find.exe: find.obj findmes.obj
         link find+findmes,find.exe/ex;
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist find.cl1 del find.cl1
+	@if exist find.cl2 del find.cl2
+	@if exist find.cla del find.cla
+	@if exist find.ctl del find.ctl
+	@if exist find.exe del find.exe

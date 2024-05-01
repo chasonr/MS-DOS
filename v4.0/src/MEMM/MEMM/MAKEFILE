@@ -338,6 +338,8 @@ memminc.lst: memminc.asm $(MEMMINC)
 #memmonf.lst: memmonf.asm memm_msg.inc
 #	 $(ASM) -l -n $(AFLAGS) $(AINC) $*.asm;
 
-
-
-
+clean:
+	@if exist *.obj del *.obj
+	@if exist emm386.sys del emm386.sys
+	@if exist emm386.map del emm386.map
+	@if exist mapdma.cod del mapdma.cod

@@ -9,6 +9,9 @@ all:
 	$(make)
 	cd ..
 
-
-
-
+clean:
+	cd emm
+	$(make) clean
+	cd ..\memm
+	$(make) clean
+	cd ..

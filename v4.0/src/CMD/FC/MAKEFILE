@@ -62,3 +62,7 @@ update.obj: update.c tools.h ttypes.h
 
 $(DEST).exe: $(OBJ) $(DEST).lnk
 	$(link) @$(DEST).lnk;
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist fc.exe del fc.exe

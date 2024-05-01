@@ -105,3 +105,14 @@ debug.com:      debug.obj debcom1.obj debcom2.obj debcom3.obj debems.obj \
         link @debug.lnk
         convert debug.exe
         del debug.exe
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist debug.com del debug.com
+	@if exist debug.cl1 del debug.cl1
+	@if exist debug.cl2 del debug.cl2
+	@if exist debug.cla del debug.cla
+	@if exist debug.clb del debug.clb
+	@if exist debug.clc del debug.clc
+	@if exist debug.cld del debug.cld
+	@if exist debug.ctl del debug.ctl

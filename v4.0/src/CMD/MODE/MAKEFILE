@@ -128,3 +128,13 @@ mode.com: main.obj \
 	link @mode.lnk
 	exe2bin mode.exe mode.com
 	del mode.exe
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist mode.com del mode.com
+	@if exist mode.cl1 del mode.cl1
+	@if exist mode.cl2 del mode.cl2
+	@if exist mode.cla del mode.cla
+	@if exist mode.clb del mode.clb
+	@if exist mode.ctl del mode.ctl
+	@if exist mode.map del mode.map

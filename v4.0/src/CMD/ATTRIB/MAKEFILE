@@ -44,3 +44,12 @@ attrib.exe: attrib.obj \
             _msgret.obj \
             attrib.lnk
       link @attrib.lnk
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist attrib.cl1 del attrib.cl1
+	@if exist attrib.cl2 del attrib.cl2
+	@if exist attrib.cla del attrib.cla
+	@if exist attrib.clb del attrib.clb
+	@if exist attrib.ctl del attrib.ctl
+	@if exist attrib.exe del attrib.exe

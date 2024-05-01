@@ -31,3 +31,11 @@ ansi.sys:       ansi.obj ioctl.obj ansiinit.obj parser.obj ansi.lnk makefile
 			exe2bin ansi.exe ansi.sys
 			del     ansi.exe
 
+clean:
+	@if exist *.obj del *.obj
+	@if exist ansi.sys del ansi.sys
+	@if exist ansi.cl1 del ansi.cl1
+	@if exist ansi.cl2 del ansi.cl2
+	@if exist ansi.cla del ansi.cla
+	@if exist ansi.ctl del ansi.ctl
+	@if exist ansi.map del ansi.map

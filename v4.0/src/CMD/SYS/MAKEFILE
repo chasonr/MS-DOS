@@ -44,3 +44,15 @@ sys.com: sys.ctl sys1.obj syssr.obj sys1.obj sys2.obj
         link @sys.lnk
         exe2bin sys.exe sys.com
         del sys.exe
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist sys.com del sys.com
+	@if exist sys.cl1 del sys.cl1
+	@if exist sys.cl2 del sys.cl2
+	@if exist sys.cla del sys.cla
+	@if exist sys.clb del sys.clb
+	@if exist sys.clc del sys.clc
+	@if exist sys.cld del sys.cld
+	@if exist sys.ctl del sys.ctl
+	@if exist sys.map del sys.map

@@ -79,3 +79,12 @@ subst.exe: subst.obj    \
   _parse.obj            \
   subst.lnk
     link @subst.lnk
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist *.obj del *.obj
+	@if exist subst.cl1 del subst.cl1
+	@if exist subst.cl2 del subst.cl2
+	@if exist subst.cla del subst.cla
+	@if exist subst.ctl del subst.ctl
+	@if exist subst.exe del subst.exe

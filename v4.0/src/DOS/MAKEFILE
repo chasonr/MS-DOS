@@ -219,3 +219,10 @@ msdos.sys: msdos.cl1 $(inc)\nibdos.obj $(inc)\const2.obj  \
 	link @msdos.lnk
 	exe2bin msdos.exe msdos.sys
 	del msdos.exe
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist msdos.cl1 del msdos.cl1
+	@if exist msdos.cl3 del msdos.cl3
+	@if exist msdos.sys del msdos.sys
+	@if exist msdos.map del msdos.map

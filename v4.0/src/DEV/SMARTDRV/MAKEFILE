@@ -17,3 +17,9 @@ smartdrv.exe: smartdrv.obj
 
 smartdrv.sys: smartdrv.exe
 	exe2bin smartdrv smartdrv.sys
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist smartdrv.sys del smartdrv.sys
+	@if exist smartdrv.exe del smartdrv.exe
+	@if exist smartdrv.map del smartdrv.map

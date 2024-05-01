@@ -53,3 +53,15 @@ format.com:     format.obj forproc.obj msfor.obj forexec.obj display.obj \
         link  @format.lnk
         convert format.exe
         del format.exe
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist boot.cl1 del boot.cl1
+	@if exist format.com del format.com
+	@if exist format.cl1 del format.cl1
+	@if exist format.cl2 del format.cl2
+	@if exist format.cla del format.cla
+	@if exist format.clb del format.clb
+	@if exist format.clc del format.clc
+	@if exist format.ctl del format.ctl
+	@if exist format.map del format.map

@@ -32,3 +32,11 @@ label.com: label.obj    \
        link @label.lnk
        exe2bin label.exe label.com
        del label.exe
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist label.com del label.com
+	@if exist labl.cl1 del labl.cl1
+	@if exist labl.cl2 del labl.cl2
+	@if exist labl.cla del labl.cla
+	@if exist labl.ctl del labl.ctl

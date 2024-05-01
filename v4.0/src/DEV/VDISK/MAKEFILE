@@ -31,3 +31,11 @@ vdisk.sys: vdisksys.obj \
         link @vdisk.lnk
         exe2bin vdisk.exe vdisk.sys
         del vdisk.exe
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist vdisk.sys del vdisk.sys
+	@if exist vdisk.cl1 del vdisk.cl1
+	@if exist vdisk.cl2 del vdisk.cl2
+	@if exist vdisk.cla del vdisk.cla
+	@if exist vdisk.ctl del vdisk.ctl

@@ -57,3 +57,10 @@ diskcomp.com: diskcomp.obj \
 	exe2bin diskcomp.exe diskcomp.com
 	del diskcomp.exe
 
+clean:
+	@if exist *.obj del *.obj
+	@if exist diskcomp.com del diskcomp.com
+	@if exist diskcomp.cl1 del diskcomp.cl1
+	@if exist diskcomp.cl2 del diskcomp.cl2
+	@if exist diskcomp.cla del diskcomp.cla
+	@if exist diskcomp.ctl del diskcomp.ctl

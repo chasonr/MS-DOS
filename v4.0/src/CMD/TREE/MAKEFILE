@@ -49,3 +49,11 @@ tree.com: tree.obj \
 	link @tree.lnk
 	exe2bin tree.exe tree.com
 	del tree.exe
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist tree.com del tree.com
+	@if exist tree.cl1 del tree.cl1
+	@if exist tree.cl2 del tree.cl2
+	@if exist tree.cla del tree.cla
+	@if exist tree.ctl del tree.ctl

@@ -92,3 +92,16 @@ chkdsk.com: chkdsk1.obj chkdsk2.obj chkproc.obj chkproc2.obj chkprmt.obj \
 	    chkdsk.lnk	makefile
 	link @chkdsk.lnk
 	convert chkdsk.exe
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist chkdsk.com del chkdsk.com
+	@if exist chkdsk.cl1 del chkdsk.cl1
+	@if exist chkdsk.cl2 del chkdsk.cl2
+	@if exist chkdsk.cla del chkdsk.cla
+	@if exist chkdsk.clb del chkdsk.clb
+	@if exist chkdsk.clc del chkdsk.clc
+	@if exist chkdsk.cld del chkdsk.cld
+	@if exist chkdsk.ctl del chkdsk.ctl
+	@if exist chkdsk.exe del chkdsk.exe
+	@if exist chkdsk.map del chkdsk.map

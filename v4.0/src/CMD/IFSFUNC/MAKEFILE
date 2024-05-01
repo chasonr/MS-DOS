@@ -125,3 +125,11 @@ ifsfunc.exe: ifssess.obj ifsdir.obj  ifsfile.obj  ifshand.obj	      \
 	     ifsflink.obj  makefile	ifsfunc.lnk
      link @ifsfunc.lnk
 
+clean:
+	@if exist *.obj del *.obj
+	@if exist ifsfunc.cl1 del ifsfunc.cl1
+	@if exist ifsfunc.cl2 del ifsfunc.cl2
+	@if exist ifsfunc.cla del ifsfunc.cla
+	@if exist ifsfunc.ctl del ifsfunc.ctl
+	@if exist ifsfunc.exe del ifsfunc.exe
+	@if exist ifsfunc.map del ifsfunc.map

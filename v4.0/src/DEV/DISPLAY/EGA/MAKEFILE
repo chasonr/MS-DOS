@@ -53,3 +53,7 @@ ega.cpi: cpi-head.obj 437-cpi.obj 850-cpi.obj 860-cpi.obj \
 	       link @ega.lnk
 	       exe2bin cpi-head.exe ega.cpi
 	       del   cpi-head.exe
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist ega.cpi del ega.cpi

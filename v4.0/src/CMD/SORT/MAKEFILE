@@ -34,3 +34,11 @@ sortmes.obj: sort.asm           \
 sort.exe: sort.obj sortmes.obj
         link sort+sortmes,sort.exe;
         exefix sort.exe 1 1
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist sort.cl1 del sort.cl1
+	@if exist sort.cl2 del sort.cl2
+	@if exist sort.cla del sort.cla
+	@if exist sort.ctl del sort.ctl
+	@if exist sort.exe del sort.exe

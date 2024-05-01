@@ -33,3 +33,10 @@ filesys.exe:    filesys.obj             \
                 _msgret.obj
         link filesys+ _parse+ _msgret; /NOI
 
+clean:
+	@if exist *.obj del *.obj
+	@if exist filesys.cl1 del filesys.cl1
+	@if exist filesys.cl2 del filesys.cl2
+	@if exist filesys.cla del filesys.cla
+	@if exist filesys.ctl del filesys.ctl
+	@if exist filesys.exe del filesys.exe

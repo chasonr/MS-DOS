@@ -19,9 +19,29 @@ all:
 	$(make)
 	cd ..\select
 	$(make)
-        cd ..\memm
-        $(make)
+	cd ..\memm
+	$(make)
 	cd ..
 
-
-
+clean:
+	cd messages
+	$(make) clean
+	cd ..\mapper
+	$(make) clean
+	cd ..\boot
+	$(make) clean
+	cd ..\bios
+	$(make) clean
+	cd ..\dos
+	$(make) clean
+	cd ..\cmd
+	$(make) clean
+	cd ..\dev
+	$(make) clean
+	cd ..\select
+	$(make) clean
+	cd ..\memm
+	$(make) clean
+	cd ..\inc
+	$(make) clean
+	cd ..

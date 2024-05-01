@@ -246,4 +246,22 @@ select.hlp: USA.txt
         asc2hlp USA.txt select.hlp
 	attrib +R USA.txt
 			    	
-		
+clean:
+	@if exist *.obj del *.obj
+	@if exist panel.inf del panel.inf
+	@if exist sel-pan.dat del sel-pan.dat
+	@if exist select.com del select.com
+	@if exist select.hlp del select.hlp
+	@if exist services.bak del services.bak
+	@if exist services.lib del services.lib
+	@if exist sel-pan.exe del sel-pan.exe
+	@if exist sel-pan.map del sel-pan.map
+	@if exist select.cl1 del select.cl1
+	@if exist select.cl2 del select.cl2
+	@if exist select.cla del select.cla
+	@if exist select.clb del select.clb
+	@if exist select.ctl del select.ctl
+	@if exist select.dat del select.dat
+	@if exist select.exe del select.exe
+	@if exist select.map del select.map
+	@if exist sstub.exe del sstub.exe

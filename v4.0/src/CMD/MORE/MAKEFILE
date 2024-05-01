@@ -34,3 +34,11 @@ more.com: more.obj \
         link @more.lnk
         exe2bin more.exe more.com
         del more.exe
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist more.com del more.com
+	@if exist more.cl1 del more.cl1
+	@if exist more.cl2 del more.cl2
+	@if exist more.cla del more.cla
+	@if exist more.ctl del more.ctl

@@ -28,3 +28,13 @@ display.obj : display.asm makefile
 
 exe2bin.exe : display.obj e2binit.obj exe2bin.ctl makefile exe2bin.lnk
          link @exe2bin.lnk
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist exe2bin.cl1 del exe2bin.cl1
+	@if exist exe2bin.cl2 del exe2bin.cl2
+	@if exist exe2bin.cla del exe2bin.cla
+	@if exist exe2bin.clb del exe2bin.clb
+	@if exist exe2bin.ctl del exe2bin.ctl
+	@if exist exe2bin.exe del exe2bin.exe
+	@if exist exe2bin.map del exe2bin.map

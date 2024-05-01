@@ -106,3 +106,12 @@ restore.com:	 restore.obj \
 	link @restore.lnk
 	convert restore.exe restore.com
 	erase restore.exe
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist restore.com del restore.com
+	@if exist restore.cl1 del restore.cl1
+	@if exist restore.cl2 del restore.cl2
+	@if exist restore.cla del restore.cla
+	@if exist restore.ctl del restore.ctl
+	@if exist restore.map del restore.map

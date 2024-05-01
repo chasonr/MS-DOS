@@ -45,3 +45,11 @@ replace.exe: replace.obj \
   _parse.obj            \
   replace.lnk
     link @replace.lnk
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist replace.cl1 del replace.cl1
+	@if exist replace.cl2 del replace.cl2
+	@if exist replace.cla del replace.cla
+	@if exist replace.ctl del replace.ctl
+	@if exist replace.exe del replace.exe

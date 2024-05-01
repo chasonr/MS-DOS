@@ -43,3 +43,10 @@ nlsparm.obj:  nlsparm.asm	  \
 nlsfunc.exe: nlsfunc.obj nlsparm.obj
 	link nlsfunc+nlsparm;
 
+clean:
+	@if exist *.obj del *.obj
+	@if exist nlsfunc.cl1 del nlsfunc.cl1
+	@if exist nlsfunc.cl2 del nlsfunc.cl2
+	@if exist nlsfunc.cla del nlsfunc.cla
+	@if exist nlsfunc.ctl del nlsfunc.ctl
+	@if exist nlsfunc.exe del nlsfunc.exe

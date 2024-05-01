@@ -34,3 +34,9 @@ ramdrive.sys: ramdrive.obj messages.obj
 	link @ramdrive.lnk
 	exe2bin ramdrive ramdrive.sys
 	del ramdrive.exe
+
+clean:
+	@if exist messages.obj del messages.obj
+	@if exist ramdrive.obj del ramdrive.obj
+	@if exist ramdrive.sys del ramdrive.sys
+	@if exist ramdrive.map del ramdrive.map

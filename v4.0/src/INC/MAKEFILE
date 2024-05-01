@@ -52,3 +52,15 @@ mstable.obj:	mstable.asm $(dos)\mssw.asm	      \
      		$(dos)\ms_table.asm dossym.inc dosseg.asm     \
      		$(dos)\misc2.asm
 
+# Avoid deleting string.obj and printf.obj
+clean:
+	@if exist cds.obj del cds.obj
+	@if exist const2.obj del const2.obj
+	@if exist dpb.obj del dpb.obj
+	@if exist errtst.obj del errtst.obj
+	@if exist kstring.obj del kstring.obj
+	@if exist msdata.obj del msdata.obj
+	@if exist msdosme.obj del msdosme.obj
+	@if exist mstable.obj del mstable.obj
+	@if exist nibdos.obj del nibdos.obj
+	@if exist sysvar.obj del sysvar.obj

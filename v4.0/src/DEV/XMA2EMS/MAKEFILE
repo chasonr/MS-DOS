@@ -22,3 +22,8 @@ xma2ems.sys: xma2ems.obj makefile
 		link xma2ems;
 		exe2bin xma2ems.exe xma2ems.sys
 		del xma2ems.exe
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist xma2ems.cl1 del xma2ems.cl1
+	@if exist xma2ems.sys del xma2ems.sys

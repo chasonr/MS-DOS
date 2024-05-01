@@ -45,3 +45,12 @@ fastopen.exe: fastopen.obj \
 	fastp.obj \
 	fastsm.obj
 	link @fastopen.lnk
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist fastopen.cl1 del fastopen.cl1
+	@if exist fastopen.cl2 del fastopen.cl2
+	@if exist fastopen.cla del fastopen.cla
+	@if exist fastopen.ctl del fastopen.ctl
+	@if exist fastopen.exe del fastopen.exe
+	@if exist fastopen.map del fastopen.map

@@ -17,3 +17,8 @@ mkcntry.exe: mkcntry.obj
 
 country.sys: mkcntry.exe
 	mkcntry
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist country.sys del country.sys
+	@if exist mkcntry.exe del mkcntry.exe

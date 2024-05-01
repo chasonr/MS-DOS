@@ -19,3 +19,6 @@ all: 5202.cpi
           exe2bin 5202 5202.cpi
           del 5202.exe
 
+clean:
+	@if exist *.obj del *.obj
+	@if exist 5202.cpi del 5202.cpi

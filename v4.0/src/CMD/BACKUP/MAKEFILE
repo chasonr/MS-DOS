@@ -43,3 +43,12 @@ backup.com: backup.obj _parse.obj _msgret.obj		\
 	link /NOE backup + _parse + _msgret,,,$(map)\mapper + $(inc)\comsubs;
 	convert backup.exe backup.com
 	del backup.exe
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist backup.com del backup.com
+	@if exist backup.cl1 del backup.cl1
+	@if exist backup.cl2 del backup.cl2
+	@if exist backup.cla del backup.cla
+	@if exist backup.ctl del backup.ctl
+	@if exist backup.map del backup.map
