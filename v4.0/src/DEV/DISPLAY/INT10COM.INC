@@ -38,7 +38,7 @@
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 IF1					;
-	%OUT .		     О©╫INT10COM.INCО©╫
+	%OUT .		     ЁINT10COM.INCЁ
 ENDIF
 
 ;Modification history *********************************************************
@@ -221,8 +221,8 @@ FIND_FONT	ENDP			;
 ;
 ;		     7 6 5 4 3 2 1 0
 ;		     0 0 0 0 0 0 x x
-;				 О©╫ О©╫О©╫О©╫ 1 - AX=1100H
-;				 О©╫О©╫О©╫О©╫О©╫ 1 = AX=1400H
+;				 Ё юдд 1 - AX=1100H
+;				 юдддд 1 = AX=1400H
 ;
 ;		ES : DI points to start of font data
 ;		CX = ?	count of characters to load
@@ -517,8 +517,8 @@ ASK_BIOS_SCAN_LINES ENDP		;
 ;
 ;		7 6 5 4 3 2 1 0
 ;		x x x x 0 0 0 0
-;		    О©╫ О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫ 1 = INT 1FH
-;		    О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫ 1 = INT 43H
+;		    Ё юдддддддддд 1 = INT 1FH
+;		    юдддддддддддд 1 = INT 43H
 ;				  1 = int 1FH special handling
 ;
 ;

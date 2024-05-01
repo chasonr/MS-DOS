@@ -22,52 +22,52 @@ IF SCROLL				;A000;
 ;
 ;
 ;	<R1>	The quotation marks have to left-right justified
-;		О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫д©
-;		О©╫ The quotation marks (') tell SELECT where   О©╫
-;		О©╫ to start wrapping the text onto the next    О©╫
-;		О©╫ line.  The assembler line immediately after О©╫
-;		О©╫ the first text line automatically calculatesО©╫
-;		О©╫ the length of this field.  The right border О©╫
-;		О©╫ of the text can be adjusted freely - a rulerО©╫
-;		О©╫ is drawn for each entry to help in centeringО©╫
-;		О©╫ text. 				      О©╫
-;		О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫
+;               зддддддддддддддддддддддддддддддддддддддддддддд©
+;		Ё The quotation marks (') tell SELECT where   Ё
+;		Ё to start wrapping the text onto the next    Ё
+;		Ё line.  The assembler line immediately after Ё
+;		Ё the first text line automatically calculatesЁ
+;		Ё the length of this field.  The right border Ё
+;		Ё of the text can be adjusted freely - a rulerЁ
+;		Ё is drawn for each entry to help in centeringЁ
+;		Ё text. 				      Ё
+;               юддддддддддддддддддддддддддддддддддддддддддддды
 ;
 ;	<R2>	The '[' and ']' input field markers cannot be moved
-;		О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫д©
-;		О©╫ These characters must remain in the same    О©╫
-;		О©╫ position.  They define the boundries of     О©╫
-;		О©╫ input fields. 			      О©╫
-;		О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫
+;               зддддддддддддддддддддддддддддддддддддддддддддд©
+;		Ё These characters must remain in the same    Ё
+;		Ё position.  They define the boundries of     Ё
+;		Ё input fields. 			      Ё
+;               юддддддддддддддддддддддддддддддддддддддддддддды
 ;
 ;	<R3>	The panel will be centered in an 80 column screen
-;		О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫д©
-;		О©╫ This panel will be centered on the screen   О©╫
-;		О©╫ when it is displayed.  Please translate     О©╫
-;		О©╫ accordingly.				      О©╫
-;		О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫
+;               зддддддддддддддддддддддддддддддддддддддддддддд©
+;		Ё This panel will be centered on the screen   Ё
+;		Ё when it is displayed.  Please translate     Ё
+;		Ё accordingly.				      Ё
+;               юддддддддддддддддддддддддддддддддддддддддддддды
 ;
 ;	<R4>	The number of lines for the entry MUST be maintained
-;		О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫д©
-;		О©╫ The number of lines (from top to bottom)    О©╫
-;		О©╫ must not change.  Translated text must      О©╫
-;		О©╫ conform to the existing number of lines.    О©╫
-;		О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫
+;               зддддддддддддддддддддддддддддддддддддддддддддд©
+;		Ё The number of lines (from top to bottom)    Ё
+;		Ё must not change.  Translated text must      Ё
+;		Ё conform to the existing number of lines.    Ё
+;               юддддддддддддддддддддддддддддддддддддддддддддды
 ;
 ;	<R5>	The width of the entry must not exceed the RULER provided.
-;		О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫д©
-;		О©╫ Translated text should remain the same      О©╫
-;		О©╫ width (do not exceed the ruler).  Otherwise О©╫
-;		О©╫ the text will not fit within the panel.     О©╫
-;		О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫
+;               зддддддддддддддддддддддддддддддддддддддддддддд©
+;		Ё Translated text should remain the same      Ё
+;		Ё width (do not exceed the ruler).  Otherwise Ё
+;		Ё the text will not fit within the panel.     Ё
+;               юддддддддддддддддддддддддддддддддддддддддддддды
 ;
 ;	<R9>	DO NOT TRANSLATE OR CHANGE!!!!
-;		О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫д©
-;		О©╫ The information contained in the quotations О©╫
-;		О©╫ should NEVER be changed.  These fields are  О©╫
-;		О©╫ established for the size of the help text   О©╫
-;		О©╫ or error panels.			      О©╫
-;		О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫
+;               зддддддддддддддддддддддддддддддддддддддддддддд©
+;		Ё The information contained in the quotations Ё
+;		Ё should NEVER be changed.  These fields are  Ё
+;		Ё established for the size of the help text   Ё
+;		Ё or error panels.			      Ё
+;               юддддддддддддддддддддддддддддддддддддддддддддды
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
