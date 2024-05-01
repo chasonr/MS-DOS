@@ -5,3 +5,7 @@ DEV/PRINTER/ZERO.DAT text eol=crlf
 
 # Need to be CR-LF so NOSRVBLD works correctly
 *.SKL                text eol=crlf
+
+# These are copied directly to the distribution and need to be CR-LF
+CMD/GRAPHICS/GRAPHICS.PRO text eol=crlf
+SELECT/SELECT.PRT         text eol=crlf
