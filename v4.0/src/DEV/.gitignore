@@ -1,0 +1,17 @@
+*.EXE
+*.obj
+*.OBJ
+ANSI/ansi.sys
+COUNTRY/COUNTRY.SYS
+DISPLAY/display.sys
+DISPLAY/EGA/ega.cpi
+DISPLAY/LCD/lcd.cpi
+DRIVER/driver.sys
+KEYBOARD/keyboard.sys
+PRINTER/5202/5202.cpi
+PRINTER/printer.sys
+RAMDRIVE/ramdrive.sys
+SMARTDRV/smartdrv.sys
+VDISK/vdisk.sys
+XMA2EMS/xma2ems.sys
+XMAEM/XMAEM.SYS

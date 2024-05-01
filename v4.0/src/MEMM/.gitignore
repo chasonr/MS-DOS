@@ -1,0 +1,12 @@
+*.obj
+*.OBJ
+EMM/emm40.COD
+EMM/emmdata.lst
+EMM/emmdisp.lst
+EMM/emmfunct.COD
+EMM/emminc.lst
+EMM/emmlib.lib
+EMM/emmp.lst
+EMM/emmsup.lst
+MEMM/emm386.sys
+MEMM/mapdma.COD

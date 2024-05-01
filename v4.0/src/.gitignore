@@ -1,0 +1,6 @@
+*.cl[1-5a-f]
+*.CL[1-5A-F]
+*.map
+*.MAP
+*.ctl
+*.CTL

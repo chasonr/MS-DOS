@@ -1,0 +1,10 @@
+*.com
+*.EXE
+*.obj
+*.OBJ
+PANEL.INF
+sel-pan.dat
+select.hlp
+services.bak
+services.lib
+SELECT.DAT
