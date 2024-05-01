@@ -8,3 +8,4 @@ msdosme.obj
 mstable.obj
 nibdos.obj
 sysvar.obj
+BOOT.INC

@@ -29,3 +29,4 @@ clean:
 	@if exist msboot.exe del msboot.exe
 	@if exist boot.cl1 del boot.cl1
 	@if exist msboot.bin del msboot.bin
+	@if exist $(inc)\boot.inc del $(inc)\boot.inc
