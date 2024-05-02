@@ -10,7 +10,7 @@ make	=nmake
 ######################## Dependencies Begin Here ##########################
 #
 
-all: printer.sys 5202.cpi
+all: printer.sys 4201.cpi 4208.cpi 5202.cpi
 
 printer.ctl:	printer.skl $(msg)\$(COUNTRY).msg
 
@@ -32,6 +32,16 @@ printer.sys:	cpspm10.obj cpsfont3.obj parser.obj cpspi07.obj prtint2f.obj
 	exe2bin printer.exe printer.sys < zero.dat
 	del	printer.exe
 
+4201.cpi:
+	cd 4201
+	$(make)
+	cd ..
+
+4208.cpi:
+	cd 4208
+	$(make)
+	cd ..
+
 5202.cpi:
 	cd 5202
 	$(make)
@@ -45,6 +55,10 @@ clean:
 	@if exist printer.cla del printer.cla
 	@if exist printer.ctl del printer.ctl
 	@if exist printer.map del printer.map
-	cd 5202
+	cd 4201
+	$(make) clean
+	cd ..\4208
+	$(make) clean
+	cd ..\5202
 	$(make) clean
 	cd ..

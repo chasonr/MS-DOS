@@ -1,0 +1,24 @@
+#********************** Makefile for Printer\4201.CPI **********************
+
+inc	=..\..\..\inc
+dos	=..\..\..\dos
+hinc	=..\..\..\h
+msg	=..\..\..\message
+
+#
+######################### Dependencies Begin Here ##########################
+#
+
+all: 4201.cpi
+
+4201.obj:  4201.asm  $(inc)\copyrigh.inc makefile
+
+
+4201.cpi:  4201.obj
+          link 4201;
+          exe2bin 4201 4201.cpi
+          del 4201.exe
+
+clean:
+	@if exist *.obj del *.obj
+	@if exist 4201.cpi del 4201.cpi
