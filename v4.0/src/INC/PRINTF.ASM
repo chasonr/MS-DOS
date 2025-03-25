@@ -50,7 +50,7 @@ TITLE	PRINTF ROUITNE FOR MS-DOS
 
 .xlist
 .xcref
-	INCLUDE dossym.asm
+	INCLUDE dossym.inc
 .cref
 .list
 
