@@ -1,4 +1,7 @@
 *.com
+*.COM
+*.exe
 *.EXE
 *.obj
+*.OBJ
 IO.SYS

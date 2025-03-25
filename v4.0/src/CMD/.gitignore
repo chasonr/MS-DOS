@@ -1,6 +1,14 @@
 *.com
+*.COM
+*.exe
 *.EXE
 *.obj
+*.OBJ
+FDISK/fdboot.bin
 FDISK/fdboot.BIN
+FDISK/FDBOOT.BIN
 FDISK/fdboot.inc
+FDISK/FDBOOT.INC
+FDISK/fdiskm.c
 FDISK/fdiskM.C
+FDISK/FDISKM.C

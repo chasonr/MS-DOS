@@ -1,3 +1,6 @@
 *.obj
+*.OBJ
 mapper.lib
+MAPPER.LIB
 mapper.lst
+MAPPER.LST

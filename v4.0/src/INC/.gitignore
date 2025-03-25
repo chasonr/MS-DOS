@@ -1,11 +1,4 @@
-cds.obj
-const2.obj
-dpb.obj
-errtst.obj
-kstring.obj
-msdata.obj
-msdosme.obj
-mstable.obj
-nibdos.obj
-sysvar.obj
+*.obj
+*.OBJ
+boot.inc
 BOOT.INC
