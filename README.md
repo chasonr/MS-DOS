@@ -1,3 +1,14 @@
+This fork of the Microsoft MS-DOS repository fixes the files in the v4.0 directory, and adds Makefiles and scripts to build a nearly-complete MS-DOS 4.0 distribution.
+
+A few elements are missing:
+* HIMEM.SYS
+* GW-BASIC (The Microsoft release of GW-BASIC source is incomplete and does not build a working interpreter)
+* The DOS Shell (a graphical tool included with MS-DOS 4.0; COMMAND.COM is in fact provided here)
+
+The build instructions are included [in the v4.0 directory](v4.0/README.md).
+
+Original Microsoft README text follows:
+
 <img width="150" height="150" align="left" style="float: left; margin: 0 10px 0 0;" alt="MS-DOS logo" src="https://github.com/Microsoft/MS-DOS/blob/main/.readmes/msdos-logo.png">   
 
 # MS-DOS v1.25, v2.0, v4.0 Source Code
