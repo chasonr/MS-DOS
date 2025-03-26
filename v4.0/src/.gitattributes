@@ -9,3 +9,5 @@ DEV/PRINTER/ZERO.DAT text eol=crlf
 # These are copied directly to the distribution and need to be CR-LF
 CMD/GRAPHICS/GRAPHICS.PRO text eol=crlf
 SELECT/SELECT.PRT         text eol=crlf
+setup/autoexec.bat        text eol=crlf
+setup/config.sys          text eol=crlf
