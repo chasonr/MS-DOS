@@ -6,7 +6,7 @@ BREAK <Disk I/O Buffer Header>
 
 ; Field definition for I/O buffer information
 
-BUFFINFO	STRUC
+BUFFINFO1	STRUC
 buf_next	DW	?		; Pointer to next buffer in list
 buf_prev	DW	?		; Pointer to prev buffer in list
 buf_ID		DB	?		; Drive of buffer (bit 7 = 0)
@@ -28,7 +28,7 @@ buf_wrtcntinc	DW	?		; "   "     "   , # sectors between each write
 buf_DPB 	DD	?		; Pointer to drive parameters
 buf_fill	DW	?		; How full buffer is (bit 7 = 1)
 buf_reserved	DB	?		; make DWORD boundary for 386
-BUFFINFO	ENDS
+BUFFINFO1	ENDS
 
 buf_offset	EQU	DWORD PTR buf_sector
 					;For bit 7 = 1, this is the byte
@@ -38,7 +38,7 @@ buf_offset	EQU	DWORD PTR buf_sector
 					;buf_offset in the file and contains
 					;buf_fill bytes.
 
-BUFINSIZ	EQU	SIZE BUFFINFO
+BUFINSIZ	EQU	SIZE BUFFINFO1
 					; Size of structure in bytes
 
 buf_Free	EQU	0FFh		; buf_id of free buffer
