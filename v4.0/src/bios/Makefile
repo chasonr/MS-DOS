@@ -1,179 +1,209 @@
 #************************** makefile for bios ***************************
 
-dest	=io
-msg	=..\messages
-dos	=..\dos
-inc	=..\inc
-hinc	=..\h
+dest = io
+msg  = ../messages
+inc  = ../inc
+
+COUNTRY = usa-ms
+
+AS = jwasm
+ASFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 #
 #######################	dependencies begin here. #########################
 #
 
+.SUFFIXES: .asm .obj
+
+.asm.obj:
+	$(AS) $(ASFLAGS) -Fo$@ $<
+
+SMDOSSYM_INC = \
+	$(inc)/smdossym.inc \
+	$(inc)/dosmac.inc \
+	$(inc)/versiona.inc \
+	$(inc)/bpb.inc \
+	$(inc)/buffer.inc \
+	$(inc)/sysvar.inc \
+	$(inc)/version.inc \
+	$(inc)/vector.inc \
+	$(inc)/dirent.inc \
+	$(inc)/dpb.inc \
+	$(inc)/curdir.inc \
+	$(inc)/pdb.inc \
+	$(inc)/exe.inc \
+	$(inc)/sf.inc \
+	$(inc)/arena.inc \
+	$(inc)/intnat.inc \
+	$(inc)/mi.inc \
+	$(inc)/syscall.inc \
+	$(inc)/doscntry.inc
+
 all: $(dest).sys
 
-msbio.cl1: msbio.skl \
-	$(msg)\$(COUNTRY).msg
+msbio.cl1: msbio.cl1.base $(msg)/$(COUNTRY).cat
+	$(msg)/substmsg.rb $< $@ $(msg)/$(COUNTRY).cat
+
+msbio.cl2: msbio.cl2.base $(msg)/$(COUNTRY).cat
+	$(msg)/substmsg.rb $< $@ $(msg)/$(COUNTRY).cat
+
+msbio.cl3: msbio.cl3.base $(msg)/$(COUNTRY).cat
+	$(msg)/substmsg.rb $< $@ $(msg)/$(COUNTRY).cat
+
+msbio.cl4: msbio.cl4.base $(msg)/$(COUNTRY).cat
+	$(msg)/substmsg.rb $< $@ $(msg)/$(COUNTRY).cat
+
+msbio.cl5: msbio.cl5.base $(msg)/$(COUNTRY).cat
+	$(msg)/substmsg.rb $< $@ $(msg)/$(COUNTRY).cat
 
 msload.obj: msload.asm \
-	makefile \
-	msbio.cl1 \
-	$(inc)\bootform.inc \
-	$(inc)\versiona.inc \
-	msload.inc
+	msload.inc \
+	$(inc)/bootform.inc \
+	$(inc)/versiona.inc \
+	msbio.cl1
 
-msload.com: msload.obj
-	link msload.obj,msload,,;
-	exe2bin msload.exe msload.com
+MSLOAD_OBJS = msload.obj
+
+msload.com: $(MSLOAD_OBJS)
+	echo 'system dos' >resp.txt
+	echo 'option map=msload.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name msload.exe' >>resp.txt
+	for x in $(MSLOAD_OBJS); do echo "file $$x" >>resp.txt; done
+	wlink @resp.txt
+	exe2bin -q msload.exe msload.com
 
 msbio1.obj: msbio1.asm \
-	makefile \
-   	msbdata.inc \
 	msgroup.inc \
 	jumpmac.inc \
 	pushpop.inc \
-	$(inc)\devsym.inc \
+	$(inc)/devsym.inc \
 	msdskpr.inc \
+	msbdata.inc \
 	msmacro.inc
 
 mscon.obj: mscon.asm \
-	makefile \
 	msgroup.inc \
 	jumpmac.inc \
+	msequ.inc $(inc)/msbds.inc \
 	msmacro.inc
 
 msaux.obj: msaux.asm \
-	makefile \
 	msgroup.inc \
 	jumpmac.inc \
 	msmacro.inc
 
 mslpt.obj: mslpt.asm \
-	makefile \
 	msgroup.inc \
-	msequ.inc \
-	$(inc)\msbds.inc \
+	msequ.inc $(inc)/msbds.inc \
 	msmacro.inc \
-	$(inc)\devsym.inc \
-	$(inc)\ioctl.inc $(inc)\bpb.inc
+	$(inc)/devsym.inc \
+	$(inc)/ioctl.inc $(inc)/bpb.inc
 
 msclock.obj: msclock.asm \
-	makefile \
 	msgroup.inc \
 	msmacro.inc
 
 msdisk.obj: msdisk.asm \
-	makefile \
 	msgroup.inc \
-	msequ.inc \
-	$(inc)\msbds.inc \
+	msequ.inc $(inc)/msbds.inc \
 	pushpop.inc \
 	msmacro.inc \
-	$(inc)\devsym.inc \
+	$(inc)/devsym.inc \
 	msdskpr.inc \
-	msioctl.inc $(inc)\ioctl.inc $(inc)\bpb.inc
+	msioctl.inc $(inc)/ioctl.inc $(inc)/bpb.inc
 
 msinit.obj: msinit.asm \
-	makefile \
 	msgroup.inc \
 	msdskpr.inc  \
-	msequ.inc $(inc)\msbds.inc \
-	$(inc)\cputype.inc \
+	msequ.inc $(inc)/msbds.inc \
 	msmacro.inc   \
+	msextrn.inc \
+	biostruc.inc \
+	cmosequ.inc \
+	$(inc)/cputype.inc \
 	readcloc.inc  \
-	clocksub.inc   \
-	msextrn.inc
+	clocksub.inc
 
 
 sysinit1.obj: sysinit1.asm \
-	makefile \
-	msstack.inc \
-	msbio.cl4 \
-	msbio.cl5 \
-	stkinit.inc \
+	$(SMDOSSYM_INC) \
+	$(inc)/devsym.inc \
+	$(inc)/ioctl.inc $(inc)/bpb.inc \
+	biostruc.inc \
+	$(inc)/smifssym.inc \
+	defems.inc \
 	devmark.inc \
-	$(inc)\smifssym.inc \
-	$(inc)\devsym.inc \
-	$(inc)\ioctl.inc \
-	$(inc)\cputype.inc \
-	$(inc)\smdossym.inc $(inc)\dosmac.inc $(inc)\bpb.inc $(inc)\buffer.inc \
-	$(inc)\sysvar.inc $(inc)\vector.inc $(inc)\dirent.inc \
-	$(inc)\dpb.inc $(inc)\curdir.inc \
-	$(inc)\pdb.inc $(inc)\exe.inc $(inc)\sf.inc $(inc)\arena.inc \
-	$(inc)\intnat.inc $(inc)\mi.inc \
-	$(inc)\syscall.inc
+	$(inc)/cputype.inc \
+	$(inc)/version.inc \
+	msstack.inc \
+	msbio.cl5 \
+	msbio.cl4 \
+	stkinit.inc
 
 
 sysconf.obj: sysconf.asm \
-	makefile \
-	psoption.inc \
+	$(SMDOSSYM_INC) \
+	$(inc)/devsym.inc \
+	$(inc)/ioctl.inc $(inc)/bpb.inc \
+	biostruc.inc \
+	$(inc)/smifssym.inc \
 	devmark.inc \
-	$(inc)\psdata.inc \
-	$(inc)\parse.asm \
-	$(inc)\smifssym.inc \
-	$(inc)\devsym.inc \
-	$(inc)\ioctl.inc \
-	$(inc)\smdossym.inc $(inc)\dosmac.inc $(inc)\bpb.inc $(inc)\buffer.inc \
-	$(inc)\sysvar.inc $(inc)\vector.inc $(inc)\dirent.inc \
-	$(inc)\dpb.inc $(inc)\curdir.inc \
-	$(inc)\pdb.inc $(inc)\exe.inc $(inc)\sf.inc $(inc)\arena.inc \
-	$(inc)\intnat.inc $(inc)\mi.inc \
-	$(inc)\syscall.inc
+	$(inc)/version.inc \
+	psoption.inc \
+	$(inc)/parse.asm $(inc)/psdata.inc
 
 sysinit2.obj: sysinit2.asm \
-	makefile \
+	$(SMDOSSYM_INC) \
+	$(inc)/devsym.inc \
+	$(inc)/ioctl.inc $(inc)/bpb.inc \
 	devmark.inc \
-	$(inc)\copyrigh.inc \
-	$(inc)\smifssym.inc \
-	$(inc)\devsym.inc \
-	$(inc)\ioctl.inc \
-	$(inc)\smdossym.inc $(inc)\dosmac.inc $(inc)\bpb.inc $(inc)\buffer.inc \
- 	$(inc)\sysvar.inc $(inc)\vector.inc $(inc)\dirent.inc \
-	$(inc)\dpb.inc $(inc)\curdir.inc \
-	$(inc)\pdb.inc $(inc)\exe.inc $(inc)\sf.inc $(inc)\arena.inc \
-	$(inc)\intnat.inc $(inc)\mi.inc \
-	$(inc)\syscall.inc
+	$(inc)/copyrigh.inc
 
 sysimes.obj: sysimes.asm \
-	makefile \
+	msequ.inc $(inc)/msbds.inc \
 	msmacro.inc \
-	msbio.cl3 \
-	msequ.inc $(inc)\msbds.inc
+	msbio.cl3
 
 msbio2.obj: msbio2.asm \
-	makefile \
 	msgroup.inc \
 	msequ.inc \
-	$(inc)\msbds.inc \
-	$(inc)\devsym.inc \
+	$(inc)/devsym.inc \
 	pushpop.inc \
 	msmacro.inc \
 	msbio.cl2 \
 	ms96tpi.inc msvolid.inc
 
-mshard.obj:  mshard.asm $(inc)\postequ.inc $(inc)\dseg.inc
+mshard.obj:  mshard.asm
 
-$(dest).sys: msbio.cl1 msbio1.obj mscon.obj  msaux.obj \
-	mslpt.obj msclock.obj msdisk.obj msbio2.obj \
-	msinit.obj mshard.obj sysinit1.obj sysconf.obj \
-	sysinit2.obj sysimes.obj \
-	msload.com \
-	makefile
-	link @msbio.lnk
-	exe2bin msbio.exe msbio.bin <locscr
-	copy /b msload.com+msbio.bin $(dest).sys
-	del msbio.bin
-	del msbio.exe
+MSBIO_OBJS = msbio1.obj mscon.obj msaux.obj mslpt.obj msclock.obj msdisk.obj \
+             msbio2.obj mshard.obj msinit.obj sysinit1.obj sysconf.obj \
+             sysinit2.obj sysimes.obj
+
+msbio.bin: $(MSBIO_OBJS)
+	echo 'system dos' >resp.txt
+	echo 'option map=msbio.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name msbio.exe' >>resp.txt
+	for x in $(MSBIO_OBJS); do echo "file $$x" >>resp.txt; done
+	wlink @resp.txt
+	exe2bin -q -l=0x0070 msbio.exe msbio.bin
+
+$(dest).sys: msload.com msbio.bin
+	cat msload.com msbio.bin > $@
 
 clean:
-	@if exist *.obj del *.obj
-	@if exist io.sys del io.sys
-	@if exist msbio.map del msbio.map
-	@if exist msload.exe del msload.exe
-	@if exist msload.map del msload.map
-	@if exist msbio.cl1 del msbio.cl1
-	@if exist msbio.cl2 del msbio.cl2
-	@if exist msbio.cl3 del msbio.cl3
-	@if exist msbio.cl4 del msbio.cl4
-	@if exist msbio.cl5 del msbio.cl5
-	@if exist msload.com del msload.com
+	rm -f *.obj *.err *.lst
+	rm -f io.sys
+	rm -f msbio.map
+	rm -f msload.exe
+	rm -f msload.map
+	rm -f msbio.cl1
+	rm -f msbio.cl2
+	rm -f msbio.cl3
+	rm -f msbio.cl4
+	rm -f msbio.cl5
+	rm -f msload.com
+	rm -f msbio.bin
+	rm -f msbio.exe
+	rm -f resp.txt
