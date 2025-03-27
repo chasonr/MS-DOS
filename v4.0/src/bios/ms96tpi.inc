@@ -11,6 +11,8 @@
 ;		DISK OPEN/CLOSE ROUTINES ARR 2.41
 ;
 
+?stackdepth = 0
+
 DSK$OPEN:				;ARR 2.41
 	PUBLIC	DSK$OPEN
 

@@ -104,6 +104,8 @@
 	extrn Model_Byte:Byte		;MSBIO2
 	extrn Secondary_Model_Byte:Byte ;MSBIO2
 
+?stackdepth = 0
+
 ;-----------------------------------------------------------------
 ;
 ;	DISK INTERFACE ROUTINES

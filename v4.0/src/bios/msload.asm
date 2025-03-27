@@ -974,7 +974,7 @@ Got_16_Bit:
 	jae	Got_Cluster_Done
 
 Not_Last_Cluster:
-	mov	cs:EOF,not END_OF_FILE		  ;Assume last cluster
+	mov	cs:EOF,END_OF_FILE xor 0FFh	;Assume last cluster
 
 Got_Cluster_Done:
 	pop	es
