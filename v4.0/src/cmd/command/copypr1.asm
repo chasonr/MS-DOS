@@ -5,8 +5,8 @@
 
 .xlist
 .xcref
-	INCLUDE DOSSYM.INC
-;	INCLUDE DEVSYM.INC
+	INCLUDE dossym.inc
+;	INCLUDE devsym.inc
 	INCLUDE comseg.asm
 	INCLUDE comequ.asm
 .list
@@ -80,8 +80,8 @@ FLSHFIL:
 	JMP	EXISTS
 
 NOTEXISTS:
-	invoke	BUILDDEST			; Find out all about the destination
-	invoke	COMPNAME			; Source and dest. the same?
+	invoke_fn BUILDDEST			; Find out all about the destination
+	invoke_fn COMPNAME			; Source and dest. the same?
 	JNZ	PROCDEST			; If not, go ahead
 	CMP	[SRCISDEV],0
 	JNZ	PROCDEST			; Same name on device OK
@@ -122,7 +122,7 @@ DODESTOPEN:
 	JNC	dest_open_okay			;AC030;
 
 xa_set_error:					;AN030; error occurred on XA
-	invoke	set_ext_error_msg		;AN030; get extended error
+	invoke_fn set_ext_error_msg		;AN030; get extended error
 
 ext_err_set:					;AN030;
 	mov	string_ptr_2,offset trangroup:destbuf ;AN000; get address of failed string
@@ -136,7 +136,7 @@ dest_open_okay: 				;AC030
 	mov	[CFLAG],1			; Destination now exists
 	mov	bx,ax
 	mov	cx,bx				;AN030; get handle into CX
-	invoke	set_file_code_page		;AN030; set the code page for the target
+	invoke_fn set_file_code_page		;AN030; set the code page for the target
 	jc	ext_err_set			;AN030; if no error, continue
 
 	mov	[concat_xa],0			;AN000; set first file flag off
@@ -179,7 +179,7 @@ EXISTS:
 	jnz	NOCHECKING			; If nowrite don't bother with name check
 	cmp	plus_comma,1			;g  don't check if just doing +,,
 	jz	NOCHECKING			;g
-	invoke	COMPNAME			; Source and dest. the same?
+	invoke_fn COMPNAME			; Source and dest. the same?
 	JNZ	NOCHECKING			; If not, go ahead
 	CMP	[SRCISDEV],0
 	JNZ	NOCHECKING			; Same name on device OK
@@ -190,7 +190,7 @@ EXISTS:
 ; be set).
 ;
 	MOV	DX,OFFSET TRANGROUP:LOSTERR_ptr ; Tell him he's not going to get it
-	invoke	std_Eprintf			;AC022;
+	invoke_fn std_Eprintf			;AC022;
 	MOV	[NXTADD],0			; Set return
 	INC	[TERMREAD]			; Tell Read to give up
 
@@ -231,7 +231,7 @@ DEVWRTERR:
 
 PUBLIC COPERR
 COPERR:
-	INVOKE	std_Eprintf			;AC022;
+	INVOKE_FN std_Eprintf			;AC022;
 
 COPERRP:
 	inc	[DESTCLOSED]

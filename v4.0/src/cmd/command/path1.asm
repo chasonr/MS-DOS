@@ -4,7 +4,7 @@
 .sall
 .xlist
 .xcref
-INCLUDE DOSSYM.INC
+INCLUDE dossym.inc
     include comsw.asm
     include comseg.asm
     include comequ.asm
@@ -131,7 +131,7 @@ path_search_ok:
 	mov	DX, OFFSET TRANGROUP:fbuf	; clobber old dma value with
 	trap	set_dma 			; a pointer to our dma buffer
 	push	ES
-	invoke	find_path			; get a handle (ES:DI) on user path
+	invoke_fn find_path			; get a handle (ES:DI) on user path
 	mov	DS:pathinfo[0], ES		; and squirrel it away
 	mov	DS:pathinfo[2], DI		; "old" pathstring pointer
 	mov	DS:pathinfo[4], DI		; "new" pathstring pointer
@@ -139,12 +139,12 @@ path_search_ok:
 
 	mov	BX, pbuflen			; copy/format argv[0] into temp buffer
 	mov	SI, OFFSET TRANGROUP:EXECPATH
-	invoke	strip
+	invoke_fn strip
 	jc	path_failure_jmp		; if possible, of course
 
 	mov	DX, SI				; search(EXECPATH, error_message)
 	mov	[search_error], OFFSET TRANGROUP:BADDRV_ptr
-	invoke	search				; must do at least one search
+	invoke_fn search				; must do at least one search
 	or	AX, AX				; find anything?
 	jz	path_noinit			; failure ... search farther
 
@@ -295,7 +295,7 @@ path_found:					; pathinfo[] points to winner
 	mov	SI,DI				; pointer to EXECPATH
 	add	SI, 3				; Don't wipe out drive and root info
 	trap	Current_dir
-	invoke	DStrlen 			; Determine length of present info
+	invoke_fn DStrlen 			; Determine length of present info
 	add	SI,CX				; Don't copy over drive and root info
 	dec	SI
 	mov	DI,SI				; Point to end of target string
@@ -315,7 +315,7 @@ path_cpy:
 Kloop:						;AN000;  3/3/KK
 	lodsb					;AN000;  3/3/KK
 	stosb					;AN000;  3/3/KK
-	invoke	testkanj			;AN000;  3/3/KK
+	invoke_fn testkanj			;AN000;  3/3/KK
 	jz	NotKanj1			;AN000;  3/3/KK
 	dec	cx				;AN000;  3/3/KK
 	JCXZ	PopDone 			;AN000;  Ignore boundary error	 3/3/KK
@@ -377,7 +377,7 @@ Procedure   Store_PChar,NEAR
 
 	push	AX
 	mov	AL, '/'                         ; is the pathname-element separator
-	invoke	pathchrcmp			; a regular slash?
+	invoke_fn pathchrcmp			; a regular slash?
 	jz	store_slash			; if yes, remember slash
 	mov	al,'\'
 	mov	[psep_char], al 		; otherwise, remember back-slash
@@ -437,7 +437,7 @@ path_cr_copy:
 	jz	path_seg			; null terminates segment & pathstring
 	cmp	AL, BH
 	jz	path_seg			; BH terminates a pathstring segment
-	invoke	testkanj			;AN000;  3/3/KK
+	invoke_fn testkanj			;AN000;  3/3/KK
 	jz	NotKanj2			;AN000;  3/3/KK
 	stosb					;AN000;  3/3/KK
 	movsb					;AN000;  3/3/KK
@@ -478,7 +478,7 @@ path_cr_l2:
 	jnz	path_cr_l2
 	mov	DX, OFFSET TRANGROUP:tpbuf	; and look for an appropriate file...
 	mov	[search_error], OFFSET TRANGROUP:BADPMES_ptr
-	invoke	search				; results are in AX & search_best_buf
+	invoke_fn search				; results are in AX & search_best_buf
 
 path_cr_leave:
 	or	BL, BL				; did we finish off the pathstring?

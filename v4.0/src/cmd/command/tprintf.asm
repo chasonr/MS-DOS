@@ -33,7 +33,7 @@ TITLE	COMMAND Transient Printf routine
 .xlist
 .xcref
 	INCLUDE comsw.asm		;AC000;
-	INCLUDE DOSSYM.INC
+	INCLUDE dossym.inc
 	INCLUDE comseg.asm
 	INCLUDE comequ.asm		;AN000;
 	INCLUDE SYSMSG.INC		;AN000;

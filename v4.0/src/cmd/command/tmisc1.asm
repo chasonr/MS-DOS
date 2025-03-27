@@ -8,7 +8,7 @@ TITLE	Part7 COMMAND Transient Routines
 .xlist
 .xcref
 	INCLUDE comsw.asm
-	INCLUDE DOSSYM.INC
+	INCLUDE dossym.inc
 	INCLUDE comseg.asm
 	INCLUDE comequ.asm
 .list
@@ -107,17 +107,17 @@ RETSW:
 SWITCH:
 	XOR	BX,BX				; Initialize - no switches set
 SWLOOP:
-	INVOKE	SCANOFF 			; Skip any delimiters
+	INVOKE_FN SCANOFF 			; Skip any delimiters
 	CMP	AL,[SWITCHAR]			; Is it a switch specifier?
 	JNZ	RETSW				; No -- we're finished
 	OR	BX,fSwitch			; Indicate there is a switch specified
 	INC	SI				; Skip over the switch character
-	INVOKE	SCANOFF
+	INVOKE_FN SCANOFF
 	CMP	AL,0DH
 	JZ	RETSW				; Oops
 	INC	SI
 ; Convert lower case input to upper case
-	INVOKE	UPCONV
+	INVOKE_FN UPCONV
 	MOV	DI,OFFSET TRANGROUP:switch_list
 	MOV	CX,SWCOUNT
 	REPNE	SCASB				; Look for matching switch
@@ -155,7 +155,7 @@ append_internal:
 	mov	pathpos,cx
 	inc	append_exec			;AN041; set APPEND to ON
 
-	invoke	ioset				; re-direct the o'l io
+	invoke_fn ioset				; re-direct the o'l io
 
 	mov	SI, offset TRANGROUP:IDLEN	; address command name, DS already set
 	mov	DX,-1				; set invoke function
@@ -200,11 +200,11 @@ abcd:
 ;
     cmp     append_exec,0			;AN041; APPEND just executed?
     jnz     dont_set_io 			;AN041; Yes - this junk is already set
-    invoke  ioset				; re-direct the ol' i/o
+    invoke_fn ioset				; re-direct the ol' i/o
 
 dont_set_io:					;AN041;
-    invoke  SETSTDINON				;AN026; turn on critical error on STDIN
-    invoke  SETSTDOUTOFF			;AN026; turn off critical error on STDOUT
+    invoke_fn SETSTDINON				;AN026; turn on critical error on STDIN
+    invoke_fn SETSTDOUTOFF			;AN026; turn off critical error on STDOUT
     test    [CHKDRV], fCheckDrive		; did we wanna check those drives?
     jz	    nocheck
     mov     AL, [PARM1] 			; parse_file_descriptor results tell
@@ -302,7 +302,7 @@ IF IBM
 	JMP	NeoExecute
 ENDIF
 RESEARCH:
-	invoke	path_search			; find the mother (result in execpath)
+	invoke_fn path_search			; find the mother (result in execpath)
 	or	AX, AX				; did we find anything?
 	je	badcomj45			; null means no (sob)
 	cmp	AX, 04H 			; 04H and 08H are .exe and .com
@@ -317,9 +317,9 @@ ASSUME	DS:TRANGROUP,ES:TRANGROUP
 
 EXECUTE:
 NeoExecute:
-	invoke	IOSET
-	invoke	SETSTDINOFF			;AN026; turn off critical error on STDIN
-	invoke	SETSTDOUTOFF			;AN026; turn off critical error on STDOUT
+	invoke_fn IOSET
+	invoke_fn SETSTDINOFF			;AN026; turn off critical error on STDIN
+	invoke_fn SETSTDOUTOFF			;AN026; turn off critical error on STDOUT
 	MOV	ES,[TRAN_TPA]
 	MOV	AH,DEALLOC
 	INT	int_command			; Now running in "free" space
@@ -357,7 +357,7 @@ BADCOM:
 	MOV	DX,OFFSET TRANGROUP:BADNAM_ptr
 
 CERROR:
-	INVOKE	std_eprintf
+	INVOKE_FN std_eprintf
 	JMP	TCOMMAND
 
 ;
@@ -391,7 +391,7 @@ CountEnd:
 
 KanjiScan:
 	LODSB					; get a byte
-	INVOKE	TestKanj			; is it a leadin byte
+	INVOKE_FN TestKanj			; is it a leadin byte
 	JZ	KanjiQuote			; no, check for quotes
 	MOV	AH,AL				; save leadin
 	LODSB					; get trailing byte
@@ -425,7 +425,7 @@ PRESCANLP:
 	LODSB
 
 ;;;;	IF	KANJI		3/3/KK
-	INVOKE	TESTKANJ
+	INVOKE_FN TESTKANJ
 	JZ	NOTKANJ6
 	MOV	[DI],AL
 	INC	DI				; fake STOSB into DS
@@ -469,7 +469,7 @@ NOAPPND:
 ;
 ; Now we attempt to find the file name.  First, scan off all whitespace
 ;
-	INVOKE	SCANOFF
+	INVOKE_FN SCANOFF
 	CMP	AL,labracket			;AN040; was there no filename?
 	JZ	REOUT_ERRSET			;AN040; yes - set up error
 	CMP	AL,0DH
@@ -492,7 +492,7 @@ SETREOUTSTR:					; Get the output redirection name
 	LODSB
 	CMP	AL,0DH
 	JZ	GOTRESTR
-	INVOKE	DELIM
+	INVOKE_FN DELIM
 	JZ	GOTRESTR
 	CMP	AL,[SWITCHAR]
 	JZ	GOTRESTR
@@ -516,7 +516,7 @@ NOOUT:
 	CMP	AL,labracket
 	JNZ	CHKPIPE
 	mov	bx,si				; Save loc of "<"
-	INVOKE	SCANOFF
+	INVOKE_FN SCANOFF
 	CMP	AL,rabracket			;AN040; was there no filename?
 	JZ	REIN_ERRSET			;AN040; yes - set up error
 	CMP	AL,0DH
@@ -552,7 +552,7 @@ IsPipe3:
 	SHL	EchoFlag,1			; push echo state and turn it off
 NoEchoPush:
 	INC	[PIPEFLAG]
-	INVOKE	SCANOFF
+	INVOKE_FN SCANOFF
 	CMP	AL,0DH
 	JZ	PIPEERRSYNJ5
 	CMP	AL,AltPipeChr
@@ -599,7 +599,7 @@ PRESCANEND:
 	MOV	DI,OFFSET RESGROUP:PIPESTR
 	MOV	[PIPEPTR],DI
 	MOV	SI,OFFSET TRANGROUP:COMBUF+2
-	INVOKE	SCANOFF
+	INVOKE_FN SCANOFF
 
 PIPESETLP:					; Transfer the pipe into the resident
 	LODSB					; pipe buffer
@@ -617,7 +617,7 @@ ISNOPIPE:
 cmd_copy  proc near
 
 	MOV	SI,OFFSET TRANGROUP:COMBUF+2
-	INVOKE	Scanoff 			; advance past separators...
+	INVOKE_FN Scanoff 			; advance past separators...
 	add	si,PathPos
 	mov	di,81h
 	xor	cx,cx

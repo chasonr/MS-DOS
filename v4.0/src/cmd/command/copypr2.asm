@@ -5,7 +5,7 @@
 
 .xlist
 .xcref
-	INCLUDE DOSSYM.INC
+	INCLUDE dossym.inc
 	INCLUDE comseg.asm
 	INCLUDE comequ.asm
 .list
@@ -84,7 +84,7 @@ BUILDDEST:
 	MOV	DI,OFFSET TRANGROUP:USERDIR1
 	mov	bp,offset trangroup:DESTVARS
 	call	BUILDPATH
-	invoke	RESTUDIR1
+	invoke_fn RESTUDIR1
 
 ; Now know all about the destination
 
@@ -235,7 +235,7 @@ BUILDPATH:
 	INT	int_command
 	pop	di				;AN000;
 	jnc	pure_file			;AN022; is pure file
-	invoke	get_ext_error_number		;AN022; get the extended error
+	invoke_fn get_ext_error_number		;AN022; get the extended error
 	cmp	ax,error_file_not_found 	;AN022; if file not found - okay
 	jz	notpfile			;AN022;
 	cmp	ax,error_path_not_found 	;AN022; if path not found - okay
@@ -268,9 +268,9 @@ set_drive_spec: 				;AN034;
 DRVSPEC5:
 	or	dl,20h
 	sub	dl,60h				; A = 1
-	invoke	SAVUDIR1
+	invoke_fn SAVUDIR1
 	jnc	curdir_ok			;AN022; if error - exit
-	invoke	get_ext_error_number		;AN022; get the extended error
+	invoke_fn get_ext_error_number		;AN022; get the extended error
 	jmp	extend_setup			;AN022; exit with error
 
 curdir_ok:					;AN022;
@@ -304,7 +304,7 @@ ISADEV:
 	return
 
 CHECKCD:
-	invoke	SETREST1
+	invoke_fn SETREST1
 	mov	ah,CHDIR
 	INT	int_command
 	jc	NOTPDIR
@@ -319,7 +319,7 @@ Kloop:						;AN000;  3/3/KK
 	OR	AL,AL				;AN000;  3/3/KK
 	JZ	Done				;AN000;  3/3/KK
 	xor	ah,ah				;AN000;  3/3/KK
-	invoke	Testkanj			;AN000;  3/3/KK
+	invoke_fn Testkanj			;AN000;  3/3/KK
 	JZ	Kloop				;AN000;  3/3/KK
 	INC	DI				;AN000;  3/3/KK
 	INC	AH				;AN000;  3/3/KK
@@ -345,7 +345,7 @@ GOTSRCSLSH:
 
 
 NOTPDIR:
-	invoke	get_ext_error_number		;AN022; get the extended error
+	invoke_fn get_ext_error_number		;AN022; get the extended error
 	cmp	ax,error_path_not_found 	;AN022; if path not found - okay
 	jz	notpdir_try			;AN022;
 	cmp	ax,error_access_denied		;AN022; if access denied - okay
@@ -372,7 +372,7 @@ notpdir_try:					;AN022;
 DOPCD:
 	xor	bl,bl
 	xchg	bl,[SI] 			; Stick in a NUL
-	invoke	SETREST1
+	invoke_fn SETREST1
 	CMP	DX,SI				;AN000;  3/3/KK
 	JAE	LookBack			;AN000;  3/3/KK
 	PUSH	SI				;AN000;  3/3/KK
@@ -382,7 +382,7 @@ DOPCD:
 
 Kloop2: 					;AN000;  3/3/KK
 	LODSB					;AN000;  3/3/KK
-	invoke	TestKanj			;AN000;  3/3/KK
+	invoke_fn TestKanj			;AN000;  3/3/KK
 	jz	NotKanj4			;AN000;  3/3/KK
 	LODSB					;AN000;  3/3/KK
 	CMP	SI,CX				;AN000;  3/3/KK
@@ -406,7 +406,7 @@ DoCdr:						;AN000;  3/3/KK
 	INT	int_command
 	xchg	bl,[SI]
 	retnc
-	invoke	get_ext_error_number		;AN022; get the extended error
+	invoke_fn get_ext_error_number		;AN022; get the extended error
 
 EXTEND_SETUPJ:					;AN022;
 	JMP	EXTEND_SETUP			;AN022; go issue the error message
@@ -441,7 +441,7 @@ COMPNAME:
 	MOV	di,offset trangroup:TRGXNAME	;g get name translate of target
 
 
-	invoke	STRCOMP
+	invoke_fn STRCOMP
 
 	return
 

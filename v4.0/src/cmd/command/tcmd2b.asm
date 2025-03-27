@@ -6,7 +6,7 @@ TITLE	PART5 COMMAND Transient routines.
 .xlist
 .xcref
 	INCLUDE comsw.asm
-	INCLUDE DOSSYM.INC
+	INCLUDE dossym.inc
 	INCLUDE comseg.asm
 	INCLUDE comequ.asm
 .list
@@ -108,7 +108,7 @@ CTTY:
 	mov	di,offset trangroup:parse_ctty	;AC000; Get adderss of PARSE_CTTY
 	xor	cx,cx				;AC000; clear cx,dx
 	xor	dx,dx				;AC000;
-	invoke	cmd_parse			;AC000; call parser
+	invoke_fn cmd_parse			;AC000; call parser
 	cmp	ax,end_of_line			;AN000; are we at end of line?
 	jz	ctty_error			;AN000; yes - error
 	cmp	ax,result_no_error		;AN000; did an error occur
@@ -148,7 +148,7 @@ CLOSEDEV:					;AN007;
 
 ISBADDEV:
 	MOV	DX,OFFSET TRANGROUP:BADDEV_ptr
-	invoke	std_printf
+	invoke_fn std_printf
 	JMP	RESRET
 
 DEVISOK:
@@ -156,7 +156,7 @@ DEVISOK:
 	mov	ax,acrlf_ptr			;AN021; get message number for 0d, 0a
 	mov	dh,util_msg_class		;AN021; this is a utility message
 	push	bx				;AN021; save handle
-	invoke	Tsysgetmsg			;AN021; get the address of the message
+	invoke_fn Tsysgetmsg			;AN021; get the address of the message
 	mov	dx,si				;AN021; get address into dx
 	mov	ax,(write shl 8)		;AN007; write to device
 	mov	cx,2				;AN007; write two bytes
@@ -312,7 +312,7 @@ getcp:
 	int	int_command
 	mov	system_cpage,bx 		;get active cp for output
 	mov	dx,offset trangroup:cp_active_ptr
-	invoke	std_printf			;print it out
+	invoke_fn std_printf			;print it out
 
 chcp_return:
 
@@ -407,7 +407,7 @@ tn_doit:					;AN000;
 	int	int_command			;AN000;
 	jnc	tn_print_xname			;AN000; If no error - print result
 
-	invoke	Set_ext_error_msg		;AN000; get extended message
+	invoke_fn Set_ext_error_msg		;AN000; get extended message
 	mov	string_ptr_2,offset trangroup:srcxname ;AN000; get address of failed string
 	mov	Extend_buf_sub,one_subst	;AN000; put number of subst in control block
 	jmp	cerror				;AN000; Go to error routine
@@ -415,8 +415,8 @@ tn_doit:					;AN000;
 tn_print_xname: 				;AN000;
 	mov	string_ptr_2,offset Trangroup:combuf ;AN000; Set up address of combuf
 	mov	dx,offset trangroup:string_buf_ptr   ;AN000; Set up address of print control block
-	invoke	crlf2				;AN000; print a crlf
-	invoke	printf_crlf			;AN000; print it out
+	invoke_fn crlf2				;AN000; print a crlf
+	invoke_fn printf_crlf			;AN000; print it out
 
 	ret					;AN000;
 
@@ -501,7 +501,7 @@ parse_check_eol Proc near			;AN000;
 
 	xor	dx,dx				;AN000;
 	mov	[parse_last],si 		;AN018; save start of parameter
-	invoke	cmd_parse			;AN000; call parser
+	invoke_fn cmd_parse			;AN000; call parser
 	cmp	al,end_of_line			;AN000; Are we at end of line?
 	jz	parse_good_eol			;AN000; yes - no problem
 
@@ -543,7 +543,7 @@ ASSUME	CS:TRANGROUP,DS:TRANGROUP,ES:NOTHING	;AN018;
 parse_with_msg	Proc near			;AN018;
 
 	mov	[parse_last],si 		;AN018; save start of parameter
-	invoke	cmd_parse			;AN018; call parser
+	invoke_fn cmd_parse			;AN018; call parser
 	cmp	al,end_of_line			;AN018; Are we at end of line?
 	jz	parse_msg_good			;AN018; yes - no problem
 	cmp	ax,result_no_error		;AN018; did an error occur

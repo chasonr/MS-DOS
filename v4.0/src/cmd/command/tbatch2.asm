@@ -7,7 +7,7 @@ TITLE	Batch processing routines part II
 
 .xlist
 .xcref
-	INCLUDE DOSSYM.INC
+	INCLUDE dossym.inc
 	INCLUDE comseg.asm
 	INCLUDE comequ.asm
 .list
@@ -98,15 +98,15 @@ ASSUME	DS:RESGROUP
 	MOV	AH,READ
 	INT	int_command			; Get one more byte from batch file
 	jnc	bat_read_ok			;AN022; if no error - continue
-	invoke	get_ext_error_number		;AN022; get the error
+	invoke_fn get_ext_error_number		;AN022; get the error
 	push	ds				;AN022; save local segment
 	mov	ds,[resseg]			;AN022; get resident segment
 assume	ds:resgroup				;AN022;
 	mov	dx,ax				;AN022; put error in DX
-	invoke	output_batch_name		;AN022; set up to print the error
+	invoke_fn output_batch_name		;AN022; set up to print the error
 	pop	ds				;AN022;
 assume	ds:trangroup				;AN022;
-	invoke	std_eprintf			;AN022; print out the error
+	invoke_fn std_eprintf			;AN022; print out the error
 	mov	byte ptr combuf+2,end_of_line_in;AN022; terminate the batch line for parsing
 	mov	byte ptr combuf+3,end_of_line_out ;AN022; terminate the batch line for output
 	jmp	bateof				;AN022; terminate the batch file
@@ -138,7 +138,7 @@ BatEOFDS:
 	ASSUME	DS:ResGroup
 
 BATEOF:
-	invoke	BatchOff
+	invoke_fn BatchOff
 	CALL	BATCLOSE
 	MOV	AL,0DH				; If end-of-file, then end of line
 	test	byte ptr [Batch_Abort],-1
@@ -181,7 +181,7 @@ $IF:
 	assume	ds:resgroup			;AN004;
 	cmp	[PIPEFILES],0			;AN004; Only turn off if present.
 	jz	IFNoPipe			;AN004; no pipe - continue
-	invoke	PipeDel 			;AN004; turn off piping
+	invoke_fn PipeDel 			;AN004; turn off piping
 
 IFNoPipe:					;AN004;
 	pop	ds				;AN004; get local DS back
@@ -191,7 +191,7 @@ IFNoPipe:					;AN004;
 	MOV	SI,81H
 
 IFREENT:
-	invoke	SCANOFF
+	invoke_fn SCANOFF
 	CMP	AL,0DH
 	JZ	IFERROR
 	MOV	BP,SI
@@ -233,9 +233,9 @@ IF_DIF: 					;AC000;
 
 IFERRORJ:
 	JZ	IFERROR
-	invoke	DELIM
+	invoke_fn DELIM
 	JNZ	IFINDCOM
-	invoke	SCANOFF
+	invoke_fn SCANOFF
 	JMP	BX
 
 IFNOT:
@@ -256,7 +256,7 @@ FIRST_STRING:
 	LODSB					; get character
 	CMP	AL,0DH				; end of line?
 	JZ	IFERRORP			; yes => error
-	invoke	DELIM				; is it a delimiter?
+	invoke_fn DELIM				; is it a delimiter?
 	JZ	EQUAL_CHECK			; yes, go find equal sign
 	INC	CX				; remember 1 byte for the length
 	JMP	FIRST_STRING			; go back for more
@@ -284,7 +284,7 @@ EQUAL_CHECK2:
 ;
 ; Find beginning of second string.
 ;
-	invoke	SCANOFF
+	invoke_fn SCANOFF
 	CMP	AL,0DH
 	jz	iferrorpj
 	POP	DI
@@ -319,7 +319,7 @@ NOTMATCH:
 
 IFERRORJ2:
 	JZ	IFERRORJ
-	invoke	DELIM
+	invoke_fn DELIM
 	JNZ	SKIPSTRINGEND
 ;
 ; Signal that we did NOT have a match
@@ -336,7 +336,7 @@ iferrorpj:
 
 MATCH:
 	LODSB
-	invoke	DELIM
+	invoke_fn DELIM
 	JNZ	NOTMATCH			; not same.
 	XOR	AL,AL
 	JMP	SHORT IFRET
@@ -346,14 +346,14 @@ ifexist_attr	    EQU     attr_hidden+attr_system
 
 moredelim:
 	lodsb					; move command line pointer over
-	invoke	delim				; pathname -- have to do it ourselves
+	invoke_fn delim				; pathname -- have to do it ourselves
 	jnz	moredelim			; 'cause parse_file_descriptor is dumb
 	mov	DX, OFFSET TRANGROUP:dirbuf
 	trap	set_dma
 	mov	BX, 2				; if(0) [|not](|1) exist[1|2] file(2|3)
 	add	BX, [if_not_count]
 	mov	AX, OFFSET TRANGROUP:arg.argv
-	invoke	argv_calc			; convert arg index to pointer
+	invoke_fn argv_calc			; convert arg index to pointer
 	mov	DX, [BX].argpointer		; get pointer to supposed filename
 	mov	CX, ifexist_attr		; filetypes to search for
 	trap	Find_First			; request first match, if any
@@ -375,7 +375,7 @@ REALTEST:
 	JMP	TCOMMAND
 
 IFTRUE:
-	invoke	SCANOFF
+	invoke_fn SCANOFF
 	MOV	CX,SI
 	SUB	CX,81H
 	SUB	DS:[80H],CL
@@ -412,7 +412,7 @@ GETNUMLP:
 	LODSB
 	CMP	AL,0DH
 	jz	iferrorj3
-	invoke	DELIM
+	invoke_fn DELIM
 	JZ	GOTNUM
 	SUB	AL,'0'
 	XCHG	AL,BL
@@ -505,7 +505,7 @@ Procedure   SkipDelim,NEAR
 	TEST	Batch,-1
 	JZ	SkipErr 			; batch file empty.  OOPS!
 	CALL	GetBatByt			; get a char
-	invoke	Delim				; check for ignoreable chars
+	invoke_fn Delim				; check for ignoreable chars
 	JZ	SkipDelim			; ignore this char.
 	clc
 	return
@@ -534,7 +534,7 @@ $CALL:
 	push	ax
 	push	cx
 	mov	si,offset trangroup:combuf+2
-	invoke	scanoff 			;get to first non-delimeter
+	invoke_fn scanoff 			;get to first non-delimeter
 	add	si,length_call			;point to char past CALL
 	mov	di,offset trangroup:combuf+2
 	mov	cx,combuflen-length_call	;get length of buffer
@@ -557,7 +557,7 @@ $CALL:
 ;
 	cmp	[PIPEFILES],0			; Only turn off if present.
 	jz	NoPipe
-	invoke	PipeDel
+	invoke_fn PipeDel
 NoPipe:
 	pop	ds
 
@@ -580,7 +580,7 @@ ASSUME	DS:RESGROUP
 	POP	DS
 
 GotoOpen:
-	invoke	promptBat
+	invoke_fn promptBat
 	MOV	DI,FCB+1			; Get the label
 	MOV	CX,11
 	MOV	AL,' '
@@ -640,7 +640,7 @@ NEXTCHRLP:
 	POP	CX
 
 GotByte:
-	INVOKE	TESTKANJ			;AN000;  3/3/KK
+	INVOKE_FN TESTKANJ			;AN000;  3/3/KK
 	JZ	NOTKANJ1			;AN000;  3/3/KK
 	CMP	AL, ES:[DI]			;AN000;  3/3/KK
 	JNZ	LABLKTST			;AN000;  3/3/KK
@@ -736,7 +736,7 @@ ASSUME	DS:RESGROUP
 
 SETERRDL:
 	MOV	BX,DX
-	invoke	get_ext_error_number		;AN022; get the extended error
+	invoke_fn get_ext_error_number		;AN022; get the extended error
 	mov	dx,ax				;AN022; save extended error in DX
 	MOV	AL,[BX] 			; Get drive spec
 	SUB	AL,'@'                          ; A = 1

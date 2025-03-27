@@ -4,8 +4,8 @@
 .sall
 .xlist
 .xcref
-    INCLUDE DOSSYM.INC
-    INCLUDE DEVSYM.INC
+    INCLUDE dossym.inc
+    INCLUDE devsym.inc
     include comsw.asm
     include comseg.asm
     include comequ.asm
@@ -186,8 +186,8 @@ parseloop:
 	mov	comptr,si			; save ptr into original command buffer
 	xor	BP, BP				; switch information put here by cparse
 	mov	byte ptr [expand_star],0	; don't expand *'s to ?'s
-	invoke	scanoff 			; skip leading blanks...
-	invoke	cparse				; byte off a token (args in SI, DI, BL)
+	invoke_fn scanoff 			; skip leading blanks...
+	invoke_fn cparse				; byte off a token (args in SI, DI, BL)
 	jnc	More_prse
 	or	BP,BP				; Check for trailing switch character
 	jz	parsedone

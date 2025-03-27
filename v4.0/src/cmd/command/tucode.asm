@@ -97,7 +97,7 @@ ALLFIL:
 
 ASKAGN:
 	MOV	DX,OFFSET TRANGROUP:SUREMES_ptr ; "Are you sure (Y/N)?"
-	invoke	std_printf
+	invoke_fn std_printf
 	MOV	SI,80H
 	MOV	DX,SI
 	MOV	WORD PTR [SI],120		; zero length
@@ -106,7 +106,7 @@ ASKAGN:
 	LODSW
 	OR	AH,AH
 	JZ	ASKAGN
-	INVOKE	SCANOFF
+	INVOKE_FN SCANOFF
 	call	char_in_xlat			;G Convert to upper case
 	retc					;AN000; return if function not supported
 	CMP	AL,CAPITAL_N			;G
@@ -123,13 +123,13 @@ NOPRMPT:
 	INT	21H
 	INC	AL
 	jz	eraerr
-	invoke	RESTUDIR
+	invoke_fn RESTUDIR
 	ret					; If no error, return
 
 eraerr:
-	invoke	set_ext_error_msg		;AN022; set up the extended error
+	invoke_fn set_ext_error_msg		;AN022; set up the extended error
 	push	dx				;AN022; save message
-	invoke	RESTUDIR
+	invoke_fn RESTUDIR
 	pop	dx				;AN022; restore message
 
 	cmp	word ptr extend_buf_ptr,error_no_more_files ;AN022; convert no more files to
@@ -159,7 +159,7 @@ cerrorj2:
 ASSUME	CS:TRANGROUP,DS:TRANGROUP,ES:TRANGROUP,SS:NOTHING
 
 SLASHP_ERASE:					;AN000; entry point
-	invoke	build_dir_string		;AN000; set up current directory string for output
+	invoke_fn build_dir_string		;AN000; set up current directory string for output
 	mov	ah,Set_DMA			;AN000; issue set dta int 21h
 	mov	dx,offset trangroup:destdir	;AN000; use Destdir for target
 	int	21H				;AN000;
@@ -174,7 +174,7 @@ delete_prompt_loop:				;AN000;
 	mov	di,offset trangroup:dest	;AN000; set up dest as target
 	mov	al,dirchar			;AN000; store a "\" in the first char
 	stosb					;AN000;     of DEST
-	invoke	fcb_to_ascz			;AN000; convert filename from FCB to ASCIIZ string
+	invoke_fn fcb_to_ascz			;AN000; convert filename from FCB to ASCIIZ string
 
 slashp_askagn:					;AN000;
 	call	crlf2				;AN000; print out carriage return, line feed
@@ -187,13 +187,13 @@ slashp_askagn:					;AN000;
 Not_del_root:					;AN000;
 	mov	string_ptr_2,dx 		;AN000;
 	mov	dx,offset trangroup:string_buf_ptr ;AN000;
-	invoke	std_printf			;AN000;
+	invoke_fn std_printf			;AN000;
 	mov	dx,offset trangroup:dest	;AN000; print out file name string
 	mov	string_ptr_2,dx 		;AN000;
 	mov	dx,offset trangroup:string_buf_ptr ;AN000;
-	invoke	std_printf			;AN000;
+	invoke_fn std_printf			;AN000;
 	mov	dx,offset trangroup:Del_Y_N_Ptr ;AN000; issue ",    Delete (Y/N)?" message
-	invoke	std_printf			;AN000;
+	invoke_fn std_printf			;AN000;
 	mov	si,80H				;AN000; set up buffer for input
 	mov	dx,si				;AN000;
 	mov	word ptr [si],combuflen 	;AN000;
@@ -202,7 +202,7 @@ Not_del_root:					;AN000;
 	lodsw					;AN000;
 	or	ah,ah				;AN000; was a character entered?
 	jz	slashp_askagn			;AN000; no - ask again
-	invoke	scanoff 			;AN000; scan off leading delimiters
+	invoke_fn scanoff 			;AN000; scan off leading delimiters
 	call	char_in_xlat			;AN000; yes - upper case it
 	retc					;AN000; return if function not supported
 	cmp	al,capital_n			;AN000; was it no?
@@ -228,13 +228,13 @@ next_del_file:					;AN000;
 	jmp	delete_prompt_loop		;AN000; yes - continue (need long jump)
 
 slash_p_exit:
-	invoke	get_ext_error_number		;AN022; get the extended error number
+	invoke_fn get_ext_error_number		;AN022; get the extended error number
 	cmp	ax,error_no_more_files		;AN022; was error file not found?
 	jz	good_erase_exit 		;AN022; yes - clean exit
 	jmp	extend_setup			;AN022; go issue error message
 
 good_erase_exit:
-	invoke	restudir			;AN000; we're finished - restore user's dir
+	invoke_fn restudir			;AN000; we're finished - restore user's dir
 	call	crlf2				;AN000; print out carriage return, line feed
 	ret					;AN000; exit
 
@@ -273,7 +273,7 @@ DOEMES:
 	cmp	cl,0				;AC000; was anything on the line?
 	jz	PEcho				; just display current state.
 	MOV	DX,82H				; Skip one char after "ECHO"
-	invoke	CRPRINT
+	invoke_fn CRPRINT
 	JMP	CRLF2
 
 PECHO:
@@ -325,11 +325,11 @@ PRINTVAL:
 	mov	bx,dx				;AN000; save offset value
 	lodsw					;AN000; get message number of on or off
 	mov	dh,util_msg_class		;AN000; this is a utility message
-	invoke	Tsysgetmsg			;AN000; get the address of the message
+	invoke_fn Tsysgetmsg			;AN000; get the address of the message
 	add	bx,ptr_off_pos			;AN000; point to offset of ON/OFF
 	mov	word ptr [bx],si		;AN000; put the offset in the message block
 	pop	dx				;AN000; get message back
-	invoke	std_printf			;AC000; go print message
+	invoke_fn std_printf			;AC000; go print message
 	mov	word ptr [bx],0 		;AN000; zero out message pointer
 
 	ret					;AN000; exit
@@ -402,7 +402,7 @@ parse_on_off:					;AN032;    and start parsing
 	mov	di,offset trangroup:parse_break ;AN000; Get adderss of PARSE_BREAK
 	xor	cx,cx				;AN000; clear cx,dx
 	xor	dx,dx				;AN000;
-	invoke	cmd_parse			;AC000; call parser
+	invoke_fn cmd_parse			;AC000; call parser
 	cmp	ax,end_of_line			;AC000; are we at end of line?
 	jz	BADONF				;AC000; yes, return error
 	cmp	ax,result_no_error		;AN000; did an error occur
@@ -422,7 +422,7 @@ good_on_off:					;AN014;
 	pushf					;AN000; save flags
 	mov	di,offset trangroup:parse_break ;AN000; Get adderss of PARSE_BREAK
 	xor	dx,dx				;AN000;
-	invoke	cmd_parse			;AN000; call parser
+	invoke_fn cmd_parse			;AN000; call parser
 	cmp	ax,end_of_line			;AN000; are we at end of line?
 	jnz	BADONF_flags			;AN000; NO, return error
 	popf					;AN000; restore flags
@@ -460,7 +460,7 @@ PRINT_DATE:
 	mov	promptDat_yr,cx 		;AC000; put year into message control block
 	mov	promptDat_moday,dx		;AC000; put month and day into message control block
 	mov	dx,offset trangroup:promptDat_ptr ;AC000; set up message for output
-	invoke	std_printf
+	invoke_fn std_printf
 ;AD061; mov	promptDat_yr,0			;AC000; reset year, month and day
 ;AD061; mov	promptDat_moday,0		;AC000;     pointers in control block
 	POP	DI				;AC000; restore di,es
@@ -486,7 +486,7 @@ GetDate:
 	mov	ax,weektab			;AN000; get message number of weektab
 	mov	dh,util_msg_class		;AN000; this is a utility message
 	push	di				;AN000; save argument buffer
-	invoke	Tsysgetmsg			;AN000; get the address of the message
+	invoke_fn Tsysgetmsg			;AN000; get the address of the message
 	pop	di				;AN000; retrieve argument buffer
 	add	si,cx				;AC000; get day of week
 	MOV	CX,3

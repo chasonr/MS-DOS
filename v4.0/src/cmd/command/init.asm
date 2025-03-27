@@ -7,7 +7,7 @@ TITLE	COMMAND Initialization
 
 .xlist
 .xcref
-	INCLUDE DOSSYM.INC
+	INCLUDE dossym.inc
 	include doscntry.inc		;AC000;
 	INCLUDE comseg.asm
 	INCLUDE comequ.asm

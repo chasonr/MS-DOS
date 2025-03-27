@@ -9,10 +9,10 @@ TITLE	Part6 COMMAND Transient routines.
 
 .xlist
 .xcref
-	INCLUDE DOSSYM.INC
+	INCLUDE dossym.inc
 	INCLUDE comseg.asm
 	INCLUDE comequ.asm
-	INCLUDE DOSCNTRY.INC		;AN000;
+	INCLUDE doscntry.inc		;AN000;
 .list
 .cref
 
@@ -176,7 +176,7 @@ add_name_ret:
 ; We have changed the COMSPEC variable.  We need to update the resident
 ; pieces necessary to reread in the info.  First, skip all delimiters
 ;
-	invoke	ScanOff
+	invoke_fn ScanOff
 	mov	es,[resseg]			;  comspec var in the resident
 	assume	es:resgroup
 ;
@@ -220,7 +220,7 @@ GotDrive:					;g
 
 copy_comspec:
 	lodsb
-	invoke	Delim
+	invoke_fn Delim
 	jz	CopyDone
 	cmp	al,13
 	jz	CopyDone
@@ -257,7 +257,7 @@ PENVLP2:
 	push	ds
 	push	es
 	pop	ds
-	invoke	printf_crlf
+	invoke_fn printf_crlf
 	pop	ds
 	JMP	PENVLP
 
@@ -409,7 +409,7 @@ GETARG:
 	LODSB
 	OR	AL,AL
 	retz
-	invoke	SCANOFF
+	invoke_fn SCANOFF
 	CMP	AL,13
 	return
 
@@ -546,7 +546,7 @@ STORE_CHAR:
 	PUSH	AX
 	PUSH	CX
 	PUSH	BX				; Save Size of environment
-	invoke	FREE_TPA
+	invoke_fn FREE_TPA
 	POP	BX
 	ADD	BX,2				; Recover true environment size
 
@@ -572,7 +572,7 @@ ENVNOSET:
 	PUSHF
 	PUSH	ES
 	MOV	ES,[RESSEG]
-	invoke	ALLOC_TPA
+	invoke_fn ALLOC_TPA
 	POP	ES
 	POPF
 	POP	CX
@@ -625,7 +625,7 @@ RESTUDIR:
 	MOV	AH,CHDIR
 	INT	int_command			; Restore users DIR
 	XOR	AL,AL
-	invoke	SETREST
+	invoke_fn SETREST
 RET56:
 	return
 

@@ -4,7 +4,7 @@
 .sall
 .xlist
 .xcref
-INCLUDE DOSSYM.INC
+INCLUDE dossym.inc
     include comsw.asm
     include comseg.asm
     include comequ.asm
@@ -179,7 +179,7 @@ search_done:					; it's all over with...
 
 search_invalid_drive:				; Tell the user path/drive
 	mov	DX, [search_error]		; appropriate error message
-	invoke	std_printf			; and pretend no file found
+	invoke_fn std_printf			; and pretend no file found
 
 search_no_file: 				; couldn't find a match
 	mov	AX, search_file_not_found
@@ -416,7 +416,7 @@ save_ptr_loop:
 	dec	CX				; exhausted all args?
 	jl	save_done
 	mov	BX, CX				; get arg index and
-	invoke	argv_calc			; convert to a pointer
+	invoke_fn argv_calc			; convert to a pointer
 	mov	DX, DS:arg.argv[BX].argpointer
 	sub	DX, SI				; adjust argpointer
 	mov	ES:argv[BX].argpointer, DX

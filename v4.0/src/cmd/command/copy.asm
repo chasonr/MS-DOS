@@ -35,7 +35,7 @@ TITLE	COMMAND COPY routines.
 .xlist
 .xcref
 	INCLUDE comsw.asm
-	INCLUDE DOSSYM.INC
+	INCLUDE dossym.inc
 	INCLUDE comseg.asm
 	INCLUDE comequ.asm
 .list
@@ -209,7 +209,7 @@ DESTSCAN:
 	xor	bp,bp				; no switches
 	mov	di,offset trangroup:SCANBUF
 	mov	parse_last,si			;AN018; save start of parsed string
-	invoke	CPARSE
+	invoke_fn CPARSE
 	PUSHF					; save flags
 	inc	objcnt
 	test	bh,80H				; A '+' argument?
@@ -234,7 +234,7 @@ not_slashv:					;AN038;
 	jz	NOT_BAD_SWITCH			;AN018; Switches are okay
 	popf					;AN018; fix up stack
 	mov	ax,BadSwt_ptr			;AN018; get "Invalid switch" message number
-	invoke	Setup_parse_error_msg		;AN018; setup to print the message
+	invoke_fn Setup_parse_error_msg		;AN018; setup to print the message
 	jmp	CERROR				;AC018; exit
 
 NOT_BAD_SWITCH: 				;AN018; switch okay
@@ -310,7 +310,7 @@ ACOUNTOK:
 	mov	[DESTSWITCH],0			; no switches on dest
 	mov	[bp.INFO],2			; Flag dest is ambig
 	mov	[bp.ISDIR],0			; Know destination specs file
-	invoke	SETSTARS
+	invoke_fn SETSTARS
 GOT2ARGS:
 	cmp	[bp.SIZ],2
 	jnz	NOTSHORTDEST
@@ -320,7 +320,7 @@ GOT2ARGS:
 	or	[bp.INFO],2			; Know dest is d:
 	mov	di,offset trangroup:DESTBUF + 2
 	mov	[bp.ISDIR],0			; Know destination specs file
-	invoke	SETSTARS
+	invoke_fn SETSTARS
 NOTSHORTDEST:
 	mov	di,[bp.TTAIL]
 	cmp	byte ptr [DI],0
@@ -331,7 +331,7 @@ NOTSHORTDEST:
 	jnz	CERROR4J			; Trailing '/' error
 	mov	[bp.ISDIR],2			; Know destination is d:/
 	or	[bp.INFO],6
-	invoke	SETSTARS
+	invoke_fn SETSTARS
 CHKSWTCHES:
 ;AD018; mov	ax,[ALLSWITCH]
 ;AD018; test	ax,NOT SwitchCopy
@@ -365,7 +365,7 @@ NOVERIF:
 	mov	bl,plus_chr			; include '+' as a delimiter
 SCANFSRC:
 	mov	di,offset trangroup:SCANBUF
-	invoke	CPARSE				; Parse first source name
+	invoke_fn CPARSE				; Parse first source name
 	test	bh,1				; Switch?
 	jnz	SCANFSRC			; Yes, try again
 	or	[DESTSWITCH],bp 		; Include copy wide switches on dest
@@ -385,12 +385,12 @@ ENDCOPY:
 	CALL	CLOSEDEST
 ENDCOPY2:
 	call	deallocate_src_xa		;AN030; deallocate xa segment
-	invoke	free_tpa			;AN000; Make sure work area
-	invoke	alloc_tpa			;AN000;   is reset properly
+	invoke_fn free_tpa			;AN000; Make sure work area
+	invoke_fn alloc_tpa			;AN000;   is reset properly
 	MOV	DX,OFFSET TRANGROUP:COPIED_ptr
 	MOV	SI,[FILECNT]
 	mov	copy_num,si
-	invoke	std_printf
+	invoke_fn std_printf
 	JMP	TCOMMAND			; Stack could be messed up
 
 SRCNONEXIST:
@@ -416,7 +416,7 @@ LEAVECFLAG:
 	mov	[SRCPT],SI			; remember where we are
 	mov	di,offset trangroup:USERDIR1
 	mov	bp,offset trangroup:SRCVARS
-	invoke	BUILDPATH			; Figure out everything about the source
+	invoke_fn BUILDPATH			; Figure out everything about the source
 	mov	si,[SRCTAIL]			; Create the search FCB
 	return
 
@@ -431,7 +431,7 @@ MORECP:
 	mov	bl,plus_chr			; include '+' as a delimiter
 SCANSRC:
 	mov	di,offset trangroup:SCANBUF
-	invoke	CPARSE				; Parse first source name
+	invoke_fn CPARSE				; Parse first source name
 	JC	EndCopyJ2			; if error, then end (trailing + case)
 	test	bh,80H
 	jz	ENDCOPYJ2			; If no '+' we're done
@@ -462,7 +462,7 @@ DRVSPEC1:
 	call	SEARCH
 SrchDone:
 	pushf					; Save result of search
-	invoke	RESTUDIR1			; Restore users dir
+	invoke_fn RESTUDIR1			; Restore users dir
 	popf
 	jz	NEXTAMBIG0
 	jmp	SRCNONEXIST			; Failed
@@ -481,7 +481,7 @@ NEXTAMBIG:
 	mov	[NOWRITE],al			; Turn off NOWRITE
 	mov	di,[SRCTAIL]
 	mov	si,offset trangroup:DIRBUF + 1
-	invoke	FCB_TO_ASCZ			; SRCBUF has complete name
+	invoke_fn FCB_TO_ASCZ			; SRCBUF has complete name
 MELDO:
 	cmp	[CONCAT],0
 	jnz	SHOWCPNAM			; Show name if concat
@@ -489,8 +489,8 @@ MELDO:
 	jz	DOREAD
 SHOWCPNAM:
 	mov	dx,offset trangroup:file_name_ptr
-	invoke	std_printf
-	invoke	CRLF2
+	invoke_fn std_printf
+	invoke_fn CRLF2
 DOREAD:
 	call	DOCOPY
 	cmp	[CONCAT],0
@@ -501,7 +501,7 @@ DOREAD:
 NODCLOSE:
 	cmp	[CONCAT],0			; Check CONCAT again
 	jz	NOFLUSH
-	invoke	FLSHFIL 			; Flush output between source files on
+	invoke_fn FLSHFIL 			; Flush output between source files on
 						; CONCAT so LOSTERR stuff works
 						; correctly
 	TEST	[MELCOPY],0FFH
@@ -526,20 +526,20 @@ CONTMEL:
 	mov	bl,plus_chr
 SCANSRC2:
 	mov	di,OFFSET TRANGROUP:SCANBUF
-	invoke	CPARSE
+	invoke_fn CPARSE
 	test	bh,80H
 	jz	NEXTMEL 			; Go back to start
 	test	bh,1				; Switch ?
 	jnz	SCANSRC2			; Yes
 	call	SOURCEPROC
-	invoke	RESTUDIR1
+	invoke_fn RESTUDIR1
 	mov	di,OFFSET TRANGROUP:DESTFCB2
 	mov	ax,PARSE_FILE_DESCRIPTOR SHL 8
 	INT	int_command
 	mov	bx,OFFSET TRANGROUP:SDIRBUF + 1
 	mov	si,OFFSET TRANGROUP:DESTFCB2 + 1
 	mov	di,[SRCTAIL]
-	invoke	BUILDNAME
+	invoke_fn BUILDNAME
 	cmp	[CONCAT],0			; Are we concatenating?
 	jz	meldoj				; No, continue.
 ;
@@ -630,7 +630,7 @@ OpenOK:
 	jz	no_cp_get			;AN030; no - don't get attributes
 
 	push	cx				;AN030; save old code page
-	invoke	get_file_code_page_tag		;AN000; get file's code page
+	invoke_fn get_file_code_page_tag		;AN000; get file's code page
 	pop	cx				;AN030	retrieve old code page
 	jnc	no_cp_get			;AN000; no error - continue
 src_cp_error:					;AN022;
@@ -652,7 +652,7 @@ get_src_xa:
 	cmp	src_xa_size,0			;AN000; are there any extended attributes?
 	jz	no_copy_xa_jmp			;AC022; nothing there - don't allocate memory
 	push	bx				;AN000; save handle
-	invoke	free_tpa			;AN000; need to make free memory, first
+	invoke_fn free_tpa			;AN000; need to make free memory, first
 	mov	bx,src_xa_size			;AN000; get bytes (size of XA) into bx
 	mov	cl,4				;AN000; divide bytes by 16 to convert
 	shr	bx,cl				;AN000;    to paragraphs
@@ -667,7 +667,7 @@ get_src_xa:
 	mov	[rsrc_xa_seg],ax		;AN030;   in case user breaks
 	pop	ds				;AN030;   out or has critical
 	assume	ds:trangroup			;AN030;   error
-	invoke	alloc_tpa			;AN000; reallocate the work area
+	invoke_fn alloc_tpa			;AN000; reallocate the work area
 	popf					;AN000; restore flags
 	pop	bx				;AN000; restore handle
 	jnc	Alloc_for_xa_okay		;AN000; no carry - everything okay
@@ -690,10 +690,10 @@ Alloc_for_xa_okay:
 	jnc	no_copy_xa			;AC022; no error - continue
 
 error_on_source:				;AN022; we have a BAD error
-	invoke	set_ext_error_msg		;AN022; set up the error message
+	invoke_fn set_ext_error_msg		;AN022; set up the error message
 	mov	string_ptr_2,offset trangroup:srcbuf ;AN022; get address of failed string
 	mov	Extend_buf_sub,one_subst	;AN022; put number of subst in control block
-	invoke	std_Eprintf			;AN022; print it
+	invoke_fn std_Eprintf			;AN022; print it
 	cmp	[srchand],0			;AN022; did we open the file?
 	jz	no_close_src			;AN022; no - don't close
 	call	closesrc			;AN022; clean up
@@ -721,7 +721,7 @@ COPYLP:
 	mov	dx,[NXTADD]
 	sub	cx,dx				; Compute available space
 	jnz	GOTROOM
-	invoke	FLSHFIL
+	invoke_fn FLSHFIL
 	CMP	[TERMREAD],0
 	JNZ	CLOSESRC			; Give up
 	mov	cx,[BYTCNT]
@@ -759,7 +759,7 @@ BINREAD:
 	MOV	[NXTADD],CX
 	CMP	CX,[BYTCNT]			; Is buffer full?
 	JB	TESTDEV 			; If not, we may have found EOF
-	invoke	FLSHFIL
+	invoke_fn FLSHFIL
 	CMP	[TERMREAD],0
 	JNZ	CLOSESRC			; Give up
 	JMP	SHORT COPYLP
@@ -783,12 +783,12 @@ CLOSEDEST:
 	cmp	[DESTCLOSED],0
 	retnz					; Don't double close
 	MOV	AL,BYTE PTR [DESTSWITCH]
-	invoke	SETASC				; Check for B or A switch on destination
+	invoke_fn SETASC				; Check for B or A switch on destination
 	JZ	BINCLOS
 	MOV	BX,[NXTADD]
 	CMP	BX,[BYTCNT]			; Is memory full?
 	JNZ	PUTZ
-	invoke	TRYFLUSH			; Make room for one lousy byte
+	invoke_fn TRYFLUSH			; Make room for one lousy byte
 	jz	NOCONC
 CONCHNG:					; Concat flag changed on us
 	stc
@@ -808,7 +808,7 @@ PUTZ:
 	CMP	AX,1
 	JZ	FORGETITJ			; WRITTEN = 0 NXTADD = 1 (the ^Z)
 BINCLOS:
-	invoke	TRYFLUSH
+	invoke_fn TRYFLUSH
 	jnz	CONCHNG
 	cmp	[WRITTEN],0
 ForgetItJ:
@@ -926,9 +926,9 @@ source_set	proc near
 	mov	[SRCINFO],bh			; Save info about it
 	pop	SI
 	mov	ax,bp				; Switches so far
-	invoke	SETASC				; Set A,B switches accordingly
-	invoke	SWITCH				; Get any more switches on this arg
-	invoke	SETASC				; Set
+	invoke_fn SETASC				; Set A,B switches accordingly
+	invoke_fn SWITCH				; Get any more switches on this arg
+	invoke_fn SETASC				; Set
 	return
 
 source_set	endp
@@ -951,10 +951,10 @@ cleanuperr	proc	near			;AN022;
 
 	cmp	msg_flag,0			;AN022; have we already issued a message?
 	jnz	cleanuperr_cont 		;AN022; yes - don't issue duplicate error
-	invoke	set_ext_error_msg		;AN022; set up error message
+	invoke_fn set_ext_error_msg		;AN022; set up error message
 	mov	string_ptr_2,offset trangroup:destbuf ;AN022; get address of failed string
 	mov	Extend_buf_sub,one_subst	;AN022; put number of subst in control block
-	invoke	std_eprintf			;AN022; issue the error message
+	invoke_fn std_eprintf			;AN022; issue the error message
 cleanuperr_cont:				;AN022;
 
 	ret					;AN022; return to caller

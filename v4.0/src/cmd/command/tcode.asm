@@ -6,7 +6,7 @@ TITLE	Part1 COMMAND Transient Routines
 	INCLUDE comsw.asm
 .xlist
 .xcref
-	INCLUDE DOSSYM.INC
+	INCLUDE dossym.inc
 	INCLUDE comseg.asm
 	INCLUDE comequ.asm
 .list
@@ -157,9 +157,9 @@ ASSUME	SS:TRANGROUP
 	MOV	ES,AX
 	MOV	DS,AX				;AN000; set DS to transient
 ASSUME	ES:TRANGROUP,DS:TRANGROUP		;AC000;
-	invoke	TSYSLOADMSG			;AN000; preload messages
-	invoke	SETSTDINOFF			;AN026; turn off critical error on STDIN
-	invoke	SETSTDOUTOFF			;AN026; turn off critical error on STDOUT
+	invoke_fn TSYSLOADMSG			;AN000; preload messages
+	invoke_fn SETSTDINOFF			;AN026; turn off critical error on STDIN
+	invoke_fn SETSTDOUTOFF			;AN026; turn off critical error on STDOUT
 	mov	append_exec,0			;AN041; set internal append state off
 
 	MOV	DS,[RESSEG]
@@ -204,7 +204,7 @@ NOSETBUF:
 	JZ	NOPCLOSE			; Don't bother if they don't exist
 	CMP	[PIPEFLAG],0
 	JNZ	NOPCLOSE			; Don't del if still piping
-	INVOKE	PIPEDEL
+	INVOKE_FN PIPEDEL
 
 NOPCLOSE:
 	MOV	[EXTCOM],0			; Flag internal command
@@ -242,7 +242,7 @@ ASSUME	DS:RESGROUP
 
 	TEST	[ECHOFLAG],1
 	JZ	GETCOM				; Don't do the CRLF
-	INVOKE	SINGLETEST
+	INVOKE_FN SINGLETEST
 	JB	GETCOM
 	TEST	[PIPEFLAG],-1
 	JNZ	GETCOM
@@ -250,7 +250,7 @@ ASSUME	DS:RESGROUP
 	JNZ	GETCOM				; G
 	TEST	[BATCH], -1			; G  Don't print prompt if in batch
 	JNZ	GETCOM				; G
-	INVOKE	CRLF2
+	INVOKE_FN CRLF2
 
 GETCOM:
 	MOV	CALL_FLAG,0			; G Reset call flags
@@ -265,13 +265,13 @@ GETCOM:
 NOPIPE:
 	TEST	[ECHOFLAG],1
 	JZ	NOPDRV				; No prompt if echo off
-	INVOKE	SINGLETEST
+	INVOKE_FN SINGLETEST
 	JB	NOPDRV
 	TEST	[FORFLAG],-1			; G  Don't print prompt in FOR
 	JNZ	NOPDRV				; G
 	TEST	[BATCH], -1			; G  Don't print prompt if in batch
 	JNZ	TESTFORBAT			; G
-	INVOKE	PRINT_PROMPT			; Prompt the user
+	INVOKE_FN PRINT_PROMPT			; Prompt the user
 
 NOPDRV:
 	TEST	[FORFLAG],-1			; FOR has next highest precedence
@@ -301,7 +301,7 @@ TESTFORBAT:
 	jz	jdocom1 			;AN000; yes - go process command
 
 	PUSH	DS				;G
-	INVOKE	READBAT 			; Continue BATCH
+	INVOKE_FN READBAT 			; Continue BATCH
 	POP	DS				;G
 	mov	nullflag,0			;G reset no command flag
 	TEST	[BATCH],-1			;G
@@ -375,10 +375,10 @@ transpace   ends
 
 
 DOCOM:
-	INVOKE	CRLF2
+	INVOKE_FN CRLF2
 
 DOCOM1:
-	INVOKE	PRESCAN 			; Cook the input buffer
+	INVOKE_FN PRESCAN 			; Cook the input buffer
 	JZ	NOPIPEPROC
 	JMP	PIPEPROCSTRT			; Fire up the pipe
 
@@ -386,14 +386,14 @@ nullcomj:
 	jmp	nullcom
 
 NOPIPEPROC:
-	invoke	parseline
+	invoke_fn parseline
 	jnc	OkParse 			; user error?  or maybe we goofed?
 
 BadParse:
 	PUSH	CS
 	POP	DS
 	MOV	DX,OFFSET TRANGROUP:BADNAM_ptr
-	INVOKE	std_eprintf
+	INVOKE_FN std_eprintf
 	JMP	TCOMMAND
 
 OkParse:
@@ -441,11 +441,11 @@ DRVGD:
 	PUSH	SI
 
 	mov	si, OFFSET TRANGROUP:COMBUF+2	; Skip over all leading delims
-	invoke	scanoff
+	invoke_fn scanoff
 
 do_skipcom:
 	lodsb					; move command line pointer over
-	invoke	delim				; pathname -- have to do it ourselves
+	invoke_fn delim				; pathname -- have to do it ourselves
 	jz	do_skipped			; 'cause parse_file_descriptor is dumb
 	cmp	AL, 0DH 			; can't always depend on argv[0].arglen
 	jz	do_skipped			; to be the same length as the user-

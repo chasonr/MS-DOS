@@ -9,8 +9,8 @@ TITLE	Part3 COMMAND Transient Routines
 .xlist
 .xcref
 	include comsw.asm
-	INCLUDE DOSSYM.INC
-	INCLUDE DEVSYM.INC
+	INCLUDE dossym.inc
+	INCLUDE devsym.inc
 	include comseg.asm
 	include comequ.asm
 .list
@@ -80,7 +80,7 @@ BATCRLF:
 	JZ	NOFORP2 			;G  no - exit
 	TEST	[BATCH], -1			;G  print CRLF if in batch
 	JZ	NOFORP2 			;G
-	invoke	CRLF2
+	invoke_fn CRLF2
 
 NOFORP2:
 	JMP	TCOMMAND
@@ -166,7 +166,7 @@ for_begin1:
 	cmp	BX, f.for_maxarg
 	jg	$for_exit			; exceeding maxarg means all done
 	mov	AX, OFFSET for_args.argv
-	invoke	argv_calc			; compute argv[x] address
+	invoke_fn argv_calc			; compute argv[x] address
 
 	mov	CX, [BX].argstartel
 	mov	DX, [BX].argpointer
@@ -244,7 +244,7 @@ for_make_com:
 assume	ES:trangroup
 
 	mov	AX, OFFSET for_args		; translate offset to pointer
-	invoke	argv_calc
+	invoke_fn argv_calc
 	mov	si,[bx].arg_ocomptr
 	inc	si				; mov ptr passed beginning space
 
@@ -288,7 +288,7 @@ assume	DS:resgroup
 	jz	noecho3
 	cmp	nullflag,nullcommand		;G was there a command last time?
 	jz	No_crlf_pr			;G no - don't print crlf
-	invoke	CRLF2				;G  Print out prompt
+	invoke_fn CRLF2				;G  Print out prompt
 
 no_crlf_pr:
 	mov	nullflag,0			;G reset no command flag
@@ -296,12 +296,12 @@ no_crlf_pr:
 	pop	DS
 	assume	DS:trangroup
 	push	di
-	invoke	PRINT_PROMPT			;G Prompt the user
+	invoke_fn PRINT_PROMPT			;G Prompt the user
 	pop	di
 	mov	BYTE PTR ES:[DI-1],0		; yeah, PRINT it out...
 	mov	string_ptr_2,OFFSET TRANGROUP:COMBUF+2
 	mov	dx,offset trangroup:string_buf_ptr
-	invoke	std_printf
+	invoke_fn std_printf
 	mov	BYTE PTR ES:[DI-1], 0DH
 	jmp	DoCom
 noecho3:					; run silent, run deep...
@@ -336,7 +336,7 @@ assume	ES:resgroup
 ;
 	cmp	[PIPEFILES],0			; Only turn off if present.
 	jz	NoPipe
-	invoke	PipeDel
+	invoke_fn PipeDel
 NoPipe:
 	xor	DX, DX				; counter (0 <= DX < argvcnt)
 	call	nextarg 			; move to next argv[n]
@@ -445,14 +445,14 @@ for_do:
 	push	DI
 	push	SI
 	push	BP
-	invoke	FREE_TPA			; need to make free memory, first
+	invoke_fn FREE_TPA			; need to make free memory, first
 ASSUME	ES:RESGROUP
 	call	ForOff
 	mov	BX, SIZE for_info - SIZE arg_unit
-	invoke	Save_Args			; extra bytes needed for for-info
+	invoke_fn Save_Args			; extra bytes needed for for-info
 	pushf
 	mov	[ForPtr], AX
-	invoke	ALLOC_TPA			; ALLOC_TPA clobbers registers...
+	invoke_fn ALLOC_TPA			; ALLOC_TPA clobbers registers...
 	popf
 	pop	BP
 	pop	SI
@@ -498,7 +498,7 @@ nextarg:
 	jge	nextarg_err			; of argv[]...
 	mov	BX, DX
 	mov	AX, OFFSET TRANGROUP:arg.argv
-	invoke	argv_calc			; convert array index to pointer
+	invoke_fn argv_calc			; convert array index to pointer
 	mov	SI, [BX].argpointer		; load pointer to argstring
 	lodsw					; and load first two chars
 	clc

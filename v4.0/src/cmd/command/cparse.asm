@@ -5,8 +5,8 @@
 
 .xlist
 .xcref
-	INCLUDE DOSSYM.INC
-	INCLUDE DEVSYM.INC
+	INCLUDE dossym.inc
+	INCLUDE devsym.inc
 	INCLUDE comseg.asm
 	INCLUDE comequ.asm
 .list
@@ -113,7 +113,7 @@ ASSUME	DS:TRANGROUP,ES:TRANGROUP
 	mov	comma,cl			;g reset comma flag
 moredelim:
 	LODSB
-	INVOKE	DELIM
+	INVOKE_FN DELIM
 	JNZ	SCANCDONE
 	CMP	AL,' '
 	JZ	moredelim
@@ -165,7 +165,7 @@ na_switch:
 ; Mod to avoid upper-case conversion.
 	cmp	cpyflag,1
 	jnz	cpcont2
-	invoke	UPCONV
+	invoke_fn UPCONV
 cpcont2:
 ;---------------
 ;;;;	ENDIF			3/3/KK
@@ -182,7 +182,7 @@ anum_chard:
 	mov	[ELCNT],0			; Store of this char sets it to one
 	cmp	cpyflag,1			; Was CPARSE called from COPY?
 	jnz	anum_char			; No, don't add drive spec.
-	invoke	PATHCHRCMP			; Starts with a pathchar?
+	invoke_fn PATHCHRCMP			; Starts with a pathchar?
 	jnz	anum_char			; no
 	push	ax
 	mov	al,[CURDRV]			; Insert drive spec
@@ -197,7 +197,7 @@ anum_chard:
 anum_char:
 
 ;;;;	IF	KANJI		3/3/KK
-	invoke	TESTKANJ
+	invoke_fn TESTKANJ
 	jz	NOTKANJ 			;AC048;
 	call	move_char
 	lodsb
@@ -206,7 +206,7 @@ anum_char:
 NOTKANJ:					;AN048; If not kanji
 	cmp	cpyflag,1			;AN048; and if we're in COPY
 	jnz	testdot 			;AN048;
-	invoke	upconv				;AN048; upper case the char
+	invoke_fn upconv				;AN048; upper case the char
 
 TESTDOT:
 ;;;;	ENDIF			3/3/KK
@@ -255,7 +255,7 @@ testpathx:
 	xchg	ah,cl
 
 testpath:
-	invoke	PATHCHRCMP
+	invoke_fn PATHCHRCMP
 	jnz	notspecial
 	or	bh,4
 	cmp	byte ptr [expand_star],0
@@ -285,7 +285,7 @@ cpcont3:
 ;---------------
 ;;;;	ENDIF				3/3/KK
 
-	INVOKE	DELIM
+	INVOKE_FN DELIM
 	je	x_done
 
 	cmp	al,0DH
@@ -350,9 +350,9 @@ x_done2:
 a_switch:
 	OR	BH,1				; Indicate switch
 	OR	BP,fSwitch
-	INVOKE	SCANOFF
+	INVOKE_FN SCANOFF
 	INC	SI
-	invoke	testkanj			;AN057; See if DBCS lead byte
+	invoke_fn testkanj			;AN057; See if DBCS lead byte
 	jz	a_switch_notkanj		;AN057; no - continue processing
 	call	move_char			;AN057; DBCS - store first byte
 	lodsb					;AN057; get second byte
@@ -374,7 +374,7 @@ Store_swt:
 ;---------------
 ; This upconv call must stay.  It is used to identify copy-switches
 ; on the command line, and won't store anything into the output buffer.
-	invoke	UPCONV
+	invoke_fn UPCONV
 ;---------------
 ;
 	PUSH	ES
