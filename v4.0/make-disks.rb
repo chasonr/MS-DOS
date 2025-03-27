@@ -11,7 +11,7 @@ ImageName = "dos40.img"
 Distribution360_1 = [
     # These two must be first
     'src/bios/io.sys',
-    'src/DOS/msdos.sys',
+    'src/dos/msdos.sys',
 
     'src/CMD/COMMAND/command.com',
     'src/setup/autoexec.bat',
