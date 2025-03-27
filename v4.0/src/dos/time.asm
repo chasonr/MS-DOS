@@ -68,7 +68,7 @@ ASSUME	DS:NOTHING,ES:NOTHING
 ; WARNING!!!! DAY and MONTH must be adjacently allocated!
 ;
 	MOV	BX,WORD PTR [DAY]	; fetch both day and month
-	invoke	get_user_stack		;Get pointer to user registers
+	invoke_fn get_user_stack		;Get pointer to user registers
 ASSUME	DS:NOTHING
 	MOV	[SI.user_DX],BX 	;DH=month, DL=day
 	ADD	AX,1980 		;Put bias back
@@ -99,7 +99,7 @@ ASSUME	DS:NOTHING,ES:NOTHING
 	CMP	DH,12			;Check against max. month
 	JA	RET24
 	Context DS
-	invoke	DODATE
+	invoke_fn DODATE
 RET24:	return
 EndProc $SET_DATE
 
@@ -115,7 +115,7 @@ ASSUME	DS:NOTHING,ES:NOTHING
 
 	Context DS
 	CALL	READTIME
-	invoke	get_user_stack		;Get pointer to user registers
+	invoke_fn get_user_stack		;Get pointer to user registers
 	MOV	[SI.user_DX],DX
 	MOV	[SI.user_CX],CX
 	XOR	AL,AL
@@ -149,21 +149,21 @@ ASSUME	DS:NOTHING,ES:NOTHING
 	XOR	DX,DX
 	MOV	AX,DX
 	PUSH	BX
-	invoke	SETREAD
+	invoke_fn SETREAD
 	DOSAssume   CS,<ES>,"TIME/SetRead"
 	PUSH	DS
 	LDS	SI,[BCLOCK]
 ASSUME	DS:NOTHING
-	invoke	DEVIOCALL2		;Get correct day count
+	invoke_fn DEVIOCALL2		;Get correct day count
 	POP	DS
 	DOSAssume   CS,<DS>,"TIME/DevIOCall2"
 	POP	BX
-	invoke	SETWRITE
+	invoke_fn SETWRITE
 	POP	WORD PTR [TIMEBUF+4]
 	POP	WORD PTR [TIMEBUF+2]
 	LDS	SI,[BCLOCK]
 ASSUME	DS:NOTHING
-	invoke	DEVIOCALL2		;Set the time
+	invoke_fn DEVIOCALL2		;Set the time
 	XOR	AL,AL
 	return
 EndProc $SET_TIME
@@ -219,11 +219,11 @@ EndProc DATE16
 	MOV	CX,6
 	XOR	DX,DX
 	MOV	AX,DX
-	invoke	SETREAD
+	invoke_fn SETREAD
 	PUSH	DS
 	LDS	SI,[BCLOCK]
 ASSUME	DS:NOTHING
-	invoke	DEVIOCALL2		;Get correct date and time
+	invoke_fn DEVIOCALL2		;Get correct date and time
 	POP	DS
 	DOSAssume   CS,<DS>,"ReadTime/DevIOCall2"
 	POP	BX
@@ -334,21 +334,21 @@ EndProc SETYEAR
 	XOR	DX,DX
 	MOV	AX,DX
 	PUSH	BX
-	invoke	SETREAD
+	invoke_fn SETREAD
 	DOSAssume   CS,<ES>,"DoDate/SetRead"
 	PUSH	DS
 	LDS	SI,[BCLOCK]
 ASSUME	DS:NOTHING
-	invoke	DEVIOCALL2		;Get correct date and time
+	invoke_fn DEVIOCALL2		;Get correct date and time
 	POP	DS
 	POP	BX
 	DOSAssume   CS,<DS>,"DoDate/DevIOCall2"
-	invoke	SETWRITE
+	invoke_fn SETWRITE
 	POP	WORD PTR [TIMEBUF]
 	PUSH	DS
 	LDS	SI,[BCLOCK]
 ASSUME	DS:NOTHING
-	invoke	DEVIOCALL2		;Set the date
+	invoke_fn DEVIOCALL2		;Set the date
 	POP	DS
 	DOSAssume   CS,<DS>,"DoDate/DevIOCall2(second)"
 	POP	BX

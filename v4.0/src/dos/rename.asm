@@ -91,7 +91,7 @@ Installed = TRUE
 	DOSAssume   CS,<DS>,"DOS_Rename"
 	ASSUME	ES:NOTHING
 
-	Invoke	TestNet
+	Invoke_fn TestNet
 	JNC	LOCAL_RENAME
 ;	invoke	OWN_SHARE2		       ;IFS.  IFS owns share ?		;AN000;
 ;	JZ	ifsshare		       ;IFS.  yes			;AN000;
@@ -161,7 +161,7 @@ SAMEDRV:
 	MOV	WORD PTR [DMAADD],OFFSET DOSGROUP:RENAMEDMA
 	MOV	[Found_dev],0		; Rename fails on DEVS, assume not a dev
 	EnterCrit   critDisk
-	invoke	DOS_SEARCH_FIRST	; Sets [NoSetDir] to 1, [CURBUF+2]:BX
+	invoke_fn DOS_SEARCH_FIRST	; Sets [NoSetDir] to 1, [CURBUF+2]:BX
 					;    points to entry
 	JNC	Check_Dev
 	CMP	AX,error_no_more_files
@@ -184,7 +184,7 @@ Check_dev:
 	TEST	[SI.dir_attr],attr_directory  ;PTM.				;AN000;
 	JZ	notdir			      ;PTM.				;AN000;
 	MOV	SI,[REN_WFP]		      ;PTM.  if yes, make sure path	;AN000;
-	invoke	Check_Pathlen2		      ;PTM.   length < 67		;AN000;
+	invoke_fn Check_Pathlen2		      ;PTM.   length < 67		;AN000;
 notdir:
 	POP	DS			      ;PTM.				;AN000;
 	JA	GOTERR			      ;PTM.				;AN000;
@@ -200,20 +200,20 @@ notdir:
 ; [SATTRIB] is also set.
 	MOV	SI,BX
 	ADD	SI,dir_first
-	invoke	REN_DEL_Check
+	invoke_fn REN_DEL_Check
 	JNC	REN_OK1
 	MOV	AX,error_sharing_violation
 	JMP	RENAME_POP
 
 REN_OK1:				;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	invoke	FastOpen_Delete 	; delete dir info in fastopen DOS 3.3
+	invoke_fn FastOpen_Delete 	; delete dir info in fastopen DOS 3.3
 	MOV	SI,[REN_WFP]		; Swap source and destination
 	MOV	[WFP_START],SI
 	MOV	[CURR_DIR_END],-1	; No current dir on dest
 	MOV	WORD PTR [CREATING],0E5FFH  ; Creating, not DEL *.*
 					; A rename is like a CREATE_NEW as far
 					; as the destination is concerned.
-	invoke	GetPathNoSet
+	invoke_fn GetPathNoSet
 ;   If this Getpath fails due to file not found, we know all renames will work
 ;   since no files match the destination name.	If it fails for any other
 ;   reason, the rename fails on a path not found, or whatever (also fails if
@@ -233,7 +233,7 @@ RENAME_CLEAN:
 	PUSHF				; Save carry state
 	PUSH	AX			; and error code (if carry set)
 	MOV	AL,[THISDRV]
-	invoke	FLUSHBUF
+	invoke_fn FLUSHBUF
 	POP	AX
 	CMP	[FAILERR],0
 	JNZ	BAD_ERR 		; User FAILed to I 24
@@ -275,14 +275,14 @@ BUILDDEST:
 
 	MOV	[ATTRIB],attr_all	; Stop duplicates with any attributes
 	MOV	[CREATING],0FFH
-	invoke	DEVNAME 		; Check if we built a device name
+	invoke_fn DEVNAME 		; Check if we built a device name
 	ASSUME	ES:NOTHING
 	JNC	BAD_ACC
 	MOV	BX,[DESTSTART]
 	LES	BP,[THISDPB]
-	invoke	SetDirSrch		; Reset search to start of dir
+	invoke_fn SetDirSrch		; Reset search to start of dir
 	JC	BAD_ACC 		; Screw up
-	invoke	FINDENTRY		; See if new name already exists
+	invoke_fn FINDENTRY		; See if new name already exists
 	JNC	BAD_ACC 		; Error if found
 	CMP	[FAILERR],0
 	JNZ	BAD_ACCJ		; Find failed because user FAILed to I 24
@@ -301,7 +301,7 @@ BUILDDEST:
 	MOV	WORD PTR [THISSFT],SI
 	MOV	[SI].sf_mode,sharing_compat+open_for_both
 	XOR	CX,CX			; Set "device ID" for call into makenode
-	invoke	RENAME_MAKE		; This is in mknode
+	invoke_fn RENAME_MAKE		; This is in mknode
 	JNC	GOT_DEST
 BAD_ACCJ:
 	JMP	BAD_ACC
@@ -309,7 +309,7 @@ BAD_ACCJ:
 GOT_DEST:
 	SaveReg <BX>
 	LES	DI,ThisSFT		; Rename_make entered this into sharing
-	Invoke	ShareEnd		; we need to remove it.
+	Invoke_fn ShareEnd		; we need to remove it.
 	RestoreReg  <BX>
 ; A zero length entry with the correct new name has now been made at
 ;   [CURBUF+2]:BX.
@@ -318,7 +318,7 @@ GOT_DEST:
 
 	TEST	ES:[DI.buf_flags],buf_dirty  ;LB. if already dirty		;AN000;
 	JNZ	yesdirty		  ;LB.	  don't increment dirty count   ;AN000;
-	invoke	INC_DIRTY_COUNT 	  ;LB.					;AN000;
+	invoke_fn INC_DIRTY_COUNT 	  ;LB.					;AN000;
 	OR	ES:[DI.buf_flags],buf_dirty
 yesdirty:
 	MOV	DI,BX
@@ -347,7 +347,7 @@ DIRTY_IT:
 
 	TEST	ES:[DI.buf_flags],buf_dirty  ;LB. if already dirty		;AN000;
 	JNZ	yesdirty2		  ;LB.	  don't increment dirty count   ;AN000;
-	invoke	INC_DIRTY_COUNT 	  ;LB.					;AN000;
+	invoke_fn INC_DIRTY_COUNT 	  ;LB.					;AN000;
 	OR	ES:[DI.buf_flags],buf_dirty
 yesdirty2:
 	Assert	ISBUF,<ES,DI>,"Dirty_it"
@@ -360,20 +360,20 @@ NEXT_SOURCE:
 	EnterCrit   critDisk
 	MOV	[CREATING],0	; Correct setting for search (we changed it
 				;   to FF when we made the prev new file).
-	invoke	RENAME_NEXT
+	invoke_fn RENAME_NEXT
 ;
 ; Note, now, that we have exited the previous ENTER and so are back to where
 ; we were before.
 ;
 	JC	RENAME_OVER
 	LEA	SI,[BX].dir_First
-	invoke	REN_DEL_Check
+	invoke_fn REN_DEL_Check
 	JNC	REN_OK2
 	MOV	AX,error_sharing_violation
 	JMP	RENAME_CLEAN
 
 REN_OK2:				;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	invoke	FastOpen_Delete 	; delete dir info in fastopen DOS 3.3
+	invoke_fn FastOpen_Delete 	; delete dir info in fastopen DOS 3.3
 	JMP	BUILDDEST
 
 RENAME_OVER:
@@ -396,11 +396,11 @@ GET_SOURCE:
 
 	MOV	BX,WORD PTR [RENAMEDMA + 15]	; DirStart
 	LES	BP,ThisDPB
-	invoke	SetDirSrch
+	invoke_fn SetDirSrch
 	retc
-	invoke	StartSrch
+	invoke_fn StartSrch
 	MOV	AX,WORD PTR [RENAMEDMA + 13]	; Lastent
-	invoke	GetEnt
+	invoke_fn GetEnt
 	return
 
 EndProc DOS_RENAME

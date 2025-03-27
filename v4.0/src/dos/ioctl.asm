@@ -252,7 +252,7 @@ BREAK <IOCTL - munge on a handle to do device specific stuff>
 	JBE	ioctl_check_char	; char	device
 	JMP	ioctl_check_block	; Block device
 ioctl_check_char:
-	invoke	SFFromHandle		; ES:DI -> SFT
+	invoke_fn SFFromHandle		; ES:DI -> SFT
 	JNC	ioctl_check_permissions ; have valid handle
 ioctl_bad_handle:
 	error	error_invalid_handle
@@ -299,7 +299,7 @@ ioctl_read:
 	MOV	AH,BYTE PTR ES:[DI.SDEVATT+1]	; Get high byte
 ioctl_no_high:
 	MOV	DX,AX
-	invoke	get_user_stack
+	invoke_fn get_user_stack
 	MOV	[SI.user_DX],DX
 	transfer    SYS_RET_OK
 
@@ -334,13 +334,13 @@ ioctl_check_block:
 	MOV	AH,3
 ioctl_get_status:
 	PUSH	AX
-	invoke	GET_IO_SFT
+	invoke_fn GET_IO_SFT
 	POP	AX
 	JNC	DO_IOFUNC
 	JMP	ioctl_bad_handle	; invalid SFT
 
 DO_IOFUNC:
-	invoke	IOFUNC
+	invoke_fn IOFUNC
 	MOV	AH,AL
 	MOV	AL,0FFH
 	JNZ	ioctl_status_ret
@@ -395,7 +395,7 @@ doneok:
 ;	SI:DX -> Users Device Parameter Table
 ;	IOCALL -> IOCTL_Req structure
 GENERICIOCTLHANDLE:
-	invoke	SFFromHandle		; Get SFT for device.
+	invoke_fn SFFromHandle		; Get SFT for device.
 	jnc	goodh
 	JMP	ioctl_bad_handlej
 goodh:
@@ -497,7 +497,7 @@ ASSUME	DS:NOTHING
 	POP	ES
 	MOV	BX,OFFSET DOSGROUP:IOCALL   ; ES:BX -> Call header
 	SaveReg <DS,SI>
-	invoke	DEVIOCALL2
+	invoke_fn DEVIOCALL2
 	RestoreReg <SI,DS>
 	MOV	AX,[IOCALL.REQSTAT]	; Get Status word
 	AND	AX,STBUI		; Mask to busy bit
@@ -540,7 +540,7 @@ IOCTLLocal:
 	OR	DX,8000h
 
 ioctl_set_DX:
-	invoke	get_user_stack
+	invoke_fn get_user_stack
 	MOV	[SI.user_DX],DX
 	transfer    SYS_RET_OK
 
@@ -550,7 +550,7 @@ ioctl_drv_err:
 
 ; Function 10
 Ioctl_Handle_redir:
-	invoke	SFFromHandle		; ES:DI -> SFT
+	invoke_fn SFFromHandle		; ES:DI -> SFT
 	JNC	ioctl_got_sft		; have valid handle
 	error	error_invalid_handle
 
@@ -596,7 +596,7 @@ ASSUME	DS:NOTHING
 	POP	ES
 	MOV	BX,OFFSET DOSGROUP:IOCALL   ; ES:BX -> Call header
 ioctl_do_IO:
-	invoke	DEVIOCALL2
+	invoke_fn DEVIOCALL2
 	TEST	[IOCALL.REQSTAT],STERR	    ;Error?
 	JNZ	Ioctl_string_err
 	MOV	AX,[IOSCNT]		; Get actual bytes transferred
@@ -607,7 +607,7 @@ Ioctl_string_err:
 device_err:
 	AND	DI,STECODE		; mask out irrelevant bits
 	MOV	AX,DI
-	invoke	SET_I24_EXTENDED_ERROR
+	invoke_fn SET_I24_EXTENDED_ERROR
 	mov	ax, cs:extErr
 	transfer    SYS_RET_ERR
 
@@ -620,7 +620,7 @@ Get_Driver_BL:
 
 	PUSH	AX
 	MOV	AL,BL			; Drive
-	invoke	GETTHISDRV
+	invoke_fn GETTHISDRV
 	JNC	ioctl_goodrv		;AC000;IFS.
 	CMP	AL,error_not_dos_disk	;AN000;IFS.   if unknow media then
 	JZ	ioctl_goodrv		;AN000;IFS.	 let it go
@@ -712,7 +712,7 @@ ASSUME	DS:NOTHING
 	POP	ES
 	MOV	BX,OFFSET DOSGROUP:IOCALL   ; ES:BX -> Call header
 	SaveReg <DS,SI>
-	invoke	DEVIOCALL2
+	invoke_fn DEVIOCALL2
 	RestoreReg <SI,DS>
 	test	[IOCALL.REQSTAT],STERR
 	jnz	ioctl_string_errj

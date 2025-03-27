@@ -58,7 +58,7 @@ reset_free_jfn:
 	PUSH    CX
 	DEC     BX                      ; get jfn (start with last one)
 
-	invoke  $close
+	invoke_fn  $close
 	POP     CX
 	LOOP    reset_free_jfn          ; and do 'em all
 ;
@@ -109,7 +109,7 @@ FCBScanDone:
 	XOR     BX,BX
 Scan:
 	push    bx
-	invoke  SFFromSFN
+	invoke_fn  SFFromSFN
 	pop     bx
 	retc
 	cmp     es:[di].sf_ref_count,0

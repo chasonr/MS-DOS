@@ -198,7 +198,7 @@ alloc_end:
 	JNZ     alloc_do_split
 
 alloc_fail:
-	invoke  get_user_stack
+	invoke_fn  get_user_stack
 	POP     BX
 	MOV     [SI].user_BX,BX
 	LeaveCrit   critMem

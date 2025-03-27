@@ -114,7 +114,7 @@ ASSUME	DS:NOTHING,ES:NOTHING
 	MOV	AL,ES:[BP.dpb_UNIT]
 	PUSH	BX
 	PUSH	ES
-	invoke	SETREAD
+	invoke_fn SETREAD
 	JMP	DODSKOP
 
 Break	<DWRITE -- SEE ABOUT WRITING>
@@ -140,7 +140,7 @@ ASSUME	DS:NOTHING,ES:NOTHING
 	CALL	DSKWRITE
 	retz			; Carry clear
 	MOV	BYTE PTR [READOP],1
-	invoke	HARDERRRW
+	invoke_fn HARDERRRW
 	CMP	AL,1		; Check for retry
 	JZ	DWRITE
 	CMP	AL,3		; Check for FAIL
@@ -177,13 +177,13 @@ ASSUME	DS:NOTHING,ES:NOTHING
 	MOV	AL,ES:[BP.dpb_UNIT]
 	PUSH	BX
 	PUSH	ES
-	invoke	SETWRITE
+	invoke_fn SETWRITE
 DODSKOP:
 	MOV	CX,DS		; Save DS
 	POP	DS		; DS:BP points to DPB
 	PUSH	DS
 	LDS	SI,DS:[BP.dpb_driver_addr]
-	invoke	DEVIOCALL2
+	invoke_fn DEVIOCALL2
 	MOV	DS,CX		; Restore DS
 	POP	ES		; Restore ES
 	POP	BX
@@ -226,7 +226,7 @@ ASSUME	DS:NOTHING,ES:NOTHING
 	POP	SI
 	POP	DS
 DO_ERR:
-	invoke	HARDERR
+	invoke_fn HARDERR
 	return
 
 EndProc HARDERRRW
@@ -290,7 +290,7 @@ ASSUME	DS:NOTHING
 ;	CMP	DX,BX		; See if divide will overflow
 ;	JNC	EOFERR		; for 16 bit sector
 ;; 32 bit divide
-	invoke	DIV32			      ; F.C. >32mb   ;AN000;
+	invoke_fn DIV32			      ; F.C. >32mb   ;AN000;
 	MOV	WORD PTR [SECPOS],AX	      ; F.C. >32mb   ;AN000;
 	MOV	BX,[HIGH_SECTOR]	      ; F.C. >32mb   ;AN000;
 	MOV	WORD PTR [SECPOS+2],BX	      ; F.C. >32mb   ;AN000;
@@ -305,7 +305,7 @@ ASSUME	DS:NOTHING
 	POP	[HIGH_SECTOR]		     ; F.C. >32mb	   ;AN000;
 	PUSH	AX			     ; F.C. >32mb save ax  ;AN000;
 	MOV	AX,DX			     ; F.C. >32mb ax=dx    ;AN000;
-	invoke	SHR32			     ; F.C. >32mb shift ax ;AN000;
+	invoke_fn SHR32			     ; F.C. >32mb shift ax ;AN000;
 	MOV	DX,AX			     ; F.C. >32mb dx=ax    ;AN000;
 	POP	AX			     ; F.C. >32mb restore dx ;AN000;
 
@@ -411,7 +411,7 @@ ERR_ON_CHECK:
 	POP	CX
 	JNE	NO_HARD_ERR
 HARD_ERR:
-	invoke	LOCK_VIOLATION
+	invoke_fn LOCK_VIOLATION
 	retnc				; User wants Retrys
 NO_HARD_ERR:
 	XOR	CX,CX			;No bytes transferred
@@ -470,7 +470,7 @@ Break	<DISKREAD -- PERFORM USER DISK READ>
 	JAE	ENUF			;I/O fits
 	MOV	CX,AX			;Limit read to up til EOF
 ENUF:
-	invoke	CHECK_READ_LOCK 	;IFS. check read lock			 ;AN000;
+	invoke_fn CHECK_READ_LOCK 	;IFS. check read lock			 ;AN000;
 	JNC	Read_Ok 		; There are no locks
 	return
 
@@ -482,7 +482,7 @@ READ_OK:
 
 	CALL	BREAKDOWN
 	MOV	CX,[CLUSNUM]
-	invoke	FNDCLUS
+	invoke_fn FNDCLUS
 ;------------------------------------------------------------------------
 IF	NOT IBMCOPYRIGHT
 	JC	SET_ACC_ERR_DS		; fix to take care of I24 fail
@@ -520,12 +520,12 @@ SKIPERR:
 	MOV	[CLUSNUM],BX
 	CMP	[BYTCNT1],0
 	JZ	RDMID
-	invoke	BUFRD
+	invoke_fn BUFRD
 	JC	SET_ACC_ERR_DS
 RDMID:
 	CMP	[SECCNT],0
 	JZ	RDLASTJ
-	invoke	NEXTSEC
+	invoke_fn NEXTSEC
 	JC	SETSFTJ2
 	MOV	BYTE PTR [TRANS],1	; A transfer is taking place
 ONSEC:
@@ -533,7 +533,7 @@ ONSEC:
 	MOV	CX,[SECCNT]
 	MOV	BX,[CLUSNUM]
 RDLP:
-	invoke	OPTIMIZE
+	invoke_fn OPTIMIZE
 	JC	SET_ACC_ERR_DS
 	PUSH	DI
 	PUSH	AX
@@ -543,7 +543,7 @@ RDLP:
 ASSUME	DS:NOTHING
 	PUSH	DX
 	PUSH	CX
-	invoke	SET_RQ_SC_PARMS 	 ;LB. do this for SC		       ;AN000;
+	invoke_fn SET_RQ_SC_PARMS 	 ;LB. do this for SC		       ;AN000;
 
 IF	BUFFERFLAG
 	pushf
@@ -555,7 +555,7 @@ safe_read:
 	popf
 ENDIF
 
-	invoke	DREAD
+	invoke_fn DREAD
 
 IF	BUFFERFLAG
 	pushf
@@ -637,7 +637,7 @@ ELSE
 	pop	dx
 	pop	di
 
-	invoke	SET_MAP_PAGE		  ;LB. activate handle if EMS there	;AN000;
+	invoke_fn SET_MAP_PAGE		  ;LB. activate handle if EMS there	;AN000;
 	pop	di			; restore hash ptr.
 	pop	ds
 	LDS	DI,[DI.BUFFER_BUCKET]	  ;LB. ds:di is 1st buffer addr 	;AN000;
@@ -652,7 +652,7 @@ ENDIF
 	Assert	ISDPB,<ES,BP>,"DISKREAD/RdLp"
 	MOV	AL,ES:[BP.dpb_drive]
 NXTBUF: 			; Must see if one of these sectors is buffered
-	invoke	BUFF_RANGE_CHECK			   ;F.C. >32mb
+	invoke_fn BUFF_RANGE_CHECK			   ;F.C. >32mb
 	JNC	inrange 		   ;LB. 				;AN000;
 	mov	DI,[DI.buf_next]	   ;LB. get next buffer 1/19/88 	;AN000;
 	JMP	DONXTBUF		   ;LB. 				;AN000;
@@ -687,10 +687,10 @@ EVENMOV:
 	POP	DX
 	POP	DI
 	MOV	AL,ES:[BP.dpb_drive]
-	invoke	SCANPLACE		 ;LB. done with this chain		;AN000;
+	invoke_fn SCANPLACE		 ;LB. done with this chain		;AN000;
 	JMP	SHORT end_scan		 ;LB.					;AN000;
 CLBUFF:
-	invoke	SCANPLACE
+	invoke_fn SCANPLACE
 DONXTBUF:
 	CMP	DI,[FIRST_BUFF_ADDR]	 ;LB. end of buffers			;AN000;
 	JNZ	NXTBUF
@@ -706,7 +706,7 @@ SCAN_DONE:
 	POP	CX
 	POP	BX
 	JCXZ	RDLAST
-	invoke	IsEOF			; test for eof on fat size
+	invoke_fn IsEOF			; test for eof on fat size
 	JAE	SETSFT
 	MOV	DL,0
 	INC	[LASTPOS]	; We'll be using next cluster
@@ -717,10 +717,10 @@ RDLAST:
 	OR	AX,AX
 	JZ	SETSFT
 	MOV	[BYTCNT1],AX
-	invoke	NEXTSEC
+	invoke_fn NEXTSEC
 	JC	SETSFT
 	MOV	[BYTSECPOS],0
-	invoke	BUFRD
+	invoke_fn BUFRD
 	JNC	SETSFT
 	JMP	SET_ACC_ERR_DS
 

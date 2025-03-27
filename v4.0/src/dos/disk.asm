@@ -169,9 +169,9 @@ ENDIF
 	transfer   SET_ACC_ERR
 
 READ_NO_MODE:
-	invoke	SETUP
+	invoke_fn SETUP
 	JCXZ	NoIORet 		; no bytes to read - fast return
-	invoke	IsSFTNet
+	invoke_fn IsSFTNet
 	JZ	LOCAL_READ
 
 ;	invoke	OWN_SHARE		;AN000;;IFS. IFS owns share ?
@@ -209,7 +209,7 @@ LOCAL_READ:
 	JZ	FS_no			       ; no
 	OR	[FastSeekflg],FS_begin	       ; set fastseek mode
 FS_no:
-	invoke	DISKREAD
+	invoke_fn DISKREAD
 	PUSHF				      ; save flag
 	AND	CS:[FastSeekflg],FS_end       ; reset fastseek mode
 	POPF				      ; retore flag
@@ -256,17 +256,17 @@ ReadRawRetry:
 	MOV	BX,DI			; DS:BX transfer addr
 	XOR	AX,AX			; Media Byte, unit = 0
 	MOV	DX,AX			; Start at 0
-	invoke	SETREAD
+	invoke_fn SETREAD
 	PUSH	DS			; Save Seg part of Xaddr
 	LDS	SI,[THISSFT]
 	Assert	ISSFT,<DS,SI>,"DOS_Read/DvRdRawR"
-	invoke	DEVIOCALL
+	invoke_fn DEVIOCALL
 	MOV	DX,DI			; DS:DX is preserved by INT 24
 	MOV	AH,86H			; Read error
 	MOV	DI,[DEVCALL.REQSTAT]
 	TEST	DI,STERR
 	JZ	CRDROK			; No errors
-	invoke	CHARHARD
+	invoke_fn CHARHARD
 	MOV	DI,DX			; DS:DI is Xaddr
 	OR	AL,AL
 	JZ	CRDROK			; Ignore
@@ -310,20 +310,20 @@ ASSUME	DS:NOTHING
 	MOV	AX,DX
 	PUSH	CX
 	MOV	CX,1
-	invoke	SETREAD
+	invoke_fn SETREAD
 	POP	CX
 	LDS	SI,[THISSFT]
 	Assert	ISSFT,<DS,SI>,"DOS_Read/NotRdCon"
 	LDS	SI,[SI.sf_devptr]
 DVRDLP:
-	invoke	DSKSTATCHK
-	invoke	DEVIOCALL2
+	invoke_fn DSKSTATCHK
+	invoke_fn DEVIOCALL2
 	PUSH	DI		; Save "count" done
 	MOV	AH,86H
 	MOV	DI,[DEVCALL.REQSTAT]
 	TEST	DI,STERR
 	JZ	CRDOK
-	invoke	CHARHARD
+	invoke_fn CHARHARD
 	POP	DI
 	MOV	[CALLSCNT],1
 	CMP	AL,1
@@ -367,7 +367,7 @@ NORMCH:
 	LOOPNZ	TRANBUF
 	JNZ	ENDRDCON
 	XOR	SI,SI		; Cause a new buffer to be read
-	invoke	OUTT		; Transmit linefeed
+	invoke_fn OUTT		; Transmit linefeed
 	OR	AL,1		; Clear zero flag--not end of file
 ENDRDCON:
 	Context DS
@@ -381,7 +381,7 @@ ENDRDDEV:
 	Assert	ISSFT,<ES,DI>,"DOS_Read/EndRdDev"
 	AND	BYTE PTR ES:[DI.sf_flags],NOT devid_device_EOF ; Mark as no more data available
 SETSFTC:
-	invoke	SETSFT
+	invoke_fn SETSFT
 	return
 
 ASSUME	DS:NOTHING,ES:NOTHING
@@ -400,7 +400,7 @@ GETBUF:
 	PUSH	ES
 	PUSH	DI
 	MOV	DX,OFFSET DOSGROUP:CONBUF
-	invoke	$STD_CON_STRING_INPUT		; Get input buffer
+	invoke_fn $STD_CON_STRING_INPUT		; Get input buffer
 	POP	DI
 	POP	ES
 	POP	CX
@@ -411,7 +411,7 @@ GETBUF:
 	STOSB
 	DEC	DI
 	MOV	AL,c_LF
-	invoke	OUTT		; Send linefeed
+	invoke_fn OUTT		; Send linefeed
 	XOR	SI,SI
 	JMP	ENDRDCON
 
@@ -481,8 +481,8 @@ Check_FCB_RO:
 	TEST	ES:[DI].sf_attr,attr_read_only
 	JNZ	BadMode 		; Can't write to Read_Only files via FCB
 WRITE_NO_MODE:
-	invoke	SETUP
-	invoke	IsSFTNet
+	invoke_fn SETUP
+	invoke_fn IsSFTNet
 	JZ	LOCAL_WRITE
 
 ;	invoke	OWN_SHARE		;AN000;;IFS. IFS owns share ?
@@ -521,7 +521,7 @@ LOCAL_WRITE:
 	JZ	FS_no2			       ;AN000;FO. no
 	OR	[FastSeekflg],FS_begin	       ;AN000;FO. set fastseek mode
 FS_no2: 				       ;AN000;
-	invoke	DISKWRITE
+	invoke_fn DISKWRITE
 	PUSHF				       ;AN000;FO. save flag
 	AND	CS:[FastSeekflg],FS_end        ;AN000;FO. reset fastseek mode
 	POPF				       ;AN000;FO. restore flag
@@ -531,7 +531,7 @@ FS_no2: 				       ;AN000;
 	TEST	ES:[DI.sf_mode],auto_commit_write ;AN000;EO.
 	JZ	nocommit		       ;AN000;EO.
 	PUSH	CX			       ;AN000;EO.
-	invoke	DOS_COMMIT		       ;AN000;EO.
+	invoke_fn DOS_COMMIT		       ;AN000;EO.
 	POP	CX			       ;AN000;EO.
 nocommit:				       ;AN000;
 ;; Extended Open
@@ -541,17 +541,17 @@ nocommit:				       ;AN000;
 DVWRTRAW:
 ASSUME	DS:NOTHING
 	XOR	AX,AX			; Media Byte, unit = 0
-	invoke	SETWRITE
+	invoke_fn SETWRITE
 	PUSH	DS			; Save seg of transfer
 	LDS	SI,[THISSFT]
 	Assert	ISSFT,<DS,SI>,"DosWrite/DvWrtRaw"
-	invoke	DEVIOCALL		; DS:SI -> DEVICE
+	invoke_fn DEVIOCALL		; DS:SI -> DEVICE
 	MOV	DX,DI			; Offset part of Xaddr saved in DX
 	MOV	AH,87H
 	MOV	DI,[DEVCALL.REQSTAT]
 	TEST	DI,STERR
 	JZ	CWRTROK
-	invoke	CHARHARD
+	invoke_fn CHARHARD
 	MOV	BX,DX			; Recall transfer addr
 	OR	AL,AL
 	JZ	CWRTROK 		; Ignore
@@ -573,7 +573,7 @@ ENDWRDEV:
 	LES	DI,[THISSFT]
 	Assert	ISSFT,<ES,DI>,"DosWrite/EndWrDev"
 	MOV	CX,AX
-	invoke	ADDREC
+	invoke_fn ADDREC
 	return
 
 WRTNUL:
@@ -608,23 +608,23 @@ TEST_DEV_CON:
 	JZ	WRTCOOKJ		; Yes, transfer nothing
 	PUSH	CX
 	MOV	CX,1
-	invoke	SETWRITE
+	invoke_fn SETWRITE
 	POP	CX
 	LDS	SI,[THISSFT]
 	OR	CS:[DOS34_FLAG],X25_Special;AN000;;PTM. bad x25 driver
 	MOV	AH,3			;AN000;;PTM. prompt critical error ASAP
-	invoke	IOFUNC			;AN000;;PTM.
+	invoke_fn IOFUNC			;AN000;;PTM.
 	Assert	ISSFT,<DS,SI>,"DosWrite/TestDevCon"
 	LDS	SI,[SI.sf_devptr]
 DVWRTLP:
-	invoke	DSKSTATCHK
-	invoke	DEVIOCALL2
+	invoke_fn DSKSTATCHK
+	invoke_fn DEVIOCALL2
 	PUSH	DI
 	MOV	AH,87H
 	MOV	DI,[DEVCALL.REQSTAT]
 	TEST	DI,STERR
 	JZ	CWROK
-	invoke	CHARHARD
+	invoke_fn CHARHARD
 	POP	DI
 	MOV	[CALLSCNT],1
 	CMP	AL,1
@@ -665,7 +665,7 @@ WRCONLP:
 	LODSB
 	CMP	AL,1AH		; ^Z?
 	JZ	CONEOF
-	invoke	OUTT
+	invoke_fn OUTT
 	LOOP	WRCONLP
 CONEOF:
 	POP	AX			; Count
@@ -688,7 +688,7 @@ GetNormal:
 	Context DS
 	PUSH	ES
 	PUSH	DI
-	invoke	SFFromHandle
+	invoke_fn SFFromHandle
 	JC	RET44P
 	MOV	SI,ES
 	MOV	DS,SI
@@ -775,23 +775,23 @@ DoRead:
 	MOV	[NXTCLUSNUM],BX
 	JCXZ	FIRSTCLUSTER
 SKPCLLP:
-	invoke	UNPACK
+	invoke_fn UNPACK
 	retc
 	XCHG	BX,DI
-	invoke	IsEOF			; test for eof based on fat size
+	invoke_fn IsEOF			; test for eof based on fat size
 	JAE	HAVESKIPPED
 	LOOP	SKPCLLP
 HAVESKIPPED:
 	MOV	[NXTCLUSNUM],BX
 	MOV	DX,DI
 	MOV	BL,AH
-	invoke	FIGREC
+	invoke_fn FIGREC
 
 	entry	FIRSTCLUSTER
 
 	MOV	[ALLOWED],allowed_RETRY + allowed_FAIL
 	XOR	AL,AL		; Indicate pre-read
-	invoke	GETBUFFR
+	invoke_fn GETBUFFR
 	retc
 
 	entry	SET_BUF_AS_DIR
@@ -839,7 +839,7 @@ NXTFAT:
 	PUSH	CX		      ;AN000;>32mb
 	PUSH	AX
 	MOV	CX,DI
-	invoke	DSKREAD
+	invoke_fn DSKREAD
 	POP	AX
 	POP	CX
 	JZ	RET41P		; Carry clear
@@ -870,10 +870,10 @@ Break	<DREAD -- DO A DISK READ>
 ASSUME	DS:NOTHING,ES:NOTHING
 
 	Assert	ISDPB,<ES,BP>,"DREAD"
-	invoke	DSKREAD
+	invoke_fn DSKREAD
 	retz			; Carry clear
 	MOV	BYTE PTR [READOP],0
-	invoke	HARDERRRW
+	invoke_fn HARDERRRW
 	CMP	AL,1		; Check for retry
 	JZ	DREAD
 	CMP	AL,3		; Check for FAIL
@@ -904,7 +904,7 @@ ASSUME	DS:NOTHING,ES:NOTHING		       ;AN000;
 
 	TEST	ES:[DI].sf_attr,attr_volume_id ;AN000;;MS.  volume id
 	JZ	write_cont		       ;AN000;;MS.  no
-	invoke	SET_ACC_ERR_DS		       ;AN000;;MS.
+	invoke_fn SET_ACC_ERR_DS		       ;AN000;;MS.
 	return				;AN000;;MS.
 write_cont:				;AN000;
 	PUSH	CX			;AN000;;MS. save reg
@@ -913,10 +913,10 @@ write_cont:				;AN000;
 	MOV	CX,0FFFFH		;AN000;;MS. check for lock on whole file
 Not_Truncate:				;AN000;
 	MOV	AL,80H			;AN000;;MS. check write access
-	invoke	LOCK_CHECK		;AN000;;MS. check lock
+	invoke_fn LOCK_CHECK		;AN000;;MS. check lock
 	POP	CX			;AN000;;MS. restore reg
 	JNC	WRITE_OK		;AN000;;MS. lock ok
-	invoke	WRITE_LOCK_VIOLATION	;AN000;;MS. issue I24
+	invoke_fn WRITE_LOCK_VIOLATION	;AN000;;MS. issue I24
 	JNC	CHECK_WRITE_LOCK	;AN000;;MS. retry
 WRITE_OK:				;AN000;
 	return				;AN000;;MS.
@@ -939,13 +939,13 @@ ASSUME	DS:NOTHING,ES:NOTHING		       ;AN000;
 
 	TEST	ES:[DI].sf_attr,attr_volume_id ;AN000;;MS.  volume id
 	JZ	do_retry		       ;AN000;;MS.  no
-	invoke	SET_ACC_ERR		       ;AN000;;MS.
+	invoke_fn SET_ACC_ERR		       ;AN000;;MS.
 	return				       ;AN000;;MS.
 do_retry:				;AN000;
 	MOV	AL,0			;AN000;;MS. check read access
-	invoke	LOCK_CHECK		;AN000;;MS. check lock
+	invoke_fn LOCK_CHECK		;AN000;;MS. check lock
 	JNC	READ_OK 		;AN000;;MS. lock ok
-	invoke	READ_LOCK_VIOLATION	;AN000;;MS. issue I24
+	invoke_fn READ_LOCK_VIOLATION	;AN000;;MS. issue I24
 	JNC	CHECK_READ_LOCK 	;AN000;;MS. retry
 READ_OK:				;AN000; MS.
 	return				;AN000;;MS.

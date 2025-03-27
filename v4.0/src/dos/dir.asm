@@ -89,7 +89,7 @@ Break	<FINDENTRY -- LOOK FOR AN ENTRY>
 	DOSAssume   CS,<DS>,"FindEntry"
 	ASSUME	ES:NOTHING
 
-	invoke	STARTSRCH
+	invoke_fn STARTSRCH
 	MOV	AL,Attrib
 	AND	AL,NOT attr_ignore	; Ignore useless bits
 	CMP	AL,attr_volume_id	; Looking for vol ID only ?
@@ -180,7 +180,7 @@ FOUND:
 check_one_volume_id:
 	CMP	AH,attr_volume_id	; Looking only for Volume ID?
 	JZ	NEXTENTJ		; Yes, continue search
-	invoke	MatchAttributes
+	invoke_fn MatchAttributes
 	JZ	RETFF
 	TEST	BYTE PTR [CREATING],-1	; Pass back mismatch if creating
 	JZ	NEXTENTJ		; Otherwise continue searching
@@ -284,7 +284,7 @@ Procedure NextEntry
 	CMP	BL,BYTE PTR [CLUSFAC]
 	JB	SAMECLUS
 	MOV	BX,[NXTCLUSNUM]
-	Invoke	IsEOF
+	Invoke_fn IsEOF
 	JAE	NONE
 	CMP	BX,2
 	JB	NONE
@@ -313,7 +313,7 @@ ASSUME	DS:NOTHING
 	ADC	[HIGH_SECTOR],0 		;AN000; >32mb
 	POP	DS
 	DOSAssume   CS,<DS>,"DIR/SameClus"
-	invoke	FIRSTCLUSTER
+	invoke_fn FIRSTCLUSTER
 	XOR	BX,BX
 	JMP	SETENTRY
 EndProc NextEntry
@@ -361,7 +361,7 @@ Procedure GETENTRY,NEAR
 	DIV	BX
 	MOV	BX,DX			; Position within sector
 	PUSH	BX
-	invoke	DIRREAD
+	invoke_fn DIRREAD
 	POP	BX
 	retc
 SETENTRY:
@@ -403,7 +403,7 @@ Break	<SETDIRSRCH SETROOTSRCH -- Set Search environments>
 	JNZ	UNP_OK
 
 ; DOS 3.3 for FastOPen	F.C. 6/12/86
-	invoke	UNPACK
+	invoke_fn UNPACK
 	JNC	UNP_OK
 	RestoreReg  <SI>
 	return
@@ -413,7 +413,7 @@ UNP_OK:
 	MOV	DX,BX
 	XOR	BL,BL
 	MOV	BYTE PTR [SECCLUSPOS],BL
-	invoke	FIGREC
+	invoke_fn FIGREC
 	RestoreReg  <SI>
 	PUSH	DX			   ;AN000; >32mb
 	MOV	DX,[HIGH_SECTOR]	   ;AN000; >32mb

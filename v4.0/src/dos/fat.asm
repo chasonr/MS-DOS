@@ -144,7 +144,7 @@ HURTFAT:
 ; Signal Bad FAT to INT int_fatal_abort handler.  We have an invalid cluster.
 ;
 	MOV	DI,0FFFH		; In case INT int_fatal_abort returns (it shouldn't)
-	invoke	FATAL
+	invoke_fn FATAL
 	CMP	AL,3
 	CLC
 	JNZ	OKU_RET 		; Try to ignore bad FAT
@@ -196,7 +196,7 @@ PACKIN:
 	LDS	SI,[CURBUF]
 	TEST	[SI.buf_flags],buf_dirty  ;LB. if already dirty 		;AN000;
 	JNZ	yesdirty		  ;LB.	  don't increment dirty count   ;AN000;
-	invoke	INC_DIRTY_COUNT 	  ;LB.					;AN000;
+	invoke_fn INC_DIRTY_COUNT 	  ;LB.					;AN000;
 	OR	[SI.buf_flags],buf_dirty  ;LB.					;AN000;
 yesdirty:				  ;LB.					;AN000;
 	CMP	BYTE PTR [CLUSSPLIT],0
@@ -218,14 +218,14 @@ ASSUME	DS:NOTHING
 	MOV	DX,WORD PTR [CLUSSEC]
 	MOV	SI,1
 	XOR	AL,AL
-	invoke	GETBUFFRB
+	invoke_fn GETBUFFRB
 	POP	AX
 	JC	POPP_RET
 	LDS	DI,[CURBUF]
 ASSUME	DS:NOTHING
 	TEST	[DI.buf_flags],buf_dirty  ;LB. if already dirty 		;AN000;
 	JNZ	yesdirty2		  ;LB.	  don't increment dirty count   ;AN000;
-	invoke	INC_DIRTY_COUNT 	  ;LB.					;AN000;
+	invoke_fn INC_DIRTY_COUNT 	  ;LB.					;AN000;
 	OR	[DI.buf_flags],buf_dirty
 yesdirty2:
 	ADD	DI,BUFINSIZ
@@ -311,7 +311,7 @@ DivDone:
 	MOV	[HIGH_SECTOR],0 	;F.C. >32mb  low sector #
 	XOR	AL,AL
 	MOV	SI,1
-	invoke	GETBUFFRB
+	invoke_fn GETBUFFRB
 	RestoreReg  <CX,AX,DX>		; CX is sec siz-1, AX is offset in sec
 	JC	MAP_POP
 	LDS	SI,[CURBUF]
@@ -330,7 +330,7 @@ ASSUME	DS:NOTHING
 	MOV	[HIGH_SECTOR],0 	      ;F.C. >32mb  FAT sector <32mb	;AN000;
 	XOR	AL,AL
 	MOV	SI,1
-	invoke	GETBUFFRB
+	invoke_fn GETBUFFRB
 	JC	MAP_POP
 	LDS	SI,[CURBUF]
 ASSUME	DS:NOTHING
@@ -388,7 +388,7 @@ Break	<FATREAD_SFT/FATREAD_CDS -- CHECK DRIVE GET FAT>
 	Assert	    ISDPB,<ES,BP>,"FatReadSFT"
 	MOV	AL,ES:[BP.dpb_drive]
 	MOV	[THISDRV],AL
-	invoke	GOTDPB			;Set THISDPB
+	invoke_fn GOTDPB			;Set THISDPB
 	CALL	FAT_GOT_DPB
 	return
 EndProc FATREAD_SFT
@@ -417,7 +417,7 @@ EndProc FATREAD_SFT
 	Assert	ISDPB,<ES,BP>,"FatReadCDS"
 	MOV	AL,ES:[BP.dpb_drive]
 	MOV	[THISDRV],AL
-	invoke	GOTDPB			;Set THISDPB
+	invoke_fn GOTDPB			;Set THISDPB
 	CALL	FAT_GOT_DPB
 	POP	DI			;Get back CDS pointer
 	POP	ES
@@ -440,7 +440,7 @@ CHECK_CDS:
 	PUSH	ES
 	PUSH	DI
 	LES	DI,ES:[DI.curdir_devptr]
-	invoke	POINTCOMP
+	invoke_fn POINTCOMP
 	POP	DI
 	POP	ES
 	JNZ	NEXTCDS 		; CDS not for this drive
@@ -468,7 +468,7 @@ FATERR:
 	MOV	[ALLOWED],allowed_FAIL + allowed_RETRY
 	MOV	AH,2 + allowed_FAIL + allowed_RETRY ; While trying to read FAT
 	MOV	AL,BYTE PTR [THISDRV]	 ; Tell which drive
-	invoke	FATAL1
+	invoke_fn FATAL1
 	LES	BP,[THISDPB]
 	CMP	AL,3
 	JNZ	FAT_GOT_DPB		; User said retry
@@ -490,7 +490,7 @@ FAT_GOT_DPB:
 	LDS	SI,ES:[BP.dpb_driver_addr]  ; DS:SI Points to device header
 ASSUME	DS:NOTHING
 	POP	ES			; ES:BX Points to call header
-	invoke	DEVIOCALL2
+	invoke_fn DEVIOCALL2
 	Context DS
 	POP	ES			; Restore ES:BP
 	MOV	DI,[DEVCALL.REQSTAT]
@@ -535,7 +535,7 @@ ASSUME	DS:NOTHING
 	MOV	WORD PTR [EXTERRPT],DI
 	MOV	AX,error_I24_wrong_disk
 	MOV	[READOP],1		; Write
-	invoke	HARDERR
+	invoke_fn HARDERR
 	POP	DI			; Get back buffer for ignore
 	POP	DS
 ASSUME	DS:NOTHING
@@ -557,7 +557,7 @@ scan_dirty:
 	JZ	GETNEXT 			 ;LB.	 get next hash entry	;AN000;
 	PUSH	DS				 ;LB. save hash entry addr	;AN000;
 	PUSH	DI				 ;LB.				;AN000;
-	invoke	Map_Entry			 ;LB.				;AN000;
+	invoke_fn Map_Entry			 ;LB.				;AN000;
 NBUFFER:				; Look for dirty buffers
 	CMP	AL,[DI.buf_ID]
 	JNZ	LFNXT			; Not for this unit
@@ -594,7 +594,7 @@ ASSUME DS:NOTHING
 	MOV	CX,[BUF_HASH_COUNT]	;LB. get Hash entry count		  ;AN000;
 
 NxtHash:
-	invoke	GETCURHEAD		;LB. get Hash entry buffer header	  ;AN000;
+	invoke_fn GETCURHEAD		;LB. get Hash entry buffer header	  ;AN000;
 					;  to do this AFTER the check for
 ASSUME	DS:NOTHING
 NXBUFFER:
@@ -608,7 +608,7 @@ OLDDRV2:
 	JMP	Disk_Chng_Err		; Disk changed but dirty buffers
 OLDDRV:
 	MOV	WORD PTR [DI.buf_ID],(buf_visit SHL 8) OR 0FFH	; Free up buffer
-	invoke	SCANPLACE
+	invoke_fn SCANPLACE
 SKPBUFF:
 	CMP	DI,[FIRST_BUFF_ADDR]	;LB.  end of chain  1/19/88		  ;AN000;
 	JNZ	NXBUFFER		;LB.  no				  ;AN000;
@@ -639,9 +639,9 @@ ASSUME	DS:NOTHING
 ;	LDS	DI,[BUFFHEAD]
 	XOR	DX,DX			     ;LB.  fake to get 1st		  ;AN000;
 	MOV	[HIGH_SECTOR],DX	     ;LB.  buffer addr			  ;AN000;
-	invoke	GETCURHEAD		     ;LB.				  ;AN000;
+	invoke_fn GETCURHEAD		     ;LB.				  ;AN000;
 
-	invoke	BUFWRITE
+	invoke_fn BUFWRITE
 	POP	BP
 	POP	ES
 	JC	FAIL_OPJ
@@ -666,7 +666,7 @@ GOTGETBUF:
 	POP	DS			; DS:SI Points to device header
 ASSUME	DS:NOTHING
 	POP	ES			; ES:BX Points to call header
-	invoke	DEVIOCALL2
+	invoke_fn DEVIOCALL2
 	POP	ES			; Restore ES:BP
 	Context DS
 	MOV	DI,[DEVCALL.REQSTAT]
@@ -676,7 +676,7 @@ ASSUME	DS:NOTHING
 	LDS	SI,[CALLBPB]
 ASSUME	DS:NOTHING
 	MOV	ES:[BP].DPB_next_free,0 ; recycle scanning pointer
-	invoke	$SETDPB
+	invoke_fn $SETDPB
 	LDS	DI,[CALLXAD]		; Get back buffer pointer
 	MOV	AL,BYTE PTR ES:[BP.dpb_FAT_count]
 	MOV	[DI.buf_wrtcnt-BUFINSIZ],AL   ;>32mb				;AN000;

@@ -108,7 +108,7 @@ fileDeleted = 10h
 	DOSAssume   CS,<DS>,"DOS_Delete"
 	ASSUME	ES:NOTHING
 
-	Invoke	TestNet
+	Invoke_fn TestNet
 	JNC	LOCAL_DELETE
 ;	invoke	OWN_SHARE2		       ;IFS. IFS owns share ?		;AN000;
 ;	JZ	ifsshare		       ;IFS. yes			;AN000;
@@ -188,7 +188,7 @@ CHECK_ATTS:
 	MOV	[DELALL],0	     ; DEL *.* - flag deleting all
 NOT_ALL:
 	MOV	[NoSetDir],1
-	invoke	GetPathNoSet
+	invoke_fn GetPathNoSet
 	ASSUME	ES:NOTHING
 	JNC	Del_found
 	JNZ	bad_path
@@ -253,7 +253,7 @@ DEL_SHARE_OK:
 	Assert	ISBUF,<DS,DI>,"Del_Share_OK"
 	TEST	[DI.buf_flags],buf_dirty  ;LB. if already dirty 		;AN000;
 	JNZ	yesdirty		  ;LB.	  don't increment dirty count   ;AN000;
-	invoke	INC_DIRTY_COUNT 	  ;LB.					;AN000;
+	invoke_fn INC_DIRTY_COUNT 	  ;LB.					;AN000;
 	OR	[DI.buf_flags],buf_dirty
 yesdirty:
 	MOV	[BX],AH 		; Put in E5H or 0
@@ -269,7 +269,7 @@ yesdirty:
 	CALL	Delete_FSeek		; delete the fastseek entry
 ;; FastSeek 10/27/86
 
-	invoke	RELEASE 		; Free file data
+	invoke_fn RELEASE 		; Free file data
 	JC	No_fileJ
 ; DOS 3.3  FastOpen
 
@@ -291,9 +291,9 @@ DELEXT:
 ;; Extended Attributes
 DELNXT:
 	LES	BP,[THISDPB]		; Possible to get here without this set
-	invoke	GETENTRY		; Registers need to be reset
+	invoke_fn GETENTRY		; Registers need to be reset
 	JC	No_fileJ
-	invoke	NEXTENT
+	invoke_fn NEXTENT
 if DEBUG
 	JC	Flsh
 	JMP	DelFile
@@ -303,7 +303,7 @@ ELSE
 ENDIF
 	LES	BP,[THISDPB]		; NEXTENT sets ES=DOSGROUP
 	MOV	AL,ES:[BP.dpb_drive]
-	invoke	FLUSHBUF
+	invoke_fn FLUSHBUF
 	JC	No_fileJ
 ;
 ; Now we need to test FoundDel for our flags.  The cases to consider are:
@@ -328,8 +328,8 @@ ASSUME	ES:NOTHING
 	SUB	AH,'A'                  ; Convert to 0-based
 	mov	byte ptr [VOLCHNG_FLAG],AH
 	XOR	BH,BH			;>32mb delte volume id from boot record ;AN000;
-	invoke	Set_Media_ID		;>32mb set voulme id to boot record	;AN000;
-	invoke	FATRead_CDS		; force media check
+	invoke_fn Set_Media_ID		;>32mb set voulme id to boot record	;AN000;
+	invoke_fn FATRead_CDS		; force media check
 	POP	DI
 	POP	ES
 	POP	AX
@@ -385,13 +385,13 @@ ASSUME	ES:DOSGROUP
 	MOV	DS,WORD PTR [CURBUF+2]	; DS:SI -> entry (FCB style name)
 	MOV	BX,DI		; Set backup limit for skipback
 	ADD	BX,2		; Skip over d: to point to leading '\'
-	invoke	StrLen		; CX is length of ES:DI including NUL
+	invoke_fn StrLen		; CX is length of ES:DI including NUL
 	DEC	CX		; Don't include nul in count
 	ADD	DI,CX		; Point to NUL at end of string
-	invoke	SkipBack	; Back up one element
+	invoke_fn SkipBack	; Back up one element
 	INC	DI		; Point to start of last element
 	MOV	[SAVE_BX],DI	;IFS. save for DOS_RENAME			   ;AN000;
-	invoke	PackName	; Transfer name from entry to ASCIZ tail.
+	invoke_fn PackName	; Transfer name from entry to ASCIZ tail.
 	POP	SI		; Get back entry pointers
 	POP	BX
 	PUSH	BX
@@ -410,15 +410,15 @@ endif
 	MOV	WORD PTR [THISSFT],OFFSET DOSGROUP:AUXSTACK - (SIZE sf_entry)
 				; Scratch space
 	XOR	AH,AH		; Indicate file to DOOPEN (high bit off)
-	invoke	DOOPEN		; Fill in SFT for share check
+	invoke_fn DOOPEN		; Fill in SFT for share check
 	LES	DI,[THISSFT]
 	MOV	ES:[DI.sf_mode],sharing_deny_both   ; requires exclusive access
 	MOV	ES:[DI.sf_ref_count],1	; Pretend open
-	invoke	ShareEnter
+	invoke_fn ShareEnter
 	jc	CheckDone
 	LES	DI,[THISSFT]
 	MOV	ES:[DI.sf_ref_count],0	; Pretend closed and free
-	invoke	SHAREEND		; Tell sharer we're done with THISSFT
+	invoke_fn SHAREEND		; Tell sharer we're done with THISSFT
 	CLC
 CheckDone:
 	LES	BP,[THISDPB]

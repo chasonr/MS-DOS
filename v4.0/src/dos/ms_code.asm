@@ -103,7 +103,7 @@ ASSUME	DS:NOTHING
 	CALL	RW32_CONVERT		;>32mb convert 32bit format to 16bit	;AN000;
 	retc
 
-	invoke	SET_RQ_SC_PARMS 	;LB. set up SC parms			;AN000;
+	invoke_fn SET_RQ_SC_PARMS 	;LB. set up SC parms			;AN000;
 	PUSH	DS
 	PUSH	SI
 	PUSH	AX
@@ -144,7 +144,7 @@ EndProc AbsSetup
 	POP	SS
 ASSUME	SS:DOSGROUP
 	MOV	SP,OFFSET DOSGROUP:DSKSTACK
-	invoke	Save_World		      ;>32mb save all regs		;AN000;
+	invoke_fn Save_World		      ;>32mb save all regs		;AN000;
 	PUSH	ES
 	CALL	AbsSetup
 	JC	ILEAVE
@@ -159,7 +159,7 @@ if not ibmcopyright
 	MOV	[CURSC_DRIVE],-1	      ; invalidate SC			;AN000;
 	LeaveCrit   critDisk
 endif
-	invoke	DSKREAD
+	invoke_fn DSKREAD
 TLEAVE:
 	JZ	ILEAVE
 
@@ -181,7 +181,7 @@ LEAVECODE:
 	STC
 ILEAVE:
 	POP	ES
-	invoke	Restore_World		     ;>32mb				;AN000;
+	invoke_fn Restore_World		     ;>32mb				;AN000;
 	CLI
 	DEC	INDOS
 	MOV	SS,[user_SS]
@@ -212,7 +212,7 @@ ASSUME	DS:NOTHING,ES:NOTHING,SS:NOTHING
 	POP	SS
 ASSUME	SS:DOSGROUP
 	MOV	SP,OFFSET DOSGROUP:DSKSTACK
-	invoke	Save_World		      ;>32mb save all regs		;AN000;
+	invoke_fn Save_World		      ;>32mb save all regs		;AN000;
 
 	PUSH	ES
 	CALL	AbsSetup
@@ -223,7 +223,7 @@ ASSUME	SS:DOSGROUP
 	CALL	Fastxxx_Purge		      ; purge fatopen			;AN000;
 	LeaveCrit   critDisk
 
-	invoke	DSKWRITE
+	invoke_fn DSKWRITE
 	JMP	TLEAVE
 EndProc ABSDWRT
 
@@ -245,7 +245,7 @@ Procedure GETBP,NEAR
 	PUSH	AX
 	ADD	AL,1			; No increment; need carry flag
 	JC	SkipGet
-	invoke	GetThisDrv
+	invoke_fn GetThisDrv
 	JNC	SkipGet 		   ;PM. good drive			;AN000;
 	XOR	AH,AH			   ;DCR. ax= error code 		;AN000;
 	CMP	AX,error_not_dos_disk	   ;DCR. is unknown media ?		;AN000;
@@ -292,17 +292,17 @@ ASSUME	SS:DOSGROUP
 procedure   SYS_RETURN,NEAR
 	ASSUME	DS:NOTHING,ES:NOTHING
 entry	SYS_RET_OK
-	invoke	FETCHI_CHECK		; TAG checking for FETCHI
-	invoke	get_user_stack
+	invoke_fn FETCHI_CHECK		; TAG checking for FETCHI
+	invoke_fn get_user_stack
 	AND	[SI.user_F],NOT f_Carry ; turn off user's carry flag
 	JMP	SHORT DO_RET		; carry is now clear
 
 entry	SYS_RET_ERR
 	XOR	AH,AH			; hack to allow for smaller error rets
-	invoke	ETAB_LK 		; Make sure code is OK, EXTERR gets set
+	invoke_fn ETAB_LK 		; Make sure code is OK, EXTERR gets set
 	CALL	ErrorMap
 entry	From_GetSet
-	invoke	get_user_stack
+	invoke_fn get_user_stack
 	OR	[SI.user_F],f_Carry	; signal carry to user
 	STC				; also, signal internal error
 DO_RET:
@@ -329,7 +329,7 @@ DO_RET:
 	MOV	[EXTERR],error_FAIL_I24 ; Ooops, this is the REAL reason
 	MOV	SI,OFFSET DOSGROUP:ERR_TABLE_21
 EXTENDED_NORMAL:
-	invoke	CAL_LK			; Set CLASS,ACTION,LOCUS for EXTERR
+	invoke_fn CAL_LK			; Set CLASS,ACTION,LOCUS for EXTERR
 	POP	SI
 	return
 
@@ -526,7 +526,7 @@ DispatchDOS:
 
 	MOV	AX,[BP+0Eh]		; get AX value
 	POP	BP
-	Invoke	TableDispatch
+	Invoke_fn TableDispatch
 	JMP	BadFunc 		; return indicates invalid function
 
 Procedure   INT2F_etcetera,NEAR
@@ -601,7 +601,7 @@ topen:
 dofast:
 	MOV	AL,FONC_purge		      ; purge				;AN000;
 	MOV	DL,ES:[BP.dpb_drive]	      ; set up drive number		;AN000;
-	invoke	Fast_Dispatch		      ; call fastopen/seek		;AN000;
+	invoke_fn Fast_Dispatch		      ; call fastopen/seek		;AN000;
 nofast:
 	POP	DX								;AN000;
 	POP	SI			      ; restore regs			;AN000;

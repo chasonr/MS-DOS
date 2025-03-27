@@ -169,7 +169,7 @@ LOCAL_CREATE:
 	OR	ES:[DI].sf_mode,sharing_compat+open_for_both
 setdone:
 	EnterCrit   critDisk
-	invoke	MakeNode
+	invoke_fn MakeNode
 	JNC	Create_ok
 	mov	[VOLCHNG_FLAG],-1	; indicate no change in volume label
 	LeaveCrit   critDisk
@@ -211,7 +211,7 @@ Create_ok:
 ; drive number to force a Build BPB after Media Check.
 
 ;;; FASTOPEN 8/29/86
-	invoke	FastOpen_Delete
+	invoke_fn FastOpen_Delete
 ;;; FASTOPEN 8/29/86
 	mov	al,[SATTRIB]
 	test	al,attr_volume_id
@@ -224,7 +224,7 @@ Create_ok:
 	CALL	Set_Media_ID		;AN000;>32mb
 
 	EnterCrit CritDisk
-	invoke	FatRead_CDS		; force a media check
+	invoke_fn FatRead_CDS		; force a media check
 	LeaveCrit CritDisk
 NoVolLabel:
 	MOV	ax,2
@@ -311,7 +311,7 @@ EndProc DOS_Create_New
 	PUSH	DX		;AN000;;>32mb
 	XOR	BH,BH		;AN000;;>32mb
 
-	invoke	$IOCTL		;AN000;;>32mb
+	invoke_fn $IOCTL		;AN000;;>32mb
 	POP	DX		;AN000;;>32mb
 	POP	BX		;AN000;;>32mb
 	JC	geterr		;AN000;;>32mb
@@ -334,7 +334,7 @@ doset:					       ;AN000;
 	MOV	CX,0846H	;AN001;;>32mb
 	MOV	AL,0DH		;AN000;;>32mb
 	XOR	BH,BH		;AN000;;>32mb
-	invoke	$IOCTL		;AN000;;>32mb  set volume id
+	invoke_fn $IOCTL		;AN000;;>32mb  set volume id
 geterr: 			;AN000;
 	PUSH	CS		;AN000;>32mb
 	POP	DS		;AN000;>32mb   ds= dosgroup

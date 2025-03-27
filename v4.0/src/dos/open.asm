@@ -190,7 +190,7 @@ LOCAL_OPEN:
 ; DOS 3.3 FastOPen 6/16/86
 
 	OR	[FastOpenFlg],FastOpen_Set+Special_Fill_Set   ;  only open can
-	invoke	GetPath
+	invoke_fn GetPath
 
 
 ; DOS 3.3 FastOPen 6/16/86
@@ -286,7 +286,7 @@ NORM1:										;AN000;
 NORM0:
 
 ;;; File Tagging DOS 4.00
-	invoke	DOOPEN			; Fill in SFT
+	invoke_fn DOOPEN			; Fill in SFT
 	AND	BYTE PTR CS:[FastOpenFlg],Fast_yes    ;; DOS 3.3
 	CALL	DO_SHARE_CHECK		;
 	JNC	Share_Ok
@@ -308,7 +308,7 @@ endif
 	MOV	CX,ES:[DI.sf_firclus]		   ; first cluster #		;AN000;
 	LES	DI,ES:[DI.sf_devptr]		   ; pointer to DPB		;AN000;
 	MOV	DL,ES:[DI.dpb_drive]		   ; drive #			;AN000;
-	invoke	FastSeek_Open			   ; call fastseek		;AN000;
+	invoke_fn FastSeek_Open			   ; call fastseek		;AN000;
 no_fastseek:
 
 ;; DOS 4.00 10/27/86
@@ -330,7 +330,7 @@ no_fastseek:
 	ASSUME	ES:NOTHING
 
 	LES	DI,ThisSFT
-	invoke	DEV_OPEN_SFT
+	invoke_fn DEV_OPEN_SFT
 	TEST	ES:[DI.sf_mode],sf_isfcb; Clears carry
 	retz				; sf_mode correct
 	MOV	AX,[CurrentPDB]
@@ -357,7 +357,7 @@ procedure SHARE_ERROR,NEAR
 	CMP	CL,sharing_compat
 	JNE	NO_HARD_ERR
 HARD_ERR:
-	invoke	SHARE_VIOLATION
+	invoke_fn SHARE_VIOLATION
 	retnc				; User wants retry
 NO_HARD_ERR:
 	MOV	AX,error_sharing_violation
@@ -381,10 +381,10 @@ OPN_RETRY:
 	MOV	CX,RetryCount		; Get # tries to do
 OpenShareRetry:
 	SaveReg <CX>			; Save number left to do
-	invoke	SHARE_CHECK		; Final Check
+	invoke_fn SHARE_CHECK		; Final Check
 	RestoreReg  <CX>		; CX = # left
 	JNC	Share_Ok2		; No problem with access
-	Invoke	Idle
+	Invoke_fn Idle
 	LOOP	OpenShareRetry		; One more retry used up
 OpenShareFail:
 	LES	DI,[ThisSft]

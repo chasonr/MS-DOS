@@ -126,7 +126,7 @@ NOFN:					      ;AN000;
 	JNC	norm_getpath		;AN000;;FO. no
 	AND	[FastOpenflg],Fast_yes	;AN000;;FO. reset fastopen
 norm_getpath:
-	invoke	GetPath
+	invoke_fn GetPath
 getdone:
 	JNC	find_check_dev
 	JNZ	bad_path
@@ -278,14 +278,14 @@ LOCAL_SEARCH_NEXT:
 	MOV	WORD PTR ThisCDS,OFFSET DOSGROUP:DummyCDS
 	MOV	WORD PTR ThisCDS+2,CS
 	ADD	AL,'A'-1
-	invoke	InitCDS
+	invoke_fn InitCDS
 
 ;	invoke	GetThisDrv		; Set CDS pointer
 
 	JC	No_files		; Bogus drive letter
 	LES	DI,[THISCDS]		; Get CDS pointer
 	LES	BP,ES:[DI.curdir_devptr]; Get DPB pointer
-	invoke	GOTDPB			; [THISDPB] = ES:BP
+	invoke_fn GOTDPB			; [THISDPB] = ES:BP
 
 	mov	AL,ES:[BP.dpb_drive]
 	mov	ThisDrv,AL
@@ -319,17 +319,17 @@ cont_load:
 	MOV	BX,AX
 	context DS
 	LES	BP,[THISDPB]		; Recover ES:BP
-	invoke	SetDirSrch
+	invoke_fn SetDirSrch
 	JNC	SEARCH_GOON
 	POP	AX			; Clean stack
 	JMP	No_files
 
 SEARCH_GOON:
-	invoke	StartSrch
+	invoke_fn StartSrch
 	POP	AX
-	invoke	GetEnt
+	invoke_fn GetEnt
 	JC	No_files
-	invoke	NextEnt
+	invoke_fn NextEnt
 	JC	No_files
 	XOR	AH,AH			; If Search_Next, can't be a DEV
 	JMP	found_it

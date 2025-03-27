@@ -87,7 +87,7 @@ ASSUME	DS:NOTHING,ES:NOTHING
 	JA	lock_bad_func		;AN000;;MS. no,
 
 	PUSH	DI			       ; Save LengthLow
-	invoke	SFFromHandle		       ; ES:DI -> SFT
+	invoke_fn SFFromHandle		       ; ES:DI -> SFT
 	JNC	lock_do 		       ; have valid handle
 	POP	DI			       ; Clean stack
 	error	error_invalid_handle
@@ -313,7 +313,7 @@ else
 endif
 	RestoreReg  <AX,BX>		; MS. restrore regs			;AN000;
 	retnc				; There are no locks
-	Invoke	Idle			; wait a while
+	Invoke_fn Idle			; wait a while
 	DEC	BX			; remember a retry
 	JNZ	LockRetry		; more retries left...
 	STC
@@ -345,7 +345,7 @@ EndProc LOCK_CHECK
 	MOV	DI,1				; Fake some registers
 	MOV	CX,DI
 	MOV	DX,ES:[BP.dpb_first_sector]
-	invoke	HARDERR
+	invoke_fn HARDERR
 	POP	CX
 	POP	DI
 	POP	ES

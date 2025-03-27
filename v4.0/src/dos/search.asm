@@ -69,7 +69,7 @@ NORMFCB4:
 	SaveReg <[SI]>			; Save original drive byte for later
 	Context ES			; get es to address DOSGroup
 	MOV	DI,OFFSET DOSGroup:OpenBuf  ; appropriate buffer
-	invoke	TransFCB		; convert the FCB, set SATTRIB EXTFCB
+	invoke_fn TransFCB		; convert the FCB, set SATTRIB EXTFCB
 	JNC	SearchIt		; no error, go and look
 	RestoreReg <BX> 		; Clean stack
 ;
@@ -82,7 +82,7 @@ SearchIt:
 	SaveReg <<WORD PTR [DMAAdd]>, <WORD PTR [DMAAdd+2]>>
 	MOV	WORD PTR [DMAAdd],OFFSET DOSGroup:SEARCHBUF
 	MOV	WORD PTR [DMAAdd+2],DS
-	invoke	GET_FAST_SEARCH 	; search
+	invoke_fn GET_FAST_SEARCH 	; search
 	RestoreReg <<WORD PTR [DMAAdd+2]>, <WORD PTR [DMAAdd]>>
 	JNC	SearchSet		; no error, transfer info
 	RestoreReg <BX> 		; Clean stack
@@ -182,7 +182,7 @@ NORMFCB6:
 	SaveReg <<WORD PTR [DMAAdd]>, <WORD PTR [DMAAdd+2]>>
 	MOV	WORD PTR [DMAAdd],OFFSET DOSGroup:SEARCHBUF
 	MOV	WORD PTR [DMAAdd+2],DS
-	invoke	DOS_SEARCH_NEXT 	; Find it
+	invoke_fn DOS_SEARCH_NEXT 	; Find it
 	RestoreReg <<WORD PTR [DMAAdd+2]>, <WORD PTR [DMAAdd]>>
 	JC	SearchNoMore
 	JMP	SearchSet		; Ok set return
@@ -220,7 +220,7 @@ ASSUME	CS:DOSGroup,DS:NOTHING,ES:NOTHING,SS:DOSGroup
 	MOV	SI,DX			; get name in appropriate place
 	MOV	[SATTRIB],CL		; Search attribute to correct loc
 	MOV	DI,OFFSET DOSGroup:OpenBuf  ; appropriate buffer
-	invoke	TransPathSet		; convert the path
+	invoke_fn TransPathSet		; convert the path
 	JNC	Find_it 		; no error, go and look
 FindError:
 	error	error_path_not_found	; error and map into one.
@@ -229,7 +229,7 @@ Find_it:
 	SaveReg <<WORD PTR [DMAAdd]>, <WORD PTR [DMAAdd+2]>>
 	MOV	WORD PTR [DMAAdd],OFFSET DOSGroup:SEARCHBUF
 	MOV	WORD PTR [DMAAdd+2],DS
-	invoke	GET_FAST_SEARCH 	; search
+	invoke_fn GET_FAST_SEARCH 	; search
 	RestoreReg <<WORD PTR [DMAAdd+2]>, <WORD PTR [DMAAdd]>>
 	JNC	FindSet 		; no error, transfer info
 	transfer Sys_Ret_Err
@@ -286,7 +286,7 @@ ASSUME	CS:DOSGroup,DS:NOTHING,ES:NOTHING,SS:DOSGroup
 	SaveReg <<WORD PTR [DMAAdd]>, <WORD PTR [DMAAdd+2]>>
 	MOV	WORD PTR [DMAAdd],OFFSET DOSGroup:SEARCHBUF
 	MOV	WORD PTR [DMAAdd+2],DS
-	invoke	DOS_SEARCH_NEXT 	; Find it
+	invoke_fn DOS_SEARCH_NEXT 	; Find it
 	RestoreReg <<WORD PTR [DMAAdd+2]>, <WORD PTR [DMAAdd]>>
 	JNC	FindSet 		; No error, set info
 	transfer Sys_Ret_Err
@@ -338,7 +338,7 @@ EndProc PackName
 	ASSUME	DS:NOTHING,ES:NOTHING
 
 	OR	[DOS34_FLAG],SEARCH_FASTOPEN  ;FO.trigger fastopen		;AN000;
-	invoke	DOS_SEARCH_FIRST
+	invoke_fn DOS_SEARCH_FIRST
 	return
 
 EndProc GET_FAST_SEARCH

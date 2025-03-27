@@ -342,7 +342,7 @@ nret:										;AN000;
 										;AN000;
 	cmp	[DI.buf_ID],-1			; Buffer FREE?			;AN000;
 	retnz					; No				;AN000;
-	invoke	PLACEHEAD			; Buffer is free, belongs at hea;AN000;
+	invoke_fn PLACEHEAD			; Buffer is free, belongs at hea;AN000;
 	return									;AN000;
 bufloop:				;(label is now a misnomer)		;AN000;
 	mov	BX,[DI.buf_next]		;Set new head position		;AN000;
@@ -495,11 +495,11 @@ normread:
 endif
 	OR	SI,SI
 	JZ	NORMSEC
-	invoke	FATSECRD
+	invoke_fn FATSECRD
 	MOV	AH,buf_isFAT		; Set buf_flags
 	JMP	SHORT GOTTHESEC 	; Buffer is marked free if read barfs
 NORMSEC:
-	invoke	DREAD			; Buffer is marked free if read barfs
+	invoke_fn DREAD			; Buffer is marked free if read barfs
 	MOV	AH,0			; Set buf_flags to no type, DO NOT XOR!
 GOTTHESEC:				; Carry set by either FATSECRD or DREAD
 if	bufferflag
@@ -599,7 +599,7 @@ NXTBUFF2:
 Zapzap: 									;AN004;
 	PUSH	DS			     ;LB. save regs			;AN000;
 	PUSH	DI			     ;LB.				;AN000;
-	invoke	Map_Entry		     ;LB. ds:di -> first buffer addr	;AN000;
+	invoke_fn Map_Entry		     ;LB. ds:di -> first buffer addr	;AN000;
 NXTBUFF:
 	CALL	CHECKFLUSH	; Ignore Carry return from CHECKFLUSH.
 				; FAILERR is set if user FAILed.
@@ -683,7 +683,7 @@ ASSUME	DS:NOTHING,ES:NOTHING
 	retz				; Buffer is free, carry clear.
 	TEST	AH,buf_dirty
 	retz				; Buffer is clean, carry clear.
-	invoke	DEC_DIRTY_COUNT 	; LB. decrement dirty count
+	invoke_fn DEC_DIRTY_COUNT 	; LB. decrement dirty count
 	CMP	AL,BYTE PTR [WPERR]
 	retz				; If in WP error zap buffer
 	MOV	[SC_DRIVE],AL		;LB. set it for invalidation		;AN000;
@@ -739,7 +739,7 @@ if	bufferflag
 skipwritetrans:
 endif
 
-	invoke	DWRITE		; Write out the dirty buffer
+	invoke_fn DWRITE		; Write out the dirty buffer
 
 if	bufferflag
 	pushf			; save carry flag from DWRITE

@@ -92,12 +92,12 @@ Cmplp:
 notkanj1:				;AN000;; 2/13/KK
  ENDIF					;AN000;
 	CALL	uCase			; convert to upper case
-	Invoke	PathChrCmp		; convert / to \
+	Invoke_fn PathChrCmp		; convert / to \
 	MOV	AH,AL
 	MOV	AL,ES:[DI]
 	INC	DI
 	CALL	uCase			; convert to upper case
-	Invoke	PathChrCmp		; convert / to \
+	Invoke_fn PathChrCmp		; convert / to \
 	CMP	AH,AL
 	JNZ	PopRet			; Strings dif
 Tend:
@@ -137,7 +137,7 @@ CPYLoop:
 notkanj2:			;AN000;; 2/13/KK
  ENDIF				;AN000;
 	CALL	uCase			; convert to upper case
-	Invoke	PathChrCmp		; convert / to \
+	Invoke_fn PathChrCmp		; convert / to \
 	STOSB
 Tend2:
 	OR	AL,AL
@@ -171,7 +171,7 @@ Procedure   uCase,NEAR
 ;	ADD	AL,'A'-'a'
 ;CaseRet:
 ;;; 10/31/86 let's do file upper case for all DOS file names
-	invoke	GetLet2
+	invoke_fn GetLet2
 ;;; 10/31/86 let's do file upper case for all DOS file names
 	return
 EndProc uCase
@@ -416,7 +416,7 @@ Procedure   NLS_OPEN,NEAR
 ;	PUSH	BX		 ; save current state
 
 	MOV	AL,CL		 ; set up correct interface for $OPEN
-	invoke	$OPEN
+	invoke_fn $OPEN
 
  ;	POP	BX		 ; restore current state
  ;	MOV	[CPSWFLAG],BL
@@ -439,7 +439,7 @@ Procedure   NLS_LSEEK,NEAR
 	PUSH	[user_SS]
 	CALL	Fake_User_Stack
 	MOV	AX,BP	     ; set up correct interface for $LSEEK
-	invoke	$LSEEK
+	invoke_fn $LSEEK
 	POP	[user_SS]	 ; restore user stack
 	POP	[user_SP]
 	RET
@@ -502,7 +502,7 @@ Procedure   NLS_IOCTL,NEAR
 	PUSH	[user_SS]
 	CALL	Fake_User_Stack
 	MOV	AX,BP	     ; set up correct interface for $LSEEK
-	invoke	$IOCTL
+	invoke_fn $IOCTL
 	POP	[user_SS]	 ; restore user stack
 	POP	[user_SP]
 	RET

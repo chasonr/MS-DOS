@@ -176,12 +176,12 @@ exec_check_2:
 	MOV	execNameL,DX
 	MOV	execNameH,DS
 	MOV	SI,DX			; move pointer to convenient place
-	invoke	DStrLen
+	invoke_fn DStrLen
 	MOV	ExecNameLen,CX		; save length
 
 	XOR	AL,AL			; open for reading
 	PUSH	BP
-	invoke	$OPEN			; is the file there?
+	invoke_fn $OPEN			; is the file there?
 	POP	BP
 	JC	exec_ret_err
 ;File Type Checking
@@ -210,7 +210,7 @@ exec_check_2:
 	MOV	exec_fh,AX
 	MOV	BX,AX
 	XOR	AL,AL
-	invoke	$IOCTL
+	invoke_fn $IOCTL
 	JC	Exec_bombJ
 	TEST	DL,devid_ISDEV
 	JZ	exec_check_environ
@@ -259,7 +259,7 @@ exec_get_environ_len:
 	MOV	CL,4
 	SHR	BX,CL			; number of paragraphs needed
 	PUSH	ES
-	invoke	$ALLOC			; can we get the space?
+	invoke_fn $ALLOC			; can we get the space?
 	POP	DS
 	POP	CX
 	JNC	exec_save_environ
@@ -350,7 +350,7 @@ exec_bomb:
 	CALL	exec_dealloc
 	LeaveCrit   CritMem
 	SaveReg <AX,BP>
-	invoke	$CLOSE
+	invoke_fn $CLOSE
 	RestoreReg  <BP,AX>
 	JMP	Exec_Ret_Err
 
@@ -359,7 +359,7 @@ exec_allocate:
 	PUSH	AX
 	MOV	BX,0FFFFh		; see how much room in arena
 	PUSH	DS
-	invoke	$ALLOC			; should have carry set and BX has max
+	invoke_fn $ALLOC			; should have carry set and BX has max
 	POP	DS
 	POP	AX
 	ADD	AX,10h			; room for header
@@ -386,7 +386,7 @@ exec_got_block:
 	PUSH	DS
 	MOV	BX,AX
 	MOV	exec_size,BX
-	invoke	$ALLOC			; get the space
+	invoke_fn $ALLOC			; get the space
 	POP	DS
 	JC	exec_no_mem
 	MOV	exec_load_block,AX
@@ -419,7 +419,7 @@ exec_find_res:
 	MOV	BX,exec_fh
 	PUSH	DS
 	XOR	AL,AL
-	invoke	$LSEEK			; seek to resident
+	invoke_fn $LSEEK			; seek to resident
 	POP	DS
 	jnc	exec_big_read
 	jmp	exec_bomb
@@ -487,7 +487,7 @@ exec_do_reloc:
 	MOV	BX,exec_fh
 	PUSH	DS
 	XOR	AX,AX
-	invoke	$LSEEK
+	invoke_fn $LSEEK
 	POP	DS
 
 	JNC	exec_get_entries
@@ -560,12 +560,12 @@ exec_com_file:
 ;
 exec_alloc_com_file:
 	MOV	BX,0FFFFh
-	invoke	$ALLOC			; largest piece available as error
+	invoke_fn $ALLOC			; largest piece available as error
 	OR	BX,BX
 	JZ	exec_no_memj
 	MOV	exec_size,BX		; save size of allocation block
 	PUSH	BX
-	invoke	$ALLOC			; largest piece available as error
+	invoke_fn $ALLOC			; largest piece available as error
 	POP	BX			; get size of block...
 	MOV	exec_load_block,AX
 	ADD	AX,10h			; increment for header
@@ -584,7 +584,7 @@ exec_read_block:
 	XOR	CX,CX			; but seek to 0:0
 	MOV	DX,CX
 	XOR	AX,AX			; seek relative to beginning
-	invoke	$LSEEK			; back to beginning of file
+	invoke_fn $LSEEK			; back to beginning of file
 	POP	CX			; number to read
 	MOV	DS,exec_dma
 	XOR	DX,DX
@@ -615,7 +615,7 @@ exec_set_PDB:
 	MOV	BX,exec_fh		; we are finished with the file.
 	CALL	exec_dealloc
 	PUSH	BP
-	invoke	$CLOSE			; release the jfn
+	invoke_fn $CLOSE			; release the jfn
 	POP	BP
 	CALL	exec_alloc
 	TEST	BYTE PTR exec_func,exec_func_overlay
@@ -674,7 +674,7 @@ fill8:					;AN000;
 	PUSH	DX
 	MOV	SI,exec_size
 	ADD	SI,DX
-	invoke	$Dup_PDB		; ES is now PDB
+	invoke_fn $Dup_PDB		; ES is now PDB
 	POP	DX
 
 	PUSH	exec_environ
@@ -732,17 +732,17 @@ fill8:					;AN000;
 	DEC	CL			; get 0FFh in CL
 	MOV	AL,BH
 	XOR	BH,BH
-	invoke	GetVisDrv
+	invoke_fn GetVisDrv
 	JNC	exec_BL
 	MOV	BH,CL
 exec_BL:
 	MOV	AL,BL
 	XOR	BL,BL
-	invoke	GetVisDrv
+	invoke_fn GetVisDrv
 	JNC	exec_Set_Return
 	MOV	BL,CL
 exec_set_return:
-	invoke	get_user_stack		; get his return address
+	invoke_fn get_user_stack		; get his return address
 	PUSH	[SI.user_CS]		; suck out the CS and IP
 	PUSH	[SI.user_IP]
 	PUSH	[SI.user_CS]		; suck out the CS and IP
@@ -799,7 +799,7 @@ exec_go:
 procedure   exec_long_ret,FAR
 
 IF	BUFFERFLAG
-	invoke	restore_user_map
+	invoke_fn restore_user_map
 ENDIF
 
 	RET
@@ -811,7 +811,7 @@ Procedure   ExecRead,NEAR
 	CALL	exec_dealloc
 	MOV	bx,exec_fh
 	PUSH	BP
-	invoke	$READ
+	invoke_fn $READ
 	POP	BP
 	CALL	exec_alloc
 	return

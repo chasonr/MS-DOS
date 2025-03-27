@@ -139,14 +139,14 @@ Procedure   $Close,NEAR
 ; -1.
 ;
 FreeJFN:
-	Invoke	pJFNFromHandle		;   d = pJFN (handle);
+	Invoke_fn pJFNFromHandle		;   d = pJFN (handle);
 	fmt TypAccess,LevSFN,<"$p  Close jfn pointer $x:$x\n">,<es,di>
 	MOV	BYTE PTR ES:[DI],0FFh	; release the JFN
 PostFree:
 ;
 ; ThisSFT is correctly set, we have DS = DOSGROUP.  Looks OK for a DOS_CLOSE!
 ;
-	invoke	DOS_Close
+	invoke_fn DOS_Close
 ;
 ; DOS_Close may return an error.  If we see such an error, we report it but
 ; the JFN stays closed because DOS_Close always frees the SFT!
@@ -190,7 +190,7 @@ Procedure   $Commit,NEAR
 ;
 ; ThisSFT is correctly set, we have DS = DOSGROUP.  Looks OK for a DOS_COMMIT
 ;
-	invoke	DOS_COMMIT
+	invoke_fn DOS_COMMIT
 ;
 ;
 	JC	Commiterror
@@ -260,7 +260,7 @@ larger:
 	AND	BX,1FFFH		; clear most 3 bits
 
 	PUSH	BP
-	invoke	$ALLOC			; allocate memory
+	invoke_fn $ALLOC			; allocate memory
 	POP	BP
 	JC	no_memory		; not enough meory
 
@@ -300,7 +300,7 @@ ASSUME DS:NOTHING
 	PUSH	DS			; save old table segment
 	PUSH	ES			; save new table segment
 	MOV	ES,WORD PTR DS:[PDB_JFN_Pointer+2] ; get old table segment
-	invoke	$DEALLOC		; deallocate old table meomory
+	invoke_fn $DEALLOC		; deallocate old table meomory
 	POP	ES			; restore new table segment
 	POP	DS			; restore old table segment
 	POP	BP
@@ -346,7 +346,7 @@ procedure   $READ,NEAR
 	fmt TypSysCall,LevArgs,<" Handle $x Cnt $x Buf $x:$x\n">,<BX,CX,DS,DX>
 	MOV	SI,OFFSET DOSGROUP:DOS_Read
 ReadDo:
-	invoke	pJFNFromHandle
+	invoke_fn pJFNFromHandle
 	JC	ReadError
 	MOV	AL,ES:[DI]
 	call	CheckOwner		; get the handle
@@ -510,7 +510,7 @@ LSeekStore:
 LSeekSetpos:
 	MOV	WORD PTR ES:[DI.SF_Position],AX
 	MOV	WORD PTR ES:[DI.SF_Position+2],DX
-	invoke	Get_user_stack
+	invoke_fn Get_user_stack
 	MOV	DS:[SI.User_DX],DX	; return DX:AX
 	transfer    SYS_RET_OK		; successful return
 
@@ -635,7 +635,7 @@ doXA:					       ;AN000;
 ;	PUSH	[SAVE_ES]		       ;AN000;;FT. save XA list
 ;	PUSH	[SAVE_DI]		       ;AN000;;FT. save XA list
 
-	invoke	GetSet_XA		       ;AN000;;FT. issue Get/Set XA
+	invoke_fn GetSet_XA		       ;AN000;;FT. issue Get/Set XA
 ;	POP	SI			       ;AN000;;FT. DS:SI -> XA list
 ;	POP	DS			       ;AN000;
 	JC	getexit 		       ;AN000;;FT. error
@@ -672,7 +672,7 @@ gsdt:
 	MOV	CX,ES:[DI.sf_Time]	; suck out time
 	MOV	DX,ES:[DI.sf_Date]	; and date
 	STI
-	invoke	Get_user_stack		; obtain place to return it
+	invoke_fn Get_user_stack		; obtain place to return it
 	MOV	[SI.user_CX],CX 	; and stash in time
 	MOV	[SI.user_DX],DX 	; and stask in date
 ext_done:
@@ -709,7 +709,7 @@ BREAK <$DUP - duplicate a jfn>
 Procedure   $DUP,NEAR
 	ASSUME	CS:DOSGROUP,DS:NOTHING,ES:NOTHING,SS:DOSGROUP
 	MOV	AX,BX			; save away old handle in AX
-	invoke	JFNFree 		; free handle? into ES:DI, new in BX
+	invoke_fn JFNFree 		; free handle? into ES:DI, new in BX
 DupErrorCheck:
 	JC	DupErr			; nope, bye
 	SaveReg <ES,DI> 		; save away SFT
@@ -717,8 +717,8 @@ DupErrorCheck:
 	XCHG	AX,BX			; get back old handle
 	call	CheckOwner		; get sft in ES:DI
 	JC	DupErr			; errors go home
-	invoke	DOS_Dup_Direct
-	invoke	pJFNFromHandle		; get pointer
+	invoke_fn DOS_Dup_Direct
+	invoke_fn pJFNFromHandle		; get pointer
 	MOV	BL,ES:[DI]		; get SFT number
 	MOV	DS:[SI],BL		; stuff in new SFT
 	transfer    SYS_RET_OK		; and go home
@@ -742,7 +742,7 @@ Procedure   $Dup2,NEAR
 	MOV	BX,CX			; get one to close
 	invoke	$Close			; close destination handle
 	RestoreReg  <BX,AX>		; old in AX, new in BX
-	invoke	pJFNFromHandle		; get pointer
+	invoke_fn pJFNFromHandle		; get pointer
 	JMP	DupErrorCheck		; check error and do dup
 EndProc $Dup2
 
@@ -765,7 +765,7 @@ Break	<CheckOwner - verify ownership of handles from server>
 
 Procedure   CheckOwner,NEAR
 	ASSUME	CS:DOSGROUP,DS:NOTHING,ES:NOTHING,SS:DOSGROUP
-	invoke	SFFromHandle
+	invoke_fn SFFromHandle
 	retc
 	push	ax
 	mov	ax,user_id

@@ -91,11 +91,11 @@ entry	$SLEAZEFUNCDL
 
 	context DS
 	MOV	AL,DL
-	invoke	GETTHISDRV		; Get CDS structure
+	invoke_fn GETTHISDRV		; Get CDS structure
 SET_AL_RET:
 ;	MOV	AL,error_invalid_drive	; Assume error				;AC000;
 	JC	BADSLDRIVE
-	invoke	DISK_INFO
+	invoke_fn DISK_INFO
 	JC	SET_AL_RET		; User FAILed to I 24
 	MOV	[FATBYTE],AH
 ; NOTE THAT A FIXED MEMORY CELL IS USED --> THIS CALL IS NOT
@@ -103,7 +103,7 @@ SET_AL_RET:
 ; CALL AGAIN
 	MOV	DI,OFFSET DOSGROUP:FATBYTE
 	XOR	AH,AH			; AL has sectors/cluster
-	invoke	get_user_stack
+	invoke_fn get_user_stack
 ASSUME	DS:NOTHING
 	MOV	[SI.user_CX],CX
 	MOV	[SI.user_DX],BX
@@ -131,7 +131,7 @@ BREAK <$Get_INDOS_Flag -- Return location of DOS critical-section flag>
 	procedure   $GET_INDOS_FLAG,NEAR
 ASSUME	DS:NOTHING,ES:NOTHING
 
-	invoke	get_user_stack
+	invoke_fn get_user_stack
 	MOV	[SI.user_BX],OFFSET DOSGROUP:INDOS
 	MOV	[SI.user_ES],SS
 	return
@@ -148,7 +148,7 @@ BREAK <$Get_IN_VARS -- Return a pointer to DOS variables>
 ; dependent and is subject to change without notice in future versions.
 ; Use at risk.
 	procedure   $GET_IN_VARS,NEAR
-	invoke	get_user_stack
+	invoke_fn get_user_stack
 	MOV	[SI.user_BX],OFFSET DOSGROUP:SYSINITVAR
 	MOV	[SI.user_ES],SS
 	return
@@ -180,17 +180,17 @@ ASSUME	DS:NOTHING,ES:NOTHING
 
 	context DS
 	MOV	AL,DL
-	invoke	GETTHISDRV		; Get CDS structure
+	invoke_fn GETTHISDRV		; Get CDS structure
 	JC	ISNODRV 		; no valid drive
 	LES	DI,[THISCDS]		; check for net CDS
 	TEST	ES:[DI.curdir_flags],curdir_isnet
 	JNZ	ISNODRV 		; No DPB to point at on NET stuff
 	EnterCrit CritDisk
-	invoke	FATRead_CDS		; Force Media Check and return DPB
+	invoke_fn FATRead_CDS		; Force Media Check and return DPB
 	LeaveCrit CritDisk
 	JC	ISNODRV 		; User FAILed to I 24, only error we
 					;   have.
-	invoke	get_user_stack
+	invoke_fn get_user_stack
 ASSUME	DS:NOTHING
 	MOV	[SI.user_BX],BP
 	MOV	[SI.user_DS],ES
@@ -223,7 +223,7 @@ ASSUME	DS:NOTHING,ES:NOTHING
 	context DS
 	EnterCrit   critDisk
 	OR	[DOS34_FLAG],FROM_DISK_RESET					;AN000;
-	invoke	FLUSHBUF
+	invoke_fn FLUSHBUF
 	AND	[DOS34_FLAG],NO_FROM_DISK_RESET 				;AN000;
 ;
 ; We will "ignore" any errors on the flush, and go ahead and invalidate.  This
@@ -414,7 +414,7 @@ CreateCopy:
 
 Create_dup_jfn:
 	PUSH	ES			; save new PDB
-	invoke	SFFromHandle		; get sf pointer
+	invoke_fn SFFromHandle		; get sf pointer
 	MOV	AL,-1			; unassigned JFN
 	JC	CreateStash		; file was not really open
 	TEST	ES:[DI].sf_flags,sf_no_inherit
@@ -432,11 +432,11 @@ Create_dup_jfn:
 ;
 	MOV	WORD PTR [THISSFT],DI
 	MOV	WORD PTR [THISSFT+2],ES
-	invoke	DOS_DUP 		; signal duplication
+	invoke_fn DOS_DUP 		; signal duplication
 ;
 ; get the old sfn for copy
 ;
-	invoke	pJFNFromHandle		; ES:DI is jfn
+	invoke_fn pJFNFromHandle		; ES:DI is jfn
 	MOV	AL,ES:[DI]		; get sfn
 ;
 ; Take AL (old sfn or -1) and stash it into the new position
@@ -529,7 +529,7 @@ ASSUME	DS:NOTHING,ES:NOTHING,SS:NOTHING
 	PUSHF
 	CMP	CS:[FETCHI_TAG],22642
 	JZ	TAG_OK
-	invoke	DOSINIT 	      ; go to hell
+	invoke_fn DOSINIT 	      ; go to hell
 TAG_OK:
 	POPF
 	return
@@ -562,7 +562,7 @@ ASSUME	DS:NOTHING,ES:NOTHING	      ;AN000;
 	MOV	CX,0846H	      ;AN001;MS.;
 doioctl:			      ;AN000;
 	MOV	AL,0DH		      ;AN000;MS.; generic IOCTL
-	invoke	$IOCTL		      ;AN000;MS.; let IOCTL take care of it
+	invoke_fn $IOCTL		      ;AN000;MS.; let IOCTL take care of it
 	return			      ;AN000;MS.;
 errorfunc:			      ;AN000;
 	error	error_invalid_function;AN000;MS.	; invalid function

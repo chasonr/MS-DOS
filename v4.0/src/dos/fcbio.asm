@@ -91,8 +91,8 @@ Break <$Get_FCB_Position - set random record fields to current pos>
 
 Procedure $Get_FCB_Position,NEAR
 	ASSUME	CS:DOSGROUP,DS:NOTHING,ES:NOTHING,SS:DOSGroup
-	invoke	GetExtended		; point to FCB
-	invoke	GetExtent		; DX:AX is current record
+	invoke_fn GetExtended		; point to FCB
+	invoke_fn GetExtent		; DX:AX is current record
 	MOV	WORD PTR [SI.fcb_RR],AX ; drop in low order piece
 	MOV	[SI+fcb_RR+2],DL	; drop in high order piece
 	CMP	[SI.fcb_RECSIZ],64
@@ -116,10 +116,10 @@ Break <$FCB_Delete - remove several files that match the input FCB>
 Procedure $FCB_Delete,NEAR
 	ASSUME	CS:DOSGROUP,DS:NOTHING,ES:NOTHING,SS:DOSGroup
 	MOV	DI,OFFSET DOSGroup:OpenBuf  ; appropriate place
-	invoke	TransFCB		; convert FCB to path
+	invoke_fn TransFCB		; convert FCB to path
 	JC	BadPath 		; signal no deletions
 	Context DS
-	invoke	DOS_Delete		; wham
+	invoke_fn DOS_Delete		; wham
 	JC	BadPath
 GoodPath:
 	transfer    FCB_Ret_OK		; do a good return
@@ -143,16 +143,16 @@ Break <$Get_FCB_File_Length - return the length of a file>
 
 Procedure   $Get_FCB_File_Length,NEAR
 	ASSUME	CS:DOSGROUP,DS:NOTHING,ES:NOTHING,SS:DOSGroup
-	invoke	GetExtended		; get real FCB pointer
+	invoke_fn GetExtended		; get real FCB pointer
 					; DX points to Input FCB
 	MOV	DI,OFFSET DOSGroup:OpenBuf  ; appropriate buffer
 	SaveReg <DS,SI> 		; save pointer to true FCB
-	Invoke	TransFCB		; Trans name DS:DX, sets SATTRIB
+	Invoke_fn TransFCB		; Trans name DS:DX, sets SATTRIB
 	RestoreReg  <SI,DS>
 	JC	BadPath
 	SaveReg <DS,SI> 		; save pointer
 	Context DS
-	invoke	Get_File_Info		; grab the info
+	invoke_fn Get_File_Info		; grab the info
 	RestoreReg  <SI,DS>		; get pointer back
 	JC	BadPath 		; invalid something
 	MOV	DX,BX			; get high order size
@@ -197,12 +197,12 @@ Break <$FCB_Close - close a file>
 Procedure $FCB_Close,NEAR
 	ASSUME	CS:DOSGROUP,DS:NOTHING,ES:NOTHING,SS:DOSGroup
 	XOR	AL,AL			; default search attributes
-	invoke	GetExtended		; DS:SI point to real FCB
+	invoke_fn GetExtended		; DS:SI point to real FCB
 	JZ	NoAttr			; not extended
 	MOV	AL,[SI-1]		; get attributes
 NoAttr:
 	MOV	[Attrib],AL		; stash away found attributes
-	invoke	SFTFromFCB
+	invoke_fn SFTFromFCB
 	JC	GoodRet 		; MZ 16 Jan Assume death
 ;
 ; If the sharer is present, then the SFT is not regenable.  Thus, there is
@@ -213,7 +213,7 @@ NoAttr:
 	XOR	AH,AH
 	PUSH	AX
 ;;; 9/8/86 F.C. save SFT attribute and restore it back when close is done
-	invoke	CheckShare
+	invoke_fn CheckShare
 	JNZ	NoStash
 	MOV	AL,Attrib
 	MOV	ES:[DI].sf_attr,AL	; attempted attribute for close
@@ -228,7 +228,7 @@ NoStash:
 	MOV	WORD PTR ES:[DI].sf_size+2,AX
 	OR	ES:[DI].sf_Flags,sf_close_nodate
 	Context DS			; let Close see variables
-	invoke	DOS_Close		; wham
+	invoke_fn DOS_Close		; wham
 	LES	DI,ThisSFT
 ;;; 9/8/86 F.C. restore SFT attribute
 	POP	CX
@@ -239,7 +239,7 @@ NoStash:
 	JNZ	CloseOK
 	PUSH	AX
 	MOV	AL,'M'
-	invoke	BlastSFT
+	invoke_fn BlastSFT
 	POP	AX
 CloseOK:
 	POPF
@@ -266,7 +266,7 @@ Break	<$FCB_Rename - change names in place>
 
 Procedure $FCB_Rename,NEAR
 	ASSUME	CS:DOSGROUP,DS:NOTHING,ES:NOTHING,SS:DOSGroup
-	invoke	GetExtended		; get pointer to real FCB
+	invoke_fn GetExtended		; get pointer to real FCB
 	SaveReg <DX>
 	MOV	AL,[SI] 		; get drive byte
 	ADD	SI,10h			; point to destination
@@ -274,19 +274,19 @@ Procedure $FCB_Rename,NEAR
 	SaveReg <<WORD PTR DS:[SI]>,DS,SI>  ; save source pointer for TransFCB
 	MOV	DS:[SI],AL		; drop in real drive
 	MOV	DX,SI			; let TransFCB know where the FCB is
-	invoke	TransFCB		; munch this pathname
+	invoke_fn TransFCB		; munch this pathname
 	RestoreReg  <SI,DS,<WORD PTR DS:[SI]>>	; get path back
 	RestoreReg  <DX>		; Original FCB pointer
 	JC	BadRen			; bad path -> error
 	MOV	SI,WFP_Start		; get pointer
 	MOV	Ren_WFP,SI		; stash it
 	MOV	DI,OFFSET DOSGroup:OpenBuf  ; appropriate spot
-	invoke	TransFCB		; wham
+	invoke_fn TransFCB		; wham
 					; NOTE that this call is pointing
 					;  back to the ORIGINAL FCB so
 					;  SATTRIB gets set correctly
 	JC	BadRen			; error
-	invoke	DOS_Rename
+	invoke_fn DOS_Rename
 	JC	BadRen
 	transfer    FCB_Ret_OK
 BadRen:
@@ -416,7 +416,7 @@ Procedure   SaveFCBInfo,NEAR
 	ASSUME	CS:DOSGroup,DS:NOTHING,ES:NOTHING,SS:DOSGroup
 	LES	DI,ThisSFT
 	Assert	ISSFT,<ES,DI>,"SaveFCBInfo"
-	invoke	IsSFTNet
+	invoke_fn IsSFTNet
 	JZ	SaveLocal		; if not network then save local info
 ;
 ;----- In net support -----
@@ -439,7 +439,7 @@ ELSE
 ENDIF
 SaveLocal:
 	IF	Installed
-	Invoke	CheckShare
+	Invoke_fn CheckShare
 	JZ	SaveNoShare		; no sharer
 	JMP	SaveShare		; sharer present
 
@@ -513,7 +513,7 @@ SaveSFN:
 ; get set to 0.  Others -= 8000h.  This LRU = 8000h
 ;
 	MOV	BX,sf_position
-	invoke	ResetLRU
+	invoke_fn ResetLRU
 ;
 ; Set new LRU to AX
 ;
@@ -577,7 +577,7 @@ Procedure   SetOpenAge,NEAR
 	MOV	ES:[DI].sf_OpenAge,AX
 	JNZ	SetDone
 	MOV	BX,sf_Position+2
-	invoke	ResetLRU
+	invoke_fn ResetLRU
 SetDone:
 	MOV	OpenLRU,AX
 	return
@@ -600,7 +600,7 @@ Break	<LRUFCB - perform LRU on FCB sfts>
 
 Procedure   LRUFCB,NEAR
 	ASSUME CS:DOSGroup,DS:NOTHING,ES:NOTHING,SS:NOTHING
-	Invoke	Save_World
+	Invoke_fn Save_World
 ;
 ; Find nth oldest NET/SHARE FCB.  We want to find its age for the second scan
 ; to find the lease recently used one that is younger than the open age.  We
@@ -658,7 +658,7 @@ lru3:
 	TEST	ES:[DI].sf_flags,sf_isnet   ;	  if (!net[i]
 	JNZ	lru35
 if installed
-	Invoke	CheckShare		;		&& !sharing)
+	Invoke_fn CheckShare		;		&& !sharing)
 	JZ	lru5			;	  else
 ENDIF
 ;
@@ -711,7 +711,7 @@ lru75:
 lru8:
 	TEST	ES:[DI].sf_flags,sf_isnet
 	jnz	lru85			; is for network, go check age
-	invoke	CheckShare		; sharer here?
+	invoke_fn CheckShare		; sharer here?
 	jz	lru86			; no, go check lru
 ;
 ; Network or sharer.  Check age
@@ -753,7 +753,7 @@ lru11:
 	TEST	ES:[DI].sf_flags,sf_isNet
 	JNZ	LRUClose
 IF INSTALLED
-	Invoke	CheckShare
+	Invoke_fn CheckShare
 	JZ	LRUDone
 ENDIF
 ;
@@ -770,7 +770,7 @@ LRUClose:
 ;	Message     1,":"
 ;	MessageNum  <WORD PTR THISSFT>
 
-	Invoke	DOS_Close
+	Invoke_fn DOS_Close
 	jnc	LRUClose		; no error => clean up
 	cmp	al,error_invalid_handle
 	jz	LRUClose
@@ -778,9 +778,9 @@ LRUClose:
 	JMP	short LRUDead
 LRUDone:
 	XOR	AL,AL
-	invoke	BlastSFT		; fill SFT with 0 (AL)
+	invoke_fn BlastSFT		; fill SFT with 0 (AL)
 LRUDead:
-	Invoke	Restore_World
+	Invoke_fn Restore_World
 	ASSUME	DS:NOTHING
 	LES	DI,ThisSFT
 	Assert	ISSFT,<ES,DI>,"LRUFCB return"
@@ -822,7 +822,7 @@ Procedure   FCBRegen,NEAR
 ; around, presume that we have cycled out the FCB and give the hard error.
 ; Otherwise, just return with carry set.
 ;
-	invoke	CheckShare		; test for sharer
+	invoke_fn CheckShare		; test for sharer
 	JNZ	RegenFail		; yep, fail this.
 	MOV	AX,multNet SHL 8	; install check on multnet
 	INT	2FH
@@ -832,7 +832,7 @@ RegenFail:
 	MOV	AX,User_In_AX
 	cmp	AH,fcb_close
 	jz	RegenDead
-	invoke	FCBHardErr		; massive hard error.
+	invoke_fn FCBHardErr		; massive hard error.
 RegenDead:
 	STC
 	return				; carry set
@@ -841,7 +841,7 @@ RegenDead:
 ; fail the operation.
 ;
 RegenNoSharing:
-	invoke	CheckShare		; Sharing around?
+	invoke_fn CheckShare		; Sharing around?
 	JNZ	RegenFail
 ;
 ; Find an SFT for this guy.
@@ -885,7 +885,7 @@ RegenCopyName2:
 notkanj9:				;AN000;
  ENDIF					;AN000;
 
-	Invoke	UCase
+	Invoke_fn UCase
 StuffChar2:
 	STOSB
 	LOOP	RegenCopyName2
@@ -894,7 +894,7 @@ DoneNam2:
 	MOV	[ATTRIB],attr_hidden + attr_system + attr_directory
 					; Must set this to something interesting
 					; to call DEVNAME.
-	Invoke	DevName 		; check for device
+	Invoke_fn DevName 		; check for device
 	ASSUME	DS:NOTHING,ES:NOTHING
 	RestoreReg  <DI,ES,SI,DS>
 	JC	RegenFileNoSharing	; not found on device list => file
@@ -917,7 +917,7 @@ RegenFileNoSharing:
 	MOV	AX,ES:[DI].sf_flags
 	AND	AX,03Fh
 	SaveReg <DS,SI>
-	Invoke	Find_DPB
+	Invoke_fn Find_DPB
 	MOV	WORD PTR ES:[DI].sf_devptr,SI
 	MOV	WORD PTR ES:[DI].sf_devptr+2,DS
 	RestoreReg  <SI,DS>
@@ -954,7 +954,7 @@ RegenCopyName:
 notkanj1:
 	ENDIF				;AN000;
 
-	Invoke	UCase
+	Invoke_fn UCase
 StuffChar:
 	STOSB
 	LOOP	RegenCopyName
@@ -1143,9 +1143,9 @@ Procedure   SFTFromFCB,NEAR
 
 	fmt	typFCB,LevCheck,<"FCB $x:$x does not match SFT $x:$x\n">,<DS,SI,ES,DI>
 
-	Invoke	Save_World
+	Invoke_fn Save_World
 	invoke	FCBRegen
-	Invoke	Restore_World		; restore world
+	Invoke_fn Restore_World		; restore world
 	MOV	AX,EXTERR
 	retc
 
@@ -1176,7 +1176,7 @@ Procedure   FCBHardErr,NEAR
 	MOV	DI,1				; Fake some registers
 	MOV	CX,DI
 	MOV	DX,ES:[BP.dpb_first_sector]
-	invoke	HARDERR
+	invoke_fn HARDERR
 	STC
 	return
 EndProc FCBHardErr

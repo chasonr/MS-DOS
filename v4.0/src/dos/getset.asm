@@ -95,7 +95,7 @@ ASSUME	DS:NOTHING,ES:NOTHING
 	MOV	BX,[USERNUM + 2]
 	MOV	CX,[USERNUM]
 	MOV	AX,[MSVERS]
-	invoke	get_user_stack
+	invoke_fn get_user_stack
 ASSUME	DS:NOTHING
 	MOV	[SI.user_BX],BX
 	MOV	[SI.user_CX],CX
@@ -256,7 +256,7 @@ international_copy:
 	MOV	CX,OLD_COUNTRY_SIZE
 	REP	MOVSB			 ;copy country info
 international_ok3:
-	invoke	get_user_stack
+	invoke_fn get_user_stack
 ASSUME	DS:NOTHING
 	MOV	[SI.user_BX],BX
 international_ok:
@@ -329,8 +329,8 @@ capit:					;AN000;
 	CMP	AL,CAP_ONE_CHAR 	;AN000;;MS.cap one char ?
 	JNZ	chkyes			;AN000;;MS. no
 	MOV	AL,DL			;AN000;;MS. set up AL
-	invoke	GETLET3 		;AN000;;MS. upper case it
-	invoke	get_user_stack		;AN000;;MS. get user stack
+	invoke_fn GETLET3 		;AN000;;MS. upper case it
+	invoke_fn get_user_stack		;AN000;;MS. get user stack
 	MOV	byte ptr [SI.user_DX],AL;AN000;;MS. user's DL=AL
 	JMP	SHORT nono		;AN000;;MS. done
 chkyes: 				;AN000;
@@ -377,7 +377,7 @@ concap: 				;AN000;
 notdbcs:				;AN000;
  ENDIF					;AN000;
 
-	invoke	GETLET3 		;AN000;;MS. upper case it
+	invoke_fn GETLET3 		;AN000;;MS. upper case it
 	MOV	byte ptr [SI-1],AL	;AN000;;MS. store back
 next99: 				;AN000;
 	LOOP	concap			;AN000;;MS. continue
@@ -398,7 +398,7 @@ concap2:				;AN000;
 	JMP	concap2 		;AN000;;MS.
 notdbcs2:				;AN000;
  ENDIF					;AN000;
-	invoke	GETLET3 		;AN000;;MS. upper case it
+	invoke_fn GETLET3 		;AN000;;MS. upper case it
 	MOV	byte ptr [SI-1],AL	;AN000;;MS. store back
 	JMP	concap2 		;AN000;;MS. continue
 
@@ -449,7 +449,7 @@ OK_RETN:
 	MOV	CX,AX			; CX = actual length returned
 	MOV	AX,BX			; return sys code page in ax
 GETDONE:
-	invoke	get_user_stack		; return actual length to user's CX
+	invoke_fn get_user_stack		; return actual length to user's CX
 	MOV	[SI.user_CX],CX
 	transfer SYS_RET_OK
 setsize:
@@ -509,7 +509,7 @@ ASSUME	DS:NOTHING,ES:NOTHING
 	JNZ	setglpg 	       ; set global cod epage
 	MOV	BX,[SI.ccDosCodePage]  ; get active code page id
 	MOV	DX,[SI.ccSysCodePage]  ; get sys code page id
-	invoke	get_user_stack
+	invoke_fn get_user_stack
 ASSUME DS:NOTHING
 	MOV	[SI.user_BX],BX        ; update returned bx
 	MOV	[SI.user_DX],DX        ; update returned dx
@@ -566,15 +566,15 @@ ASSUME	DS:NOTHING,ES:NOTHING
 
 	context DS
 	MOV	AL,DL
-	invoke	GetThisDrv		; Get drive
+	invoke_fn GetThisDrv		; Get drive
 SET_AX_RET:
 	JC	BADFDRV
-	invoke	DISK_INFO
+	invoke_fn DISK_INFO
 	XCHG	DX,BX
 	JC	SET_AX_RET		; User FAILed to I 24
 	XOR	AH,AH			; Chuck Fat ID byte
 DoSt:
-	invoke	get_user_stack
+	invoke_fn get_user_stack
 ASSUME	DS:NOTHING
 	MOV	[SI.user_DX],DX
 	MOV	[SI.user_CX],CX
@@ -583,7 +583,7 @@ ASSUME	DS:NOTHING
 	return
 BADFDRV:
 ;	MOV	AL,error_invalid_drive	; Assume error
-	invoke	FCB_RET_ERR
+	invoke_fn FCB_RET_ERR
 	MOV	AX,-1
 	JMP	DoSt
 EndProc $GET_DRIVE_FREESPACE
@@ -601,7 +601,7 @@ ASSUME	DS:NOTHING,ES:NOTHING
 
 	MOV	BX,WORD PTR [DMAADD]
 	MOV	CX,WORD PTR [DMAADD+2]
-	invoke	get_user_stack
+	invoke_fn get_user_stack
 	MOV	[SI.user_BX],BX
 	MOV	[SI.user_ES],CX
 	return
@@ -649,7 +649,7 @@ ASSUME	DS:NOTHING,ES:NOTHING
 
 	MOV	AL,DL
 	INC	AL			; A=1, b=2...
-	invoke	GetVisDrv		; see if visible drive
+	invoke_fn GetVisDrv		; see if visible drive
 	JC	SETRET			; errors do not set
 ;	LDS	SI,ThisCDS		; get CDS
 ;	TEST	[SI].curdir_flags,curdir_splice ; was it spliced?
@@ -673,7 +673,7 @@ ASSUME	DS:NOTHING,ES:NOTHING
 
 	CALL	RECSET
 	LES	BX,DWORD PTR ES:[BX]
-	invoke	get_user_stack
+	invoke_fn get_user_stack
 	MOV	[SI.user_BX],BX
 	MOV	[SI.user_ES],ES
 	return
@@ -774,7 +774,7 @@ CharSetSw:
 CharGetDev:
 	MOV	DL,-1
 CharSet:
-	Invoke	Get_User_Stack
+	Invoke_fn Get_User_Stack
 	ASSUME	DS:NOTHING
 	MOV	[SI.User_DX],DX
 CharSetDev:
@@ -797,7 +797,7 @@ BREAK <$GetExtendedError - Return Extended DOS error code>
 	LES	DI,[EXTERRPT]
 	MOV	BX,WORD PTR [EXTERR_ACTION]	; BL = Action, BH = Class
 	MOV	CH,[EXTERR_LOCUS]
-	invoke	get_user_stack
+	invoke_fn get_user_stack
 ASSUME	DS:NOTHING
 	MOV	[SI.user_DI],DI
 	MOV	[SI.user_ES],ES
@@ -897,7 +897,7 @@ get_interim:									;AN000;
 	or	al, al			; AL = 0 (get table)?  ;AN000;
 	jnz	okok					       ;AN000;
 get_lbt:						       ;AN000;
-	invoke	get_user_stack				       ;AN000;
+	invoke_fn get_user_stack				       ;AN000;
  assume ds:nothing					       ;AN000;
 	MOV	[SI.user_SI], Offset Dosgroup:DBCS_TAB+2       ;AN000;
 	MOV	[SI.user_DS], CS			       ;AN000;

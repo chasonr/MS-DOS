@@ -91,7 +91,7 @@ keep_shrink:
 	MOV	BX,DX
 	PUSH	BX
 	PUSH	ES
-	invoke	$SETBLOCK		; ignore return codes.
+	invoke_fn $SETBLOCK		; ignore return codes.
 	POP	DS
 	POP	BX
 	JC	keep_done		; failed on modification
@@ -137,7 +137,7 @@ PAGE
 
 	entry	Exit_inner
 
-	invoke	get_user_stack
+	invoke_fn get_user_stack
 	PUSH	[CurrentPDB]
 	POP	[SI.user_CS]
 	JMP	SHORT abort_inner
@@ -168,7 +168,7 @@ ASSUME	DS:NOTHING,ES:NOTHING
 
 	MOV	AH,[exit_type]
 	MOV	[exit_code],AX
-	invoke	Get_user_stack
+	invoke_fn Get_user_stack
 	MOV	DS,[SI.user_CS] 	; set up old interrupts
 	XOR	AX,AX
 	MOV	ES,AX

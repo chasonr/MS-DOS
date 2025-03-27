@@ -75,7 +75,7 @@ PAGE
 	DOSAssume   CS,<DS>,"Get_File_Info"
 	ASSUME	ES:NOTHING
 
-	Invoke	TestNet
+	Invoke_fn TestNet
 	JNC	Local_Info
 ;	invoke	OWN_SHARE2		       ;IFS. IFS owns share ?		;AN000;
 ;	JZ	ifsshare		       ;IFS. yes			;AN000;
@@ -107,7 +107,7 @@ nofiles:
 LOCAL_INFO:
 	EnterCrit   critDisk
 	MOV	[NoSetDir],1		; if we find a dir, don't change to it
-	invoke	Get_FAST_PATH
+	invoke_fn Get_FAST_PATH
 info_check:
 	JNC	info_check_dev
 
@@ -202,7 +202,7 @@ BAD_ACC:
 	return
 
 set_look:
-	Invoke	TestNet
+	Invoke_fn TestNet
 	JNC	Local_Set
 
 IF NOT Installed
@@ -219,7 +219,7 @@ LOCAL_SET:
 	EnterCrit   critDisk
 	PUSH	AX			; Save new attributes
 	MOV	[NoSetDir],1		; if we find a dir, don't change to it
-	invoke	GetPath 		; get path through fastopen if there	 ;AC000;
+	invoke_fn GetPath 		; get path through fastopen if there	 ;AC000;
 	JNC	set_check_device
 	POP	BX			; Clean stack (don't zap AX)
 	JMP	NO_PATH
@@ -233,7 +233,7 @@ set_check_device:
 
 set_check_share:
 	POP	AX			; Get new attributes
-	invoke	REN_DEL_Check
+	invoke_fn REN_DEL_Check
 	JNC	set_do
 	MOV	AX,error_sharing_violation
 	jmp	short	ok_bye
@@ -245,7 +245,7 @@ set_do:
 
 	TEST	ES:[DI.buf_flags],buf_dirty  ;LB. if already dirty		;AN000;
 	JNZ	yesdirty		  ;LB.	  don't increment dirty count   ;AN000;
-	invoke	INC_DIRTY_COUNT 	  ;LB.					;AN000;
+	invoke_fn INC_DIRTY_COUNT 	  ;LB.					;AN000;
 	OR	ES:[DI.buf_flags],buf_dirty
 yesdirty:
 	MOV	AL,[THISDRV]
@@ -255,11 +255,11 @@ yesdirty:
 	MOV	AH,0		  ; dir entry update
 	MOV	DL,AL		  ; drive number A=0,B=1,,
 	MOV	DI,BX		  ; ES:DI -> dir entry
-	invoke	FastOpen_Update
+	invoke_fn FastOpen_Update
 	POP	DI
 	POP	DX
 ;;;; 9/11/86 F.C update fastopen cache
-	invoke	FlushBuf
+	invoke_fn FlushBuf
 	JNC	OK_BYE
 	MOV	AX,error_file_not_found
 OK_BYE:
@@ -274,7 +274,7 @@ EndProc SET_FILE_ATTRIBUTE
 	ASSUME	DS:NOTHING,ES:NOTHING
 
 	OR	[FastOpenFlg],FastOpen_Set ;FO. trigger fastopen		;AN000;
-	invoke	GetPath
+	invoke_fn GetPath
 	PUSHF			       ;FO.					;AN000;
 	AND    [FastOpenFlg],Fast_yes  ;FO. clear all fastopen flags		;AN000;
 	POPF			       ;FO.					;AN000;

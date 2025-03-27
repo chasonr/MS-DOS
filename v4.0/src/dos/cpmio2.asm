@@ -78,9 +78,9 @@ sj0:						;AN000;
 	popf					;AN000;
 	jz	$STD_CON_INPUT			;AN000;
  ELSE						;AN000;
-	invoke	$STD_CON_INPUT_NO_ECHO
+	invoke_fn $STD_CON_INPUT_NO_ECHO
 	PUSH	AX
-	invoke	OUTT
+	invoke_fn OUTT
 	POP	AX
  ENDIF						;AN000;
 	return
@@ -115,10 +115,10 @@ OUTCH:
 	AND	BYTE PTR [CHARCO],00111111B	;AN000; every 64th char
 	JNZ	OUTSKIP
 	PUSH	AX
-	invoke	STATCHK
+	invoke_fn STATCHK
 	POP	AX
 OUTSKIP:
-	invoke	RAWOUT				;output the character
+	invoke_fn RAWOUT				;output the character
 	POP	SI
 	POP	DS
  IF  DBCS				;AN000;
@@ -131,7 +131,7 @@ OUTSKIP:
 	PUSH	DS
 	PUSH	SI
 	MOV	BX,1
-	invoke	GET_IO_SFT
+	invoke_fn GET_IO_SFT
 	JC	TRIPOPJ
 	MOV	BX,[SI.sf_flags]
 	TEST	BX,sf_isnet			; output to NET?
@@ -139,7 +139,7 @@ OUTSKIP:
 	TEST	BX,devid_device 		; output to file?
 	JZ	TRIPOPJ 			; if so, no echo
 	MOV	BX,4
-	invoke	GET_IO_SFT
+	invoke_fn GET_IO_SFT
 	JC	TRIPOPJ
 	TEST	[SI.sf_flags],sf_net_spool	; StdPrn redirected?
 	JZ	LISSTRT2J			; No, OK to echo
@@ -169,7 +169,7 @@ CTRLOUT:
 	JCXZ	POPTAB
 TABLP:
 	MOV	AL," "
-	invoke	OUTT
+	invoke_fn OUTT
 	LOOP	TABLP
 POPTAB:
 	POP	CX
@@ -200,11 +200,11 @@ NOT_CTRLU:
 
 	PUSH	AX
 	MOV	AL,"^"
-	invoke	OUTT		;Print '^' before control chars
+	invoke_fn OUTT		;Print '^' before control chars
 	POP	AX
 	OR	AL,40H		;Turn it into Upper case mate
 CTRLU:
-	invoke	OUTT
+	invoke_fn OUTT
 	return
 EndProc $STD_CON_OUTPUT
 
@@ -220,19 +220,19 @@ Break
 	procedure   $STD_AUX_INPUT,NEAR   ;System call 3
 ASSUME	DS:NOTHING,ES:NOTHING
 
-	invoke	STATCHK
+	invoke_fn STATCHK
 	MOV	BX,3
-	invoke	GET_IO_SFT
+	invoke_fn GET_IO_SFT
 	retc
 	JMP	SHORT TAISTRT
 AUXILP:
-	invoke	SPOOLINT
+	invoke_fn SPOOLINT
 TAISTRT:
 	MOV	AH,1
-	invoke	IOFUNC
+	invoke_fn IOFUNC
 	JZ	AUXILP
 	XOR	AH,AH
-	invoke	IOFUNC
+	invoke_fn IOFUNC
 	return
 EndProc $STD_AUX_INPUT
 
@@ -272,12 +272,12 @@ ASSUME	DS:NOTHING,ES:NOTHING
 SENDOUT:
 	MOV	AL,DL
 	PUSH	AX
-	invoke	STATCHK
+	invoke_fn STATCHK
 	POP	AX
 	PUSH	DS
 	PUSH	SI
 LISSTRT2:
-	invoke	RAWOUT2
+	invoke_fn RAWOUT2
 TRIPOP:
 	POP	SI
 	POP	DS
@@ -297,7 +297,7 @@ Break
 	procedure   $STD_CON_INPUT_STATUS,NEAR	 ;System call 11
 ASSUME	DS:NOTHING,ES:NOTHING
 
-	invoke	STATCHK
+	invoke_fn STATCHK
 	MOV	AL,0			; no xor!!
 	retz
 	OR	AL,-1
@@ -319,10 +319,10 @@ ASSUME	DS:NOTHING,ES:NOTHING
 	PUSH	AX
 	PUSH	DX
 	XOR	BX,BX
-	invoke	GET_IO_SFT
+	invoke_fn GET_IO_SFT
 	JC	BADJFNCON
 	MOV	AH,4
-	invoke	IOFUNC
+	invoke_fn IOFUNC
 
 BADJFNCON:
 	POP	DX

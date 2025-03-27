@@ -79,7 +79,7 @@ EndProc SHARE_CHECK
 	MOV     DI,1                            ; Fake some registers
 	MOV     CX,DI
 	MOV     DX,ES:[BP.dpb_dir_sector]
-	invoke  HARDERR
+	invoke_fn  HARDERR
 	POP     DI
 	POP     ES
 	POP     DS
@@ -138,7 +138,7 @@ attempt:
 	call    Share_Check             ; attempt to enter into the sharing set
 	RestoreReg  <CX>
 	jnc     done                    ; success, let the user see this
-	invoke  Idle                    ; wait a while
+	invoke_fn  Idle                    ; wait a while
 	loop    attempt                 ; go back for another attempt
 	call    Share_violation         ; signal the problem to the user
 	jnc     retry                   ; user said to retry, go do it

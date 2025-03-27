@@ -108,11 +108,11 @@ LocalClose:
 	JZ	nofastsk	       ;FS. yes, dont do it			;AN000;
 	LDS	SI,ES:[DI.sf_devptr]   ;FS.					;AN000;
 	MOV	DL,[SI.dpb_drive]      ;FS. dl= drive				;AN000;
-	invoke	FastSeek_Close	       ;FS. invoke fastseek			;AN000;
+	invoke_fn FastSeek_Close	       ;FS. invoke fastseek			;AN000;
 nofastsk:
 	Context DS
 	SaveReg <AX,BX>
-	invoke	ShareEnd
+	invoke_fn ShareEnd
 	RestoreReg  <BX,AX>
 ;
 ; Commit enters here.  AX from commit MUST be <> 1, BX is flags word
@@ -146,13 +146,13 @@ clook:
 ; ES:DI point to directory entry
 ; DS:SI point to unpacked name
 ;
-	invoke	XCHGP
+	invoke_fn XCHGP
 ;
 ; ES:DI point to unpacked name
 ; DS:SI point to directory entry
 ;
-	invoke	MetaCompare
-	invoke	XCHGP
+	invoke_fn MetaCompare
+	invoke_fn XCHGP
 	RestoreReg  <SI,DI>
 	JZ	CLOSE_GO		; Name OK
 Bye:	MOV	DI,SI
@@ -170,7 +170,7 @@ CLOSE_GO:
 	MOV	CH,ES:[DI].dir_attr
 	MOV	AL,[SI].sf_attr
 	MOV	Attrib,AL
-	invoke	MatchAttributes
+	invoke_fn MatchAttributes
 	JNZ	Bye			; attributes do not match
 	JMP	SHORT setattr		;FT.
 nofcb:
@@ -203,7 +203,7 @@ setattr:
 ;; File Tagging
 	TEST	ES:[BX.buf_flags],buf_dirty  ;LB. if already dirty		;AN000;
 	JNZ	yesdirty		  ;LB.	  don't increment dirty count   ;AN000;
-	invoke	INC_DIRTY_COUNT 	  ;LB.					;AN000;
+	invoke_fn INC_DIRTY_COUNT 	  ;LB.					;AN000;
 	OR	ES:[BX.buf_flags],buf_dirty ;Buffer dirty
 yesdirty:
 	SaveReg  <DS,SI>
@@ -227,11 +227,11 @@ do_update2:				;AN011;F.O.
 	MOV	CX,[OLD_FIRSTCLUS]	;AN011;F.O.
 do_update:				  ;AN005;
 	Context DS
-	invoke	FastOpen_Update 	; invoke fastopen
+	invoke_fn FastOpen_Update 	; invoke fastopen
 	POP	DX
 
 ;;; 10/1/86  update fastopen cache
-	invoke	FLUSHBUF		; flush all relevant buffers
+	invoke_fn FLUSHBUF		; flush all relevant buffers
 	RestoreReg  <DI,ES>
 	MOV	AL,error_access_denied
 	JC	CloseFinish
@@ -243,7 +243,7 @@ CloseFinish:
 ;
 ;;;; 7/21/86
 	PUSHF				; save flag from DirFromSFT
-	invoke	Dev_Close_SFT
+	invoke_fn Dev_Close_SFT
 	POPF
 ;;;; 7/21/86
 ;
@@ -313,14 +313,14 @@ Procedure   DirFromSFT,NEAR
 
 	PUSH	[HIGH_SECTOR]			 ;F.C. >32mb
 	PUSH	DX
-	invoke	FATREAD_SFT		; ES:BP points to DPB, [THISDRV] set
+	invoke_fn FATREAD_SFT		; ES:BP points to DPB, [THISDRV] set
 					; [THISDPB] set
 	POP	DX
 	POP	[HIGH_SECTOR]			 ;F.C. >32mb
 	JC	PopDone
 	XOR	AL,AL			; Pre read
 	MOV	[ALLOWED],allowed_FAIL + allowed_RETRY
-	invoke	GETBUFFR
+	invoke_fn GETBUFFR
 	JC	PopDone
 	RestoreReg  <SI,DS>		; Get back SFT pointer
 	ASSUME	DS:NOTHING
@@ -383,7 +383,7 @@ LOCAL_COMMIT:
 	MOV	AX,-1
 	call	CloseEntry
 	PUSHF				;PTM.					;AN000;
-	invoke	DEV_OPEN_SFT		;PTM.  increment device count		;AN000;
+	invoke_fn DEV_OPEN_SFT		;PTM.  increment device count		;AN000;
 	POPF				;PTM.					;AN000;
 	LeaveCrit CritDisk		;PTM.					;AN000;
 	return
@@ -415,7 +415,7 @@ Procedure   SetSFTTimes,NEAR
 	TEST	BX,sf_close_nodate
 	retnz				; nodate => no timestamp
 	SaveReg <AX,BX>
-	invoke	DATE16			; Date/Time to AX/DX
+	invoke_fn DATE16			; Date/Time to AX/DX
 	MOV	ES:[DI.sf_date],AX
 	MOV	ES:[DI.sf_time],DX
 	XOR	AX,AX

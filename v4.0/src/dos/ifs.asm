@@ -199,12 +199,12 @@ str_cmp:								  ;AN000;
 	 mov	 DS,[Temp_Var]	  ; restore DS				  ;AN000;
 	 cmp	 ah,36					    ;AN000;
 	 jne	 str_cpy				    ;AN000;
-	 invoke  strcmp 	 ; string compare	    ;AN000;
+	 invoke_fn  strcmp 	 ; string compare	    ;AN000;
 	 jmp	 SHORT dos_exit 					  ;AN000;
 str_cpy:								  ;AN000;
 	 cmp	 ah,37					    ;AN000;
 	 jne	 dos_error				    ;AN000;
-	 invoke  strcpy 	 ; string copy		    ;AN000;
+	 invoke_fn  strcpy 	 ; string copy		    ;AN000;
 	 jmp	 SHORT dos_exit 					  ;AN000;
 
 Dos_Error:								  ;AN000;
@@ -351,7 +351,7 @@ PROCEDURE  GET_DOS_INFO,NEAR						   ;AN000;
 	cmp    al,0			; TIME and DATE ??		   ;AN000;
 	jne    chk_al1							   ;AN000;
 
-	Invoke	ReadTime		; get time in CX:DX		   ;AN000;
+	Invoke_fn ReadTime		; get time in CX:DX		   ;AN000;
 
 	push	cx			; save time			   ;AN000;
 	push	dx							   ;AN000;

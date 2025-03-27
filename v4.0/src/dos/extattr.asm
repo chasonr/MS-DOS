@@ -151,7 +151,7 @@ geteaname:
 	MOV    CX,2		       ;AN000;;FT. FAKE FAKE ......................
 ;;	MOV    CX,[MAX_EANAME_SIZE]    ;AN000;;FT. get name size
 set_user_cx:			       ;AN000;
-	invoke get_user_stack	       ;AN000;;FT. get user stack
+	invoke_fn get_user_stack	       ;AN000;;FT. get user stack
 	MOV    [SI.user_CX],CX	       ;AN000;;FT.
 	JMP    OKexit		       ;AN000;;FT. exit
 

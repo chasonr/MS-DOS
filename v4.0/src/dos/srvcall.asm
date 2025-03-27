@@ -115,7 +115,7 @@ ASSUME	DS:NOTHING,ES:NOTHING
 	MOV	DI,OFFSET DOSGROUP:SWAP_AREA_TABLE ;IFS.			;AN000;
 	PUSH	SS				   ;IFS.			;AN000;
 	POP	ES				   ;IFS.			;AN000;
-	invoke	GET_USER_STACK			   ;IFS.			;AN000;
+	invoke_fn GET_USER_STACK			   ;IFS.			;AN000;
 	MOV	[SI.user_DS],ES 		   ;IFS.   ds:si -> swap tab	;AN000;
 	MOV	[SI.user_SI],DI 		   ;IFS.			;AN000;
 	transfer SYS_RET_OK			   ;IFS.			;AN000;
@@ -129,7 +129,7 @@ NO_SET_ID:
 	PUSH	SERVERLEAVE		; push return address
 	PUSH	ServerTab		; push table address
 	PUSH	AX
-	Invoke	TableDispatch
+	Invoke_fn TableDispatch
 	MOV	EXTERR_LOCUS,errLoc_Unk ; Extended Error Locus
 	error	error_invalid_function
 ServerReturn:
@@ -145,19 +145,19 @@ ASSUME	DS:NOTHING,ES:NOTHING
 	EnterCrit   critSFT		; Gonna scan SFT cache, lock it down
 CommitLoop:
 	SaveReg <BX>
-	Invoke	SFFromSFN
+	Invoke_fn SFFromSFN
 	JC	CommitDone
 	CMP	ES:[DI].sf_Ref_Count,0	;	if (ThisSFT->refcount != 0)
 	JZ	CommitNext
 	CMP	ES:[DI].sf_Ref_Count,sf_busy  ; BUSY SFTs have god knows what
 	JZ	CommitNext		      ;   in them.
 ;	TEST	ES:[DI].sf_flags,sf_isnet
-	invoke	Test_IFS_Remote 	;IFS.					;AN000;
+	invoke_fn Test_IFS_Remote 	;IFS.					;AN000;
 	JNZ	CommitNext		;  Skip Network SFTs so the SERVER
 					;	doesn't deadlock
 	MOV	WORD PTR ThisSFT,DI
 	MOV	WORD PTR ThisSFT+2,ES
-	Invoke	DOS_Commit		;	    DOSCommit ();
+	Invoke_fn DOS_Commit		;	    DOSCommit ();
 CommitNext:
 	RestoreReg  <BX>
 	INC	BX
@@ -209,7 +209,7 @@ else
 	Call	MFT_get
 endif
 	JC	func_err
-	invoke	get_user_stack
+	invoke_fn get_user_stack
 	MOV	[SI.user_BX],BX
 	MOV	[SI.user_DI],DI
 	MOV	[SI.user_ES],ES
@@ -221,13 +221,13 @@ SRV_CALL:
 ASSUME	DS:NOTHING,ES:NOTHING
 	POP	AX			; get rid of call to $srvcall
 	SaveReg <DS,SI>
-	invoke	GET_USER_STACK
+	invoke_fn GET_USER_STACK
 	RestoreReg  <DI,ES>
 ;
 ; DS:SI point to stack
 ; ES:DI point to DPL
 ;
-	invoke	XCHGP
+	invoke_fn XCHGP
 ;
 ; DS:SI point to DPL
 ; ES:DI point to stack
@@ -262,7 +262,7 @@ ASSUME	DS:NOTHING,ES:NOTHING
 	MOV	DX,[SWAP_ALWAYS_AREA_LEN]    ;IFS. get swap always area len   ;AC000;
 	AND	DX,7FFFH		     ;IFS. clear high bit	      ;AC000;
 	MOV	CX,[SWAP_AREA_LEN]	     ;IFS. get swap len 	      ;AC000;
-	invoke	GET_USER_STACK
+	invoke_fn GET_USER_STACK
 	MOV	[SI.user_DS],ES 	     ;	set user regs
 	MOV	[SI.user_SI],DI 	     ;
 	MOV	[SI.user_DX],DX 	     ;

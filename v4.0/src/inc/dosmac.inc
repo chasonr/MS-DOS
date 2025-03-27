@@ -365,11 +365,11 @@ ENDM
 BREAK <Critical section macros>
 
 EnterCrit MACRO section
-	Invoke  E&section
+	invoke_fn  E&section
 ENDM
 
 LeaveCrit MACRO section
-	Invoke  L&section
+	invoke_fn  L&section
 ENDM
 
 Break   <message - display a message>

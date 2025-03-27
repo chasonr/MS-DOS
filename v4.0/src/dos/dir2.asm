@@ -199,7 +199,7 @@ NoSave:
 ;
 	mov	di,dx
 	mov	byte ptr [di],0 	; end of string
-	invoke	Build_device_ent	; Clears carry sets zero
+	invoke_fn Build_device_ent	; Clears carry sets zero
 	INC	AL			; reset zero
 	return
 
@@ -287,7 +287,7 @@ NO_CURR_D:
 ;
 GOT_SEARCH_CLUSTER:
 	LES	BP,[THISDPB]		; Get ES:BP
-	invoke	SETDIRSRCH
+	invoke_fn SETDIRSRCH
 	JC	SETFERR
 	JMP	FINDPATH
 
@@ -313,7 +313,7 @@ Procedure   ChkDev,NEAR
 	MOV	DI,OFFSET DOSGROUP:NAME1
 	MOV	CX,9
 TESTLOOP:
-	invoke	GETLET
+	invoke_fn GETLET
  IF  DBCS				;AN000;
 	invoke	Testkanj		;AN000;; 2/13/KK
 	jz	Notkanja		;AN000;; 2/13/KK
@@ -326,7 +326,7 @@ Notkanja:				;AN000;
  ENDIF					;AN000;
 	CMP	AL,'.'
 	JZ	TESTDEVICE
-	invoke	PATHCHRCMP
+	invoke_fn PATHCHRCMP
 	JZ	NOTDEV
 	OR	AL,AL
 	JZ	TESTDEVICE
@@ -343,7 +343,7 @@ TESTDEVICE:
 	REP	STOSB
 	MOV	AX,SS
 	MOV	DS,AX
-	invoke	DEVNAME
+	invoke_fn DEVNAME
 	return
 EndProc ChkDev
 
@@ -365,7 +365,7 @@ Break	<ROOTPATH, FINDPATH -- PARSE A PATH>
 	DOSAssume   CS,<DS>,"RootPath"
 	ASSUME	ES:NOTHING
 
-	invoke	SETROOTSRCH
+	invoke_fn SETROOTSRCH
 	CMP	BYTE PTR [SI],0
 	JNZ	FINDPATH
 
@@ -569,7 +569,7 @@ NOT_LAST:
 ;
 	PUSH	ES			; Save ES:BP
 	context ES
-	invoke	DevName 		; blast BX
+	invoke_fn DevName 		; blast BX
 	POP	ES			; Restore ES:BP
 	ASSUME	ES:NOTHING
 	JC	FindFile		; Not a device
@@ -599,7 +599,7 @@ NOE5:
 	JNC	DIR_FOUND		; found dir entry
 
 ;DOS 3.3 FastOPen 6/12/86 F.C.
-	invoke	FINDENTRY
+	invoke_fn FINDENTRY
 DIR_FOUND:
 	POP	CX
 	POP	ES
@@ -650,7 +650,7 @@ SetDir:
 	MOV	BX,DX		      ; not found
 	MOV	DI,[CLUSNUM]	      ; clusnum was set in LookupPath
 	PUSH	AX		      ; save device id (AH)
-	invoke	SETDIRSRCH
+	invoke_fn SETDIRSRCH
 	POP	AX		      ; restore device id (AH)
 	ADD	SP,2		      ; pop ds in stack
 	JMP	FAST_OPEN_SKIP
@@ -670,14 +670,14 @@ ASSUME	DS:NOTHING
 	PUSH	WORD PTR [DI.buf_sector+2]   ;AN000;>32mb
 	MOV	BX,DX
 	context DS
-	invoke	SETDIRSRCH		; This uses UNPACK which might blow
+	invoke_fn SETDIRSRCH		; This uses UNPACK which might blow
 					; the entry sector buffer
 	POP	[HIGH_SECTOR]
 	POP	DX
 	JC	SKIP_GETB
 	MOV	[ALLOWED],allowed_RETRY + allowed_FAIL
 	XOR	AL,AL
-	invoke	GETBUFFR		; Get the entry buffer back
+	invoke_fn GETBUFFR		; Get the entry buffer back
 SKIP_GETB:
 	POP	CX
 	POP	SI
@@ -689,7 +689,7 @@ SKIP_GETB:
 	JMP	SHORT BADPATH
 
 SET_THE_BUF:
-	invoke	SET_BUF_AS_DIR
+	invoke_fn SET_BUF_AS_DIR
 	MOV	DI,WORD PTR [CURBUF]
 	ADD	SI,DI			; Get the offsets back
 	ADD	BX,DI
@@ -708,7 +708,7 @@ FAST_OPEN_SKIP:
 	JZ	SETRET			; At end
 	INC	DI			; Skip over "/"
 	MOV	SI,DI			; Point with SI
-	invoke	PATHCHRCMP
+	invoke_fn PATHCHRCMP
 	JNZ	find_bad_name		; oops
 	JMP	FINDPATH		; Next element
 
@@ -920,7 +920,7 @@ BREAK <Build_device_ent - Make a Directory entry>
 ; Fill dir_pad
 ;
 	REP	STOSW			; Fill rest with zeros
-	invoke	DATE16
+	invoke_fn DATE16
 	MOV	DI,OFFSET DOSGROUP:DEVFCB+dir_time
 	XCHG	AX,DX
 ;
@@ -985,16 +985,16 @@ DoSplice:
 	XOR	DL,DL
 	XCHG	DL,NoSetDir
 	Context ES
-	Invoke	FStrcpy
+	Invoke_fn FStrcpy
 	MOV	SI,Temp
 	Context DS
-	Invoke	Splice
+	Invoke_fn Splice
 	ASSUME	DS:NOTHING
 	Context DS			;   FatReadCDS (ThisCDS);
 	MOV	NoSetDir,DL
 	LES	DI,ThisCDS
 	SaveReg <BP>
-	Invoke	FatRead_CDS
+	Invoke_fn FatRead_CDS
 	RestoreReg  <BP>
 	JC	FatFail
 	LDS	SI,ThisCDS		;   if (ThisCDS->ID == -1) {
@@ -1007,11 +1007,11 @@ DoSplice:
 	JNZ	DoChdir
 	MOV	DI,Temp
 	MOV	wfp_Start,DI		;	wfp_start = d;
-	Invoke	FStrCpy 		;	strcpy (d, ThisCDS->Text);
+	Invoke_fn FStrCpy 		;	strcpy (d, ThisCDS->Text);
 DoChdir:
 	Context DS
 	SaveReg <<WORD PTR SAttrib>,BP> ;	c = DOSChDir ();
-	Invoke	DOS_ChDir
+	Invoke_fn DOS_ChDir
 	RestoreReg  <BP,BX,wfp_start>	;	wfp_Start = t;
 	MOV	SAttrib,BL
 	LDS	SI,SaveCDS
@@ -1129,7 +1129,7 @@ Procedure   CheckThisDevice,NEAR
 ; Check for presence of \dev\ (Dam multiplan!)
 ;
 	MOV	AL,[SI]
-	Invoke	PathChrCmp		; is it a path char?
+	Invoke_fn PathChrCmp		; is it a path char?
 	JNZ	ParseDev		; no, go attempt to parse device
 	INC	SI			; simulate LODSB
 ;
@@ -1144,7 +1144,7 @@ Procedure   CheckThisDevice,NEAR
 	CMP	AL,"v"                  ; Not "v", assume not device
 	JNZ	NotDevice
 	LODSB
-	invoke	PathChrCmp		; do we have the last path separator?
+	invoke_fn PathChrCmp		; do we have the last path separator?
 	JNZ	NotDevice		; no. go for it.
 ;
 ; DS:SI now points to a potential drive.  Preserve them as NameTrans advances
@@ -1152,12 +1152,12 @@ Procedure   CheckThisDevice,NEAR
 ;
 ParseDev:
 	SaveReg <DS,SI> 		; preserve the source pointer
-	invoke	NameTrans		; advance DS:SI
+	invoke_fn NameTrans		; advance DS:SI
 	CMP	BYTE PTR [SI],0 	; parse entire string?
 	STC				; simulate a Carry return from DevName
 	JNZ	SkipSearch		; no parse.  simulate a file return.
 	Context DS
-	Invoke	DevName
+	Invoke_fn DevName
 	ASSUME	DS:NOTHING
 SkipSearch:
 	RestoreReg  <SI,DS>

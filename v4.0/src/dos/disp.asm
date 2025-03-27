@@ -377,7 +377,7 @@ DSKROUT:
         TEST    [CNTCFLAG],-1
         JZ      DISPCALL                ; Extra ^C checking is disabled
         PUSH    AX
-        invoke  DSKSTATCHK
+        invoke_fn  DSKSTATCHK
         POP     AX
 DISPCALL:
         MOV     BX,CS:Dispatch[BX]
@@ -392,14 +392,14 @@ IF	BUFFERFLAG
 	jne	saveuser
 	mov	cs:[SETVECTFLAG], 1
 saveuser:
-	invoke	SAVE_USER_MAP		    ;AN000;LB.	save EMS map
+	invoke_fn SAVE_USER_MAP		    ;AN000;LB.	save EMS map
 ENDIF
 
         ASSUME  DS:NOTHING
         CALL    SaveBX
 
 IF	BUFFERFLAG
-      invoke  RESTORE_USER_MAP            ;AN000;LB.  retsore EMS map
+      invoke_fn  RESTORE_USER_MAP            ;AN000;LB.  retsore EMS map
 ENDIF
 
         entry   LEAVEDOS

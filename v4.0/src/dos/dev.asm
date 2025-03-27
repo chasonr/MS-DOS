@@ -121,7 +121,7 @@ IOTO22:
 	JNZ	IOTo33								;AN000;
 	JMP	IOTOFILE							;AN000;
 IOTO33:
-	invoke	save_world
+	invoke_fn save_world
 	MOV	DX,DS
 	MOV	BX,SS
 	MOV	DS,BX
@@ -208,7 +208,7 @@ DNODRD: MOV	AH,BYTE PTR [IOCALL.REQSTAT+1]
 	AND	AH,STBUI SHR 8
 
 QuickReturn:				;AN000; 2/13/KK
-	invoke	restore_world
+	invoke_fn restore_world
 ASSUME	DS:NOTHING
 	MOV	AX,WORD PTR [DEVIOBUF]
 	return
@@ -244,10 +244,10 @@ DevErr:
 	JMP	okDevIO 		 ;AN000;
 notx25:
 	MOV	AH,CL
-	invoke	CHARHARD
+	invoke_fn CHARHARD
 	CMP	AL,1
 	JNZ	NO_RETRY
-	invoke	restore_world
+	invoke_fn restore_world
 	JMP	IOFUNC
 
 NO_RETRY:
@@ -277,7 +277,7 @@ IOIST:
 
 IOUT:
 	CALL	SETXADDR
-	invoke	DOS_WRITE
+	invoke_fn DOS_WRITE
 	CALL	RESTXADDR		; If you change this into a jmp don't
 	return				; come crying to me when things don't
 					; work ARR
@@ -285,7 +285,7 @@ IOUT:
 IOIN:
 	CALL	SETXADDR
 	OR	[DOS34_FLAG],Disable_EOF_I24   ;AN000;
-	invoke	DOS_READ
+	invoke_fn DOS_READ
 	AND	[DOS34_FLAG],NO_Disable_EOF_I24   ;AN000;
 	OR	CX,CX			; Check EOF
 	CALL	RESTXADDR
@@ -296,7 +296,7 @@ IOIN:
 
 SETXADDR:
 	POP	WORD PTR [CALLSCNT]	; Return address
-	invoke	save_world
+	invoke_fn save_world
 	PUSH	WORD PTR [DMAADD]	; Save Disk trans addr
 	PUSH	WORD PTR [DMAADD+2]
 	MOV	WORD PTR [THISSFT+2],DS
@@ -314,7 +314,7 @@ RESTXADDR:
 	POP	WORD PTR [CALLSCNT]	; Return address
 	POP	WORD PTR [DMAADD+2]	; Restore Disk trans addr
 	POP	WORD PTR [DMAADD]
-	invoke	restore_world
+	invoke_fn restore_world
 ASSUME	DS:NOTHING
 RESTRET:JMP	WORD PTR [CALLSCNT]	; Return address
 EndProc IOFUNC
@@ -333,7 +333,7 @@ Break <DEV_OPEN_SFT, DEV_CLOSE_SFT - OPEN or CLOSE A DEVICE>
 ASSUME	DS:NOTHING,ES:NOTHING
 
 	Assert	ISSFT,<ES,DI>,"Dev_Open_SFT"
-	invoke	Save_World
+	invoke_fn Save_World
 	MOV	AL,DEVOPN
 	JMP	SHORT DO_OPCLS
 
@@ -351,7 +351,7 @@ EndProc DEV_OPEN_SFT
 ASSUME	DS:NOTHING,ES:NOTHING
 
 	Assert	ISSFT,<ES,DI>,"Dev_Close_SFT"
-	invoke	Save_World
+	invoke_fn Save_World
 	MOV	AL,DEVCLS
 
 ;
@@ -364,7 +364,7 @@ ASSUME	DS:NOTHING,ES:NOTHING
 ;
 ; Is the SFT for the net?  If so, no action necessary.
 ;
-	invoke	Test_IFS_Remote 						;AC000;
+	invoke_fn Test_IFS_Remote 						;AC000;
 	JNZ	OPCLS_DONE		; NOP on net SFTs
 	XOR	AH,AH			; Unit
 	TEST	ES:[DI.sf_flags],devid_device
@@ -400,7 +400,7 @@ OPCLS_RETRY:
 	STOSB				; Command
 	MOV	WORD PTR ES:[DI],0	; Status
 	PUSH	AX			; Save Unit,Command
-	invoke	DEVIOCALL2
+	invoke_fn DEVIOCALL2
 	MOV	DI,ES:[BX.REQSTAT]
 	TEST	DI,STERR
 	JZ	OPCLS_DONEP		; No error
@@ -413,7 +413,7 @@ BLKDEV:
 	MOV	AL,CL			; Drive # in AL
 	MOV	AH,6			; Read error in data, Blk dev
 HRDERR:
-	invoke	CHARHARD
+	invoke_fn CHARHARD
 	CMP	AL,1
 	JNZ	OPCLS_DONEP		; IGNORE or FAIL
 					;  Note that FAIL is essentually IGNORED
@@ -423,7 +423,7 @@ HRDERR:
 OPCLS_DONEP:
 	POP	AX			; Clean stack
 OPCLS_DONE:
-	invoke	Restore_World
+	invoke_fn Restore_World
 	return
 
 EndProc DEV_CLOSE_SFT

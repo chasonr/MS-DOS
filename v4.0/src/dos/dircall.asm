@@ -80,7 +80,7 @@ BREAK <DOS_MkDir - Make a directory entry>
 	DOSAssume   CS,<DS>,"DOS_MkDir"
 	ASSUME	ES:NOTHING
 
-	Invoke	TestNet
+	Invoke_fn TestNet
 	JNC	local_mkdir
 IF NOT Installed
 	transfer NET_MKDIR
@@ -114,7 +114,7 @@ LOCAL_MKDIR:
 ;
 	MOV	WORD PTR RenBuf.sf_mft,0    ; make sure SHARER won't complain.
 	MOV	AL,attr_directory
-	invoke	MAKENODE
+	invoke_fn MAKENODE
 
 	JC	PATHNFJ
 	CMP	AX,3
@@ -131,31 +131,31 @@ ASSUME	DS:NOTHING
 	PUSH	[DIRSTART]	; Parent for .. entry
 	XOR	AX,AX
 	MOV	[DIRSTART],AX	; Null directory
-	invoke	NEWDIR
+	invoke_fn NEWDIR
 	JC	NODEEXISTSPOPDEL    ; No room
-	invoke	GETENT		; First entry
+	invoke_fn GETENT		; First entry
 	JC	NODEEXISTSPOPDEL    ; Screw up
 	LES	DI,[CURBUF]
 
 	TEST	ES:[DI.buf_flags],buf_dirty  ;LB. if already dirty		;AN000;
 	JNZ	yesdirty		  ;LB.	  don't increment dirty count   ;AN000;
-	invoke	INC_DIRTY_COUNT 	  ;LB.					;AN000;
+	invoke_fn INC_DIRTY_COUNT 	  ;LB.					;AN000;
 	OR	ES:[DI.buf_flags],buf_dirty
 yesdirty:
 	ADD	DI,BUFINSIZ	; Point at buffer
 	MOV	AX,202EH	; ". "
 	MOV	DX,[DIRSTART]	; Point at itself
-	invoke	SETDOTENT
+	invoke_fn SETDOTENT
 	MOV	AX,2E2EH	; ".."
 	POP	DX		; Parent
-	invoke	SETDOTENT
+	invoke_fn SETDOTENT
 	LES	BP,[THISDPB]
 	MOV	[ALLOWED],allowed_FAIL + allowed_RETRY
 	POP	DX		; Entry sector
 	POP	[HIGH_SECTOR]	;F.C. >32mb
 
 	XOR	AL,AL		; Pre read
-	invoke	GETBUFFR
+	invoke_fn GETBUFFR
 	JC	NODEEXISTSP
 	MOV	DX,[DIRSTART]
 	LDS	DI,[CURBUF]
@@ -170,12 +170,12 @@ ASSUME	DS:NOTHING
 DIRUP:
 	TEST	[DI.buf_flags],buf_dirty  ;LB. if already dirty 		;AN000;
 	JNZ	yesdirty2		  ;LB.	  don't increment dirty count   ;AN000;
-	invoke	INC_DIRTY_COUNT 	  ;LB.					;AN000;
+	invoke_fn INC_DIRTY_COUNT 	  ;LB.					;AN000;
 	OR	[DI.buf_flags],buf_dirty	; Dirty buffer
 yesdirty2:
 	context DS
 	MOV	AL,ES:[BP.dpb_drive]
-	invoke	FLUSHBUF
+	invoke_fn FLUSHBUF
 	MOV	AX,error_access_denied
 	LeaveCrit   critDisk
 	return
@@ -188,7 +188,7 @@ NODEEXISTSPOPDEL:
 	LES	BP,[THISDPB]
 	MOV	[ALLOWED],allowed_FAIL + allowed_RETRY
 	XOR	AL,AL		; Pre read
-	invoke	GETBUFFR
+	invoke_fn GETBUFFR
 	JC	NODEEXISTSP
 	LDS	DI,[CURBUF]
 ASSUME	DS:NOTHING
@@ -236,7 +236,7 @@ BREAK <DOS_ChDir -- Verify a directory>
 	DOSAssume   CS,<DS>,"DOS_Chdir"
 	ASSUME	ES:NOTHING
 
-	Invoke	TestNet
+	Invoke_fn TestNet
 	JNC	LOCAL_CHDIR
 IF NOT Installed
 	transfer NET_CHDIR
@@ -258,7 +258,7 @@ nojoin:
 ; DOS 3.3  6/24/86 FastOpen
 
 	OR	[FastOpenFlg],FastOpen_Set	   ; set fastopen flag
-	invoke	GetPath
+	invoke_fn GetPath
 	PUSHF									;AN000;
 	AND	[FastOpenFlg],Fast_yes		   ; clear it all		;AC000;
 	POPF									;AN000;
@@ -307,7 +307,7 @@ BREAK <DOS_RmDir -- Remove a directory>
 	DOSAssume   CS,<DS>,"DOS_RmDir"
 	ASSUME	ES:NOTHING
 
-	Invoke	TestNet
+	Invoke_fn TestNet
 	JNC	Local_RmDIR
 IF NOT Installed
 	transfer NET_RMDIR
@@ -322,7 +322,7 @@ LOCAL_RMDIR:
 	MOV	[NoSetDir],0
 	MOV	[SATTRIB],attr_directory+attr_system+attr_hidden
 				; Dir calls can find these
-	invoke	GetPath
+	invoke_fn GetPath
 	JC	NOPATH		; Path not found
 	JNZ	NOTDIRPATH	; Path not a DIR
 	MOV	DI,[DIRSTART]
@@ -357,8 +357,8 @@ ASSUME	DS:NOTHING
 	REP	STOSB
 	XOR	AL,AL
 	STOSB			; Nul terminate it
-	invoke	STARTSRCH	; Set search
-	invoke	GETENTRY	; Get start of directory
+	invoke_fn STARTSRCH	; Set search
+	invoke_fn GETENTRY	; Get start of directory
 	JC	NOTDIRPATHPOP	; Screw up
 	MOV	DS,WORD PTR [CURBUF+2]
 ASSUME	DS:NOTHING
@@ -372,26 +372,26 @@ ASSUME	DS:NOTHING
 	JNZ	NOTDIRPATHPOP		; Nope
 	context DS
 	MOV	[LASTENT],2		; Skip . and ..
-	invoke	GETENTRY		; Get next entry
+	invoke_fn GETENTRY		; Get next entry
 	JC	NOTDIRPATHPOP		; Screw up
 	MOV	[ATTRIB],attr_directory+attr_hidden+attr_system
-	invoke	SRCH			; Do a search
+	invoke_fn SRCH			; Do a search
 	JNC	NOTDIRPATHPOP		; Found another entry!
 	CMP	[FAILERR],0
 	JNZ	NOTDIRPATHPOP		; Failure of search due to I 24 FAIL
 	LES	BP,[THISDPB]
 	MOV	BX,[DIRSTART]
 ;; FastSeek 10/27/86
-	invoke	Delete_FSeek		; delete the fastseek entry
+	invoke_fn Delete_FSeek		; delete the fastseek entry
 ;; FastSeek 10/27/86
-	invoke	RELEASE 		; Release data in sub dir
+	invoke_fn RELEASE 		; Release data in sub dir
 	JC	NOTDIRPATHPOP		; Screw up
 	POP	DX			; Sector # of entry
 	POP	[HIGH_SECTOR]		; F.C. >32mb
 
 	MOV	[ALLOWED],allowed_FAIL + allowed_RETRY
 	XOR	AL,AL			; Pre read
-	invoke	GETBUFFR		; Get sector back
+	invoke_fn GETBUFFR		; Get sector back
 	JC	NOTDIRPATHPOP2		; Screw up
 	LDS	DI,[CURBUF]
 ASSUME	DS:NOTHING
@@ -403,7 +403,7 @@ ASSUME	DS:NOTHING
 ;DOS 3.3 FastOpen  6/16/86  F.C.
 	PUSH	DS
 	context DS
-	invoke	FastOpen_Delete 	; call fastopen to delete an entry
+	invoke_fn FastOpen_Delete 	; call fastopen to delete an entry
 	POP	DS
 ;DOS 3.3 FastOpen  6/16/86  F.C.
 

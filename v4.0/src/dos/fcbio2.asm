@@ -287,10 +287,10 @@ ELSE
 SKP_SkipOp:
 ENDIF
 DoGetExt:
-	invoke	SFTFromFCB		;	if (!SFTFromFCB (SFT,FCB))
+	invoke_fn SFTFromFCB		;	if (!SFTFromFCB (SFT,FCB))
 	JNC	ContinueOp
 FCBDeath:
-	invoke	FCB_Ret_Err		; signal error, map for extended
+	invoke_fn FCB_Ret_Err		; signal error, map for extended
 	MOV	cRecRes,0		; no bytes transferred
 	MOV	FCBErr,FEOF		;	    return FTRIM;
 	JMP	FCBSave 		; bam!
@@ -354,7 +354,7 @@ ENDIF
 NODSKFULL:
 ;; Fix for disk full
 	MOV	cResult,CX
-	invoke	SaveFCBInfo		;	SaveFCBInfo (FCB);
+	invoke_fn SaveFCBInfo		;	SaveFCBInfo (FCB);
 	Assert	ISSFT,<ES,DI>,"FCBIO/SaveFCBInfo"
 %out WARNING!!! Make sure sf_position+2 is OpenAGE
 	POP	WORD PTR ES:[DI].sf_Position+2	; restore open age
@@ -420,7 +420,7 @@ TryReturn:
 	TEST	FCBOP,FCBRead		;   if (!(FCBOP & FCBREAD)) {
 	JNZ	FCBSave
 	SaveReg <DS>			;	FCB->FDate = date;
-	Invoke	Date16			;	FCB->FTime = time;
+	Invoke_fn Date16			;	FCB->FTime = time;
 	RestoreReg  <DS>
 	MOV	[SI].FCB_FDate,AX
 	MOV	[SI].FCB_FTime,DX	;	}
@@ -428,7 +428,7 @@ FCBSave:
 	TEST	FCBOp,BLOCK		;   if ((op&BLOCK) <> 0)
 	JZ	DoReturn
 	MOV	CX,cRecRes		;	user_CX = cRecRes;
-	invoke	Get_User_Stack
+	invoke_fn Get_User_Stack
 	MOV	[SI.User_CX],CX
 DoReturn:
 	MOV	AL,FCBErr		;   return (FCBERR);
@@ -459,7 +459,7 @@ Procedure $FCB_Open,NEAR
 DoAccess:
 	SaveReg <DS,DX,CX,AX>		; save FCB pointer away
 	MOV	DI,OFFSET DOSGroup:OpenBuf
-	invoke	TransFCB		; crunch the fcb
+	invoke_fn TransFCB		; crunch the fcb
 	RestoreReg  <AX,CX,DX,DS>	; get fcb
 	JNC	FindFCB 		; everything seems ok
 FCBOpenErr:
@@ -469,7 +469,7 @@ FCBOpenErr:
 	transfer    FCB_Ret_Err
 FindFCB:
 	invoke	GetExtended		; DS:SI will point to FCB
-	invoke	LRUFCB			; get a sft entry (no error)
+	invoke_fn LRUFCB			; get a sft entry (no error)
 	JC	HardMessage
 	ASSUME	ES:NOTHING
 
@@ -492,7 +492,7 @@ FindFCB:
 failopen:
 	PUSH	AX
 	MOV	AL,"R"                  ; clear out field (free sft)
-	invoke	BlastSFT
+	invoke_fn BlastSFT
 	POP	AX
 	CMP	AX,error_too_many_open_files
 	JZ	HardMessage
@@ -500,14 +500,14 @@ failopen:
 	jnz	DeadFCB
 HardMessage:
 	PUSH	AX
-	invoke	FCBHardErr
+	invoke_fn FCBHardErr
 	POP	AX
 DeadFCB:
 	transfer    FCB_Ret_Err
 FCBOK:
-	invoke	IsSFTNet		       ;AN007;F.C. >32mb  Non Fat file?
+	invoke_fn IsSFTNet		       ;AN007;F.C. >32mb  Non Fat file?
 	JNZ	FCBOK2			       ;AN007;F.C. >32mb  yes
-	invoke	CheckShare		       ;AN000;F.C. >32mb  share around?
+	invoke_fn CheckShare		       ;AN000;F.C. >32mb  share around?
 	JNZ	FCBOK2			       ;AN000;F.C. >32mb  yes
 	CMP	WORD PTR ES:[DI].sf_dirsec+2,0 ;AN000;F.C. >32mb  if dirsec >32mb
 	JZ	FCBOK2			       ;AN000;F.C. >32mb    then error
@@ -516,14 +516,14 @@ FCBOK:
 FCBOK2:
 
 	INC	ES:[DI].sf_ref_count	; increment reference count
-	invoke	SaveFCBInfo
+	invoke_fn SaveFCBInfo
 	Assert	ISSFT,<ES,DI>,"FCBOK"
-	invoke	SetOpenAge
+	invoke_fn SetOpenAge
 	Assert	ISSFT,<ES,DI>,"FCBOK/SetOpenAge"
 	TEST	ES:[DI].sf_flags,devid_device
 	JNZ	FCBNoDrive		; do not munge drive on devices
 	MOV	AL,DS:[SI]		; get drive byte
-	invoke	GetThisDrv		; convert
+	invoke_fn GetThisDrv		; convert
 	INC	AL
 	MOV	DS:[SI],AL		; stash in good drive letter
 FCBNoDrive:
@@ -548,7 +548,7 @@ OpenScan:
 	CMP	AL,[SI].fcb_sfn 	; don't compare ourselves
 	JZ	SkipCheck
 	SaveReg <AX>			; preserve count
-	invoke	CheckFCB		; do they match
+	invoke_fn CheckFCB		; do they match
 	RestoreReg  <AX>		; get count back
 	JNC	OpenFound		; found a match!
 SkipCheck:
@@ -590,10 +590,10 @@ OpenFound:
 	context DS
 	LES	DI,ThisSFT
 	DEC	ES:[DI].sf_ref_count	; free the newly allocated SFT
-	invoke	ShareEnd
+	invoke_fn ShareEnd
 	Assert	ISSFT,<ES,DI>,"Open blasting"
 	MOV	AL,'C'
-	invoke	BlastSFT
+	invoke_fn BlastSFT
 	JMP	OpenDone
 EndProc $FCB_Open
 

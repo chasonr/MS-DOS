@@ -58,7 +58,7 @@ Break	<DISK_INFO -- Get Disk Drive Information>
 	DOSAssume   CS,<DS>,"Disk_Info"
 	ASSUME	ES:NOTHING
 
-	Invoke	TestNet
+	Invoke_fn TestNet
 	JNC	LOCAL_INFO
 IF NOT Installed
 	transfer NET_DISK_INFO
@@ -71,10 +71,10 @@ ENDIF
 LOCAL_INFO:
 	MOV	[EXTERR_LOCUS],errLOC_Disk
 	EnterCrit   critDisk
-	invoke	FATREAD_CDS		; perform media check.
+	invoke_fn FATREAD_CDS		; perform media check.
 	JC	CRIT_LEAVE
 	MOV	BX,2
-	invoke	UNPACK			; Get first FAT sector into CURBUF
+	invoke_fn UNPACK			; Get first FAT sector into CURBUF
 	JC	CRIT_LEAVE
 	LDS	SI,[CURBUF]
 ASSUME	DS:NOTHING
@@ -100,7 +100,7 @@ DoScan:
 	XOR	DX,DX
 	DEC	CX
 SCANFREE:
-	invoke	UNPACK
+	invoke_fn UNPACK
 	JC	Crit_Leave
 	JNZ	NOTFREECLUS
 	INC	DX			; A free one

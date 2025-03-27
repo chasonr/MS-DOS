@@ -65,7 +65,7 @@ BREAK <$CURRENT_DIR - dump the current directory into user space>
 	ASSUME	CS:DOSGroup,DS:NOTHING,ES:NOTHING,SS:NOTHING
 	EnterCrit   critDisk
 	MOV	AL,DL			; get drive number (0=def, 1=A)
-	Invoke	GetVisDrv		; grab it
+	Invoke_fn GetVisDrv		; grab it
 	JNC	CurrentValidate 	; no error -> go and validate dir
 CurdirErr:
 	LeaveCrit   critDisk
@@ -83,7 +83,7 @@ CurrentValidate:
 DoCheck:
 	MOV	NoSetDir,0		; interested only in contents
 	MOV	DI,OFFSET DOSGroup:OpenBuf
-	Invoke	ValidateCDS		; output is ES:DI -> CDS
+	Invoke_fn ValidateCDS		; output is ES:DI -> CDS
 	SaveReg <ES,DI> 		; swap source and destination
 	RestoreReg  <SI,DS>
 GetDst:
@@ -152,7 +152,7 @@ BREAK <$RmDir -- Remove a directory>
 	mov	si,dx			; Load ptr into si
 	mov	di,offset DOSGroup:OpenBuf	; di = ptr to buf for trans name
 	push	di
-	Invoke	TransPathNoSet		; Translate the name
+	Invoke_fn TransPathNoSet		; Translate the name
 	pop	di			; di = ptr to buf for trans name
 	jnc	rmlset			; If transpath succeeded, continue
 	pop	ds
@@ -164,9 +164,9 @@ rmlset:
 	Jnz	rmerr			;	return (-1);
 	Context ES
 	xor	al,al			; al = 0 , ie drive a:
-rmloop: Invoke	GetCDSFromDrv		; Get curdir for drive in al
+rmloop: Invoke_fn GetCDSFromDrv		; Get curdir for drive in al
 	jc	rmcont			; If error, exit loop & cont normally
-	Invoke	StrCmp			; Are the 2 paths the same?
+	Invoke_fn StrCmp		; Are the 2 paths the same?
 	jz	rmerr			; Yes, report error.
 	inc	al			; No, inc al to next drive number
 	jmp	rmloop			; Go check next drive.
@@ -215,7 +215,7 @@ BREAK <$ChDir -- Change current directory on a drive>
 	ASSUME	CS:DOSGroup,DS:NOTHING,ES:NOTHING,SS:DOSGroup
 	MOV	DI,OFFSET DOSGroup:OpenBuf  ; spot for translated name
 	MOV	SI,DX			; get source
-	Invoke	TransPath		; go munge the path and get real CDS
+	Invoke_fn TransPath		; go munge the path and get real CDS
 	JNC	ChDirCrack		; no errors, try path
 ChDirErrP:
 	MOV	AL,error_path_not_found
@@ -236,7 +236,7 @@ ChDirCrack:
  ;
  ; Find out if the directory exists.
  ;
-	Invoke	DOS_ChDir
+	Invoke_fn DOS_ChDir
 	JC	ChDirErr
 ;
 ; Get back CDS to see if a join as seen.  Set the currency pointer (only if
@@ -249,7 +249,7 @@ ChDirCrack:
 ; The CDS was joined.  Let's go back and grab the logical CDS.
 ;
 	SaveReg <ES,DI,CX>		; save CDS and cluster...
-	Invoke	Get_User_Stack		; get original text
+	Invoke_fn Get_User_Stack		; get original text
 	ASSUME	DS:NOTHING
 	MOV	DI,[SI.User_DX]
 	MOV	DS,[SI.User_DS]
@@ -257,7 +257,7 @@ ChDirCrack:
 	XCHG	SI,DI
 	XOR	AL,AL			; do no splicing
 	SaveReg <DI>
-	Invoke	TransPathNoSet		; Munge path
+	Invoke_fn TransPathNoSet		; Munge path
 	RestoreReg  <SI>
 	Assume	DS:DOSGroup
 ;
@@ -289,7 +289,7 @@ setdirclus:
 	MOV	ES:[DI].curdir_id,CX
 	LES	DI,ThisCDS		; get logical CDS
 SkipRecency:
-	invoke	FStrCpy
+	invoke_fn FStrCpy
 	XOR	AL,AL
 	transfer    Sys_Ret_OK
 EndProc $CHDIR
@@ -315,7 +315,7 @@ DoDirCall:
 	MOV	DI,OFFSET DOSGroup:OpenBuf  ; spot for translated name
 	SaveReg <SI>
 	MOV	SI,DX			; get source
-	Invoke	TransPath		; go munge the path
+	Invoke_fn TransPath		; go munge the path
 	RestoreReg  <SI>
 	JNC	MkDirCrack		; no errors, try path
 MkErrP:
@@ -353,7 +353,7 @@ EndProc $MKDIR
   entry Check_PathLen2
 	Context <DS>
 	SaveReg <CX>
-	invoke	DStrLen
+	invoke_fn DStrLen
 	CMP	CX,DirStrLen
 	RestoreReg  <CX>
 	ret

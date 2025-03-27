@@ -53,9 +53,9 @@ BREAK <DOS_DUP -- DUP SFT across network>
 	LES	DI,ThisSFT
 	Entry	Dos_Dup_Direct
 	Assert	ISSFT,<ES,DI>,"DOSDup"
-	invoke	IsSFTNet
+	invoke_fn IsSFTNet
 	JNZ	DO_INC
-	invoke	DEV_OPEN_SFT
+	invoke_fn DEV_OPEN_SFT
 DO_INC:
 	Assert	ISSFT,<ES,DI>,"DOSDup/DoInc"
 	INC	ES:[DI.sf_ref_count]	; Clears carry (if this ever wraps

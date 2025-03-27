@@ -53,9 +53,9 @@ BREAK <$Parse_File_Descriptor -- Parse an arbitrary string into an FCB>
 	procedure   $PARSE_FILE_DESCRIPTOR,NEAR
 ASSUME  DS:NOTHING,ES:NOTHING
 
-	invoke  MAKEFCB
+	invoke_fn  MAKEFCB
 	PUSH    SI
-	invoke  get_user_stack
+	invoke_fn  get_user_stack
 	POP     [SI.user_SI]
 	return
 EndProc $PARSE_FILE_DESCRIPTOR

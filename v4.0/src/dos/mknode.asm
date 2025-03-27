@@ -104,23 +104,23 @@ CHECK_IF_ROOT:
         MOV     BX,[DIRSTART]
         OR      BX,BX
         JZ      NULLDIR
-        invoke  GETEOF
+        invoke_fn  GETEOF
         retc                    ; Screw up
 NULLDIR:
         MOV     CX,1
-        invoke  ALLOCATE
+        invoke_fn  ALLOCATE
         retc
         MOV     DX,[DIRSTART]
         OR      DX,DX
         JNZ     ADDINGDIR
-        invoke  SETDIRSRCH
+        invoke_fn  SETDIRSRCH
         retc
         MOV     [LASTENT],-1
         JMP     SHORT GOTDIRREC
 ADDINGDIR:
         PUSH    BX
         MOV     BX,[ClusNum]
-        Invoke  IsEof
+        Invoke_fn  IsEof
         POP     BX
         JB      NOTFIRSTGROW
 ;;;; 10/17/86 update CLUSNUM in the fastopen cache
@@ -132,7 +132,7 @@ ADDINGDIR:
         MOV     DL,ES:[BP.dpb_drive]       ; drive #
         MOV     CX,[DIRSTART]              ; first cluster #
         MOV     BP,BX                      ; CLUSNUM
-        invoke  FastOpen_Update
+        invoke_fn  FastOpen_Update
         POP     BP
         POP     AX
         POP     CX
@@ -141,7 +141,7 @@ ADDINGDIR:
 NOTFIRSTGROW:
         MOV     DX,BX
         XOR     BL,BL
-        invoke  FIGREC
+        invoke_fn  FIGREC
 GOTDIRREC:
         MOV     CL,ES:[BP.dpb_cluster_mask]
         INC     CL
@@ -150,7 +150,7 @@ ZERODIR:
         PUSH    CX
         MOV     [ALLOWED],allowed_FAIL + allowed_RETRY
         MOV     AL,0FFH
-        invoke  GETBUFFR
+        invoke_fn  GETBUFFR
         JNC     GET_SSIZE
         POP     CX
         return
@@ -172,7 +172,7 @@ EVENZ:
 
         TEST    ES:[DI.buf_flags],buf_dirty  ;LB. if already dirty              ;AN000;
         JNZ     yesdirty                  ;LB.    don't increment dirty count   ;AN000;
-        invoke  INC_DIRTY_COUNT           ;LB.                                  ;AN000;
+        invoke_fn  INC_DIRTY_COUNT           ;LB.                                  ;AN000;
         OR      ES:[DI.buf_flags],buf_dirty
 yesdirty:
         POP     ES
@@ -288,7 +288,7 @@ Break   <MAKENODE -- CREATE A NEW NODE>
         PUSH    AX              ; Save AH value
         MOV     [NoSetDir],0
         MOV     [SATTRIB],AL
-        invoke  GetPathNoSet
+        invoke_fn  GetPathNoSet
         MOV     DL,CL           ; Save CL info
         MOV     CX,AX           ; Device ID to CH
         POP     AX              ; Get back AH
@@ -343,7 +343,7 @@ make_exists:
         MOV     CH,ES:[BX+dir_attr] ; Get file attributes
         TEST    CH,attr_read_only
         JNZ     make_err_ret_5P ; Cannot create on read only files
-        invoke  MatchAttributes
+        invoke_fn  MatchAttributes
         POP     CX              ; Devid back in CH
         JNZ     make_err_ret_5  ; Attributes not ok
         XOR     AL,AL           ; AL = 0, Disk Node
@@ -356,7 +356,7 @@ make_share:
         LES     DI,[THISSFT]
 ;       MOV     ES:[DI.sf_mode],sharing_compat + open_for_both
         SaveReg <SI,BX>         ; Save CURBUF pointers
-        invoke  ShareEnter
+        invoke_fn  ShareEnter
         jnc     MakeEndShare
 ;
 ; User failed request.
@@ -392,7 +392,7 @@ make_new:
         retnz                   ; Don't "open" directories, so don't
                                 ;   tell the sharer about them
         SaveReg <AX,BX,SI>      ; Save AL code
-        invoke  ShareEnter
+        invoke_fn  ShareEnter
         RestoreReg  <SI,BX,AX>
         retnc
 ;
@@ -406,12 +406,12 @@ make_new:
 
         TEST    ES:[DI.buf_flags],buf_dirty  ;LB. if already dirty              ;AN000;
         JNZ     yesdirty2                 ;LB.    don't increment dirty count   ;AN000;
-        invoke  INC_DIRTY_COUNT           ;LB.                                  ;AN000;
+        invoke_fn  INC_DIRTY_COUNT           ;LB.                                  ;AN000;
         OR      ES:[DI].buf_flags,buf_dirty ; flag buffer as dirty
 yesdirty2:
         LES     BP,ThisDPB
         MOV     AL,ES:[BP].DPB_Drive    ; get drive for flush
-        Invoke  FlushBuf                ; write out buffer.
+        Invoke_fn  FlushBuf                ; write out buffer.
         POP     AX
         jmp     make_Share_ret
 ;
@@ -433,7 +433,7 @@ MakeEndShare:
         XCHG    AX,ES:[DI].sf_ref_count
         SaveReg <AX,DI,ES>
         PUSHF
-        invoke  ShareEnd                ; remove sharing
+        invoke_fn  ShareEnd                ; remove sharing
         POPF
         RestoreReg  <ES,DI,ES:[DI].sf_ref_count>
         LeaveCrit   critSFT
@@ -445,7 +445,7 @@ MakeEndShare:
         retc                            ; bye if error
         SaveReg <AX,BX,SI>
         PUSHF
-        invoke  ShareEnter
+        invoke_fn  ShareEnter
         POPF
         RestoreReg  <SI,BX,AX>
 ;
@@ -496,7 +496,7 @@ ASSUME  ES:NOTHING
         retnz                   ; User FAILed, node might exist
         CALL    BUILDDIR        ; Try to build dir
         retc                    ; Failed
-        invoke  GETENT          ; Point at that free entry
+        invoke_fn  GETENT          ; Point at that free entry
         retc                    ; Failed
         JMP     SHORT FREESPOT
 
@@ -511,7 +511,7 @@ EXISTENT:
         JMP     DOOPEN          ; If so, proceed with open
 
 NOT_DEV1:
-        invoke  FREEENT         ; Free cluster chain
+        invoke_fn  FREEENT         ; Free cluster chain
         retc                    ; Failed
 FREESPOT:
         TEST    BYTE PTR [ATTRIB],attr_volume_id
@@ -540,7 +540,7 @@ NOTVOLID:
 ;; File Tagging for Create DOS 4.00
         XOR     AX,AX
         REP     STOSW           ; Zero pad
-        invoke  DATE16
+        invoke_fn  DATE16
         XCHG    AX,DX
         errnz   dir_time-(dir_attr+1+2*5)
         STOSW                   ; dir_time
@@ -561,7 +561,7 @@ updnxt:
 
         TEST    ES:[SI.buf_flags],buf_dirty  ;LB. if already dirty              ;AN000;
         JNZ     yesdirty3                 ;LB.    don't increment dirty count   ;AN000;
-        invoke  INC_DIRTY_COUNT           ;LB.                                  ;AN000;
+        invoke_fn  INC_DIRTY_COUNT           ;LB.                                  ;AN000;
         OR      ES:[SI.buf_flags],buf_dirty
 yesdirty3:
         LES     BP,[THISDPB]
@@ -582,18 +582,18 @@ yesdirty3:
         MOV     BX,DS
         MOV     word ptr ES:[DI.sf_devptr+2],BX
         RestoreReg <BX,DS>      ; need to use DS for segment later on
-        invoke  Dev_Open_SFT    ; increment ref. count
+        invoke_fn  Dev_Open_SFT    ; increment ref. count
         mov     [VIRTUAL_OPEN],1; set flag
 GotADevice:
         RestoreReg <DI,ES>
 
         PUSH    [ACT_PAGE]      ;LB. save EMS page for curbuf                   ;AN000;
-        invoke  FLUSHBUF
+        invoke_fn  FLUSHBUF
         POP     BX              ;LB. restore EMS page for curbuf                ;AN000;
         PUSHF                   ;LB. save flushbuf falg                         ;AN000;
         CMP     BX,-1           ;BL-NETWORK PTM #-?
         JE      Page_ok         ;BL-NETWORK PTM #-?
-        invoke  SET_MAP_PAGE    ;LB. remap curbuf                               ;AN000;
+        invoke_fn  SET_MAP_PAGE    ;LB. remap curbuf                               ;AN000;
 Page_ok:                        ;BL-NETWORK PTM #-?
         POPF                    ;LB. restore flush flag                         ;AN000;
         Call    CHECK_VIRT_OPEN ; decrement ref. count                          ;AN000;
@@ -832,8 +832,8 @@ ASSUME  DS:NOTHING
         PUSH    DX              ; Save sector number
 
         MOV     BX,CX
-        invoke  Delete_FSeek    ; FS. delete Fastseek Clusters                  ;AN000;
-        invoke  RELEASE         ; Free any data allocated
+        invoke_fn  Delete_FSeek    ; FS. delete Fastseek Clusters                  ;AN000;
+        invoke_fn  RELEASE         ; Free any data allocated
         POP     DX
         POP     [HIGH_SECTOR]                  ;F.C. >32mb                      ;AN000;
         JNC     GET_BUF_BACK
@@ -844,10 +844,10 @@ GET_BUF_BACK:
 
         MOV     [ALLOWED],allowed_RETRY + allowed_FAIL
         XOR     AL,AL
-        invoke  GETBUFFR        ; Get sector back
+        invoke_fn  GETBUFFR        ; Get sector back
         POP     BX              ; Get offset back
         retc
-        invoke  SET_BUF_AS_DIR
+        invoke_fn  SET_BUF_AS_DIR
         ADD     BX,WORD PTR [CURBUF]    ; Correct it for new buffer
         MOV     SI,BX
         ADD     SI,dir_first    ; Get corrected SI
@@ -874,7 +874,7 @@ EndProc FREEENT
         mov     [VIRTUAL_OPEN],0        ; reset flag
         SaveReg <ES,DI>
         LES     DI,[THISSFT]
-        INVOKE  DEV_CLOSE_SFT
+        INVOKE_fn  DEV_CLOSE_SFT
         RestoreReg <DI,ES>
 
 ALL_CLOSED:

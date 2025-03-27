@@ -122,13 +122,13 @@ ASSUME	DS:NOTHING,ES:NOTHING
 	PUSH	DS
 	PUSH	SI
 INTEST:
-	invoke	STATCHK
+	invoke_fn STATCHK
 	JNZ	Get
 ;*************************************************************************
 	cmp	[Printer_Flag],0	; is printer idle?
 	jnz	no_sys_wait
 	mov	ah,5			; get input status with system wait
-	invoke	IOFUNC
+	invoke_fn IOFUNC
 no_sys_wait:
 ;**************************************************************************
 	MOV	AH,84h
@@ -151,7 +151,7 @@ no_sys_wait:
 
 	MOV	AX,0			; therefore, we save DEVCALL
 	CALL	Save_Restore_Packet	; save DEVCALL packet
-	invoke	READTIME		; readtime
+	invoke_fn READTIME		; readtime
 	MOV	AX,1
 	CALL	Save_Restore_Packet	; restore DEVCALL packet
 
@@ -160,7 +160,7 @@ no_sys_wait:
 	ADD	BX,2			; check the TAG
 	CMP	word ptr CS:[BX],22642
 	JZ	check_ok
-	invoke	DOSINIT 		; should never come here
+	invoke_fn DOSINIT 		; should never come here
 check_ok:
 	POP	BX
 
@@ -176,7 +176,7 @@ NoUpdate:
 	JMP	Intest
 Get:
 	XOR	AH,AH
-	invoke	IOFUNC
+	invoke_fn IOFUNC
 	POP	SI
 	POP	DS
 ;;; 7/15/86
@@ -223,7 +223,7 @@ SBCS00: 				;AN000; 	      2/11/KK		 ;AN000;
 	CMP	AL,'$'
 	retz
 NEXT_STR1:
-	invoke	OUTT
+	invoke_fn OUTT
 	JMP	STRING_OUT1
 
 EndProc $STD_CON_STRING_OUTPUT
@@ -254,19 +254,19 @@ ASSUME	DS:NOTHING,ES:NOTHING
 RAW22:						      ;AN000;
 	LES	DI,DWORD PTR [user_SP]		      ; Get pointer to register save area
 	XOR	BX,BX
-	invoke	GET_IO_SFT
+	invoke_fn GET_IO_SFT
 	retc
  IF  DBCS				;AN000;
 	push	word ptr [Intercon]	;AN000;
 	mov	[Intercon],0		;AN000; disable interim characters
  ENDIF					;AN000;
 	MOV	AH,1
-	invoke	IOFUNC
+	invoke_fn IOFUNC
 	JNZ	RESFLG
  IF  DBCS				;AN000;
 	pop	word ptr [InterCon]	;AN000; restore interim flag
  ENDIF					;AN000;
-	invoke	SPOOLINT
+	invoke_fn SPOOLINT
 	OR	BYTE PTR ES:[DI.user_F],40H ; Set user's zero flag
 	XOR	AL,AL
 	return
@@ -281,7 +281,7 @@ RESFLG:
  ENDIF					;AN000; 				;AN000;
 
 RILP:
-	invoke	SPOOLINT
+	invoke_fn SPOOLINT
 
 ; Inputs:
 ;	None
@@ -294,18 +294,18 @@ RILP:
 
 	PUSH	BX
 	XOR	BX,BX
-	invoke	GET_IO_SFT
+	invoke_fn GET_IO_SFT
 	POP	BX
 	retc
 	MOV	AH,1
-	invoke	IOFUNC
+	invoke_fn IOFUNC
 	JNZ	Got
 	MOV	AH,84h
 	INT	int_IBM
 	JMP	RILP
 Got:
 	XOR	AH,AH
-	invoke	IOFUNC
+	invoke_fn IOFUNC
  IF  DBCS				;AN000;
 	cmp	[InterChar],1		;AN000;    2/11/KK
 ;								2/11/KK
@@ -343,7 +343,7 @@ sj0:					;AN000; 		2/11/KK
 	PUSH	BX
 	MOV	BX,1
 
-	invoke	GET_IO_SFT
+	invoke_fn GET_IO_SFT
 	JC	RAWRET1
 
 	MOV	BX,[SI.sf_flags]
@@ -386,22 +386,22 @@ RAWNORM:
 ;
 	entry	RAWOUT2
 
-	invoke	GET_IO_SFT
+	invoke_fn GET_IO_SFT
 	retc
 RAWOUT3:
 	PUSH	AX
 	JMP	SHORT RAWOSTRT
 ROLP:
-	invoke	SPOOLINT
+	invoke_fn SPOOLINT
 	OR	[DOS34_FLAG],CTRL_BREAK_FLAG ;AN002; set control break
-	invoke	DSKSTATCHK		     ;AN002; check control break
+	invoke_fn DSKSTATCHK		     ;AN002; check control break
 RAWOSTRT:
 	MOV	AH,3
-	invoke	IOFUNC
+	invoke_fn IOFUNC
 	JZ	ROLP
 	POP	AX
 	MOV	AH,2
-	invoke	IOFUNC
+	invoke_fn IOFUNC
 	CLC			; Clear carry indicating successful
 	return
 EndProc $RAW_CON_IO
