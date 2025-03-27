@@ -118,9 +118,9 @@ SETFINDPB:
 	PUSH	ES
 	INC	DX			    ; Leave enough room for the ARENA
 	MOV	SI,EndMem
-	invoke	$Dup_PDB
+	invoke_fn $Dup_PDB
 ;	MOV	BYTE PTR [CreatePDB],0FFh   ; create jfns and set CurrentPDB
-;	invoke	$CREATE_PROCESS_DATA_BLOCK     ; Set up segment
+;	invoke_fn $CREATE_PROCESS_DATA_BLOCK ; Set up segment
 ASSUME	DS:NOTHING,ES:NOTHING
 	POP	ES
 	DOSAssume   CS,<ES>,"INIT/CreateProcess"
@@ -152,9 +152,9 @@ ASSUME	DS:NOTHING,ES:NOTHING
 	MOV	DI,OFFSET DOSGROUP:SySInitTable
 
 	IF	NOT Installed
-	invoke	NETWINIT
+	invoke_fn NETWINIT
 ;	ELSE
-;	invoke	NETWINIT
+;	invoke_fn NETWINIT
 ;	%OUT Random NETWINIT done at install
 	ENDIF
 
@@ -280,7 +280,7 @@ PERUNIT:
 	PUSH	BX
 	PUSH	CX
 	PUSH	DX
-	invoke	$SETDPB
+	invoke_fn $SETDPB
 	MOV	AX,ES:[BP.dpb_sector_size]
 	CMP	AX,[MAXSEC]
 	JBE	NOTMAX
@@ -504,7 +504,7 @@ JumpTabLoop:
 	MOV	AX,[ENDMEM]
 	MOV	DX,DI
 
-	invoke	SETMEM		; Basic Header
+	invoke_fn SETMEM	; Basic Header
 ASSUME	DS:NOTHING,ES:NOTHING
 	PUSH	CS
 	POP	DS
@@ -531,7 +531,7 @@ OUTMES:
 	LODS	CS:BYTE PTR [SI]
 	CMP	AL,"$"
 	JZ	OUTDONE
-	invoke	OUT
+	invoke_fn OUT
 	JMP	SHORT OUTMES
 OUTDONE:
 	PUSH	CS			; OUT stomps on segments
@@ -630,7 +630,7 @@ ASSUME	DS:NOTHING,ES:NOTHING
 	MOV	BX,OFFSET DOSGROUP:DEVCALL
 	PUSH	CS
 	POP	ES
-	invoke	DEVIOCALL2
+	invoke_fn DEVIOCALL2
 	POP	AX
 	POP	BX
 	POP	ES
