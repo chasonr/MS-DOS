@@ -191,7 +191,7 @@ getparm:
 	mov	word ptr Switches,BX	     ; save switches read so far
 	jc	swterr
 get_next:
-	invoke	getchr
+	invoke_fn getchr
 	jc	done_line
 	jmp	NextSwtch
 swterr:
@@ -225,7 +225,7 @@ put_back:
 ; error.
 ;
 Check_Switch:
-	invoke	getchr
+	invoke_fn getchr
 	jc	err_check
 	and	al,0DFH 	    ; convert it to upper case
 	cmp	al,'A'
@@ -248,11 +248,11 @@ Check_Switch:
 	mov	cx,ax
 	test	ax, switchnum	; test against switches that require number to follow
 	jz	done_swtch
-	invoke	getchr
+	invoke_fn getchr
 	jc	err_Swtch
 	cmp	al,':'
 	jnz	err_swtch
-	invoke	getchr
+	invoke_fn getchr
 	push	bx			; preserve switches
 	mov	byte ptr cs:sepchr,' '          ; allow space separators
 	call	GetNum
@@ -724,11 +724,11 @@ NOGET:	POP	CX
 ;
 ;  NEWLINE RETURNS WITH FIRST CHARACTER OF NEXT LINE
 ;
-NEWLINE:invoke	GETCHR			;SKIP NON-CONTROL CHARACTERS
+NEWLINE:invoke_fn GETCHR		;SKIP NON-CONTROL CHARACTERS
 	retc
 	CMP	AL,LF			;LOOK FOR LINE FEED
 	JNZ	NEWLINE
-	invoke	GETCHR
+	invoke_fn GETCHR
 	return
 
 MAPCASE:
@@ -833,7 +833,7 @@ ROUND:
 	PUSH	AX
 	MOV	AX,[MEMLO]
 
-	invoke	ParaRound		; para round up
+	invoke_fn ParaRound		; para round up
 
 	ADD	[MEMHI],AX
 	MOV	[MEMLO],0
@@ -908,7 +908,7 @@ B2:	CALL	ToDigit 		; do we have a digit
 	JC	BADNUM			; too big a number
 	XCHG	AX,BX			; stash total
 
-	invoke	GETCHR			;GET NEXT DIGIT
+	invoke_fn GETCHR		;GET NEXT DIGIT
 	JC	B1			; no more characters
 	cmp	al, ' '                 ;J.K. 5/23/86 space?
 	jz	B15			;J.K. 5/23/86 then end of digits

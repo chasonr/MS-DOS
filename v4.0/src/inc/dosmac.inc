@@ -55,7 +55,7 @@ ENDM
 ;
 ; call a procedure that may be external.  The call will be short.
 ;
-invoke  MACRO   name
+invoke_fn  MACRO   name
 .xcref
 	IF2
 	    IFNDEF name
@@ -65,7 +65,7 @@ invoke  MACRO   name
 .cref
 	CALL    name
 ENDM
-.xcref  invoke
+.xcref  invoke_fn
 
 PAGE
 ;
@@ -411,7 +411,7 @@ ENDIF
 	PUSH    AX
 cargs = cargs + 2
 ENDM
-	invoke  PFMT
+	invoke_fn  PFMT
 	ADD     SP,Cargs
 	POP     BP
 	POP     AX

@@ -619,7 +619,7 @@ ENDCONF:
 
 
 BADOP:	MOV	DX,OFFSET BADOPM	;WANT TO PRINT COMMAND ERROR "Unrecognized command..."
-	invoke	PRINT
+	invoke_fn PRINT
 	call	Error_Line		;show "Error in CONFIG.SYS ..." .
 	JMP	COFF
 
@@ -629,7 +629,7 @@ Badop_p 	proc	near		;AN000;
 	push	cs
 	pop	ds			;set ds to CONFIGSYS seg.
 	mov	dx, offset badopm
-	invoke	PRINT
+	invoke_fn PRINT
 	call	Error_Line
 	ret
 Badop_p 	endp
@@ -647,7 +647,7 @@ Badparm_p	proc	near		;AN007;
 	push	cs			;AN007;
 	pop	ds			;AN007;
 	mov	dx, offset Badparm	;AN007;
-	invoke	PRINT			;AN007;"Bad command or parameters - "
+	invoke_fn PRINT			;AN007;"Bad command or parameters - "
 	lds	si, Badparm_ptr 	;AN007;
 Badparm_Prt:				;AN007;print "xxxx" until CR.
 	mov	dl, byte ptr [si]	;AN007;
@@ -659,7 +659,7 @@ Badparm_Prt:				;AN007;print "xxxx" until CR.
 	push	cs			;AN007;
 	pop	ds			;AN007;
 	mov	dx, offset CRLFM	;AN007;
-	invoke	PRINT			;AN007;
+	invoke_fn PRINT			;AN007;
 	call	Error_Line		;AN007;
 	pop	si			;AN007;
 	pop	dx			;AN007;
@@ -757,7 +757,7 @@ Multi_Pass:				;AN018;AN026; called to execute IFS=,  INSTALL= commands
 	call	GetChr			;AN018;
 	jmp	Conflp			;AN018;
 GETCOM:
-	invoke	ORGANIZE		;ORGANIZE THE FILE
+	invoke_fn ORGANIZE		;ORGANIZE THE FILE
 	CALL	GETCHR
 
 CONFLP: JC	ENDCONV
@@ -783,7 +783,7 @@ ENDIF
 
 COFF:	PUSH	CS
 	POP	DS
-	invoke	NEWLINE
+	invoke_fn NEWLINE
 	JMP	CONFLP
 Blank_Line:				;AN000;
 	call	Getchr			;AN000;
@@ -942,7 +942,7 @@ Sysinit_Parse	endp
 ;*******************************************************************************
 ;TryB:	 CMP	 AH,'B' 		 ;BUFFER COMMAND?
 ;	 JNZ	 TRYC
-;	 invoke  GETNUM
+;	 invoke_fn  GETNUM
 ;	 JZ	 TryBBad		 ; Gotta have at least one
 ;	 CMP	 AX,100 		 ; check for max number
 ;	 JB	 SaveBuf
@@ -1418,7 +1418,7 @@ Skip0_ResetMEMHI:
 	jne	BADBRK_1
 	jmp	BADOP			;show "Unrecognized command in CONFIG.SYS"
 BADBRK_1:
-	invoke	BADLOAD
+	invoke_fn BADLOAD
 	JMP	COFF
 
 GOODLD:
@@ -1474,9 +1474,9 @@ Got_Device_Com_Cont:			;AN017;
 	pop	si			;AN017;
 	pop	ds			;AN017;
 	MOV	BX,SDEVSTRAT
-	invoke	CALLDEV 		;   CallDev (SDevStrat);
+	invoke_fn CALLDEV 		;   CallDev (SDevStrat);
 	MOV	BX,SDEVINT
-	invoke	CALLDEV 		;   CallDev (SDevInt);
+	invoke_fn CALLDEV 		;   CallDev (SDevInt);
 End_Init_Call:
 	RestoreReg  <SI,DS>
 	MOV	BYTE PTR [SI],0 	;   *p = 0;
@@ -1495,7 +1495,7 @@ End_Init_Call:
 	mov	word ptr [Break_addr], 0	   ;AN000;
 	mov	word ptr [Break_addr+2], ax	   ;AN000;
 	or	cs:[SetDevMarkFlag], FOR_DEVMARK       ;AN004;
-	invoke	Set_Break		;AN000; Will also check the memory size too.
+	invoke_fn Set_Break		;AN000; Will also check the memory size too.
 	push	es			;AN000; Save it again, in case, for Erase_Dev_Do.
 	push	si			;AN000;
 	jc	Erase_Dev_do		;AN000;
@@ -1546,7 +1546,7 @@ BREAKOK:
 	TEST	AX,DEVTYP		;TEST IF BLOCK DEV
 	JZ	ISBLOCK
 	or	cs:[SetDevMarkFlag],FOR_DEVMARK ;AN004;
-	invoke	Set_Break		; Go ahead and alloc mem for device
+	invoke_fn Set_Break		; Go ahead and alloc mem for device
 	jc	Erase_Dev_do		;device driver's Init routien failed.
 	TEST	AX,ISCIN		;IS IT A CONSOLE IN?
 	JZ	TRYCLK
@@ -1580,12 +1580,12 @@ BadNumBlock:				;AN017;
 	PUSH	CS
 	POP	DS
 	MOV	DX,OFFSET BADBLOCK
-	invoke	PRINT
+	invoke_fn PRINT
 	JMP	ERASE_DEV_do
 
 OK_BLOCK:
 	or	cs:[SetDevMarkFlag],FOR_DEVMARK ;AN004;
-	invoke	SET_BREAK		; Alloc the device
+	invoke_fn SET_BREAK		; Alloc the device
 	ADD	ES:[DI.SYSI_NUMIO],AL	;UPDATE THE AMOUNT
 	ADD	CS:DriveNumber,AL	; remember amount for next device
 	LDS	BX,CS:[BPB_ADDR]	;POINT TO BPB ARRAY
@@ -1664,7 +1664,7 @@ Bad_BPB_Size_Sector:
 	MOV	DX,OFFSET BADSIZ_PRE
 ;	 MOV	 BX,OFFSET BADSIZ_POST
 	mov	bx, offset CRLFM	;AN???;
-	invoke	PRNERR
+	invoke_fn PRNERR
 	test	[SetDevMarkFlag],SETBRKDONE ;AN004;If already Set_Break is done,
 	jnz	Skip2_ResetMEMHI	;AN004; then do not
 	dec	[MEMHI] 		;AN004;Adjust MEMHI by a paragrah of DEVMARK.
@@ -1684,7 +1684,7 @@ TRYQ:
 	JMP	TRYF
 TRYQ_CONT:
 
-;	 invoke  GETNUM
+;	 invoke_fn  GETNUM
 ;	 JZ	 TryQBad		 ; 0 is never a valid code, or number is
 ;					 ;   bad
 ;	 MOV	 BX,AX			 ; Country code in BX
@@ -1692,7 +1692,7 @@ TRYQ_CONT:
 ;					 ;J.K. 5/26/86
 ;	 MOV	 DX,0			 ; assume no code page id
 ;
-;	 invoke  skip_delim		 ;skip the delimeters after the first num
+;	 invoke_fn  skip_delim		 ;skip the delimeters after the first num
 ;	 jc	 TryQ_Def_File		 ;no more characters left? then use default file
 ;	 cmp	 al, CR 		 ;
 ;	 je	 TryQ_Def_File
@@ -1706,17 +1706,17 @@ TRYQ_CONT:
 ;TRYQ_YES_EXTENDED:
 ;	 cmp	 al, ','		 ;was the second comma?
 ;	 jne	 TryQ_GETNUM
-;	 invoke  skip_delim		 ;Yes, skip ',' and other possible delim
+;	 invoke_fn  skip_delim		 ;Yes, skip ',' and other possible delim
 ;	 jmp	 short TRYQ_PATH	 ;and No code page id entered.
 ;TRYQ_GETNUM:
-;	 invoke  GETNUM
+;	 invoke_fn  GETNUM
 ;	 jc	 TryQBadCOM		 ;"Country=xxx,path" will not be accepted.
 ;;	 jc	 TRYQ_PATH		 ;Codepage is not specified. No code page.
 ;;					 ;At this point, AL already contain the
 ;;					 ;first char of the PATH.
 ;	 jz	 TryQBad		 ;codepage=0 entered. Error
 ;	 mov	 DX, AX 		 ;save code page in DX
-;	 invoke  skip_delim		 ;move CHRPTR to the path string
+;	 invoke_fn  skip_delim		 ;move CHRPTR to the path string
 ;	 jc	 TryQ_Def_File		 ;no more char? then use default filename
 ;	 cmp	 al, CR
 ;	 je	 TryQ_Def_File
@@ -1906,7 +1906,7 @@ TryQChkErr:
 	push	cs
 	pop	ds			;retore DS to SYSINIT_SEG
 	jnc	CoffJ4			;if no error, then exit
-	invoke	PRINT			;else show error message
+	invoke_fn PRINT			;else show error message
 	call	Error_Line		;AN000;
 CoffJ4:
 	mov	bx, CntryFileHandle
@@ -1933,7 +1933,7 @@ $$IF61:
 	     mov	dx, offset BadCountryCom ;"Error in CONTRY command"
 ;	$ENDIF
 $$EN61:
-	invoke	Print
+	invoke_fn Print
 	call	Error_Line
 	ret
 Cntry_Error	endp
@@ -1969,7 +1969,7 @@ TRYF:
 	CMP	AH,'F'
 	JNZ	TRYL
 
-;	 invoke  GETNUM
+;	 invoke_fn  GETNUM
 ;	 CMP	 AX,5			 ;j.k. change it to 8!!!!!!!!
 ;	 JB	 TryFBad		 ; Gotta have at least 5
 ;	 CMP	 AX,256
@@ -2082,10 +2082,10 @@ $$SR70:
 TRYP:
 	CMP	AH,'P'
 	JNZ	TRYK
-	invoke	PARSELINE
+	invoke_fn PARSELINE
 	JC	TryPBad
-	invoke	SETPARMS
-	INVOKE	DIDDLEBACK
+	invoke_fn SETPARMS
+	invoke_fn DIDDLEBACK
 	jc	TryPBad
 	JMP	COFF
 TryPBad:jmp	Badop
@@ -2143,7 +2143,7 @@ TRYK:
 		IF	STACKSW
 
 ;	 MOV	 SepChr,','
-;	 INVOKE  GetNum 		 ; Get number of stacks
+;	 invoke_fn  GetNum 		 ; Get number of stacks
 ;	 MOV	 SepChr,0
 ;	 cmp	 ax, 0			 ;J.K. 5/5/86
 ;	 je	 TRYK_0 		 ;J.K. Let's accept 0.
@@ -2156,10 +2156,10 @@ TRYK:
 ;
 ; Skip delimiters after the first number.
 ;
-;	 invoke  Skip_delim		 ;J.K.
+;	 invoke_fn  Skip_delim		 ;J.K.
 ;	 JC	 TryKBad
 ;
-;	 INVOKE  GetNum 		 ; Get size of individual stack
+;	 invoke_fn  GetNum 		 ; Get size of individual stack
 ;	 JC	 TryKBad		 ; Number bad
 ;
 ;	 cmp	 ax, 0			 ;J.K. 5/5/86
@@ -2181,7 +2181,7 @@ TRYK:
 ;	 je	 TRYK_OK		 ;yes. accepted.
 ;TryKBad:
 ;	 MOV	 DX, OFFSET BADSTACK	 ;J.K. 5/26/86 "Invalid stack parameter"
-;	 invoke  PRINT
+;	 invoke_fn  PRINT
 ;	 JMP	 COFF
 
 Do_TryK:
@@ -2361,7 +2361,7 @@ PARMLOOP:
 TRYX:
 	CMP	AH,'X'
 	JNZ	TRYY
-;	 invoke  GETNUM
+;	 invoke_fn  GETNUM
 ;	 JZ	 TryXBad		 ; gotta have at least one
 ;	 CMP	 AX,256
 ;	 JAE	 TryXBad		 ; Can't be more than 8 bits worth
@@ -2369,9 +2369,9 @@ TRYX:
 ;
 ; Skip delimiters after the first number including ","
 ;
-;	 invoke  Skip_delim		 ;J.K.
+;	 invoke_fn  Skip_delim		 ;J.K.
 ;	 jc	 tryxbad
-;	 invoke  GetNum
+;	 invoke_fn  GetNum
 ;	 JC	 TryXBad		 ; Number bad (Zero is OK here)
 ;	 CMP	 AX,256
 ;	 JAE	 TryXBad
