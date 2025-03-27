@@ -108,8 +108,8 @@ PAGE
 ;
 ; *************************************************************
 
-INCLUDE DOSSYM.INC
-INCLUDE DEVSYM.INC
+INCLUDE dossym.inc
+INCLUDE devsym.inc
 
 Break <SEGMENT DECLARATIONS>
 

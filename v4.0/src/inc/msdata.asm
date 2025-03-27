@@ -8,18 +8,18 @@
 include mssw.asm
 include dosseg.asm
 debug = FALSE                           ; No dossym (too big)
-INCLUDE DOSMAC.INC
-INCLUDE SF.INC
-INCLUDE DIRENT.INC
-INCLUDE CURDIR.INC
-INCLUDE DPB.INC
-INCLUDE BUFFER.INC
-INCLUDE ARENA.INC
-INCLUDE VECTOR.INC
-INCLUDE DEVSYM.INC
-INCLUDE PDB.INC
-INCLUDE FIND.INC
-INCLUDE MI.INC
+INCLUDE dosmac.inc
+INCLUDE sf.inc
+INCLUDE dirent.inc
+INCLUDE curdir.inc
+INCLUDE dpb.inc
+INCLUDE buffer.inc
+INCLUDE arena.inc
+INCLUDE vector.inc
+INCLUDE devsym.inc
+INCLUDE pdb.inc
+INCLUDE find.inc
+INCLUDE mi.inc
 .cref
 .list
 

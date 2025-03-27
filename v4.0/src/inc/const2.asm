@@ -4,9 +4,9 @@ NAME	CONST2
 
 .xlist
 .xcref
-INCLUDE DOSSYM.INC
+INCLUDE dossym.inc
 include dosseg.asm
-INCLUDE DEVSYM.INC
+INCLUDE devsym.inc
 .cref
 .list
 

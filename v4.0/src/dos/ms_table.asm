@@ -7,7 +7,7 @@
 .xlist
 .xcref
 include dosseg.asm
-include EA.inc                           ;AN000;; for Extended Attributes
+include ea.inc                           ;AN000;; for Extended Attributes
 include fastopen.inc                     ;AN000;; for Extended Attributes
 include dossym.inc
 .cref
