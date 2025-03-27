@@ -69,12 +69,12 @@ DOSSIZE EQU	0A000H
 .xlist
 ;	INCLUDE dossym.INC
 	include smdossym.inc	;J.K. Reduced version of DOSSYM.INC
-	INCLUDE devsym.INC
-	include ioctl.INC
-	include BIOSTRUC.INC
+	include devsym.inc
+	include ioctl.inc
+	include biostruc.inc
 	include smifssym.inc		;AN000;
 	include defems.inc		;AN010;
-	include DEVMARK.inc		;AN005;
+	include devmark.inc		;AN005;
 	include cputype.inc
 
 	include version.inc
@@ -211,9 +211,9 @@ ASSUME	CS:SYSINITSEG,DS:NOTHING,ES:NOTHING,SS:NOTHING
 SYSINIT$:
 	IF	STACKSW
 .SALL
-	  include MSSTACK.INC		;Main stack program and data definitions
-;	  include STKMES.INC		;Fatal stack error message
-	  include MSBIO.CL5		;Fatal stack error message
+	  include msstack.inc		;Main stack program and data definitions
+;	  include stkmes.inc		;Fatal stack error message
+	  include msbio.cl5		;Fatal stack error message
 .XALL
 	    public Endstackcode
 Endstackcode	label byte
@@ -1935,7 +1935,7 @@ Sysinit_Base_SP  equ $-Sysinit_Base		;AN000;
 		dw	?			;AN000;
 Mem_Alloc_Err_msg equ $-Sysinit_Base		;AN000;
 ;include BASEMES.INC				;AN000; Memory allocation error message
-include MSBIO.CL4				;AN011; Memory allocation error message
+include msbio.cl4				;AN011; Memory allocation error message
 End_Sysinit_Base	label	byte		;AN000;
 SIZE_SYSINIT_BASE	equ $-Sysinit_Base	;AN000;
 
@@ -2569,7 +2569,7 @@ Roundup endp
 	IF	STACKSW
 .SALL
 
-INCLUDE STKINIT.INC
+INCLUDE stkinit.inc
 
 .XALL
 	ENDIF

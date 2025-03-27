@@ -1,5 +1,5 @@
 	%OUT MSIOCTL.SIL...
-	INCLUDE IOCTL.INC
+	INCLUDE ioctl.inc
 ;	$SALUT $ioctl$
 
 ;==============================================================================

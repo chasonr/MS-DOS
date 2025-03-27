@@ -53,9 +53,9 @@ DOSSIZE EQU	0A000H
 .xlist
 ;	INCLUDE dossym.INC
 	include smdossym.inc	;J.K. Reduced version of DOSSYM.INC
-	INCLUDE devsym.INC
-	include ioctl.INC
-	include DEVMARK.inc
+	INCLUDE devsym.inc
+	include ioctl.inc
+	include devmark.inc
 .list
 
 	IF	NOT IBM

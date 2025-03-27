@@ -86,11 +86,11 @@ DOSSIZE EQU	0A000H
 .xlist
 ;	INCLUDE dossym.INC
 	include smdossym.inc	;J.K. Reduced version of DOSSYM.INC
-	INCLUDE devsym.INC
-	include ioctl.INC
-	include BIOSTRUC.INC
+	INCLUDE devsym.inc
+	include ioctl.inc
+	include biostruc.inc
 	include smifssym.inc	;AN000; Reduced version of IFSSYM.INC.
-	include DEVMARK.inc	;AN004;
+	include devmark.inc	;AN004;
 	include version.inc
 .list
 
@@ -209,8 +209,8 @@ XMAEM_file	db	'XMAEM.SYS',0	;AN029;
 ;SYSTEM parser data and code.
 ;******************************************************************************
 .xlist
-	include PSOPTION.INC			;Parsing options for SYSCONF.
-	include PARSE.ASM			;together with PSDATA.INC
+	include psoption.inc			;Parsing options for SYSCONF.
+	include parse.asm			;together with PSDATA.INC
 .list
 ;Control block definitions for PARSER.
 ;---------------------------------------------------

@@ -9,10 +9,10 @@
 ;==============================================================================
 
 	itest=0
-	INCLUDE MSGROUP.INC	;DEFINE CODE SEGMENT
-	INCLUDE JUMPMAC.INC
-	INCLUDE MSEQU.INC
-	INCLUDE MSMACRO.INC
+	INCLUDE msgroup.inc	;DEFINE CODE SEGMENT
+	INCLUDE jumpmac.inc
+	INCLUDE msequ.inc
+	INCLUDE msmacro.inc
 
 ;*** DOS 3.3 will not support more than 25 rows
 ;	INCLUDE DEVSYM.INC	;J.K. 4/29/86 for CON$GENIOCTL support
