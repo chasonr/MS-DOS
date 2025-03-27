@@ -262,6 +262,7 @@ ASSUME	DS:NOTHING
 	MOV	[SI.user_BX],BX
 international_ok:
 	MOV	AX,BX		     ; Return country code in AX too.
+ok_ret_1:
 	transfer SYS_RET_OK
 
 international_set:
@@ -272,9 +273,11 @@ ASSUME	DS:DOSGROUP
 errtn:
 	CMP	AL,0FFH
 	JZ	errtn2
+err_ret_1:
 	transfer SYS_RET_ERR	     ; return what we got from NLSFUNC
 errtn2:
-	error	error_Invalid_Function	; NLSFUNC not existent
+	MOV	AL,error_Invalid_Function ; NLSFUNC not existent
+	jmp	short err_ret_1
 
 
 EndProc $INTERNATIONAL
@@ -359,7 +362,8 @@ dbcs_char:				;AN000;
 yesyes: 				;AN000'
 	INC	AX			;AN000;;MS. return 1
 nono:					;AN000;
-	transfer SYS_RET_OK		;AN000;;MS. done
+ok_ret_2:
+	jmp	short ok_ret_1		;AN000;;MS. done ; transfer SYS_RET_OK
 capstring:				;AN000;
 	MOV	SI,DX			;AN000;;MS. si=dx
 	CMP	AL,CAP_STRING		;AN000;;MS. cap string ?
@@ -437,7 +441,9 @@ NXTENTRY:
 	LOOP	NXTENTRY
 	POP	CX
 capinval:
-	error	error_Invalid_Function	; info type not found
+	mov	AL,error_Invalid_Function	; info type not found
+err_ret_2:
+	jmp	SYS_RET_ERR
 FOUNDIT:
 	MOVSB				; move info id byte
 	POP	CX			; retsore char count
@@ -452,7 +458,8 @@ OK_RETN:
 GETDONE:
 	invoke_fn get_user_stack		; return actual length to user's CX
 	MOV	[SI.user_CX],CX
-	transfer SYS_RET_OK
+ok_ret_3:
+	jmp	short ok_ret_2
 setsize:
 	SUB	CX,3			; size after length field
 	CMP	WORD PTR [SI],CX	; less than table size
@@ -473,14 +480,17 @@ CHKNLS:
 	CMP	AL,0FFH
 	JZ	NLSNXT			   ;	 in memory
 sizeerror:
-	error	error_Invalid_Function
+	MOV	AL,error_Invalid_Function
+err_ret_3:
+	jmp	short err_ret_2
 NLSNXT: CallInstall GetExtInfo,NLSFUNC,2  ;get extended info
 	CMP	AL,0			   ; success ?
 	JNZ	NLSERROR
 	MOV	AX,[SI.ccSysCodePage]	; ax = sys code page id
 	JMP	GETDONE
 NLSERROR:
-	transfer SYS_RET_ERR		; return what is got from NLSFUNC
+err_ret_4:
+	jmp	short err_ret_3		; return what is got from NLSFUNC
 
 EndProc $GetExtCntry
 
@@ -515,7 +525,8 @@ ASSUME DS:NOTHING
 	MOV	[SI.user_BX],BX        ; update returned bx
 	MOV	[SI.user_DX],DX        ; update returned dx
 OK_RETURN:
-	transfer SYS_RET_OK
+ok_ret_4:
+	jmp	short ok_ret_3	       ; SYS_RET_OK
 ASSUME DS:DOSGROUP
 setglpg:
 	CMP	AL,2
@@ -539,9 +550,11 @@ setglpg:
 	transfer   From_GetSet
 
 seterr:
-	transfer  SYS_RET_ERR
+err_ret_5:
+	jmp	short err_ret_4
 nomem:
-	error	error_Invalid_Function ; function not defined
+	MOV	AL,error_Invalid_Function ; function not defined
+	jmp	short err_ret_5
 ;
 EndProc $GetSetCdPg
 
@@ -804,7 +817,8 @@ ASSUME	DS:NOTHING
 	MOV	[SI.user_ES],ES
 	MOV	[SI.user_BX],BX
 	MOV	[SI.user_CX],CX
-	transfer SYS_RET_OK
+ok_ret_5:
+	jmp	SYS_RET_OK
 EndProc $GetExtendedError
 
 BREAK <$Get_Global_CdPg  - Return Global Code Page>
@@ -903,7 +917,7 @@ get_lbt:						       ;AN000;
 	MOV	[SI.user_SI], Offset Dosgroup:DBCS_TAB+2       ;AN000;
 	MOV	[SI.user_DS], CS			       ;AN000;
 okok:							       ;AN000;
-	transfer SYS_RET_OK		;		       ;AN000;
+	jmp	short ok_ret_5		;		       ;AN000;
 
  ENDIF							       ;AN000;
 

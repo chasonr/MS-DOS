@@ -103,7 +103,7 @@ EndProc SHARE_VIOLATION
 	DOSAssume   CS,<DS>,"ShareEnd"
 	ASSUME  ES:NOTHING
 
-if installed
+ifdef installed
 	Call    JShare + 2 * 4
 else
 	Call    MFTClose

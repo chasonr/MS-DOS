@@ -467,6 +467,7 @@ FCBOpenErr:
 ;
 ; AL has error code
 ;
+err_ret_1:
 	transfer    FCB_Ret_Err
 FindFCB:
 	invoke	GetExtended		; DS:SI will point to FCB
@@ -504,7 +505,7 @@ HardMessage:
 	invoke_fn FCBHardErr
 	POP	AX
 DeadFCB:
-	transfer    FCB_Ret_Err
+	jmp	err_ret_1
 FCBOK:
 	invoke_fn IsSFTNet		       ;AN007;F.C. >32mb  Non Fat file?
 	JNZ	FCBOK2			       ;AN007;F.C. >32mb  yes

@@ -111,6 +111,8 @@ Installed = TRUE
 	I_need	EXTERR_LOCUS,BYTE	; Extended Error Locus
 	I_need	DrvErr,BYTE		; drive error
 
+	EXTRN Sys_Ret_Err:NEAR, Sys_Ret_OK:NEAR
+
 BREAK <$AssignOper -- Set up a Macro>
 
 ; Inputs:
@@ -175,10 +177,12 @@ chk08:										;AN000;
 	POP	BX			; Don't zap error code in AX
 	JC	ASS_ERR
 okdone:
-	transfer SYS_RET_OK
+ok_ret_1:
+	JMP	Sys_Ret_OK
 
 ASS_ERR:
-	transfer SYS_RET_ERR
+err_ret_1:
+	JMP	Sys_Ret_Err
 	ENDIF
 
 EndProc $AssignOper
@@ -240,7 +244,7 @@ Procedure InitCDS,NEAR
 	PUSH	DS
 	PUSH	SI
 	SUB	AL,"A"                  ; A = 0
-	invoke	FIND_DPB
+	invoke_fn FIND_DPB
 	JC	PRET			; OOOOPPPPPSSSS!!!!
 	MOV	WORD PTR ES:[DI.curdir_devptr],SI
 	MOV	WORD PTR ES:[DI.curdir_devptr+2],DS
@@ -279,7 +283,9 @@ Procedure   $UserOper,NEAR
 	CMP	AL,5			; test for 2,3,4 or 5
 	JBE	UserPrint		; yep
 	MOV	EXTERR_LOCUS,errLoc_Unk ; Extended Error Locus
-	error	error_Invalid_Function	; not 0,1,2,3
+	MOV	AL,error_Invalid_Function	; not 0,1,2,3
+err_ret_2:
+	JMP	Sys_Ret_Err
 
 UserGet:
 ; Transfer MYNAME to DS:DX
@@ -300,7 +306,8 @@ ASSUME	DS:NOTHING
 	XOR	AX,AX			; 16th byte is 0
 	STOSB
 UserBye:
-	transfer    sys_ret_ok		; no errors here
+ok_ret_2:
+	JMP	Sys_Ret_OK		; no errors here
 
 UserSet:
 ASSUME	DS:NOTHING
@@ -323,10 +330,10 @@ ELSE
 	INT	2FH
 	POP	DX			; Clean stack
 	JNC	OKPA
-	transfer SYS_RET_ERR
+	JMP	SHORT err_ret_2
 
 OKPA:
-	transfer SYS_RET_OK
+	JMP	SHORT ok_ret_2
 ENDIF
 
 EndProc $UserOper

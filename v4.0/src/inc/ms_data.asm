@@ -188,6 +188,8 @@ PUBLIC  SWAP_END
  
 MSDAT001e       label byte
  
+        align 2
+
 .xall
  
 DATA    ENDS

@@ -46,6 +46,7 @@ include version.inc
 .sall
 
 	EXTRN	DOS_Read:NEAR, DOS_Write:NEAR
+	EXTRN	Sys_Ret_OK:NEAR, Sys_Ret_Err:NEAR
 
 IF	BUFFERFLAG
 	extrn	save_user_map:near
@@ -154,11 +155,13 @@ PostFree:
 	JC	CloseError
 	fmt TypSysCall,LevLog,<"$p: Close ok\n">
 	MOV	AH,close		; MZ Bogus multiplan fix
-	transfer    Sys_Ret_OK
+ok_ret_1:
+	JMP	Sys_Ret_OK
 CloseError:
 	ASSUME	DS:NOTHING
 	fmt TypSysCall,LevLog,<"$p: Close error $x\n">,<AX>
-	transfer    Sys_Ret_Err
+err_ret_1:
+	JMP	Sys_Ret_Err
 EndProc $Close
 
 BREAK <$Commit - commit the file>
@@ -195,10 +198,12 @@ Procedure   $Commit,NEAR
 ;
 	JC	Commiterror
 	MOV	AH,Commit		;
-	transfer    Sys_Ret_OK
+ok_ret_2:
+	JMP	short ok_ret_1
 Commiterror:
 	ASSUME	DS:NOTHING
-	transfer    Sys_Ret_Err
+err_ret_2:
+	JMP	short err_ret_1
 EndProc $Commit
 
 
@@ -275,10 +280,12 @@ movhandl:
 	PUSH	CX
 	JMP	copy_hand
 ok_done:
-	transfer    Sys_Ret_OK
+ok_ret_3:
+	JMP	short ok_ret_2
 too_many_files:
 	MOV	AL,error_too_many_open_files
-	transfer    Sys_Ret_Err
+err_ret_3:
+	JMP	short err_ret_2
 enlarge:
 	MOV	CX,DS:[PDB_JFN_Length]	  ; get number of old handles
 copy_hand:
@@ -315,14 +322,17 @@ non_psp:
 final:
 	MOV	WORD PTR DS:[PDB_JFN_Pointer+2],ES  ; update table pointer segment
 	POP	DS:[PDB_JFN_Length]	 ; restore new number of handles
-	transfer   Sys_Ret_Ok
+ok_ret_4:
+	JMP	short ok_ret_3
 no_memory:
 	POP	BX			; clean stack
 	MOV	AL,error_not_enough_memory
-	transfer    Sys_Ret_Err
+err_ret_4:
+	JMP	short err_ret_3
 invalid_func:
 	MOV	AL,error_invalid_function
-	transfer    Sys_Ret_Err
+err_ret_5:
+	JMP	short err_ret_4
 EndProc $ExtHandle
 
 BREAK <$READ - Read from a file handle>
@@ -353,7 +363,8 @@ ReadDo:
 	JNC	ReadSetup		; no errors do the operation
 ReadError:
 	fmt TypSysCall,LevLog,<"Read/Write error $x\n">,<AX>
-	transfer    SYS_RET_ERR 	; go to error traps
+err_ret_6:
+	JMP	short err_ret_5 		; go to error traps
 ReadSetup:
 	MOV	WORD PTR [ThisSFT],DI	; save offset of pointer
 	MOV	WORD PTR [ThisSFT+2],ES ; save segment value
@@ -418,7 +429,8 @@ ENDIF
 
 	MOV	AX,CX			; get correct return in correct reg
 	fmt TypSysCall,LevLog,<"Read/Write cnt done $x\n">,<AX>
-	transfer    sys_ret_ok		; successful return
+ok_ret_5:
+	JMP	Sys_Ret_OK		; successful return
 EndProc $READ
 
 ;
@@ -497,7 +509,9 @@ ENDIF
 	CMP	AL,2			; is the seek value correct?
 	JBE	LSeekDisp		; yes, go dispatch
 	MOV	EXTERR_LOCUS,errLoc_Unk ; Extended Error Locus
-	error	error_invalid_function	; invalid method
+	MOV	AL,error_invalid_function	; invalid method
+err_ret_7:
+	JMP	Sys_Ret_Err
 LSeekDisp:
 	CMP	AL,1			; best way to dispatch; check middle
 	JB	LSeekStore		; just store CX:DX
@@ -512,7 +526,8 @@ LSeekSetpos:
 	MOV	WORD PTR ES:[DI.SF_Position+2],DX
 	invoke_fn Get_user_stack
 	MOV	DS:[SI.User_DX],DX	; return DX:AX
-	transfer    SYS_RET_OK		; successful return
+ok_ret_6:
+	JMP	short ok_ret_5		; successful return
 
 LSeekEOF:
 	TEST	ES:[DI.sf_flags],sf_isnet
@@ -536,7 +551,8 @@ NET_LSEEK:
 ; REMOVE ABOVE INSTRUCTION TO ENABLE DCR 142
 	CallInstall Net_Lseek,multNet,33
 	JNC	LSeekSetPos
-	transfer    SYS_RET_ERR
+err_ret_8:
+	JMP	short err_ret_7
 
 EndProc $LSeek
 
@@ -620,7 +636,8 @@ IFSsearch:				       ;AN000;
 	MOV	AX,(multNET SHL 8) or 45       ;AN000;;FT. Get/Set XA support
 	INT	2FH			       ;AN000;
 	JC	getseterror		       ;AN000;;FT. error
-	transfer    SYS_RET_OK		       ;AN000;;FT.
+ok_ret_7:
+	JMP	Sys_Ret_OK		       ;AN000;;FT.
 localhandle:				       ;AN000;
 ;	TEST	ES:[DI.sf_flags],devid_device  ;AN000;;FT. device
 ;	JZ	getsetfile8		       ;AN000;;FT. no
@@ -655,12 +672,15 @@ getexit:				       ;AN000;;FT.
 
 
 getseterror:				       ;AN000;
-	transfer    SYS_RET_ERR 	       ;AN000;;FT. mark file as dirty
+err_ret_9:
+	JMP	short err_ret_8	 	       ;AN000;;FT. mark file as dirty
 inval_func:
 
 ;;;;; DOS 4.00
 	MOV	EXTERR_LOCUS,errLoc_Unk ; Extended Error Locus
-	error	error_invalid_function	; give bad return
+	MOV	AL,error_invalid_function	; give bad return
+err_ret_10:
+	JMP	short err_ret_9
 filetimes_ok:
 	call	CheckOwner		; get sf pointer
 	JNC	gsdt
@@ -676,14 +696,15 @@ gsdt:
 	MOV	[SI.user_CX],CX 	; and stash in time
 	MOV	[SI.user_DX],DX 	; and stask in date
 ext_done:
-	transfer    SYS_RET_OK		; and say goodnight
+ok_ret_8:
+	JMP	short ok_ret_7		; and say goodnight
 filetimes_set:
 	EnterCrit   critSFT
 	MOV	ES:[DI.sf_Time],CX	; drop in new time
 	MOV	ES:[DI.sf_Date],DX	; and date
 	XOR	AX,AX
 do_share:
-if installed
+ifdef installed
 	Call	JShare + 14 * 4
 else
 	Call	ShSU
@@ -693,7 +714,8 @@ datetimeflg:
 	OR	ES:[DI.sf_Flags],sf_close_nodate
 ftok:
 	LeaveCrit   critSFT
-	transfer    SYS_RET_OK		; mark file as dirty and return
+ok_ret_9:
+	JMP	short ok_ret_8		; mark file as dirty and return
 EndProc $File_Times
 
 BREAK <$DUP - duplicate a jfn>
@@ -721,8 +743,8 @@ DupErrorCheck:
 	invoke_fn pJFNFromHandle		; get pointer
 	MOV	BL,ES:[DI]		; get SFT number
 	MOV	DS:[SI],BL		; stuff in new SFT
-	transfer    SYS_RET_OK		; and go home
-DupErr: transfer    SYS_RET_ERR
+	JMP	short ok_ret_9		; and go home
+DupErr: JMP	short err_ret_10
 
 EndProc $Dup
 
@@ -740,7 +762,7 @@ Procedure   $Dup2,NEAR
 	ASSUME	CS:DOSGROUP,DS:NOTHING,ES:NOTHING,SS:DOSGROUP
 	SaveReg <BX,CX> 		; save source
 	MOV	BX,CX			; get one to close
-	invoke	$Close			; close destination handle
+	invoke_fn $Close			; close destination handle
 	RestoreReg  <BX,AX>		; old in AX, new in BX
 	invoke_fn pJFNFromHandle		; get pointer
 	JMP	DupErrorCheck		; check error and do dup

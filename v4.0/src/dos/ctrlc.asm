@@ -331,6 +331,7 @@ ASSUME	DS:NOTHING
 ;
 ctrlc_repeat:
 	MOV	AX,User_In_AX
+cmd_1:
 	transfer    COMMAND
 ;
 ; The current SP is NOT the same as the input SP.  Presume that he RETF'd
@@ -347,7 +348,7 @@ ctrlc_try_new:
 ctrlc_abort:
 	MOV	AX,(EXIT SHL 8) + 0
 	MOV	DidCTRLC,-1
-	transfer    COMMAND		; give up by faking $EXIT
+	jmp	short cmd_1		; give up by faking $EXIT
 
 EndProc CNTCHAND
 

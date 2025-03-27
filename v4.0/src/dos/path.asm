@@ -39,6 +39,7 @@ INCLUDE devsym.inc
 .list
 
 	EXTRN	DOS_MkDir:NEAR,DOS_RmDir:NEAR
+	EXTRN	Sys_Ret_Err:NEAR,Sys_Ret_Ok:NEAR
 
 	I_Need	ThisCDS,DWORD		; pointer to Current CDS
 	I_Need	WFP_Start,WORD		; pointer to beginning of directory text
@@ -70,7 +71,8 @@ BREAK <$CURRENT_DIR - dump the current directory into user space>
 CurdirErr:
 	LeaveCrit   critDisk
 	MOV	AL,[DrvErr]		;IFS.					;AN000;
-	transfer SYS_RET_ERR		;IFS. make noise			;AN000;
+err_ret_1:
+	jmp	Sys_Ret_Err		;IFS. make noise			;AN000;
 CurrentValidate:
 	SaveReg <DS,SI> 		; save destination
 	LDS	SI,ThisCDS
@@ -124,7 +126,8 @@ FOK:
 ;; 10/29/86 E5 char
 	xor	AL,AL			; MZ 19 Jan 84
 	LeaveCrit   critDisk
-	transfer    Sys_Ret_OK		; no more, bye!
+ok_ret_1:
+	jmp	Sys_Ret_OK		; no more, bye!
 EndProc $Current_Dir
 
 BREAK <$RmDir -- Remove a directory>
@@ -157,7 +160,9 @@ BREAK <$RmDir -- Remove a directory>
 	jnc	rmlset			; If transpath succeeded, continue
 	pop	ds
 	pop	dx			; Restore the	 name
-	error	error_path_not_found	; Otherwise, return an error
+	mov	al,error_path_not_found	; Otherwise, return an error
+err_ret_2:
+	jmp	short err_ret_1
 
 rmlset:
 	CMP	cMeta,-1		;   if (cMeta >= 0)
@@ -174,7 +179,9 @@ rmloop: Invoke_fn GetCDSFromDrv		; Get curdir for drive in al
 rmerr:
 	pop	ds
 	pop	dx			; Restore the	 name
-	error	error_current_directory ;  error
+	mov	al,error_current_directory ;  error
+err_ret_3:
+	jmp	short err_ret_2
 
 rmcont:
 	pop	ds
@@ -220,7 +227,7 @@ BREAK <$ChDir -- Change current directory on a drive>
 ChDirErrP:
 	MOV	AL,error_path_not_found
 ChdirErr:
-	transfer    SYS_Ret_Err 	; oops!
+	jmp	short err_ret_3		; oops!
 
 ChDirCrack:
 	Assume	DS:DOSGroup
@@ -291,7 +298,8 @@ setdirclus:
 SkipRecency:
 	invoke_fn FStrCpy
 	XOR	AL,AL
-	transfer    Sys_Ret_OK
+ok_ret_2:
+	jmp	Sys_Ret_OK
 EndProc $CHDIR
 
 BREAK <$MkDir - Make a directory entry>
@@ -321,7 +329,8 @@ DoDirCall:
 MkErrP:
 	MOV	AL,error_Path_Not_Found    ; oops!
 MkErr:
-	transfer    Sys_Ret_Err
+err_ret_5:
+	jmp	Sys_Ret_Err
 MkDirCrack:
 	CMP	cMeta,-1
 	JNZ	MkErrP
@@ -331,12 +340,12 @@ MkDirCrack:
 	POP	SI			;PTM.					;AN000;
 	JBE	pathok			;PTM.					;AN000;
 	MOV	AL,error_Access_Denied	;PTM. ops!
-	transfer Sys_Ret_Err		;PTM.
+	jmp	short err_ret_5		;PTM.
 pathok:
 	CALL	SI			; go get file
 	ASSUME	ES:NOTHING
 	JC	MkErr			; no errors
-	transfer    Sys_Ret_OK
+	jmp	short ok_ret_2
 EndProc $MKDIR
 
 ; Inputs:

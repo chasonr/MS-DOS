@@ -44,6 +44,7 @@ include version.inc
 .sall
 
 	EXTRN	DOS_OPEN:NEAR,DOS_CREATE:NEAR,DOS_Create_New:NEAR
+	EXTRN	Sys_Ret_Err:NEAR, Sys_Ret_OK:NEAR
 
 IF 	NOT IBMCOPYRIGHT
 	extrn	Set_EXT_mode:near
@@ -222,7 +223,7 @@ OpenOK:
 ; sharer.
 ;
 	MOV	AX,JFN
-if installed
+ifdef installed
 	Call	JShare + 12 * 4
 else
 	Call	ShCol
@@ -230,7 +231,8 @@ endif
 	fmt	TypAccess,LevSFN,<"AccessFile setting SFN to -1\n">
 	MOV	SFN,-1			; clear out sfn pointer
 	fmt	TypSysCall,LevLog,<"Open/CreateXX: return $x\n">,<AX>
-	transfer    Sys_Ret_OK		; bye with no errors
+ok_ret_1:
+	JMP	Sys_Ret_OK		; bye with no errors
 ;Extended Open hooks check
 OpenE2: 				   ;AN000;;EO.
 	CMP	AX,error_invalid_parameter ;AN000;;EO. IFS extended open ?
@@ -263,7 +265,8 @@ OpenCritLeave:
 NORERR: 						;AN000;
 
 ;; File Tagging DOS 4.00
-	transfer    Sys_Ret_Err 	; no free, return error
+err_ret_1:
+	JMP	Sys_Ret_Err 		; no free, return error
 
 EndProc $Open
 
@@ -320,22 +323,27 @@ BREAK <$CHMOD - change file attributes>
 	JB	ChModGet		; 0 -> go get value
 	JZ	ChModSet		; 1 -> go set value
 	MOV	EXTERR_LOCUS,errLoc_Unk ; Extended Error Locus
-	error	error_invalid_function	; bad value
+	MOV	AL,error_invalid_function	; bad value
+err_ret_2:
+	JMP	short err_ret_1
 ChModGet:
 	invoke_fn Get_File_Info		; suck out the ol' info
 	JC	ChModE			; error codes are already set for ret
 	invoke_fn Get_User_stack		; point to user saved vaiables
 	MOV	[SI.User_CX],AX 	; return the attributes
-	transfer    Sys_Ret_OK		; say sayonara
+ok_ret_2:
+	JMP	SHORT ok_ret_1		; say sayonara
 ChModSet:
 	MOV	AX,CX			; get attrs in position
 	invoke_fn Set_File_Attribute	; go set
 	JC	ChModE			; errors are set
-	transfer    Sys_Ret_OK
+ok_ret_3:
+	JMP	SHORT ok_ret_2
 ChModErr:
 	mov	al,error_path_not_found
 ChmodE:
-	Transfer    SYS_RET_ERR
+err_ret_3:
+	JMP	short err_ret_2
 EndProc $ChMod
 
 BREAK <$UNLINK - delete a file entry>
@@ -369,11 +377,13 @@ BREAK <$UNLINK - delete a file entry>
 	JC	UnlinkE 		; error is there
 
 
-	transfer    Sys_Ret_OK		; okey doksy
+ok_ret_4:
+	JMP	SHORT ok_ret_3		; okey doksy
 NotFound:
 	MOV	AL,error_path_not_found
 UnlinkE:
-	transfer    Sys_Ret_Err 	; bye
+err_ret_4:
+	JMP	short err_ret_3 		; bye
 EndProc $UnLink
 
 BREAK <$RENAME - move directory entries around>
@@ -433,7 +443,9 @@ rnloop: 				   ;AN000;
 	JMP	rnloop			   ;AN000;;MS.
 rnerr:					   ;AN000;
 	ADD	SP,4			   ;AN000;;MS. pop thiscds
-	error	error_current_directory    ;AN000;;MS.
+	MOV	AL,error_current_directory    ;AN000;;MS.
+err_ret_5:
+	JMP	short err_ret_4
 dorn:					   ;AN000;
 	POP	WORD PTR SS:[THISCDS+2]    ;AN000;;MS.
 	POP	WORD PTR SS:[THISCDS]	   ;AN000;;MS.
@@ -444,7 +456,8 @@ dorn:					   ;AN000;
 	JC	UnlinkE 		; errors
 
 
-	transfer    Sys_Ret_OK
+ok_ret_5:
+	JMP	Sys_Ret_OK
 EndProc $Rename
 
 Break <$CreateNewFile - Create a new directory entry>
@@ -626,9 +639,11 @@ SETTMPERR:
 CreateDone:
 	Leave
 	JC	CreateFail
-	transfer    Sys_Ret_OK		; success!
+ok_ret_6:
+	JMP	Sys_Ret_OK		; success!
 CreateFail:
-	transfer    Sys_Ret_Err
+err_ret_6:
+	JMP	Sys_Ret_Err
 EndProc $CreateTempFile
 
 Break	<SetAttrib - set the search attrib>
@@ -729,11 +744,15 @@ procedure   $Extended_Open,NEAR 			       ;AN000;
 ;	JNZ	no_cdpg_chk			 ;AN000;;EO.  no
 	JMP	SHORT goopen2			 ;AN000;;EO.  do nromal
 ext_inval2:					 ;AN000;;EO.
-	error	error_Invalid_Function		 ;AN000;EO..  invalid function
+	MOV	AL,error_Invalid_Function		 ;AN000;EO..  invalid function
+err_ret_7:
+	JMP	short err_ret_6
 ext_inval_parm: 				 ;AN000;EO..
 	POP	CX				 ;AN000;EO..  pop up satck
 	POP	SI				 ;AN000;EO..
-	error	error_Invalid_data		 ;AN000;EO..  invalid parms
+	MOV	AL,error_Invalid_data		 ;AN000;EO..  invalid parms
+err_ret_8:
+	JMP	short err_ret_7
 error_return:					 ;AN000;EO.
 	ret					 ;AN000;EO..  return with error
 ;no_cdpg_chk:						EO.
@@ -756,7 +775,8 @@ goopen: 					 ;AN000;
 	MOV	[XA_from],By_Create		 ;AN000;;EO.  for set xa
 	JMP	setXAttr			 ;AN000;;EO.  set XAs
 ok_return2:
-	transfer SYS_RET_OK			 ;AN000;;EO.
+ok_ret_7:
+	JMP	Sys_Ret_OK			 ;AN000;;EO.
 chknext:
 	TEST	[EXTOPEN_FLAG],ext_exists_open	 ;AN000;;EO.  exists open
 	JNZ	exist_open			 ;AN000;;EO.  yes
@@ -829,7 +849,7 @@ setXAttr:
 	MOV	[SI.USER_AX],AX 	;AN000;;EO. set handle for ax
 
 ok_return:				;AN000;
-	transfer SYS_RET_OK		;AN000;;EO.
+	JMP	Sys_Ret_OK		;AN000;;EO.
 
 extexit2:				;AN000; ERROR RECOVERY
 
@@ -855,7 +875,7 @@ ext_file_unfound:			;AN000;
 ext_inval:				 ;AN000;
 	MOV	AX,error_invalid_function;AN000;EO.
 extexit:
-	transfer SYS_RET_ERR		;AN000;EO.
+	JMP	Sys_Ret_Err		;AN000;EO.
 
 EndProc $Extended_Open			;AN000;
 

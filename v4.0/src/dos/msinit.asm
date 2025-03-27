@@ -449,7 +449,7 @@ ISET2:
 
 	MOV	AX,BP		; Final DOS segment to AX
 
-IF installed
+IFDEF installed
 ; the following two are in the Code segment, thus the CS
 ; overrides
 	MOV	WORD PTR DS:[02FH * 4],OFFSET DOSGROUP:INT2F

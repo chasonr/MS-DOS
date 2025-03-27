@@ -38,6 +38,8 @@ Installed = TRUE
 	i_need	Lock_Buffer,DWORD	;AN000; DOS 4.00
 	i_need	Temp_Var,WORD		;AN000; DOS 4.00
 
+	EXTRN	Sys_Ret_Err:NEAR
+
 BREAK <$LockOper - Lock Calls>
 
 ;
@@ -90,10 +92,14 @@ ASSUME	DS:NOTHING,ES:NOTHING
 	invoke_fn SFFromHandle		       ; ES:DI -> SFT
 	JNC	lock_do 		       ; have valid handle
 	POP	DI			       ; Clean stack
-	error	error_invalid_handle
+	MOV	AL,error_invalid_handle
+err_ret_1:
+	JMP	Sys_Ret_Err
 lock_bad_func:
 	MOV	EXTERR_LOCUS,errLoc_Unk        ; Extended Error Locus
-	error	error_invalid_function
+	MOV	AL,error_invalid_function
+err_ret_2:
+	JMP	short err_ret_1
 
 ; Align_buffer call has been deleted, since it corrupts the DTA  (6/5/88) P5013
 
@@ -190,7 +196,7 @@ DOS_Unlock:
 	CallInstall Net_Xlock,multNet,10
 	JMP	SHORT ValChk
 LOCAL_UNLOCK:
-if installed
+ifdef installed
 	Call	JShare + 7 * 4
 else
 	Call	clr_block
@@ -198,7 +204,7 @@ endif
 ValChk:
 	JNC	Lock_OK
 lockerror:
-	transfer SYS_RET_ERR
+	JMP	short err_ret_2
 Lock_OK:
 	MOV	AX,[Temp_VAR]			 ;AN000;;MS. AX= number of bytes
 	transfer SYS_Ret_OK
@@ -210,7 +216,7 @@ DOS_Lock:
 	CallInstall NET_XLock,multNet,10
 	JMP	ValChk
 LOCAL_LOCK:
-if installed
+ifdef installed
 	Call	JShare + 6 * 4
 else
 	Call	Set_Block
@@ -306,7 +312,7 @@ BREAK <Set_Lock_Buffer>
 	MOV	BX,RetryCount		; Number retries
 LockRetry:
 	SaveReg <BX,AX> 		; MS. save regs 			;AN000;
-if installed
+ifdef installed
 	call	JShare + 8 * 4
 else
 	Call	chk_block

@@ -99,6 +99,7 @@ Procedure $Get_FCB_Position,NEAR
 	JAE	GetFCBBye
 	MOV	[SI+fcb_RR+2+1],DH	; Set 4th byte only if record size < 64
 GetFCBBye:
+ok_ret_1:
 	transfer    FCB_Ret_OK
 EndProc $GET_FCB_POSITION
 
@@ -122,12 +123,14 @@ Procedure $FCB_Delete,NEAR
 	invoke_fn DOS_Delete		; wham
 	JC	BadPath
 GoodPath:
-	transfer    FCB_Ret_OK		; do a good return
+ok_ret_2:
+	jmp	short ok_ret_1		; do a good return
 BadPath:
 ;
 
 ; Error code is in AX
 ;
+err_ret_1:
 	transfer    FCB_Ret_Err 	; let someone else signal the error
 EndProc $FCB_DELETE
 
@@ -181,7 +184,7 @@ LengthStore:
 	JZ	GoodPath		; not storing insignificant zero
 	MOV	[SI.FCB_RR+3],DH	; save that high piece
 GoodRet:
-	transfer    FCB_Ret_OK
+	jmp	short ok_ret_2
 EndProc $GET_FCB_FILE_LENGTH
 
 Break <$FCB_Close - close a file>
@@ -247,7 +250,8 @@ CloseOK:
 	CMP	AL,error_invalid_handle
 	JZ	GoodRet
 	MOV	AL,error_file_not_found
-	transfer    FCB_Ret_Err
+err_ret_2:
+	jmp	FCB_Ret_Err
 EndProc $FCB_CLOSE
 
 Break	<$FCB_Rename - change names in place>
@@ -293,7 +297,7 @@ BadRen:
 ;
 ; AL has error code
 ;
-	transfer    FCB_Ret_Err
+	jmp	err_ret_2
 
 EndProc $FCB_RENAME
 

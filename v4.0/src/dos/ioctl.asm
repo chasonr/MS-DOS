@@ -50,6 +50,8 @@ include ifssym.inc			 ;AN000;
 	I_need	USER_IN_AX,WORD 		;AN000;
 	I_need	Temp_Var2,WORD			;AN000;
 
+	EXTRN	Sys_Ret_Err:NEAR,Sys_Ret_OK:NEAR
+
 BREAK <IOCTL - munge on a handle to do device specific stuff>
 
 ;
@@ -255,7 +257,9 @@ ioctl_check_char:
 	invoke_fn SFFromHandle		; ES:DI -> SFT
 	JNC	ioctl_check_permissions ; have valid handle
 ioctl_bad_handle:
-	error	error_invalid_handle
+	MOV	AL,error_invalid_handle
+err_ret_1:
+	JMP	Sys_Ret_Err
 
 ioctl_check_permissions:
 	CMP	AL,2
@@ -267,7 +271,9 @@ ioctl_check_permissions:
 	AND	DH,0FEH 		;AN000;MS.allow DH=01H
 	POP	DX			;AN000;MS.
 	JZ	ioctl_check_device	; can I set with this data?
-	error	error_invalid_data	; no DH <> 0
+	MOV	AL,error_invalid_data	; no DH <> 0
+err_ret_2:
+	JMP	short err_ret_1
 
 ioctl_bad_funj2:
 	JMP	ioctl_bad_fun
@@ -283,7 +289,8 @@ ioctl_check_device:
 do_exception:
 	OR	BYTE PTR ES:[DI.sf_flags+1],DH;AN000;MS.;set 100H bit for disk full
 
-	transfer    SYS_RET_OK
+ok_ret_1:
+	jmp	Sys_Ret_OK
 
 
 
@@ -301,7 +308,8 @@ ioctl_no_high:
 	MOV	DX,AX
 	invoke_fn get_user_stack
 	MOV	[SI.user_DX],DX
-	transfer    SYS_RET_OK
+ok_ret_2:
+	jmp	short ok_ret_1
 
 ioctl_control_string:
 	TEST	ES:[DI.sf_flags],devid_device	; can I?
@@ -346,7 +354,8 @@ DO_IOFUNC:
 	JNZ	ioctl_status_ret
 	INC	AL
 ioctl_status_ret:
-	transfer SYS_RET_OK
+ok_ret_3:
+	jmp	short ok_ret_2
 
 ioctl_rem_media_check:			; 4=2,5=3,6=4,7=5,8=6,9=7,10=8,11=9
 	JE	ioctl_rem_mediaj
@@ -388,7 +397,8 @@ Set_Retry_Parameters:
 goodtr:
 	MOV	RetryCount,DX		; Set new retry count
 doneok:
-	transfer	Sys_Ret_Ok	; Done
+ok_ret_4:
+	jmp	short ok_ret_3		; Done
 
 ; Generic IOCTL entry point.
 ;	here we invoke the Generic IOCTL using the IOCTL_Req structure.
@@ -470,7 +480,9 @@ ASSUME DS:NOTHING			; DS:SI -> Device header.
 IOCtl_Handle_RedirJ:
 	JMP	IOCTL_Handle_Redir
 ioctl_bad_fun:
-	error	error_invalid_function
+	MOV	AL,error_invalid_function
+err_ret_3:
+	JMP	Sys_Ret_Err
 
 ioctl_bad_handlej:
 	jmp	ioctl_bad_handle
@@ -503,7 +515,8 @@ ASSUME	DS:NOTHING
 	AND	AX,STBUI		; Mask to busy bit
 	MOV	CL,9
 	SHR	AX,CL			; Busy bit to bit 0
-	transfer    SYS_RET_OK
+ok_ret_5:
+	jmp	Sys_Ret_OK
 
 ; Function 9
 Ioctl_Drive_attr:
@@ -542,17 +555,21 @@ IOCTLLocal:
 ioctl_set_DX:
 	invoke_fn get_user_stack
 	MOV	[SI.user_DX],DX
-	transfer    SYS_RET_OK
+ok_ret_6:
+	jmp	short ok_ret_5
 
 ioctl_drv_err:
 	MOV	AL,[DrvErr]		;AN000;IFS. DrvErr is saved in GetThisDrv
-	transfer SYS_RET_ERR		;AN000;IFS.
+err_ret_4:
+	JMP	Sys_Ret_Err		;AN000;IFS.
 
 ; Function 10
 Ioctl_Handle_redir:
 	invoke_fn SFFromHandle		; ES:DI -> SFT
 	JNC	ioctl_got_sft		; have valid handle
-	error	error_invalid_handle
+	MOV	AL,error_invalid_handle
+err_ret_5:
+	JMP	short err_ret_4
 
 ioctl_got_sft:
 	MOV	DX,ES:[DI.sf_flags]	; Get flags
@@ -600,7 +617,8 @@ ioctl_do_IO:
 	TEST	[IOCALL.REQSTAT],STERR	    ;Error?
 	JNZ	Ioctl_string_err
 	MOV	AX,[IOSCNT]		; Get actual bytes transferred
-	transfer    SYS_RET_OK
+ok_ret_7:
+	jmp	short ok_ret_6
 
 Ioctl_string_err:
 	MOV	DI,[IOCALL.REQSTAT]	;Get Error
@@ -609,7 +627,7 @@ device_err:
 	MOV	AX,DI
 	invoke_fn SET_I24_EXTENDED_ERROR
 	mov	ax, cs:extErr
-	transfer    SYS_RET_ERR
+	jmp	short err_ret_5
 
 Get_Driver_BL:
 	DOSAssume   CS,<DS>,"Get_Driver_BL"

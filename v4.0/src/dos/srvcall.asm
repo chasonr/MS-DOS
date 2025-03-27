@@ -53,6 +53,8 @@ Installed = TRUE
 	i_need	SWAP_ALWAYS_AREA_LEN,WORD
 	i_need	SWAP_AREA_LEN,WORD
 
+	EXTRN	Sys_Ret_Err:NEAR,Sys_Ret_OK:NEAR
+
 BREAK <ServerCall -- Server DOS call>
 
 TABLE	SEGMENT
@@ -118,7 +120,8 @@ ASSUME	DS:NOTHING,ES:NOTHING
 	invoke_fn GET_USER_STACK			   ;IFS.			;AN000;
 	MOV	[SI.user_DS],ES 		   ;IFS.   ds:si -> swap tab	;AN000;
 	MOV	[SI.user_SI],DI 		   ;IFS.			;AN000;
-	transfer SYS_RET_OK			   ;IFS.			;AN000;
+ok_ret_1:
+	JMP	Sys_Ret_OK			   ;IFS.			;AN000;
 SET_STUFF:
 	MOV	SI,DX			; Point to DPL with DS:SI
 	MOV	BX,[SI.DPL_UID]
@@ -131,7 +134,9 @@ NO_SET_ID:
 	PUSH	AX
 	Invoke_fn TableDispatch
 	MOV	EXTERR_LOCUS,errLoc_Unk ; Extended Error Locus
-	error	error_invalid_function
+	MOV	AL,error_invalid_function
+err_ret_1:
+	jmp	Sys_Ret_Err
 ServerReturn:
 	return
 
@@ -165,26 +170,29 @@ CommitNext:
 CommitDone:
 	LeaveCrit   critSFT
 	RestoreReg  <BX>
-	transfer    Sys_Ret_OK
+ok_ret_2:
+	JMP	short ok_ret_1
 
 CLOSE_NAME:
 ASSUME	DS:NOTHING,ES:NOTHING
 
-if installed
+ifdef installed
 	Call	JShare + 5 * 4
 else
 	Call	MFTcloN
 endif
 CheckReturns:
 	JC	func_err
-	transfer SYS_RET_OK
+ok_ret_3:
+	JMP	short ok_ret_2
 func_err:
-	transfer SYS_RET_ERR
+err_ret_2:
+	jmp	short err_ret_1
 
 CLOSE_UID:
 ASSUME	DS:NOTHING,ES:NOTHING
 
-if installed
+ifdef installed
 	Call	JShare + 3 * 4
 else
 	Call	MFTclU
@@ -194,7 +202,7 @@ endif
 CLOSE_UID_PID:
 ASSUME	DS:NOTHING,ES:NOTHING
 
-if installed
+ifdef installed
 	Call	JShare + 4 * 4
 else
 	Call	MFTCloseP
@@ -203,7 +211,7 @@ endif
 
 GET_LIST:
 ASSUME	DS:NOTHING,ES:NOTHING
-if installed
+ifdef installed
 	Call	JShare + 9 * 4
 else
 	Call	MFT_get
@@ -215,7 +223,8 @@ endif
 	MOV	[SI.user_ES],ES
 SetCXOK:
 	MOV	[SI.user_CX],CX
-	transfer    SYS_RET_OK
+ok_ret_4:
+	JMP	short ok_ret_3
 
 SRV_CALL:
 ASSUME	DS:NOTHING,ES:NOTHING
@@ -272,9 +281,9 @@ SPOOL_OPER:
 ASSUME	DS:NOTHING,ES:NOTHING
 	CallInstall NETSpoolOper,multNet,37,AX,BX
 	JC	func_err2
-	transfer SYS_RET_OK
+	JMP	short ok_ret_4
 func_err2:
-	transfer SYS_RET_ERR
+	jmp	Sys_Ret_Err
 
 Break	<$SetExtendedError - set extended error for later retrieval>
 

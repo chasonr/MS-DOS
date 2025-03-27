@@ -48,6 +48,8 @@ INCLUDE fastxxxx.inc
 	I_need	Fastopenflg,BYTE
 	I_need	DOS34_FLAG,WORD
 
+	EXTRN	Sys_Ret_Err:NEAR
+
 ; Inputs:
 ;	DS:DX Points to unopenned FCB
 ; Function:
@@ -75,6 +77,7 @@ NORMFCB4:
 ;
 ; Error code is in AX
 ;
+err_ret_1:
 	transfer FCB_Ret_Err		; error
 
 SearchIt:
@@ -89,7 +92,7 @@ SearchIt:
 ;
 ; Error code is in AX
 ;
-	transfer FCB_Ret_Err
+	jmp	short err_ret_1
 
 ;
 ; The search was successful (or the search-next).  We store the information
@@ -199,7 +202,7 @@ NORMFCB8:
 ;
 ; error code is in AX
 ;
-	transfer FCB_Ret_Err
+	jmp	FCB_Ret_Err
 
 EndProc $DIR_SEARCH_NEXT
 
@@ -223,7 +226,9 @@ ASSUME	CS:DOSGroup,DS:NOTHING,ES:NOTHING,SS:DOSGroup
 	invoke_fn TransPathSet		; convert the path
 	JNC	Find_it 		; no error, go and look
 FindError:
-	error	error_path_not_found	; error and map into one.
+	MOV	AL,error_path_not_found	; error and map into one.
+syserr_ret_1:
+	JMP	Sys_Ret_Err
 Find_it:
 	Context DS
 	SaveReg <<WORD PTR [DMAAdd]>, <WORD PTR [DMAAdd+2]>>
@@ -232,7 +237,8 @@ Find_it:
 	call	GET_FAST_SEARCH 	; search
 	RestoreReg <<WORD PTR [DMAAdd+2]>, <WORD PTR [DMAAdd]>>
 	JNC	FindSet 		; no error, transfer info
-	transfer Sys_Ret_Err
+syserr_ret_2:
+	jmp	short syserr_ret_1
 
 FindSet:
 	MOV	SI,OFFSET DOSGroup:SEARCHBUF
@@ -289,7 +295,7 @@ ASSUME	CS:DOSGroup,DS:NOTHING,ES:NOTHING,SS:DOSGroup
 	invoke_fn DOS_SEARCH_NEXT 	; Find it
 	RestoreReg <<WORD PTR [DMAAdd+2]>, <WORD PTR [DMAAdd]>>
 	JNC	FindSet 		; No error, set info
-	transfer Sys_Ret_Err
+	jmp	short syserr_ret_2
 
 EndProc $FIND_NEXT
 

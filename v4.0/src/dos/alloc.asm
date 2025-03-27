@@ -49,6 +49,8 @@ PAGE
 	i_need  AllocMethod,BYTE        ; how to alloc first(best)last
 	I_need  EXTERR_LOCUS,BYTE       ; Extended Error Locus
 
+	EXTRN	Sys_Ret_Err:NEAR,Sys_Ret_OK:NEAR
+
 ;
 ; arena_free_process
 ; input:    BX - PID of process
@@ -195,7 +197,9 @@ alloc_err:
 
 alloc_trashed:
 	LeaveCrit   critMem
-	error   error_arena_trashed
+	MOV     AL,error_arena_trashed
+err_ret_1:
+	JMP	Sys_Ret_Err
 
 alloc_end:
 	CMP     [FirstArena],0
@@ -206,7 +210,9 @@ alloc_fail:
 	POP     BX
 	MOV     [SI].user_BX,BX
 	LeaveCrit   critMem
-	error   error_not_enough_memory
+	MOV	AL,error_not_enough_memory
+err_ret_2:
+	JMP	short err_ret_1
 
 alloc_free:
 	CALL    coalesce                ; add following free block to current
@@ -292,7 +298,8 @@ alloc_set_owner:
 	INC     AX
 	POP     BX
 	LeaveCrit   critMem
-	transfer    SYS_RET_OK
+ok_ret_1:
+	jmp	Sys_Ret_OK
 
 EndProc $alloc
 
@@ -357,11 +364,14 @@ PAGE
 	JC      dealloc_err
 	MOV     ES:[arena_owner],DI
 	LeaveCrit   critMem
-	transfer    SYS_RET_OK
+ok_ret_2:
+	jmp	short ok_ret_1
 
 dealloc_err:
 	LeaveCrit   critMem
-	error   error_invalid_block
+	MOV	AL,error_invalid_block
+err_ret_3:
+	JMP	Sys_Ret_Err
 EndProc $DEALLOC
 
 SUBTTL $AllocOper - get/set allocation mechanism
@@ -382,14 +392,17 @@ PAGE
 	JB      AllocOperGet
 	JZ      AllocOperSet
 	MOV     EXTERR_LOCUS,errLoc_mem ; Extended Error Locus
-	error   error_invalid_function
+	MOV	AL,error_invalid_function
+err_ret_4:
+	JMP	short err_ret_3
 AllocOperGet:
 	MOV     AL,BYTE PTR [AllocMethod]
 	XOR     AH,AH
-	transfer    SYS_RET_OK
+ok_ret_3:
+	jmp	short ok_ret_2
 AllocOperSet:
 	MOV     [AllocMethod],BL
-	transfer    SYS_RET_OK
+	jmp	short ok_ret_3
 EndProc $AllocOper
 
 CODE    ENDS
