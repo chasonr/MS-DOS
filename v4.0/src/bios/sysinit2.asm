@@ -636,6 +636,7 @@ GET2:
 	MOV	AL,ES:[SI]
 	INC	SI
 	DEC	CX
+ret_l_2:
 	return
 
 ;GET:	 JCXZ	 NOGET
@@ -683,18 +684,18 @@ No_Commt:			;AN000;
 
 DELIM:
 	CMP	AL,'/'          ;J.K. 5/30/86. IBM will assume "/" as an delimeter.
-	retz
+	jz	ret_l_2
 	cmp	al, 0		;J.K. 5/23/86 Special case for sysinit!!!
-	retz
+	jz	ret_l_2
 Org_Delim:			;AN000;  Used by Organize routine except for getting
 	CMP	AL,' '          ;the filename.
-	retz
+	jz	ret_l_2
 	CMP	AL,9
-	retz
+	jz	ret_l_2
 	CMP	AL,'='
-	retz
+	jz	ret_l_2
 	CMP	AL,','
-	retz
+	jz	ret_l_2
 	CMP	AL,';'
 	return
 
@@ -704,6 +705,7 @@ NOGET:	POP	CX
 	mov	Org_Count, DI	;AN012;
 	XOR	SI,SI
 	MOV	CHRPTR,SI
+ret_l_4:
 	return
 
 ;Get3:	 jcxz	 NOGET		 ;J.K.do not consider '/',',' as a delim.
@@ -725,7 +727,7 @@ NOGET:	POP	CX
 ;  NEWLINE RETURNS WITH FIRST CHARACTER OF NEXT LINE
 ;
 NEWLINE:invoke_fn GETCHR		;SKIP NON-CONTROL CHARACTERS
-	retc
+	jc	ret_l_4
 	CMP	AL,LF			;LOOK FOR LINE FEED
 	JNZ	NEWLINE
 	invoke_fn GETCHR
@@ -1421,6 +1423,7 @@ OPEN_DEV:
 OPEN_DEV1:
 	MOV	DX,OFFSET NULDEV
 	CALL	OPEN_FILE
+ret_l_17:
 	return
 
 OPEN_DEV3:
@@ -1429,7 +1432,7 @@ OPEN_DEV3:
 	MOV	AH,IOCTL
 	INT	21H
 	TEST	DL,10000000B
-	retnz
+	jnz	ret_l_17
 	MOV	AH,CLOSE
 	INT	21H
 	JMP	OPEN_DEV1

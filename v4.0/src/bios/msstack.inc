@@ -92,7 +92,8 @@ Entry_Int&AA&_Stk:
 ; Keyboard interrupt must have a three byte jump, a NOP and a zero byte
 ; as its first instruction for compatibility reasons
 	ifidn	<&aa>,<09>
-	jmp	Keyboard_lbl
+	jmp	short Keyboard_lbl
+	nop
 	nop
 	db	0
 Keyboard_lbl	label	near

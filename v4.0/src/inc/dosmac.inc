@@ -272,6 +272,8 @@ ret_l = a
 endm
 .xcref  return
 
+; These macros produce incorrect code with JWasm and need to be removed.
+ifndef __JWASM__
 BREAK <CONDRET - conditional return>
 
 condret macro   cc,ncc
@@ -329,6 +331,7 @@ retnc   macro
     condret nc,c
 endm
 .xcref  retnc
+endif
 
 BREAK <CONTEXT - set the DOS context to a particular register>
 
