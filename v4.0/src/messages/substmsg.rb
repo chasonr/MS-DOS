@@ -84,7 +84,7 @@ File.open(out_path, "w", encoding: 'ASCII-8BIT') do |out_file|
         tokens = line_lexer(line)
         tokens = subst_line(tokens)
         line2 = tokens.join('')
-        puts line2
+        out_file.write("#{line2}\n")
     end
 
 end
