@@ -1,9 +1,12 @@
-#************************** makefile for cmd\append ***************************
+#************************** makefile for cmd/append ***************************
 
-msg	=..\..\messages
-dos	=..\..\dos
-inc	=..\..\inc
-hinc	=..\..\h
+msg	=../../messages
+inc	=../../inc
+
+COUNTRY = usa-ms
+
+AS = jwasm
+ASFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 #
 #######################	dependencies begin here. #########################
@@ -11,140 +14,164 @@ hinc	=..\..\h
 
 all: command.com
 
-$(inc)\dossym.inc: $(inc)\dosmac.inc $(inc)\bpb.inc \
-    $(inc)\buffer.inc $(inc)\sysvar.inc $(inc)\vector.inc \
-    $(inc)\mult.inc $(inc)\dirent.inc $(inc)\dpb.inc $(inc)\curdir.inc \
-    $(inc)\cpmfcb.inc $(inc)\find.inc $(inc)\pdb.inc $(inc)\exe.inc \
-    $(inc)\sf.inc $(inc)\arena.inc $(inc)\intnat.inc $(inc)\mi.inc \
-    $(inc)\filemode.inc $(inc)\error.inc $(inc)\syscall.inc
-	echo "touch $(inc)\dossym.inc"
+.SUFFIXES: .asm .obj
 
-command.ctl: command.skl $(msg)\$(COUNTRY).msg makefile
+.asm.obj:
+	$(AS) $(ASFLAGS) -Fo$@ $<
 
-command1.obj:  command1.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc comsw.asm comequ.asm resmsg.equ \
+command.cl1: command.cl1.base $(msg)/$(COUNTRY).cat
+	$(msg)/substmsg.rb $< $@ $(msg)/$(COUNTRY).cat
+
+command.cl2: command.cl2.base $(msg)/$(COUNTRY).cat
+	$(msg)/substmsg.rb $< $@ $(msg)/$(COUNTRY).cat
+
+command.cl3: command.cl3.base $(msg)/$(COUNTRY).cat
+	$(msg)/substmsg.rb $< $@ $(msg)/$(COUNTRY).cat
+
+command.cl4: command.cl4.base $(msg)/$(COUNTRY).cat
+	$(msg)/substmsg.rb $< $@ $(msg)/$(COUNTRY).cat
+
+command.cla: command.cla.base $(msg)/$(COUNTRY).cat
+	$(msg)/substmsg.rb $< $@ $(msg)/$(COUNTRY).cat
+
+command.clb: command.clb.base $(msg)/$(COUNTRY).cat
+	$(msg)/substmsg.rb $< $@ $(msg)/$(COUNTRY).cat
+
+command.clc: command.clc.base $(msg)/$(COUNTRY).cat
+	$(msg)/substmsg.rb $< $@ $(msg)/$(COUNTRY).cat
+
+command.cld: command.cld.base $(msg)/$(COUNTRY).cat
+	$(msg)/substmsg.rb $< $@ $(msg)/$(COUNTRY).cat
+
+command.cle: command.cle.base $(msg)/$(COUNTRY).cat
+	$(msg)/substmsg.rb $< $@ $(msg)/$(COUNTRY).cat
+
+command.clf: command.clf.base $(msg)/$(COUNTRY).cat
+	$(msg)/substmsg.rb $< $@ $(msg)/$(COUNTRY).cat
+
+
+command1.obj:  command1.asm $(inc)/dossym.inc \
+    $(inc)/devsym.inc comsw.asm comequ.asm resmsg.equ \
     envdata.asm
 
-command2.obj:  command2.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc comsw.asm comequ.asm resmsg.equ \
+command2.obj:  command2.asm $(inc)/dossym.inc \
+    $(inc)/devsym.inc comsw.asm comequ.asm resmsg.equ \
     envdata.asm
 
-copy.obj:  copy.asm comsw.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc comseg.asm comequ.asm
+copy.obj:  copy.asm comsw.asm $(inc)/dossym.inc \
+    $(inc)/devsym.inc comseg.asm comequ.asm
 
-copypr1.obj:  copypr1.asm comsw.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc comseg.asm comequ.asm
+copypr1.obj:  copypr1.asm comsw.asm $(inc)/dossym.inc \
+    $(inc)/devsym.inc comseg.asm comequ.asm
 
-copypr2.obj:  copypr2.asm comsw.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc comseg.asm comequ.asm
+copypr2.obj:  copypr2.asm comsw.asm $(inc)/dossym.inc \
+    $(inc)/devsym.inc comseg.asm comequ.asm
 
-cparse.obj:  cparse.asm comsw.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc comseg.asm comequ.asm
+cparse.obj:  cparse.asm comsw.asm $(inc)/dossym.inc \
+    $(inc)/devsym.inc comseg.asm comequ.asm
 
-init.obj:  init.asm $(inc)\dossym.inc $(inc)\devsym.inc \
-    comsw.asm comseg.asm comequ.asm resmsg.equ $(inc)\sysmsg.inc \
-    $(inc)\msgserv.asm command.ctl
+init.obj:  init.asm $(inc)/dossym.inc $(inc)/devsym.inc \
+    comsw.asm comseg.asm comequ.asm resmsg.equ $(inc)/sysmsg.inc \
+    $(inc)/msgserv.asm command.ctl
 
-iparse.obj:  iparse.asm comseg.asm $(inc)\parse.asm $(inc)\psdata.inc
+iparse.obj:  iparse.asm comseg.asm $(inc)/parse.asm $(inc)/psdata.inc
 
-parse2.obj:  parse2.asm $(inc)\dossym.inc $(inc)\devsym.inc comsw.asm \
+parse2.obj:  parse2.asm $(inc)/dossym.inc $(inc)/devsym.inc comsw.asm \
     comseg.asm comequ.asm
 
-path1.obj:  path1.asm $(inc)\dossym.inc $(inc)\devsym.inc comsw.asm \
+path1.obj:  path1.asm $(inc)/dossym.inc $(inc)/devsym.inc comsw.asm \
     comseg.asm comequ.asm
 
-path2.obj:  path2.asm $(inc)\dossym.inc $(inc)\devsym.inc comsw.asm \
+path2.obj:  path2.asm $(inc)/dossym.inc $(inc)/devsym.inc comsw.asm \
     comseg.asm comequ.asm
 
-rdata.obj:  rdata.asm comsw.asm comseg.asm $(inc)\sysmsg.inc \
-    $(inc)\msgserv.asm command.cla command.cl3 command.cl4 \
+rdata.obj:  rdata.asm comsw.asm comseg.asm $(inc)/sysmsg.inc \
+    $(inc)/msgserv.asm command.cla command.cl3 command.cl4 \
     command.cld command.clc command.cle command.ctl
 
-rucode.obj:  rucode.asm $(inc)\dossym.inc $(inc)\devsym.inc \
-    $(inc)\doscntry.inc resmsg.equ $(inc)\sysmsg.inc \
-    $(inc)\msgserv.asm comsw.asm comseg.asm comequ.asm command.ctl
+rucode.obj:  rucode.asm $(inc)/dossym.inc $(inc)/devsym.inc \
+    $(inc)/doscntry.inc resmsg.equ $(inc)/sysmsg.inc \
+    $(inc)/msgserv.asm comsw.asm comseg.asm comequ.asm command.ctl
 
-tbatch.obj:  tbatch.asm comsw.asm $(inc)\dossym.inc $(inc)\doscntry.inc \
-    $(inc)\devsym.inc comseg.asm comequ.asm ifequ.asm
+tbatch.obj:  tbatch.asm comsw.asm $(inc)/dossym.inc $(inc)/doscntry.inc \
+    $(inc)/devsym.inc comseg.asm comequ.asm ifequ.asm
 
-tbatch2.obj:  tbatch2.asm comsw.asm $(inc)\dossym.inc $(inc)\doscntry.inc \
-    $(inc)\devsym.inc comseg.asm comequ.asm ifequ.asm
+tbatch2.obj:  tbatch2.asm comsw.asm $(inc)/dossym.inc $(inc)/doscntry.inc \
+    $(inc)/devsym.inc comseg.asm comequ.asm ifequ.asm
 
-tcmd1a.obj:  tcmd1a.asm comsw.asm $(inc)\dossym.inc $(inc)\ioctl.inc \
-    $(inc)\devsym.inc comseg.asm comequ.asm ifequ.asm
+tcmd1a.obj:  tcmd1a.asm comsw.asm $(inc)/dossym.inc $(inc)/ioctl.inc \
+    $(inc)/devsym.inc comseg.asm comequ.asm ifequ.asm
 
-tcmd1b.obj:  tcmd1b.asm comsw.asm $(inc)\dossym.inc $(inc)\ioctl.inc \
-    $(inc)\devsym.inc comseg.asm comequ.asm ifequ.asm $(inc)\ea.inc
+tcmd1b.obj:  tcmd1b.asm comsw.asm $(inc)/dossym.inc $(inc)/ioctl.inc \
+    $(inc)/devsym.inc comseg.asm comequ.asm ifequ.asm $(inc)/ea.inc
 
-tcmd2a.obj:  tcmd2a.asm comsw.asm $(inc)\dossym.inc $(inc)\ioctl.inc \
-    $(inc)\devsym.inc comseg.asm comequ.asm ifequ.asm
+tcmd2a.obj:  tcmd2a.asm comsw.asm $(inc)/dossym.inc $(inc)/ioctl.inc \
+    $(inc)/devsym.inc comseg.asm comequ.asm ifequ.asm
 
-tcmd2b.obj:  tcmd2b.asm comsw.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc comseg.asm comequ.asm ifequ.asm
+tcmd2b.obj:  tcmd2b.asm comsw.asm $(inc)/dossym.inc \
+    $(inc)/devsym.inc comseg.asm comequ.asm ifequ.asm
 
-tcode.obj:  tcode.asm comsw.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc comseg.asm comequ.asm ifequ.asm \
-    $(inc)\mshalo.asm
+tcode.obj:  tcode.asm comsw.asm $(inc)/dossym.inc \
+    $(inc)/devsym.inc comseg.asm comequ.asm ifequ.asm \
+    $(inc)/mshalo.asm
 
-tdata.obj:  tdata.asm comsw.asm comseg.asm $(inc)\curdir.inc \
-    $(inc)\error.inc ifequ.asm comequ.asm $(inc)\sysmsg.inc \
-    $(inc)\msgserv.asm tranmsg.asm command.clf command.cl1 command.cl2 \
-    command.ctl  $(inc)\ea.inc
+tdata.obj:  tdata.asm comsw.asm comseg.asm $(inc)/curdir.inc \
+    $(inc)/error.inc ifequ.asm comequ.asm $(inc)/sysmsg.inc \
+    $(inc)/msgserv.asm tranmsg.asm command.clf command.cl1 command.cl2 \
+    command.ctl  $(inc)/ea.inc
 
-tenv.obj:  tenv.asm comsw.asm $(inc)\dossym.inc $(inc)\devsym.inc \
-    comseg.asm comequ.asm ifequ.asm $(inc)\doscntry.inc
+tenv.obj:  tenv.asm comsw.asm $(inc)/dossym.inc $(inc)/devsym.inc \
+    comseg.asm comequ.asm ifequ.asm $(inc)/doscntry.inc
 
-tenv2.obj:  tenv2.asm comsw.asm $(inc)\dossym.inc $(inc)\devsym.inc \
+tenv2.obj:  tenv2.asm comsw.asm $(inc)/dossym.inc $(inc)/devsym.inc \
     comseg.asm comequ.asm ifequ.asm
 
-tfor.obj:  tfor.asm comsw.asm $(inc)\dossym.inc $(inc)\devsym.inc \
+tfor.obj:  tfor.asm comsw.asm $(inc)/dossym.inc $(inc)/devsym.inc \
     comseg.asm comequ.asm ifequ.asm fordata.asm
 
-tmisc1.obj:  tmisc1.asm comsw.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc comseg.asm comequ.asm ifequ.asm
+tmisc1.obj:  tmisc1.asm comsw.asm $(inc)/dossym.inc \
+    $(inc)/devsym.inc comseg.asm comequ.asm ifequ.asm
 
-tmisc2.obj:  tmisc2.asm comsw.asm $(inc)\dossym.inc $(inc)\ioctl.inc \
-    $(inc)\devsym.inc comseg.asm comequ.asm ifequ.asm
+tmisc2.obj:  tmisc2.asm comsw.asm $(inc)/dossym.inc $(inc)/ioctl.inc \
+    $(inc)/devsym.inc comseg.asm comequ.asm ifequ.asm
 
-tparse.obj:  tparse.asm comseg.asm $(inc)\parse.asm $(inc)\psdata.inc
+tparse.obj:  tparse.asm comseg.asm $(inc)/parse.asm $(inc)/psdata.inc
 
-tpipe.obj:  tpipe.asm comsw.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc comseg.asm comequ.asm ifequ.asm
+tpipe.obj:  tpipe.asm comsw.asm $(inc)/dossym.inc \
+    $(inc)/devsym.inc comseg.asm comequ.asm ifequ.asm
 
-tprintf.obj:  tprintf.asm comsw.asm $(inc)\dosmac.inc \
-    comseg.asm comequ.asm $(inc)\sysmsg.inc $(inc)\msgserv.asm \
+tprintf.obj:  tprintf.asm comsw.asm $(inc)/dosmac.inc \
+    comseg.asm comequ.asm $(inc)/sysmsg.inc $(inc)/msgserv.asm \
     command.ctl
 
-tspc.obj:  tspc.asm comsw.asm $(inc)\dossym.inc comequ.asm \
-    ifequ.asm comseg.asm  $(inc)\ea.inc
+tspc.obj:  tspc.asm comsw.asm $(inc)/dossym.inc comequ.asm \
+    ifequ.asm comseg.asm  $(inc)/ea.inc
 
-tucode.obj:  tucode.asm $(inc)\dosmac.inc $(inc)\dossym.inc \
+tucode.obj:  tucode.asm $(inc)/dosmac.inc $(inc)/dossym.inc \
     comsw.asm comseg.asm comequ.asm ifequ.asm
 
 uinit.obj:  uinit.asm comsw.asm comseg.asm ifequ.asm command.clb \
-    $(inc)\sysmsg.inc $(inc)\msgserv.asm command.ctl
+    $(inc)/sysmsg.inc $(inc)/msgserv.asm command.ctl
 
-command.com:  command1.obj command2.obj rucode.obj rdata.obj init.obj iparse.obj \
-    uinit.obj tcode.obj tbatch.obj tbatch2.obj tfor.obj tcmd1a.obj tcmd1b.obj \
-    tcmd2a.obj tcmd2b.obj tenv.obj tenv2.obj tmisc1.obj tmisc2.obj tpipe.obj \
-    parse2.obj path1.obj path2.obj tucode.obj copy.obj copypr1.obj copypr2.obj \
-    cparse.obj tparse.obj tprintf.obj tdata.obj tspc.obj
-	link @command.lnk
-	exe2bin command.exe command.com
-	del command.exe
+################################################################################
+COMMAND_OBJS = command1.obj command2.obj rucode.obj rdata.obj init.obj \
+               iparse.obj uinit.obj tcode.obj tbatch.obj tbatch2.obj tfor.obj \
+               tcmd1a.obj tcmd1b.obj tcmd2a.obj tcmd2b.obj tenv.obj tenv2.obj \
+               tmisc1.obj tmisc2.obj tpipe.obj parse2.obj path1.obj path2.obj \
+               tucode.obj copy.obj copypr1.obj copypr2.obj cparse.obj \
+               tparse.obj tprintf.obj tdata.obj tspc.obj
+
+command.com: $(COMMAND_OBJS) 
+	echo 'system dos' >resp.txt
+	echo 'option map=msdos.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name command.exe' >>resp.txt
+	for x in $(COMMAND_OBJS); do echo "file $$x" >>resp.txt; done
+	wlink @resp.txt
+	exe2bin -q command.exe command.com
 
 clean:
-	@if exist *.obj del *.obj
-	@if exist command.com del command.com
-	@if exist command.cl1 del command.cl1
-	@if exist command.cl2 del command.cl2
-	@if exist command.cl3 del command.cl3
-	@if exist command.cl4 del command.cl4
-	@if exist command.cla del command.cla
-	@if exist command.clb del command.clb
-	@if exist command.clc del command.clc
-	@if exist command.cld del command.cld
-	@if exist command.cle del command.cle
-	@if exist command.clf del command.clf
-	@if exist command.ctl del command.ctl
-	@if exist command.map del command.map
+	rm -f *.obj *.exe *.lst *.err
+	rm -f command.exe command.com command.map
+	rm -f command.cl?
+	rm -f resp.txt
