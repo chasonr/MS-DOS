@@ -4,3 +4,5 @@
 *.lst
 *.err
 io.sys
+msbio.bin
+resp.txt
