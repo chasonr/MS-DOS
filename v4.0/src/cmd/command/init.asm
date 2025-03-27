@@ -207,7 +207,7 @@ CONPROC:
 	JNC	OKDOS				;AN000; if no problem - continue
 
 	mov	ax,badver			;AN000; set DOS version
-	invoke	sysdispmsg			;AN000; must be incorrect version
+	invoke_fn sysdispmsg			;AN000; must be incorrect version
 	mov	ax,es
 	cmp	es:[PDB_Parent_PID],AX		; If command is its own parent,
 here:						;  loop forever.
@@ -423,7 +423,7 @@ NOTWIDENV:
 	MOV	WORD PTR [KAUTOBAT],AX		;AN000;  used to reference kautoexe.bat 3/3/KK
 
 NOCOMDRV:
-	INVOKE	SETVECT 			; Set interrupt vectors 22h, 23h, & 24h
+	INVOKE_FN SETVECT 			; Set interrupt vectors 22h, 23h, & 24h
 
 ;*********************************
 ; PARSING STARTS HERE
@@ -487,9 +487,9 @@ init_chk_delim:
 	cmp	al,[rswitchar]			;AN057; Switch?
 	jnz	parse_line_error_disp		;AN057; No - just issue message
 	lodsb					;AN057; Get the char after the switch
-	invoke	itestkanj			;AN057; Is it DBCS?
+	invoke_fn itestkanj			;AN057; Is it DBCS?
 	jnz	parse_line_error_disp		;AN057; Yes - can't be /C
-	invoke	iupconv 			;AN057; upper case it
+	invoke_fn iupconv 			;AN057; upper case it
 	cmp	al,scswitch			;AN057; it is /C?
 	jnz	parse_line_error_disp		;AN057;
 	pop	dx				;AN057; even up stack
@@ -727,7 +727,7 @@ COMTRLOOP:
 	PUSH	DS				;AN054; Make sure we have
 	PUSH	CS				;AN054;    local DS for
 	POP	DS				;AN054;      ITESTKANJ
-	INVOKE	ITESTKANJ
+	INVOKE_FN ITESTKANJ
 	POP	DS				;AN054; restore PARSER DS
 	JZ	COMTRLOOP
 	DEC	CX
@@ -789,7 +789,7 @@ ARGSDONEJ2:
 
 SETCOMSRBAD:
 	MOV	DX,BADCOMLKMES_ptr		;AC000; get message number
-	invoke	triageError
+	invoke_fn triageError
 	cmp	ax, 65
 	jnz	doprt
 	mov	dx,BADCOMACCMES_ptr		;AC000; get error message number
@@ -975,7 +975,7 @@ GOTENVIR:
 	pop	cx
 ; If we are too close to be safe, call LOADCOM instead of moving the code.
 	jb	Ok_To_Move
-	invoke	LOADCOM
+	invoke_fn LOADCOM
 	jmp	short Trans_Loaded
 Ok_To_Move:
 ;
@@ -992,7 +992,7 @@ Ok_To_Move:
 Trans_Loaded:
 	POP	ES
 
-	INVOKE	CHKSUM				; Compute the checksum
+	INVOKE_FN CHKSUM			; Compute the checksum
 	MOV	[SUM],DX			; Save it
 
 	CMP	BYTE PTR [PRDATTM],0		;eg
@@ -1308,7 +1308,7 @@ print_message:
 ;AD054; POP	DX				;AC000; restore registers
 ;AD054; POP	CX				;AC000;
 ;AD054; POP	BX				;AC000;
-	invoke	rprint				;AC054;
+	invoke_fn rprint			;AC054;
 
 	POP	ES				;AN000;
 	POP	DS				;AN000;
@@ -1351,7 +1351,7 @@ IFIND11:
 	LODSB
 
 ;;;;	IF	KANJI		3/3/KK
-	INVOKE	ITESTKANJ
+	INVOKE_FN ITESTKANJ
 	JZ	NOTKANJ4
 	DEC	SI
 	LODSW
@@ -1496,7 +1496,7 @@ GET_MSG_PTR	PROC NEAR			;AN000;
 	MOV	BX,OFFSET RESGROUP:ABORT_CHAR	;AN000; get first char offset
 MOVEMES:					;AN000;
 	MOV	DH,-1				;AN000; utility message
-	INVOKE	SYSGETMSG			;AN000; get the offset of the char
+	INVOKE_FN SYSGETMSG			;AN000; get the offset of the char
 	MOV	CL,BYTE PTR [SI]		;AN000; get the character in CL
 	MOV	BYTE PTR [BX],CL		;AN000; put the character in the table
 	INC	BX				;AN000; point to next position in table

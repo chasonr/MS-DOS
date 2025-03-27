@@ -142,7 +142,7 @@ ASSUME	DS:NOTHING,ES:NOTHING,SS:NOTHING
 	POP	CX
 	POP	DI				; Stack just contains DS and ES
 						;     at this point
-	INVOKE	SAVHAND
+	INVOKE_FN SAVHAND
 	PUSH	CS
 	POP	DS				; Set up local data segment
 ASSUME	DS:RESGROUP
@@ -324,7 +324,7 @@ BLKERR:
 	CALL	RPRINT
 	CMP	[LOADING],0
 	JZ	ASK
-	INVOKE	RESTHAND
+	INVOKE_FN RESTHAND
 	JMP	GETCOMDSK2			; If error loading COMMAND, re-prompt
 
 ASK:
@@ -389,7 +389,7 @@ DoPrompt:
 	MOV	AX,(STD_CON_INPUT_FLUSH SHL 8)+STD_CON_INPUT
 	INT	21H				; Get response
 
-	invoke	TestKanjR			;AN000;  3/3/KK
+	invoke_fn TestKanjR			;AN000;  3/3/KK
 	jz	notkanj 			;AN000;  3/3/KK
 	MOV	AX,(STD_CON_INPUT SHL 8)	;AN000;  eat the 2nd byte of ECS code  3/3/KK
 	INT	21H				;AN000;  3/3/KK
@@ -454,7 +454,7 @@ AbortCont:
 
 Not_Batch_Abort:
 	mov	dl,PipeFlag
-	invoke	ResPipeOff
+	invoke_fn ResPipeOff
 	OR	DL,DL
 	JZ	CHECKFORA
 	CMP	[SINGLECOM],0
@@ -478,7 +478,7 @@ EEXIT:
 	MOV	DX,DI
 
 RESTHD:
-	INVOKE	RESTHAND
+	INVOKE_FN RESTHAND
 	POP	CX
 	POP	SI				;AN000; restore registers
 	POP	ES

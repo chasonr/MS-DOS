@@ -291,7 +291,7 @@ not_stderr:
 assume	es:resgroup				;  right error msg, and jmp to cerror.
 	test	PipeFlag,-1
 	jz	go_to_error
-	invoke	PipeOff
+	invoke_fn PipeOff
 	mov	dx,offset trangroup:pipeemes_ptr
 	jmp	print_err_exit			;AC000;
 
