@@ -72,7 +72,7 @@ ASSUME	DS:NOTHING,ES:NOTHING
 	jnz	sj0				;AN000;
 	mov	[SaveCurFlg],1			;AN000;
 sj0:						;AN000;
-	invoke	OUTT				;AN000;
+	call	OUTT				;AN000;
 	mov	[SaveCurFLg],0			;AN000;
 	pop	AX				;AN000;
 	popf					;AN000;
@@ -80,7 +80,7 @@ sj0:						;AN000;
  ELSE						;AN000;
 	invoke_fn $STD_CON_INPUT_NO_ECHO
 	PUSH	AX
-	invoke_fn OUTT
+	call	OUTT
 	POP	AX
  ENDIF						;AN000;
 	return
@@ -169,7 +169,7 @@ CTRLOUT:
 	JCXZ	POPTAB
 TABLP:
 	MOV	AL," "
-	invoke_fn OUTT
+	CALL	OUTT
 	LOOP	TABLP
 POPTAB:
 	POP	CX
@@ -200,11 +200,11 @@ NOT_CTRLU:
 
 	PUSH	AX
 	MOV	AL,"^"
-	invoke_fn OUTT		;Print '^' before control chars
+	CALL	OUTT		;Print '^' before control chars
 	POP	AX
 	OR	AL,40H		;Turn it into Upper case mate
 CTRLU:
-	invoke_fn OUTT
+	CALL	OUTT
 	return
 EndProc $STD_CON_OUTPUT
 

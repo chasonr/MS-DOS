@@ -125,7 +125,7 @@ IFS_extopen:				    ;AN000;EO.
 NOEXTOP:				    ;AN000;
 ;Extended open hooks
 
-IF NOT Installed
+IFNDEF Installed
 	transfer NET_SEQ_CREATE
 ELSE
 	PUSH	AX
@@ -152,7 +152,7 @@ dochk:
 	JNZ	IFS_extopen		    ;AN000;EO. yes, issue extended open
 ;Extended open hooks
 
-IF NOT Installed
+IFNDEF Installed
 	transfer NET_CREATE
 ELSE
 	PUSH	AX
@@ -229,7 +229,7 @@ Create_ok:
 NoVolLabel:
 	MOV	ax,2
 	LES	DI,ThisSFT
-if installed
+ifdef installed
 	call	JShare + 14 * 4
 else
 	Call	ShSU

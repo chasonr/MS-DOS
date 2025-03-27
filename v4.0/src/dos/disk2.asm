@@ -140,7 +140,7 @@ ASSUME	DS:NOTHING,ES:NOTHING
 	CALL	DSKWRITE
 	retz			; Carry clear
 	MOV	BYTE PTR [READOP],1
-	invoke_fn HARDERRRW
+	CALL	HARDERRRW
 	CMP	AL,1		; Check for retry
 	JZ	DWRITE
 	CMP	AL,3		; Check for FAIL

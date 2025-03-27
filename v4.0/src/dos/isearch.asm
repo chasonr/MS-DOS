@@ -96,7 +96,7 @@ Installed = TRUE
 	LES	DI,[THISCDS]
 	CMP	DI,-1
 	JNZ	TEST_RE_NET
-IF NOT Installed
+IFNDEF Installed
 	transfer NET_SEQ_SEARCH_FIRST
 ELSE
 	MOV	AX,(multNET SHL 8) OR 25
@@ -107,7 +107,7 @@ ENDIF
 TEST_RE_NET:
 	TEST	ES:[DI.curdir_flags],curdir_isnet
 	JZ	LOCAL_SEARCH_FIRST
-IF NOT Installed
+IFNDEF Installed
 	transfer NET_SEARCH_FIRST
 ELSE
 	MOV	AX,(multNET SHL 8) OR 27
@@ -263,7 +263,7 @@ BREAK <DOS_SEARCH_NEXT - scan for subsequent matches>
 	MOV	AL,ES:[DI]
 	TEST	AL,80H			; Test for NET
 	JZ	LOCAL_SEARCH_NEXT
-IF NOT Installed
+IFNDEF Installed
 	transfer NET_SEARCH_NEXT
 ELSE
 	MOV	AX,(multNET SHL 8) OR 28

@@ -99,7 +99,7 @@ ASSUME	DS:NOTHING,ES:NOTHING
 	CMP	DH,12			;Check against max. month
 	JA	RET24
 	Context DS
-	invoke_fn DODATE
+	call	DODATE
 RET24:	return
 EndProc $SET_DATE
 

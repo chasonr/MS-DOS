@@ -400,7 +400,7 @@ OPCLS_RETRY:
 	STOSB				; Command
 	MOV	WORD PTR ES:[DI],0	; Status
 	PUSH	AX			; Save Unit,Command
-	invoke_fn DEVIOCALL2
+	CALL	DEVIOCALL2
 	MOV	DI,ES:[BX.REQSTAT]
 	TEST	DI,STERR
 	JZ	OPCLS_DONEP		; No error

@@ -23,10 +23,10 @@ DOSSYM_INC = $(inc)/dossym.inc $(inc)/dbcs.sw $(inc)/dosmac.inc \
 
 all: msdos.sys
 
-msbio.cl1: msbio.cl1.base $(msg)/$(COUNTRY).cat
+msdos.cl1: msdos.cl1.base $(msg)/$(COUNTRY).cat
 	$(msg)/substmsg.rb $< $@ $(msg)/$(COUNTRY).cat
 
-msbio.cl3: msbio.cl3.base $(msg)/$(COUNTRY).cat
+msdos.cl3: msdos.cl3.base $(msg)/$(COUNTRY).cat
 	$(msg)/substmsg.rb $< $@ $(msg)/$(COUNTRY).cat
 
 

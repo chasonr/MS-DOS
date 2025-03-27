@@ -504,7 +504,7 @@ FINCLUS:
         SUB     BX,DX           ; Number of new clusters accessed
         ADD     [LASTPOS],BX
         POP     BX              ; BL = sector postion within cluster
-        invoke_fn  FIGREC
+        CALL	FIGREC
         MOV     BX,SI
         AND     [FastSeekflg],FS_no_insert  ; clear insert flag
         CLC
@@ -732,10 +732,10 @@ NO_ALLOC:
 ads4:   POP     BX
         POP     CX              ; Don't need this stuff since we're successful
         retc
-        invoke_fn  UNPACK          ; Get first cluster allocated for return
+        invoke_fn UNPACK        ; Get first cluster allocated for return
                                 ; CAVEAT... In nul file case, UNPACKs cluster 0.
         retc
-        invoke_fn  RESTFATBYT      ; Restore correct cluster 0 value
+        CALL    RESTFATBYT      ; Restore correct cluster 0 value
         retc
         XCHG    BX,DI           ; (DI) = last cluster in file upon our entry
         OR      DI,DI           ; clear 'C'
@@ -802,13 +802,13 @@ endif
 
         POP     BX              ; (BX) = last cluster of file
         MOV     DX,0FFFFH
-        invoke_fn  RELBLKS         ; give back any clusters just alloced
+        CALL    RELBLKS         ; give back any clusters just alloced
         POP     AX              ; No. of clusters requested
                                 ; Don't "retc". We are setting Carry anyway,
                                 ;   Alloc failed, so proceed with return CX
                                 ;   setup.
         SUB     AX,CX           ; AX=No. of clusters allocated
-        invoke_fn  RESTFATBYT      ; Don't "retc". We are setting Carry anyway,
+        CALL    RESTFATBYT      ; Don't "retc". We are setting Carry anyway,
                                 ;   Alloc failed.
 ;       fmt     <>,<>,<"$p: disk full in allocate\n">
         MOV     [DISK_FULL],1   ;MS. indicating disk full

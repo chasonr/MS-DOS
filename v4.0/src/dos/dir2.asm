@@ -199,7 +199,7 @@ NoSave:
 ;
 	mov	di,dx
 	mov	byte ptr [di],0 	; end of string
-	invoke_fn Build_device_ent	; Clears carry sets zero
+	CALL	Build_device_ent	; Clears carry sets zero
 	INC	AL			; reset zero
 	return
 
@@ -343,7 +343,7 @@ TESTDEVICE:
 	REP	STOSB
 	MOV	AX,SS
 	MOV	DS,AX
-	invoke_fn DEVNAME
+	CALL	DEVNAME
 	return
 EndProc ChkDev
 
@@ -569,7 +569,7 @@ NOT_LAST:
 ;
 	PUSH	ES			; Save ES:BP
 	context ES
-	invoke_fn DevName 		; blast BX
+	CALL	DevName 		; blast BX
 	POP	ES			; Restore ES:BP
 	ASSUME	ES:NOTHING
 	JC	FindFile		; Not a device

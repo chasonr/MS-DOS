@@ -511,7 +511,7 @@ EXISTENT:
         JMP     DOOPEN          ; If so, proceed with open
 
 NOT_DEV1:
-        invoke_fn  FREEENT         ; Free cluster chain
+        call    FREEENT         ; Free cluster chain
         retc                    ; Failed
 FREESPOT:
         TEST    BYTE PTR [ATTRIB],attr_volume_id

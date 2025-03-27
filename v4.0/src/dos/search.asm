@@ -82,7 +82,7 @@ SearchIt:
 	SaveReg <<WORD PTR [DMAAdd]>, <WORD PTR [DMAAdd+2]>>
 	MOV	WORD PTR [DMAAdd],OFFSET DOSGroup:SEARCHBUF
 	MOV	WORD PTR [DMAAdd+2],DS
-	invoke_fn GET_FAST_SEARCH 	; search
+	call	GET_FAST_SEARCH 	; search
 	RestoreReg <<WORD PTR [DMAAdd+2]>, <WORD PTR [DMAAdd]>>
 	JNC	SearchSet		; no error, transfer info
 	RestoreReg <BX> 		; Clean stack
@@ -229,7 +229,7 @@ Find_it:
 	SaveReg <<WORD PTR [DMAAdd]>, <WORD PTR [DMAAdd+2]>>
 	MOV	WORD PTR [DMAAdd],OFFSET DOSGroup:SEARCHBUF
 	MOV	WORD PTR [DMAAdd+2],DS
-	invoke_fn GET_FAST_SEARCH 	; search
+	call	GET_FAST_SEARCH 	; search
 	RestoreReg <<WORD PTR [DMAAdd+2]>, <WORD PTR [DMAAdd]>>
 	JNC	FindSet 		; no error, transfer info
 	transfer Sys_Ret_Err

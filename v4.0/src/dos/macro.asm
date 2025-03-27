@@ -166,7 +166,7 @@ chk08:										;AN000;
 	CMP	AL,8				      ; reset inuse ?		;AN000;
 	JZ	srinuse 			      ; yes			;AN000;
 
-	IF	NOT INSTALLED
+	IFNDEF INSTALLED
 	transfer NET_ASSOPER
 	ELSE
 	PUSH	AX
@@ -313,7 +313,7 @@ ASSUME	DS:NOTHING
 
 UserPrint:
 	ASSUME	ES:NOTHING
-IF NOT Installed
+IFNDEF Installed
 	transfer PRINTER_GETSET_STRING
 ELSE
 	PUSH	AX
@@ -390,7 +390,7 @@ GetMap:
 	JMP	SHORT GetBye		; carry clear
 
 Not_SRVC:
-	invoke_fn GetCDSFromDrv
+	CALL    GetCDSFromDrv
 	JC	GetBerr2		; Unassigned CDS -> return error already set
 	TEST	[SI.curdir_flags],curdir_inuse	; Clears Carry
 	JNZ	GetBye			; carry clear

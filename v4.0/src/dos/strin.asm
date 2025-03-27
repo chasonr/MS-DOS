@@ -160,7 +160,7 @@ COPYNEW:
 ; Output a CRLF to the user screen and do NOT store it into the buffer
 ;
 PHYCRLF:
-        invoke_fn  CRLF
+        CALL    CRLF
         JMP     GETCH
 
 ;
@@ -202,7 +202,7 @@ GetChJ:
         invoke_fn  OUTT            ;Print the CANCEL indicator
         POP     SI              ;Remember start of edit buffer
 PUTNEW:
-        invoke_fn  CRLF            ;Go to next line on screen
+        CALL    CRLF            ;Go to next line on screen
         MOV     AL,[STARTPOS]
         invoke_fn  TAB             ;Tab over
         JMP     NEWLIN          ;Start over again
@@ -268,7 +268,7 @@ HAVTAB:
         POP     DI
         JZ      OLDBAK          ;Nothing to erase
 TABBAK:
-        invoke_fn  BACKMES
+        CALL    BACKMES
         LOOP    TABBAK          ;Erase correct number of chars
         JMP     SHORT OLDBAK
 
@@ -295,7 +295,7 @@ BACKMES:
         JMP     SHORT COPYEACH
 
         entry   CopyStr
-        invoke_fn  FINDOLD         ;Find the char
+        CALL    FINDOLD         ;Find the char
         JMP     SHORT COPYEACH  ;Copy up to it
 
 ;Copy one char from template to line
@@ -326,7 +326,7 @@ GETCH2:
         JMP     GETCH
 
         entry   SKIPSTR
-        invoke_fn  FINDOLD                 ;Find out how far to go
+        CALL    FINDOLD                 ;Find out how far to go
         ADD     SI,CX                   ;Go there
         ADD     BH,CL
         JMP     GETCH

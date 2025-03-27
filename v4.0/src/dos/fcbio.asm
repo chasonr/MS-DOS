@@ -202,7 +202,7 @@ Procedure $FCB_Close,NEAR
 	MOV	AL,[SI-1]		; get attributes
 NoAttr:
 	MOV	[Attrib],AL		; stash away found attributes
-	invoke_fn SFTFromFCB
+	CALL	SFTFromFCB
 	JC	GoodRet 		; MZ 16 Jan Assume death
 ;
 ; If the sharer is present, then the SFT is not regenable.  Thus, there is
@@ -239,7 +239,7 @@ NoStash:
 	JNZ	CloseOK
 	PUSH	AX
 	MOV	AL,'M'
-	invoke_fn BlastSFT
+	CALL	BlastSFT
 	POP	AX
 CloseOK:
 	POPF
@@ -438,7 +438,7 @@ ELSE
 	JMP	SHORT SaveSFN
 ENDIF
 SaveLocal:
-	IF	Installed
+	IFDEF	Installed
 	Invoke_fn CheckShare
 	JZ	SaveNoShare		; no sharer
 	JMP	SaveShare		; sharer present
@@ -483,7 +483,7 @@ SaveShare:
 ;
 ;----- In share support -----
 ;
-if installed
+ifdef installed
 	Call	JShare + 10 * 4
 else
 	Call	ShSave
@@ -513,7 +513,7 @@ SaveSFN:
 ; get set to 0.  Others -= 8000h.  This LRU = 8000h
 ;
 	MOV	BX,sf_position
-	invoke_fn ResetLRU
+	CALL	ResetLRU
 ;
 ; Set new LRU to AX
 ;
@@ -577,7 +577,7 @@ Procedure   SetOpenAge,NEAR
 	MOV	ES:[DI].sf_OpenAge,AX
 	JNZ	SetDone
 	MOV	BX,sf_Position+2
-	invoke_fn ResetLRU
+	CALL	ResetLRU
 SetDone:
 	MOV	OpenLRU,AX
 	return
@@ -657,7 +657,7 @@ lru25:
 lru3:
 	TEST	ES:[DI].sf_flags,sf_isnet   ;	  if (!net[i]
 	JNZ	lru35
-if installed
+ifdef installed
 	Invoke_fn CheckShare		;		&& !sharing)
 	JZ	lru5			;	  else
 ENDIF
@@ -752,7 +752,7 @@ lru11:
 ;
 	TEST	ES:[DI].sf_flags,sf_isNet
 	JNZ	LRUClose
-IF INSTALLED
+IFDEF INSTALLED
 	Invoke_fn CheckShare
 	JZ	LRUDone
 ENDIF
@@ -778,7 +778,7 @@ LRUClose:
 	JMP	short LRUDead
 LRUDone:
 	XOR	AL,AL
-	invoke_fn BlastSFT		; fill SFT with 0 (AL)
+	CALL	BlastSFT		; fill SFT with 0 (AL)
 LRUDead:
 	Invoke_fn Restore_World
 	ASSUME	DS:NOTHING
@@ -832,7 +832,7 @@ RegenFail:
 	MOV	AX,User_In_AX
 	cmp	AH,fcb_close
 	jz	RegenDead
-	invoke_fn FCBHardErr		; massive hard error.
+	CALL	FCBHardErr		; massive hard error.
 RegenDead:
 	STC
 	return				; carry set
@@ -1023,7 +1023,7 @@ Procedure   CheckFCB,NEAR
 ;
 ;----- In share support -----
 ;
-if installed
+ifdef installed
 	Call	JShare + 11 * 4
 else
 	Call	ShChk

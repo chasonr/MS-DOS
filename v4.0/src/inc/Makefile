@@ -27,6 +27,12 @@ all: 		errtst.obj sysvar.obj cds.obj dpb.obj nibdos.obj \
 		const2.obj msdata.obj msdosme.obj mstable.obj printf.obj \
 		string.obj msgserv.asm
 
+$(dos)/msdos.cl1:
+	$(MAKE) -C $(dos) msdos.cl1
+
+$(dos)/msdos.cl3:
+	$(MAKE) -C $(dos) msdos.cl3
+
 errtst.obj: 	errtst.c \
   		$(hinc)/types.h  \
   		$(hinc)/comsub.h  \

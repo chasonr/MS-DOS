@@ -36,7 +36,7 @@ Installed = TRUE
 	i_need	NoSetDir,BYTE
 	i_need	THISDRV,BYTE
 	I_need	EXTERR_CLASS,BYTE
-	I_need	EXTERR_ACTION set
+	I_need	EXTERR_ACTION,BYTE
 	I_need	EXTERR_LOCUS,BYTE
 	i_need	DMAADD,DWORD
 	i_need	FastOpenFlg,BYTE
@@ -92,7 +92,7 @@ share_okok:
 ;	POP	WORD PTR [DMAADD]	       ;IFS. retor DMAADD		;AN000;
 ;	POP	WORD PTR [DMAADD+2]	       ;IFS.				;AN000;
 ifsshare:
-IF NOT Installed
+IFNDEF Installed
 	transfer NET_GET_FILE_INFO
 ELSE
 	MOV	AX,(multNET SHL 8) OR 15
@@ -107,7 +107,7 @@ nofiles:
 LOCAL_INFO:
 	EnterCrit   critDisk
 	MOV	[NoSetDir],1		; if we find a dir, don't change to it
-	invoke_fn Get_FAST_PATH
+	CALL    Get_FAST_PATH
 info_check:
 	JNC	info_check_dev
 
@@ -205,7 +205,7 @@ set_look:
 	Invoke_fn TestNet
 	JNC	Local_Set
 
-IF NOT Installed
+IFNDEF Installed
 	transfer NET_SEQ_SET_FILE_ATTRIBUTE
 ELSE
 	PUSH	AX

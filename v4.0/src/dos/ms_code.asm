@@ -299,7 +299,7 @@ entry	SYS_RET_OK
 
 entry	SYS_RET_ERR
 	XOR	AH,AH			; hack to allow for smaller error rets
-	invoke_fn ETAB_LK 		; Make sure code is OK, EXTERR gets set
+	CALL	ETAB_LK 		; Make sure code is OK, EXTERR gets set
 	CALL	ErrorMap
 entry	From_GetSet
 	invoke_fn get_user_stack
@@ -329,7 +329,7 @@ DO_RET:
 	MOV	[EXTERR],error_FAIL_I24 ; Ooops, this is the REAL reason
 	MOV	SI,OFFSET DOSGROUP:ERR_TABLE_21
 EXTENDED_NORMAL:
-	invoke_fn CAL_LK			; Set CLASS,ACTION,LOCUS for EXTERR
+	call	CAL_LK			; Set CLASS,ACTION,LOCUS for EXTERR
 	POP	SI
 	return
 
@@ -442,7 +442,7 @@ EndProc ETAB_LK
 
 BREAK <DOS 2F Handler and default NET 2F handler>
 
-IF installed
+IFDEF installed
 
 ;
 ; SetBad sets up info for bad functions

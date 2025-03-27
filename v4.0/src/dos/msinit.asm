@@ -151,7 +151,7 @@ ASSUME	DS:NOTHING,ES:NOTHING
 	STOSW		; Adjust Refcount
 	MOV	DI,OFFSET DOSGROUP:SySInitTable
 
-	IF	NOT Installed
+	IFNDEF Installed
 	invoke_fn NETWINIT
 ;	ELSE
 ;	invoke_fn NETWINIT
@@ -524,6 +524,7 @@ ASSUME	ES:DOSGROUP
 ; After this points the char device functions for CON will work for
 ; printing messages
 
+IF 0 ; RLC
 	IF	(NOT IBM) OR (DEBUG)
 	IF	NOT ALTVECT
 	MOV	SI,OFFSET DOSGROUP:HEADER
@@ -540,6 +541,7 @@ OUTDONE:
 	POP	ES
 	ENDIF
 	ENDIF
+ENDIF ;RLC
 
 ;F.C Modification start  DOS 3.3
 	MOV	SI,OFFSET DOSGROUP:COUNTRY_CDPG  ;F.C. for DOS 3.3 country info

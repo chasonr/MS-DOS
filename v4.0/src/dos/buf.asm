@@ -342,7 +342,7 @@ nret:										;AN000;
 										;AN000;
 	cmp	[DI.buf_ID],-1			; Buffer FREE?			;AN000;
 	retnz					; No				;AN000;
-	invoke_fn PLACEHEAD			; Buffer is free, belongs at hea;AN000;
+	call	PLACEHEAD			; Buffer is free, belongs at hea;AN000;
 	return									;AN000;
 bufloop:				;(label is now a misnomer)		;AN000;
 	mov	BX,[DI.buf_next]		;Set new head position		;AN000;
@@ -599,7 +599,7 @@ NXTBUFF2:
 Zapzap: 									;AN004;
 	PUSH	DS			     ;LB. save regs			;AN000;
 	PUSH	DI			     ;LB.				;AN000;
-	invoke_fn Map_Entry		     ;LB. ds:di -> first buffer addr	;AN000;
+	CALL	Map_Entry		     ;LB. ds:di -> first buffer addr	;AN000;
 NXTBUFF:
 	CALL	CHECKFLUSH	; Ignore Carry return from CHECKFLUSH.
 				; FAILERR is set if user FAILed.
@@ -683,7 +683,7 @@ ASSUME	DS:NOTHING,ES:NOTHING
 	retz				; Buffer is free, carry clear.
 	TEST	AH,buf_dirty
 	retz				; Buffer is clean, carry clear.
-	invoke_fn DEC_DIRTY_COUNT 	; LB. decrement dirty count
+	call	DEC_DIRTY_COUNT 	; LB. decrement dirty count
 	CMP	AL,BYTE PTR [WPERR]
 	retz				; If in WP error zap buffer
 	MOV	[SC_DRIVE],AL		;LB. set it for invalidation		;AN000;

@@ -412,7 +412,7 @@ Update_size:
 ; Make sure that all other SFT's see this growth also.
 ;
 	MOV	AX,1
-if installed
+ifdef installed
 	call	JShare + 14 * 4
 else
 	Call	ShSU
@@ -460,7 +460,7 @@ UPDATE:
 ; Make sure that all other SFT's see this growth also.
 ;
 	MOV	AX,2
-if installed
+ifdef installed
 	Call	JShare + 14 * 4
 else
 	Call	ShSU
