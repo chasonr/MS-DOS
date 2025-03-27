@@ -98,6 +98,7 @@ CHECK_IF_ROOT:
         CMP     [DIRSTART],0
         JNZ     NEWDIR
         STC
+ret_l_3:
         return                  ; Can't grow root
 
         entry   NEWDIR
@@ -105,16 +106,16 @@ CHECK_IF_ROOT:
         OR      BX,BX
         JZ      NULLDIR
         invoke_fn  GETEOF
-        retc                    ; Screw up
+        jc      ret_l_3         ; Screw up
 NULLDIR:
         MOV     CX,1
         invoke_fn  ALLOCATE
-        retc
+        jc      ret_l_3
         MOV     DX,[DIRSTART]
         OR      DX,DX
         JNZ     ADDINGDIR
         invoke_fn  SETDIRSRCH
-        retc
+        jc      ret_l_3
         MOV     [LASTENT],-1
         JMP     SHORT GOTDIRREC
 ADDINGDIR:
@@ -314,6 +315,7 @@ make_type:
         JNZ    make_type2                ;FT. no                                ;AN000;
         STC                              ;FT. set carry                         ;AN000;
         MOV    AX,7                      ;FT. file not found                    ;AN000;
+ret_l_8:
         return                           ;FT.                                   ;AN000;
 make_type2:
 ;Extended Open hooks
@@ -381,20 +383,21 @@ make_save:
         MOV     AX,CX           ; Device ID to AH
         CALL    NewEntry
         POP     AX              ; 0 if Disk, 3 if File
-        retnc
+        jnc	ret_l_8
         MOV     AL,2            ; create failed case 2
+ret_l_9:
         return
 
 make_new:
         call    make_save
-        retc                    ; case 2 fail
+        jc      ret_l_9         ; case 2 fail
         TEST    BYTE PTR [ATTRIB],attr_directory
-        retnz                   ; Don't "open" directories, so don't
+        jnz     ret_l_9         ; Don't "open" directories, so don't
                                 ;   tell the sharer about them
         SaveReg <AX,BX,SI>      ; Save AL code
         invoke_fn  ShareEnter
         RestoreReg  <SI,BX,AX>
-        retnc
+        jnc     ret_l_9
 ;
 ; We get here by having the user FAIL a share problem.  Typically a failure of
 ; this nature is an out-of-space or an internal error.  We clean up as best as
@@ -442,7 +445,7 @@ MakeEndShare:
 ;
 ; If the user failed, we do not reenter into the sharing set.
 ;
-        retc                            ; bye if error
+        jc      ret_l_9                 ; bye if error
         SaveReg <AX,BX,SI>
         PUSHF
         invoke_fn  ShareEnter
@@ -451,6 +454,7 @@ MakeEndShare:
 ;
 ; If Share_check fails, then we have an internal ERROR!!!!!
 ;
+ret_l_10:
         return
 EndProc MakeNode
 
@@ -493,15 +497,16 @@ ASSUME  ES:NOTHING
         JNC     EXISTENT
         CMP     [FAILERR],0
         STC
-        retnz                   ; User FAILed, node might exist
+        jnz     ret_l_10        ; User FAILed, node might exist
         CALL    BUILDDIR        ; Try to build dir
-        retc                    ; Failed
+        jc      ret_l_10        ; Failed
         invoke_fn  GETENT          ; Point at that free entry
-        retc                    ; Failed
+        jc      ret_l_10        ; Failed
         JMP     SHORT FREESPOT
 
 ERRRET3:
         STC
+ret_l_11:
         return
 
 EXISTENT:
@@ -512,7 +517,7 @@ EXISTENT:
 
 NOT_DEV1:
         call    FREEENT         ; Free cluster chain
-        retc                    ; Failed
+        jc      ret_l_11        ; Failed
 FREESPOT:
         TEST    BYTE PTR [ATTRIB],attr_volume_id
         JZ      NOTVOLID
@@ -601,7 +606,9 @@ Page_ok:                        ;BL-NETWORK PTM #-?
         POP     AX
         POP     SI              ; Get SI input back
         MOV     AH,AL           ; Get I/O driver number back
-        retc                    ; Failed
+        jnc     @F              ; Failed
+	ret
+	@@:
 
 
 ;NOTE FALL THROUGH
@@ -838,6 +845,7 @@ ASSUME  DS:NOTHING
         POP     [HIGH_SECTOR]                  ;F.C. >32mb                      ;AN000;
         JNC     GET_BUF_BACK
         POP     BX
+ret_l_13:
         return                  ; Screw up
 
 GET_BUF_BACK:
@@ -846,7 +854,7 @@ GET_BUF_BACK:
         XOR     AL,AL
         invoke_fn  GETBUFFR        ; Get sector back
         POP     BX              ; Get offset back
-        retc
+        jc      ret_l_13
         invoke_fn  SET_BUF_AS_DIR
         ADD     BX,WORD PTR [CURBUF]    ; Correct it for new buffer
         MOV     SI,BX

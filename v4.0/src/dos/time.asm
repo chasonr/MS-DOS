@@ -74,6 +74,7 @@ ASSUME	DS:NOTHING
 	ADD	AX,1980 		;Put bias back
 	MOV	[SI.user_CX],AX 	;CX=year
 	MOV	AL,BYTE PTR [WEEKDAY]
+ret_l_1:
 	return
 EndProc $GET_DATE
 
@@ -89,13 +90,13 @@ ASSUME	DS:NOTHING,ES:NOTHING
 
 	MOV	AL,-1			;Be ready to flag error
 	SUB	CX,1980 		;Fix bias in year
-	retc				;Error if not big enough
+	jc	ret_l_1			;Error if not big enough
 	CMP	CX,119			;Year must be less than 2100
 	JA	RET24
 	OR	DH,DH
-	retz
+	jz	ret_l_1
 	OR	DL,DL
-	retz				;Error if either month or day is 0
+	jz	ret_l_1			;Error if either month or day is 0
 	CMP	DH,12			;Check against max. month
 	JA	RET24
 	Context DS
@@ -202,6 +203,7 @@ procedure   DATE16,NEAR
 	SHL	AX,1
 	POP	CX
 	OR	AL,[DAY]
+ret_l_3:
 	return
 EndProc DATE16
 
@@ -232,7 +234,7 @@ ASSUME	DS:NOTHING
 	MOV	CX,WORD PTR [TIMEBUF+2]
 	MOV	DX,WORD PTR [TIMEBUF+4]
 	CMP	AX,[DAYCNT]		;See if day count is the same
-	retz
+	jz	ret_l_3
 	CMP	AX,FOURYEARS*30 	;Number of days in 120 years
 	JAE	RET22			;Ignore if too large
 	MOV	[DAYCNT],AX
@@ -271,7 +273,7 @@ EndProc READTIME
 DSLIDE1:
 	LODSB				;Get count of days
 	CMP	DX,AX			;See if it will fit
-	retc				;If not, done
+	jc	RET22			;If not, done
 	SUB	DX,AX
 	INC	CX			;Count one more month/year
 	JMP	SHORT DSLIDE1
@@ -300,7 +302,7 @@ EndProc SETYEAR
 	XLAT				;Look up days in month
 	CMP	AL,DL
 	MOV	AL,-1			;Restore error flag, just in case
-	retc				;Error if too many days
+	jc	RET23			;Error if too many days
 	CALL	SETYEAR
 ;
 ; WARNING!  DAY and MONTH must be adjacently allocated

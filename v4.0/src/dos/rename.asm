@@ -397,7 +397,9 @@ GET_SOURCE:
 	MOV	BX,WORD PTR [RENAMEDMA + 15]	; DirStart
 	LES	BP,ThisDPB
 	invoke_fn SetDirSrch
-	retc
+	jnc	@F
+        ret
+        @@:
 	invoke_fn StartSrch
 	MOV	AX,WORD PTR [RENAMEDMA + 13]	; Lastent
 	invoke_fn GetEnt

@@ -21,7 +21,7 @@ ASSUME  DS:NOTHING,ES:NOTHING
 ; AH is the template length
 ;
         OR      AL,AL
-        retz                    ;Buffer is 0 length!!?
+        jz      ret_l_1         ;Buffer is 0 length!!?
         MOV     BL,AH           ;Init template counter
         MOV     BH,CH           ;Init template counter
  ;
@@ -155,6 +155,7 @@ COPYNEW:
         MOV     SI,OFFSET DOSGROUP:INBUF
         MOV     CL,DH                   ; set up count
         REP     MOVSB                   ; Copy final line to user buffer
+ret_l_21:
         return
 ;
 ; Output a CRLF to the user screen and do NOT store it into the buffer
@@ -233,9 +234,9 @@ BackSpace:
         CALL    BACKMES         ;Was a control char, zap the '^'
 OLDBAK:
         CMP     BYTE PTR [INSMODE],0
-        retnz                   ;In insert mode, done
+        jnz     ret_l_21        ;In insert mode, done
         OR      BH,BH
-        retz                    ;Not advanced in template, stay where we are
+        jz      ret_l_21        ;Not advanced in template, stay where we are
         DEC     BH              ;Go back in template
         DEC     SI
         return
@@ -362,6 +363,7 @@ FindSetup:
         NOT     CL              ;Turn how far to go into how far we went
         ADD     CL,BL           ;Add size of template
         SUB     CL,BH           ;Subtract current pos, result distance to skip
+ret_l_23:
         return
 
 NOTFND:

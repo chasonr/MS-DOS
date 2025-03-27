@@ -784,7 +784,9 @@ LRUDead:
 	ASSUME	DS:NOTHING
 	LES	DI,ThisSFT
 	Assert	ISSFT,<ES,DI>,"LRUFCB return"
-	retnc
+	jc	@F
+        ret
+        @@:
 	MOV	AL,error_FCB_unavailable
 	return
 EndProc LRUFCB
@@ -835,6 +837,7 @@ RegenFail:
 	CALL	FCBHardErr		; massive hard error.
 RegenDead:
 	STC
+ret_l_5:
 	return				; carry set
 ;
 ; Local FCB without sharing.  Check to see if sharing is loaded.  If so
@@ -846,8 +849,8 @@ RegenNoSharing:
 ;
 ; Find an SFT for this guy.
 ;
-	invoke	LRUFcb
-	retc
+	invoke_fn LRUFcb
+	jc	ret_l_5
 	MOV	ES:[DI].sf_mode,SF_IsFCB + open_for_both + sharing_compat
 	AND	AL,3Fh			; get drive number for flags
 	CBW
@@ -874,7 +877,7 @@ RegenCopyName2:
 	LODSB
 
  IF  DBCS				;AN000;
-	invoke	testkanj		;AN000;
+	invoke_fn testkanj		;AN000;
 	jz	notkanj9		;AN000;
 	STOSB				;AN000;
 	DEC	CX			;AN000;
@@ -980,6 +983,7 @@ Procedure   BlastSFT,NEAR
 	MOV	ES:[DI].sf_ref_count,0	; set ref count
 	MOV	ES:[DI].sf_LRU,0	; set lru
 	MOV	ES:[DI].sf_OpenAge,-1	; Set open age
+ret_l_8:
 	return
 EndProc BlastSFT
 
@@ -1040,7 +1044,7 @@ CheckD: AND	AL,3Fh
 	MOV	AH,BYTE PTR ES:[DI].sf_flags
 	AND	AH,3Fh
 	CMP	AH,AL
-	retz				; carry is clear
+	jz	ret_l_8			; carry is clear
 BadSFT: STC
 	return				; carry is clear
 CheckNet:
@@ -1147,7 +1151,9 @@ Procedure   SFTFromFCB,NEAR
 	invoke	FCBRegen
 	Invoke_fn Restore_World		; restore world
 	MOV	AX,EXTERR
-	retc
+	jnc	@F
+        ret
+        @@:
 
 ;	Message 1,<"FCBRegen Succeeded",13,10>
 

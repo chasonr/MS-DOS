@@ -141,6 +141,7 @@ ASSUME	DS:NOTHING,ES:NOTHING
 
 	AND	AL,1
 	MOV	[VERFLG],AL
+ret_l_3:
 	return
 EndProc $SET_VERIFY_ON_WRITE
 
@@ -228,7 +229,7 @@ international_find:
 international_get:
 	MOV	SI,OFFSET DOSGROUP:COUNTRY_CDPG
 	CMP	BX,[SI.ccDosCountry]	 ; = current country id
-	retz				 ; return if equal
+	jz	ret_l_3			 ; return if equal
 	MOV	DX,BX
 	XOR	BX,BX			 ; bx = 0, default code page
 	CallInstall NLSInstall,NLSFUNC,0 ; check if NLSFUNC in memory
@@ -242,7 +243,7 @@ stcdpg:
 	CallInstall SetCodePage,NLSFUNC,3  ; set country info
 chkok:
 	CMP	AL,0			   ; success ?
-	retz				   ; yes
+	jz	ret_l_3			   ; yes
 setcarry:
 	STC				 ; set carry
 	ret

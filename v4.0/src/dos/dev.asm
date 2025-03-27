@@ -279,6 +279,7 @@ IOUT:
 	CALL	SETXADDR
 	invoke_fn DOS_WRITE
 	CALL	RESTXADDR		; If you change this into a jmp don't
+ret_l_4:
 	return				; come crying to me when things don't
 					; work ARR
 
@@ -290,7 +291,7 @@ IOIN:
 	OR	CX,CX			; Check EOF
 	CALL	RESTXADDR
 	MOV	AL,[DEVIOBUF]		; Get byte from trans addr
-	retnz
+	jnz	ret_l_4
 	MOV	AL,1AH			; ^Z if no bytes
 	return
 

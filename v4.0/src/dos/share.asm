@@ -46,11 +46,12 @@ Installed = True
 	DOSAssume   CS,<DS>,"Share_Check"
 	ASSUME  ES:NOTHING
 
-if installed
+ifdef installed
 	call    JShare + 1 * 4
 else
 	Call    MFT_Enter
 endif
+ret_l_1:
 	return
 
 EndProc SHARE_CHECK
@@ -84,7 +85,7 @@ EndProc SHARE_CHECK
 	POP     ES
 	POP     DS
 	CMP     AL,1
-	retz                    ; 1 = retry, carry clear
+	jz      ret_l_1         ; 1 = retry, carry clear
 	STC
 	return
 

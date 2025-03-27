@@ -235,6 +235,7 @@ BadPack:
 	STC
 	MOV	AL,error_path_not_found
 FCBRet: Leave
+ret_l_1:
 	return
 EndProc TransFCB,NoCheck
 
@@ -334,7 +335,7 @@ SetSplice:
 	CALL	TextFromDrive		; drop in new
 	LEA	BX,[DI+1]		; backup limit
 	CALL	Canonicalize		; copy and canonicalize
-	retc				; errors
+	jc	ret_l_1			; errors
 ;
 ; Perform splices for net guys.
 ;
@@ -489,6 +490,7 @@ CheckPath:
 	invoke_fn StrCpy			; move remainder of string
 	CLC				; everything OK.
 	Context DS			; remainder of OK stuff
+ret_l_5:
 	return
 ;
 ; We have a file.  Get the raw CDS.
@@ -497,7 +499,7 @@ DoFile:
 	ASSUME	DS:NOTHING
 	invoke_fn GetVisDrv		; get proper CDS
 	MOV	AL,error_path_not_found ; Set up for possible bad file error
-	retc				; CARRY set -> bogus drive/spliced
+	jc	ret_l_5			; CARRY set -> bogus drive/spliced
 ;
 ; ThisCDS has correct CDS.  DS:SI advanced to point to beginning of path/file.
 ; Make sure that CDS has valid directory; ValidateCDS requires a temp buffer
@@ -507,7 +509,7 @@ DoFile:
 	invoke_fn ValidateCDS		; poke CDS amd make everything OK
 	RestoreReg <DI,ES,SI,DS>	; get back pointers
 	MOV	AL,error_path_not_found ; Set up for possible bad path error
-	retc				; someone failed an operation
+	jc	ret_l_5			; someone failed an operation
 ;
 ; ThisCDS points to correct CDS.  It contains the correct text of the
 ; current directory.  Copy it in.
@@ -591,7 +593,7 @@ PathAssure:
 ;
 DoCanon:
 	CALL	Canonicalize		; wham.
-	retc				; badly formatted path.
+	jc	ret_l_5			; badly formatted path.
  IF  DBCS				;AN000;
 ;--------------------- Start of DBCS 2/13/KK
 ; Although Cononicalize has done lots of good things for us it may also have
@@ -675,7 +677,9 @@ SkipSplice:
 	Context DS
 	LES	DI,ThisCDS		; point to correct drive
 	TEST	ES:[DI].curdir_flags,curdir_isnet
-	retnz				; net, no fatread necessary
+	jz	@F			; net, no fatread necessary
+        ret
+        @@:
 	JCXZ	Done
 	EnterCrit   critDisk
 	invoke_fn FatRead_CDS
@@ -793,6 +797,7 @@ CanonBad:
 	MOV	AL,error_file_not_found ; Set bad file error
 PathEnc:
 	STC
+ret_l_7:
 	return
 ;
 ; We have a textual component that we must copy.  We uppercase it and truncate
@@ -800,7 +805,7 @@ PathEnc:
 ;
 DoComponent:				;	    }
 	CALL	CopyComponent		;	if (!CopyComponent (s, d))
-	retc				;	    return (-1);
+	jc	ret_l_7			;	    return (-1);
 ;
 ; We special case the . and .. cases.  These will be backed up.
 ;
@@ -811,7 +816,7 @@ DoComponent:				;	    }
 	DEC	DI			;	    d--;
 Skip1:	CALL	SkipBack		;	    SkipBack ();
 	MOV	AL,error_path_not_found ; Set up for possible bad path error
-	retc
+	jc	ret_l_7
 	JMP	CanonPath		;	    }
 ;
 ; We have a normal path.  Advance destination pointer over it.
@@ -861,7 +866,7 @@ Procedure   PathSep,NEAR
 	MOV	AL,[SI] 		; get the character
 	entry	PathSepGotCh		; already have character
 	OR	AL,AL			; test for zero
-	retz				; return if equal to zero (NUL)
+	jz	ret_l_7			; return if equal to zero (NUL)
 	invoke_fn PathChrCmp		; check for path character
 	return				; and return HIS determination
 EndProc PathSep
@@ -1105,6 +1110,7 @@ DoSet:
 	LES	DI,[SI].curdir_devptr
 	MOV	WORD PTR ThisDPB,DI
 	MOV	WORD PTR ThisDPB+2,ES
+ret_l_13:
 	return
 EndProc Splice
 
@@ -1157,9 +1163,9 @@ Procedure   DriveFromText,NEAR
 	ASSUME	CS:DOSGroup,DS:NOTHING,ES:NOTHING,SS:NOTHING
 	XOR	AL,AL			;	drive = 0;
 	CMP	BYTE PTR [SI],0 	;	if (*s &&
-	retz
+	jz	ret_l_13
 	CMP	BYTE PTR [SI+1],':'     ;           s[1] == ':') {
-	retnz
+	jnz	ret_l_13
  IF  DBCS				;AN000;
 ;--------------------- Start of DBCS 2/18/KK
 	push	ax		       ;AN000;
@@ -1172,7 +1178,7 @@ Procedure   DriveFromText,NEAR
 	LODSW				;	    drive = (*s | 020) - 'a'+1;
 	OR	AL,020h
 	SUB	AL,'a'-1                ;           s += 2;
-	retnz
+	jnz	ret_l_13
 	MOV	AL,-1			; nuke AL...
 	return				;	    }
 EndProc DriveFromText
@@ -1194,6 +1200,7 @@ Procedure TextFromDrive,NEAR
 	ADD	AL,'A'-1                ;   *d++ = drive-1+'A';
 	MOV	AH,":"                  ;   strcat (d, ":");
 	STOSW
+ret_l_15:
 	return
 EndProc TextFromDrive
 
@@ -1233,7 +1240,7 @@ NotKanj9:				;AN000;
 ;----------------------- End of DBCS 2/13/KK
  ELSE					;AN000;
 	REPZ	CMPSB			; compare
-	retnz				; if NZ then return NZ
+	jnz	ret_l_15		; if NZ then return NZ
 	SaveReg <AX>			; save char register
  ENDIF					;AN000;
 	MOV	AL,[SI-1]		; get last byte to match

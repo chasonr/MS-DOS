@@ -198,7 +198,9 @@ DPB_LOOP:
 	CMP	SI,-1
 	JZ	NO_DPB
 	CMP	AL,[SI.dpb_drive]
-	retz				; Carry clear
+	jnz	@F			; Carry clear
+        ret
+        @@:
 	LDS	SI,[SI.dpb_next_dpb]
 	JMP	DPB_LOOP
 
@@ -343,12 +345,12 @@ Break	<GetVisDrv - return visible drive>
 Procedure   GetVisDrv,NEAR
 	ASSUME	CS:DOSGroup,DS:NOTHING,ES:NOTHING,SS:DOSGroup
 	CALL	GetThisDrv		; get inuse drive
-	retc
+	jc	RET_OK
 	SaveReg <DS,SI>
 	LDS	SI,ThisCDS
 	TEST	[SI].curdir_flags,curdir_splice
 	RestoreReg  <SI,DS>
-	retz				; if not spliced, return OK
+	jz	RET_OK			; if not spliced, return OK
 	MOV	[DrvErr],error_invalid_drive ;IFS.				;AN000;
 	STC				; signal error
 	return

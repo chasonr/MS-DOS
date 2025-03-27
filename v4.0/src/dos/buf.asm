@@ -291,6 +291,7 @@ ASSUME	DS:NOTHING,ES:NOTHING
 ;;	POP	DS			; Restore scan location
 	MOV	DI,SI
 ;;	POP	ES
+ret_l_5:
 	return
 EndProc ScanPlace
 
@@ -341,7 +342,7 @@ nret:										;AN000;
 	pop	AX								;AN000;
 										;AN000;
 	cmp	[DI.buf_ID],-1			; Buffer FREE?			;AN000;
-	retnz					; No				;AN000;
+	jnz	ret_l_5				; No				;AN000;
 	call	PLACEHEAD			; Buffer is free, belongs at hea;AN000;
 	return									;AN000;
 bufloop:				;(label is now a misnomer)		;AN000;
@@ -364,6 +365,7 @@ ASSUME	DS:NOTHING,ES:NOTHING							;AN000;
 	mov	word ptr ES:[SI.BUFFER_BUCKET],DI				;AN000;
 	pop	SI								;AN000;
 	pop	ES								;AN000;
+ret_l_7:
 	return									;AN000;
 EndProc PLACEHEAD								;AN000;
 
@@ -378,7 +380,7 @@ Break	<POINTCOMP -- 20 BIT POINTER COMPARE>
 ASSUME	DS:NOTHING,ES:NOTHING
 
 	CMP	SI,DI
-	retnz
+	jnz	ret_l_7
 	PUSH	CX
 	PUSH	DX
 	MOV	CX,DS
@@ -628,6 +630,7 @@ getnext:
 	return
 FlshBad:
 	STC			; Return error if user FAILed
+ret_l_11:
 	return
 Zap:
 	MOV	WORD PTR [DI.buf_ID],00FFH ; Invalidate buffer, it is inconsistent
@@ -641,15 +644,15 @@ ASSUME	DS:NOTHING,ES:NOTHING
 
 	Assert	ISBUF,<DS,DI>,"CheckFlush"
 	CMP	[DI.buf_ID],AH
-	retz				; Skip free buffers, carry clear
+	jz	ret_l_11		; Skip free buffers, carry clear
 	CMP	AH,AL
 	JZ	DOBUFFER		; Do all dirty buffers
 	CMP	AL,[DI.buf_ID]
 	CLC
-	retnz				; Buffer not for this unit or SFT
+	jnz	ret_l_11		; Buffer not for this unit or SFT
 DOBUFFER:
 	TEST	[DI.buf_flags],buf_dirty
-	retz				; Buffer not dirty, carry clear by TEST
+	jz	ret_l_11			; Buffer not dirty, carry clear by TEST
 	PUSH	AX
 	PUSH	WORD PTR [DI.buf_ID]
 	CALL	BUFWRITE
@@ -659,6 +662,7 @@ DOBUFFER:
 	MOV	WORD PTR [DI.buf_ID],AX
 LEAVE_BUF:
 	POP	AX			; Search info
+ret_l_12:
 	return
 EndProc CHECKFLUSH
 
@@ -680,12 +684,12 @@ ASSUME	DS:NOTHING,ES:NOTHING
 	MOV	AX,00FFH
 	XCHG	AX,WORD PTR [DI.buf_ID] ; Free, in case write barfs
 	CMP	AL,0FFH
-	retz				; Buffer is free, carry clear.
+	jz	ret_l_12		; Buffer is free, carry clear.
 	TEST	AH,buf_dirty
-	retz				; Buffer is clean, carry clear.
+	jz	ret_l_12		; Buffer is clean, carry clear.
 	call	DEC_DIRTY_COUNT 	; LB. decrement dirty count
 	CMP	AL,BYTE PTR [WPERR]
-	retz				; If in WP error zap buffer
+	jz	ret_l_12		; If in WP error zap buffer
 	MOV	[SC_DRIVE],AL		;LB. set it for invalidation		;AN000;
 	LES	BP,[DI.buf_DPB]
 	LEA	BX,[DI.BufInSiz]	; Point at buffer

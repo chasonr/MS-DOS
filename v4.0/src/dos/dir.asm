@@ -297,6 +297,7 @@ NONE:
 HAVIT:
 	MOV	[LASTENT],AX
 	CLC
+ret_l_1:
 	return
 
 SAMECLUS:
@@ -363,7 +364,7 @@ Procedure GETENTRY,NEAR
 	PUSH	BX
 	invoke_fn DIRREAD
 	POP	BX
-	retc
+	jc	ret_l_1
 SETENTRY:
 	MOV	DX,WORD PTR [CURBUF]
 	ADD	DX,BUFINSIZ

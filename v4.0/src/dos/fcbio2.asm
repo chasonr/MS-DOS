@@ -178,6 +178,7 @@ Procedure   GetExtended,NEAR
 	ADD	SI,7			; point to FCB
 GetBye:
 	CMP	SI,DX			; set condition codes
+ret_l_4:
 	return
 EndProc GetExtended
 
@@ -194,7 +195,7 @@ Procedure   GetRecSize,NEAR
 	ASSUME	CS:DOSGROUP,DS:NOTHING,ES:NOTHING,SS:DOSGroup
 	MOV	BX,[SI.fcb_RECSIZ]	; get his record size
 	OR	BX,BX			; is it nul?
-	retnz
+	jnz	ret_l_4
 	MOV	BX,128			; use default size
 	MOV	[SI.fcb_RECSIZ],BX	; stuff it back
 	return

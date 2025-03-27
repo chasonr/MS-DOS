@@ -61,7 +61,10 @@ PAGE
 	CALL    Check_Signature         ; ES <- AX, check for valid block
 
 arena_free_process_loop:
-	retc
+	jnc	@F
+ret_l_2:
+        ret
+        @@:
 	PUSH    ES
 	POP     DS
 	CMP     DS:[arena_owner],BX     ; is block owned by pid?
@@ -71,7 +74,7 @@ arena_free_process_loop:
 arena_free_next:
 	CMP     BYTE PTR DS:[DI],arena_signature_end
 					; end of road, Jack?
-	retz                            ; never come back no more
+	jz      ret_l_2                 ; never come back no more
 	CALL    arena_next              ; next item in ES/AX carry set if trash
 	JMP     arena_free_process_loop
 
@@ -105,11 +108,12 @@ EndProc arena_next
 	MOV     ES,AX                   ; ES <- AX
 	CMP     BYTE PTR ES:[DI],arena_signature_normal
 					; IF next signature = not_end THEN
-	retz                            ;   GOTO ok
+	jz      ret_l_2                 ;   GOTO ok
 	CMP     BYTE PTR ES:[DI],arena_signature_end
 					; IF next signature = end then
-	retz                            ;   GOTO ok
+	jz      ret_l_2                 ;   GOTO ok
 	STC                             ; set error
+ret_l_1:
 	return
 
 EndProc Check_signature
@@ -124,13 +128,13 @@ EndProc Check_signature
 	ASSUME  DS:NOTHING,ES:NOTHING
 	CMP     BYTE PTR DS:[DI],arena_signature_end
 					; IF current signature = END THEN
-	retz                            ;   GOTO ok
+	jz      ret_l_1                 ;   GOTO ok
 	CALL    arena_next              ; ES, AX <- next block, Carry set if error
-	retc                            ; IF no error THEN GOTO check
+	jc      ret_l_1                 ; IF no error THEN GOTO check
 
 coalesce_check:
 	CMP     ES:[arena_owner],DI
-	retnz                           ; IF next block isnt free THEN return
+	jnz     ret_l_1                 ; IF next block isnt free THEN return
 	MOV     CX,ES:[arena_size]      ; CX <- next block size
 	INC     CX                      ; CX <- CX + 1 (for header size)
 	ADD     DS:[arena_size],CX      ; current size <- current size + CX

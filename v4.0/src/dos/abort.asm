@@ -111,7 +111,9 @@ Scan:
 	push    bx
 	invoke_fn  SFFromSFN
 	pop     bx
-	retc
+	jnc	@F
+	ret
+	@@:
 	cmp     es:[di].sf_ref_count,0
 	jz      next
 ;

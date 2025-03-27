@@ -151,6 +151,7 @@ HURTFAT:
 	STC				; User said FAIL
 OKU_RET:
 	POP	AX
+ret_l_4:
 	return
 EndProc UNPACK
 
@@ -201,7 +202,7 @@ PACKIN:
 yesdirty:				  ;LB.					;AN000;
 	CMP	BYTE PTR [CLUSSPLIT],0
 	Context DS
-	retz				; Carry clear
+	jz	ret_l_4			; Carry clear
 	PUSH	AX
 	PUSH	BX
 	PUSH	CX
@@ -390,6 +391,7 @@ Break	<FATREAD_SFT/FATREAD_CDS -- CHECK DRIVE GET FAT>
 	MOV	[THISDRV],AL
 	invoke_fn GOTDPB			;Set THISDPB
 	CALL	FAT_GOT_DPB
+ret_l_8:
 	return
 EndProc FATREAD_SFT
 
@@ -421,7 +423,7 @@ EndProc FATREAD_SFT
 	CALL	FAT_GOT_DPB
 	POP	DI			;Get back CDS pointer
 	POP	ES
-	retc
+	jc	ret_l_8
 	JNZ	NO_CHANGE		;Media NOT changed
 ; Media changed. We now need to find all CDS structures which use this
 ; DPB and invalidate their ID pointers.

@@ -154,7 +154,9 @@ dodo:
 do_norm:
 
         invoke_fn  UNPACK
-        retc
+        jnc     @F
+	ret
+	@@:
 
         invoke_fn  FastSeek_Insert                   ; insert cluster # to         ;AN000;
 cluss:                                                                          ;AN000;
@@ -179,6 +181,7 @@ NOCLUS:
         INC     CX
         DEC     DX
         CLC
+ret_l_2:
         return
 clusfound:
         MOV     DX,[FSeek_logclus]                ; get cluster position        ;AN000;
@@ -219,7 +222,7 @@ Break  <BUFSEC -- BUFFER A SECTOR AND SET UP A TRANSFER>
         MOV     [ALLOWED],allowed_FAIL + allowed_RETRY + allowed_IGNORE
         CALL    FIGREC
         invoke_fn  GETBUFFR
-        retc
+        jc      ret_l_2
         MOV     BYTE PTR [TRANS],1      ; A transfer is taking place
         MOV     SI,[NEXTADD]
         MOV     DI,SI
@@ -560,6 +563,7 @@ noshift:
         ADD     DX,ES:[BP.dpb_first_sector]
         ADC     [HIGH_SECTOR],0              ;F.C. >32mb
         POP     CX
+ret_l_10:
         return
 EndProc FIGREC
 
@@ -653,7 +657,7 @@ Break   <ALLOCATE -- Assign disk space>
         invoke_fn  UNPACK
         MOV     [FATBYT],DI             ; save correct cluster 0 value
         POP     BX
-        retc                            ; abort if error   [INTERR?]
+        jc      ret_l_10                ; abort if error   [INTERR?]
 
         PUSH    CX
         PUSH    BX
@@ -731,15 +735,15 @@ NO_ALLOC:
 
 ads4:   POP     BX
         POP     CX              ; Don't need this stuff since we're successful
-        retc
+        jc      ret_l_10
         invoke_fn UNPACK        ; Get first cluster allocated for return
                                 ; CAVEAT... In nul file case, UNPACKs cluster 0.
-        retc
+        jc      ret_l_10
         CALL    RESTFATBYT      ; Restore correct cluster 0 value
-        retc
+        jc      ret_l_10
         XCHG    BX,DI           ; (DI) = last cluster in file upon our entry
         OR      DI,DI           ; clear 'C'
-        retnz                   ; we were extending an existing file
+        jnz     ret_l_10        ; we were extending an existing file
 
 ;   We were doing the first allocation for a new file.  Update the SFT cluster
 ;   info
@@ -833,6 +837,7 @@ EndProc ALLOCATE
         POP     DI
         POP     DX
         POP     BX
+ret_l_13:
         return
 EndProc RESTFATBYT
 
@@ -859,13 +864,13 @@ entry   RELBLKS
 ;   and free the rest in the chain.
 
         invoke_fn  UNPACK
-        retc
-        retz
+        jc      ret_l_13
+        jz      ret_l_13
         MOV     AX,DI
         PUSH    DX
         invoke_fn  PACK
         POP     DX
-        retc
+        jc      ret_l_13
         OR      DX,DX
         JNZ     NO_DEALLOC              ; Was putting EOF mark
         CMP     ES:[BP.dpb_free_cnt],-1 ; Free count valid?
@@ -874,7 +879,7 @@ entry   RELBLKS
 NO_DEALLOC:
         MOV     BX,AX
         dec     ax              ; check for "1"
-        retz                    ; is last cluster of incomplete chain
+        jz      ret_l_13        ; is last cluster of incomplete chain
         Invoke_fn  IsEOF
         JB      RELEASE         ; Carry clear if JMP not taken
 ret12:  return
@@ -897,7 +902,7 @@ Break   <GETEOF -- Find the end of a file>
 
         Assert      ISDPB,<ES,BP>,"GetEof"
         invoke_fn  UNPACK
-        retc
+        jc      ret12
         PUSH    BX
         MOV     BX,DI
         Invoke_fn  IsEOF

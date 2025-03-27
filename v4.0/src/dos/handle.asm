@@ -766,12 +766,15 @@ Break	<CheckOwner - verify ownership of handles from server>
 Procedure   CheckOwner,NEAR
 	ASSUME	CS:DOSGROUP,DS:NOTHING,ES:NOTHING,SS:DOSGROUP
 	invoke_fn SFFromHandle
-	retc
+	jnc	@F
+ret_l_3:
+        ret
+        @@:
 	push	ax
 	mov	ax,user_id
 	cmp	ax,es:[di].sf_UID
 	pop	ax
-	retz
+	jz	ret_l_3
 	mov	al,error_invalid_handle
 	stc
 	return

@@ -215,6 +215,7 @@ Procedure XCHGP,NEAR
 	SaveReg <DS,ES>
 	RestoreReg  <DS,ES>
 	XCHG	SI,DI
+ret_l_7:
 	return
 EndProc XCHGP
 
@@ -231,7 +232,7 @@ Break	<Idle - wait for a specified amount of time>
 Procedure   Idle,NEAR
 	ASSUME	CS:DOSGroup,SS:DOSGROUP,DS:NOTHING,ES:NOTHING
 	TEST	fSharing,-1
-	retnz
+	jnz	ret_l_7
 	SaveReg <CX>
 	MOV	CX,RetryLoop
 	JCXZ	Idle3

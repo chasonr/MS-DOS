@@ -138,7 +138,9 @@ ASSUME	DS:NOTHING,ES:NOTHING
 
 	Assert	ISDPB,<ES,BP>,"DWrite"
 	CALL	DSKWRITE
-	retz			; Carry clear
+	jnz	@F		; Carry clear
+        ret
+        @@:
 	MOV	BYTE PTR [READOP],1
 	CALL	HARDERRRW
 	CMP	AL,1		; Check for retry
@@ -341,6 +343,7 @@ EOFERR:
 NOROOM:
 	POP	BX		; Kill return address
 	CLC
+ret_l_5:
 	return			; RETURN TO CALLER OF CALLER
 EndProc SETUP
 
@@ -379,13 +382,14 @@ SAVFIR:
 	MOV	[SECCNT],AX
 	MOV	[BYTCNT2],DX	; Bytes remaining for last sector
 	OR	DX,[BYTCNT1]
-	retnz			; NOT (BYTCNT1 = BYTCNT2 = 0)
+	jnz	ret_l_5		; NOT (BYTCNT1 = BYTCNT2 = 0)
 	CMP	AX,1
-	retnz
+	jnz	ret_l_5
 	MOV	AX,ES:[BP.dpb_sector_size]	 ; Buffer EXACT one sector I/O
 	MOV	[BYTCNT2],AX
 	MOV	[SECCNT],DX		; DX = 0
 RET45:
+ret_l_6:
 	return
 EndProc BreakDown
 
@@ -412,7 +416,7 @@ ERR_ON_CHECK:
 	JNE	NO_HARD_ERR
 HARD_ERR:
 	invoke_fn LOCK_VIOLATION
-	retnc				; User wants Retrys
+	jnc	ret_l_6			; User wants Retrys
 NO_HARD_ERR:
 	XOR	CX,CX			;No bytes transferred
 	MOV	AX,error_lock_violation

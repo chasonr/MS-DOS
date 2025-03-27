@@ -335,6 +335,7 @@ Procedure   DirFromSFT,NEAR
 	return				; carry is clear
 PopDone:
 	RestoreReg  <DI,ES>
+ret_l_5:
 	return
 EndProc DirFromSFT
 
@@ -355,7 +356,7 @@ Break	<DOS_Commit - update directory entries>
 	LES	DI,[THISSFT]
 	MOV	BX,ES:[DI.sf_flags]
 	TEST	BX,devid_file_clean + devid_device	;Clears carry
-	retnz
+	jnz	ret_l_5
 	TEST	BX,sf_isnet
 	JZ	LOCAL_COMMIT
 IFNDEF Installed
@@ -386,6 +387,7 @@ LOCAL_COMMIT:
 	invoke_fn DEV_OPEN_SFT		;PTM.  increment device count		;AN000;
 	POPF				;PTM.					;AN000;
 	LeaveCrit CritDisk		;PTM.					;AN000;
+ret_l_7:
 	return
 
 EndProc DOS_COMMIT
@@ -408,12 +410,12 @@ Procedure   SetSFTTimes,NEAR
 ; File clean or device does not get stamped nor disk looked at.
 ;
 	TEST	BX,devid_file_clean + devid_device
-	retnz				; clean or device => no timestamp
+	jnz	ret_l_7			; clean or device => no timestamp
 ;
 ; file and dirty.  See if date is good
 ;
 	TEST	BX,sf_close_nodate
-	retnz				; nodate => no timestamp
+	jnz	ret_l_7			; nodate => no timestamp
 	SaveReg <AX,BX>
 	invoke_fn DATE16			; Date/Time to AX/DX
 	MOV	ES:[DI.sf_date],AX

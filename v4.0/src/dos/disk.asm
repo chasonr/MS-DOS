@@ -704,6 +704,7 @@ GetRedir:
 	LDS	SI,ConSFT
 	Assert	ISSFT,<DS,SI>,"GetIOSft"
 	CLC
+ret_l_13:
 	return
 EndProc get_io_sft
 
@@ -776,7 +777,7 @@ DoRead:
 	JCXZ	FIRSTCLUSTER
 SKPCLLP:
 	invoke_fn UNPACK
-	retc
+	jc	ret_l_13
 	XCHG	BX,DI
 	invoke_fn IsEOF			; test for eof based on fat size
 	JAE	HAVESKIPPED
@@ -792,7 +793,7 @@ HAVESKIPPED:
 	MOV	[ALLOWED],allowed_RETRY + allowed_FAIL
 	XOR	AL,AL		; Indicate pre-read
 	invoke_fn GETBUFFR
-	retc
+	jc	ret_l_13
 
 	entry	SET_BUF_AS_DIR
 	DOSAssume   CS,<DS>,"SET_BUF_AS_DIR"
@@ -807,6 +808,7 @@ HAVESKIPPED:
 	OR	[SI.buf_flags],buf_isDIR	; Clears carry
 	POP	SI
 	POP	DS
+ret_l_14:
 	return
 EndProc DirRead
 
@@ -871,7 +873,7 @@ ASSUME	DS:NOTHING,ES:NOTHING
 
 	Assert	ISDPB,<ES,BP>,"DREAD"
 	invoke_fn DSKREAD
-	retz			; Carry clear
+	jz	ret_l_14	; Carry clear
 	MOV	BYTE PTR [READOP],0
 	invoke_fn HARDERRRW
 	CMP	AL,1		; Check for retry

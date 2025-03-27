@@ -115,7 +115,9 @@ Break	<DOS_Open - internal file access>
 
 	MOV	[NoSetDir],0
 	CALL	Check_Access_AX
-	retc
+	jnc	@F
+        ret
+        @@:
 	LES	DI,[THISSFT]
 	XOR	AH,AH
 ; sleaze! move only access/sharing mode in.  Leave sf_isFCB unchanged
@@ -332,11 +334,14 @@ no_fastseek:
 	LES	DI,ThisSFT
 	invoke_fn DEV_OPEN_SFT
 	TEST	ES:[DI.sf_mode],sf_isfcb; Clears carry
-	retz				; sf_mode correct
+	jnz	@F			; sf_mode correct
+        ret
+        @@:
 	MOV	AX,[CurrentPDB]
 	MOV	ES:[DI.sf_PID],AX	; For FCB sf_PID=PID
 
 Clear_FastOpen:
+ret_l_4:
 	return			       ;;;;; DOS 3.3
 
 EndProc DOS_Open
@@ -358,7 +363,7 @@ procedure SHARE_ERROR,NEAR
 	JNE	NO_HARD_ERR
 HARD_ERR:
 	invoke_fn SHARE_VIOLATION
-	retnc				; User wants retry
+	jnc	ret_l_4			; User wants retry
 NO_HARD_ERR:
 	MOV	AX,error_sharing_violation
 	STC

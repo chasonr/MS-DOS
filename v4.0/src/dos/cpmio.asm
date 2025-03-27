@@ -190,6 +190,7 @@ noscan:
  IF  DBCS			    ;AN000;
 	cmp	cs:[InterChar],1    ;AN000; set the zero flag if the character3/31/KK ;AN000;
  ENDIF				    ;AN000;
+ret_l_1:
 	return
  IF  DBCS			    ;AN000;
 EndProc INTER_CON_INPUT_NO_ECHO     ;AN000;  ;2/11/KK				      ;AN000;
@@ -221,7 +222,7 @@ STRING_OUT1:
 SBCS00: 				;AN000; 	      2/11/KK		 ;AN000;
  ENDIF					;AN000;
 	CMP	AL,'$'
-	retz
+	jz	ret_l_1
 NEXT_STR1:
 	invoke_fn OUTT
 	JMP	STRING_OUT1
@@ -255,7 +256,7 @@ RAW22:						      ;AN000;
 	LES	DI,DWORD PTR [user_SP]		      ; Get pointer to register save area
 	XOR	BX,BX
 	invoke_fn GET_IO_SFT
-	retc
+	jc	ret_l_23
  IF  DBCS				;AN000;
 	push	word ptr [Intercon]	;AN000;
 	mov	[Intercon],0		;AN000; disable interim characters
@@ -269,6 +270,7 @@ RAW22:						      ;AN000;
 	invoke_fn SPOOLINT
 	OR	BYTE PTR ES:[DI.user_F],40H ; Set user's zero flag
 	XOR	AL,AL
+ret_l_2:
 	return
 
 RESFLG:
@@ -296,7 +298,7 @@ RILP:
 	XOR	BX,BX
 	invoke_fn GET_IO_SFT
 	POP	BX
-	retc
+	jc	ret_l_2
 	MOV	AH,1
 	invoke_fn IOFUNC
 	JNZ	Got
@@ -376,6 +378,7 @@ RAWRET:
 	CLC
 RAWRET1:
 	POP	BX
+ret_l_7:
 	return
 RAWNORM:
 	CALL	RAWOUT3
@@ -387,7 +390,7 @@ RAWNORM:
 	entry	RAWOUT2
 
 	invoke_fn GET_IO_SFT
-	retc
+	jc	ret_l_7
 RAWOUT3:
 	PUSH	AX
 	JMP	SHORT RAWOSTRT

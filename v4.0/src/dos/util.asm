@@ -70,6 +70,7 @@ JFNAdd: LES     DI,ES:[PDB_JFN_Pointer] ; get pointer to beginning of table
 	ADD     DI,BX                   ; add in offset
 ReturnNoCarry:
 	CLC                             ; no holes
+ret_l_1:
 	return                          ; bye!
 EndProc pJFNFromHandle
 
@@ -90,7 +91,7 @@ BREAK <SFFromHandle - return pointer (or error) to SF entry from handle>
 procedure   SFFromHandle,NEAR
 	ASSUME  CS:DOSGROUP,DS:NOTHING,ES:NOTHING,SS:NOTHING
 	CALL    pJFNFromHandle          ; get jfn pointer
-	retc                            ; return if error
+	jc	ret_l_1                 ; return if error
 	CMP     BYTE PTR ES:[DI],-1     ; unused handle
 	JNZ     GetSF                   ; nope, suck out SF
 	fmt     TypAccess,LevSFN,<"$p: Illegal SFN $x:$x\n">,<ES,DI>

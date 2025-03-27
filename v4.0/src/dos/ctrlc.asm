@@ -93,7 +93,9 @@ ASSUME	DS:NOTHING,ES:NOTHING
 
 	procedure   DSKSTATCHK,NEAR	; Check for ^C if only one level in
 	CMP	BYTE PTR [INDOS],1
-	retnz				; Do NOTHING
+	jz	@F			; Do NOTHING
+        ret
+        @@:
 	PUSH	CX
 	PUSH	ES
 	PUSH	BX
@@ -185,6 +187,7 @@ procedure   SPOOLINT,NEAR
 	POP	WORD PTR IdleInt
 POPFRET:
 	POPF
+ret_l_4:
 	return
 EndProc SPOOLINT
 
@@ -196,7 +199,7 @@ EndProc SPOOLINT
 	XOR	BX,BX
 	invoke_fn GET_IO_SFT
 	POP	BX
-	retc
+	jc	ret_l_4
 	MOV	AH,1
 	invoke_fn IOFUNC
 	JZ	SPOOLINT
@@ -215,7 +218,7 @@ PRINTON:
 	MOV	BX,4
 	invoke_fn GET_IO_SFT
 	POP	BX
-	retc
+	jc	ret_l_4
 	PUSH	ES
 	PUSH	DI
 	PUSH	DS
@@ -240,6 +243,7 @@ PRNOPN:
 RETP6:
 	POP	DI
 	POP	ES
+ret_l_5:
 	return
 
 PAUSOLP:
@@ -253,7 +257,7 @@ INCHK:
 	XOR	BX,BX
 	invoke_fn GET_IO_SFT
 	POP	BX
-	retc
+	jc	ret_l_5
 	XOR	AH,AH
 	invoke_fn IOFUNC
 	CMP	AL,"P"-"@"
@@ -268,7 +272,7 @@ NOPRINT:
 	JZ	PRINTOFF
 	ENDIF
 	CMP	AL,"C"-"@"
-	retnz
+	jnz	ret_l_5
 EndProc STATCHK
 
 	procedure   CNTCHAND,NEAR
@@ -569,7 +573,9 @@ DoFail:
 CleanUp:
 	MOV	WpErr,-1
 	CMP	SFN,-1
-	retz
+	jnz	@F
+        ret
+        @@:
 	SaveReg <DS,SI,AX>
 	MOV	AX,SFN
 	LDS	SI,pJFN

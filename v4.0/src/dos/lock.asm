@@ -312,11 +312,14 @@ else
 	Call	chk_block
 endif
 	RestoreReg  <AX,BX>		; MS. restrore regs			;AN000;
-	retnc				; There are no locks
+	jc	@F			; There are no locks
+        ret
+        @@:
 	Invoke_fn Idle			; wait a while
 	DEC	BX			; remember a retry
 	JNZ	LockRetry		; more retries left...
 	STC
+ret_l_1:
 	return
 EndProc LOCK_CHECK
 
@@ -351,13 +354,13 @@ EndProc LOCK_CHECK
 	POP	ES
 	POP	DS
 	CMP	AL,1
-	retz			; 1 = retry, carry clear
+	jz	ret_l_1		; 1 = retry, carry clear
 	STC
 	return
 
 EndProc LOCK_VIOLATION
 
-IF  INSTALLED
+IFDEF  INSTALLED
 ;
 ; do a retz to return error
 ;

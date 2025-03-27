@@ -226,6 +226,7 @@ SCANB:
     SCANB_EXIT: 		;AN000;; 2/18/KK  3/31/KK revoved			;AN000;
  ENDIF				;AN000;
 	DEC	SI
+ret_l_4:
 	return
 EndProc MakeFCB
 
@@ -262,7 +263,7 @@ IF DBCS 			;AN000;;KK.
 notdbcs:			;AN000;
 ENDIF				;AN000;
 	CMP	[NAME1],0E5H
-	retnz
+	jnz	ret_l_4
 	MOV	[NAME1],5	; Magic name translation
 	return
 

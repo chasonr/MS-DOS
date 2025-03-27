@@ -97,11 +97,14 @@ Procedure   AbsSetup,NEAR
 errdriv:
 	POP	DS
 ASSUME	DS:NOTHING
-	retc
+	jnc	@F
+ret_l_15:
+        ret
+        @@:
 
 	MOV	[HIGH_SECTOR],0 	;>32mb	from API			;AN000;
 	CALL	RW32_CONVERT		;>32mb convert 32bit format to 16bit	;AN000;
-	retc
+	jc	ret_l_15
 
 	invoke_fn SET_RQ_SC_PARMS 	;LB. set up SC parms			;AN000;
 	PUSH	DS
@@ -119,7 +122,7 @@ ASSUME	DS:NOTHING
 	POP	SI
 	POP	DS
 ASSUME	DS:NOTHING
-	retnc
+	jnc	ret_l_15
 	MOV	ExtErr,error_not_supported
 	return
 EndProc AbsSetup
@@ -255,7 +258,9 @@ Procedure GETBP,NEAR
 	MOV	[IFS_DRIVER_ERR],0201H	   ;PM. other errors/unknown unit	;AN000;
 SkipGet:
 	POP	AX
-	retc
+	jnc	@F
+        ret
+        @@:
 	LES	BP,[THISCDS]
 	TEST	ES:[BP.curdir_flags],curdir_isnet   ; Clears carry
 	JZ	GETBP_CDS

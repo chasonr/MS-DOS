@@ -83,6 +83,7 @@ sj0:						;AN000;
 	call	OUTT
 	POP	AX
  ENDIF						;AN000;
+ret_l_1:
 	return
 EndProc $STD_CON_INPUT
 
@@ -123,10 +124,10 @@ OUTSKIP:
 	POP	DS
  IF  DBCS				;AN000;
 	TEST	[SaveCurFlg],01H	;AN000;print but no cursor adv? 2/13/KK
-	retnz				;AN000;if so then do not send to prt2/13/KK
+	jnz	ret_l_1			;AN000;if so then do not send to prt2/13/KK
  ENDIF
 	TEST	BYTE PTR [PFLAG],-1
-	retz
+	jz	ret_l_1
 	PUSH	BX
 	PUSH	DS
 	PUSH	SI
@@ -205,6 +206,7 @@ NOT_CTRLU:
 	OR	AL,40H		;Turn it into Upper case mate
 CTRLU:
 	CALL	OUTT
+ret_l_3:
 	return
 EndProc $STD_CON_OUTPUT
 
@@ -223,7 +225,7 @@ ASSUME	DS:NOTHING,ES:NOTHING
 	invoke_fn STATCHK
 	MOV	BX,3
 	invoke_fn GET_IO_SFT
-	retc
+	jc	ret_l_3
 	JMP	SHORT TAISTRT
 AUXILP:
 	invoke_fn SPOOLINT
@@ -282,6 +284,7 @@ TRIPOP:
 	POP	SI
 	POP	DS
 	POP	BX
+ret_l_5:
 	return
 EndProc $STD_PRINTER_OUTPUT
 
@@ -299,7 +302,7 @@ ASSUME	DS:NOTHING,ES:NOTHING
 
 	invoke_fn STATCHK
 	MOV	AL,0			; no xor!!
-	retz
+	jz	ret_l_5
 	OR	AL,-1
 	return
 EndProc $STD_CON_INPUT_STATUS

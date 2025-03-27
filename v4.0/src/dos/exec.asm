@@ -845,12 +845,13 @@ procedure   ChangeOwners,NEAR
 	Call	ChangeOwner
 	POP	AX
 	popf
+ret_l_4:
 	return
 EndProc ChangeOwners
 
 Procedure   ChangeOwner,near
 	OR	AX,AX			; is area allocated?
-	retz				; no, do nothing
+	jz	ret_l_4			; no, do nothing
 	DEC	AX
 	PUSH	DS
 	MOV	DS,AX
