@@ -1,0 +1,62 @@
+; msbio.cl3 
+
+
+;_______________________
+
+BADOPM DB    13,10,_("Unrecognized command in CONFIG.SYS")
+
+;_______________________
+
+CRLFM DB    13,10,"$"
+
+;_______________________
+
+BadParm DB    13,10,_("Bad command or parameters - "),"$"
+
+;_______________________
+
+BADSIZ_PRE DB    13,10,_("Sector size too large in file "),"$"
+
+;_______________________
+
+BADLD_PRE DB    13,10,_("Bad or missing "),"$"
+
+;_______________________
+
+BADCOM DB    _("Command Interpreter"),0
+
+;_______________________
+
+BADCOUNTRY DB    13,10,_("Invalid country code or code page"),13,10,"$"
+
+;_______________________
+
+BADCOUNTRYCOM DB    13,10,_("Error in COUNTRY command"),13,10,"$"
+
+;_______________________
+
+INSUFMEMORY DB    13,10, _("Insufficient memory for COUNTRY.SYS file"),13,10,"$"
+
+;_______________________
+
+BADMEM DB    13,10,_("Configuration too large for memory"),13,10,"$"
+
+;_______________________
+
+BADBLOCK DB    13,10,_("Too many block devices"),13,10,"$"
+
+;_______________________
+
+BADSTACK DB    13,10,_("Invalid STACK parameters"),13,10,"$"
+
+;_______________________
+
+BADORDER DB    13,10,_("Incorrect order in CONFIG.SYS line "),"$"
+
+;_______________________
+
+ERRORCMD DB    _("Error in CONFIG.SYS line "),"$"
+
+;_______________________
+
+SHAREWARNMSG DB    _("WARNING! SHARE should be loaded for large media"),13,10,"$"

@@ -1,0 +1,10 @@
+; msbio.cl2 
+
+
+;_______________________
+
+SNGMSG DB    13,10,_("Insert diskette for drive ")
+
+;_______________________
+
+DRVLET DB    _("A: and press any key when ready"),13,10,10,0
