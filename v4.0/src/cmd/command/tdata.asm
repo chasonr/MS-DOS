@@ -29,7 +29,7 @@ btab	macro	b,sym
 .xcref
 	INCLUDE comsw.asm				;AC000;
 	INCLUDE comseg.asm
-	INCLUDE EA.inc					;AN030;
+	INCLUDE ea.inc					;AN030;
 	INCLUDE dirent.inc				;AN042;
 .list
 .cref
@@ -43,8 +43,8 @@ ENDM
 ; WARNING: DO NOT INCLUDE dossym.inc BECAUSE IT DESTROYS THE MACRO 'FMT' THAT
 ; has been defined above - RS.
 ;
-	INCLUDE CURDIR.INC
-	INCLUDE ERROR.INC
+	INCLUDE curdir.inc
+	INCLUDE error.inc
 	INCLUDE ifequ.asm
 	INCLUDE comequ.asm
 
@@ -753,16 +753,16 @@ TRANCODE	SEGMENT PUBLIC BYTE		;AN000;
 .xlist
 .xcref
 
-INCLUDE SYSMSG.INC				;AN000;
+INCLUDE sysmsg.inc				;AN000;
 
 .list
 .cref
 
 ASSUME DS:TRANGROUP,ES:TRANGROUP,CS:TRANGROUP
 
-MSG_UTILNAME <COMMAND>				;AN000; define utility name
+MSG_UTILNAME <command>				;AN000; define utility name
 
-MSG_SERVICES <COMT,COMMAND.CLF,COMMAND.CL1,COMMAND.CL2> ;AN000; The transient messages
+MSG_SERVICES <COMT,command.clf,command.cl1,command.cl2> ;AN000; The transient messages
 
 include msgdcl.inc
 

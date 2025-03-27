@@ -574,34 +574,34 @@ RESMSGEND	DW	0			;AN000;; holds offset of msg end (end of resident)
 .xlist
 .xcref
 
-INCLUDE SYSMSG.INC				;AN000; include message services
+INCLUDE sysmsg.inc				;AN000; include message services
 
 .list
 .cref
 
 ASSUME DS:RESGROUP,ES:RESGROUP,CS:RESGROUP
 
-MSG_UTILNAME <COMMAND>				;AN000; define utility name
+MSG_UTILNAME <command>				;AN000; define utility name
 
 ;AD054; MSG_SERVICES <COMR,MSGDATA,COMMAND.CLA,COMMAND.CL3,COMMAND.CL4>  ;AN000; get message services data and resident messages
-MSG_SERVICES <COMR,MSGDATA,COMMAND.CLA>  ;AN054; get message services data and resident messages
+MSG_SERVICES <COMR,MSGDATA,command.cla>  ;AN054; get message services data and resident messages
 
 
 CRITICAL_MSG_START	LABEL	BYTE		;AN000; start of critical error messages
 
-MSG_SERVICES <COMR,COMMAND.CLD> 		;AN000; get critical error messages
+MSG_SERVICES <COMR,command.cld> 		;AN000; get critical error messages
 
 DATARESEND		LABEL	BYTE		;AC060; end of resident portion if /msg not used
 
 PARSE_MSG_START 	LABEL	BYTE		;AN000; start of parse error messages
 
-MSG_SERVICES <COMR,COMMAND.CLC> 		;AN000; get parse error messages
+MSG_SERVICES <COMR,command.clc> 		;AN000; get parse error messages
 
 ;AD060; DATARESEND		LABEL	BYTE		; end of resident portion if /msg not used
 
 EXTENDED_MSG_START	LABEL	BYTE		;AN000; start of extended error messages
 
-MSG_SERVICES <COMR,COMMAND.CLE> 		;AN000; get extended error messages
+MSG_SERVICES <COMR,command.cle> 		;AN000; get extended error messages
 
 EXTMSGEND		LABEL	BYTE		;AN000; end of extended error messages
 

@@ -36,7 +36,7 @@ TITLE	COMMAND Transient Printf routine
 	INCLUDE dossym.inc
 	INCLUDE comseg.asm
 	INCLUDE comequ.asm		;AN000;
-	INCLUDE SYSMSG.INC		;AN000;
+	INCLUDE sysmsg.inc		;AN000;
 .list
 .cref
 
@@ -63,7 +63,7 @@ TRANSPACE	SEGMENT PUBLIC BYTE	;AC000;
 
 	; include data area for message services
 
-	MSG_UTILNAME <COMMAND>		;AN000; define utility name
+	MSG_UTILNAME <command>		;AN000; define utility name
 
 	MSG_SERVICES <MSGDATA>		;AN000;
 

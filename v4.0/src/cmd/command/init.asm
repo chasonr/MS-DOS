@@ -1669,12 +1669,12 @@ ASSUME	DS:RESGROUP, ES:RESGROUP
 .xlist
 .xcref
 
-INCLUDE SYSMSG.INC				;AN000; include message services
+INCLUDE sysmsg.inc				;AN000; include message services
 
 .list
 .cref
 
-MSG_UTILNAME <COMMAND>				;AN000; define utility name
+MSG_UTILNAME <command>				;AN000; define utility name
 
 MSG_SERVICES <COMR,NEARmsg,LOADmsg,NOCHECKSTDIN,NOCHECKSTDOUT>	;AC026; include message services macro
 

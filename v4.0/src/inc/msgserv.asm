@@ -196,7 +196,7 @@ ELSE							     ;;AN000;;
 ENDIF							     ;;AN000;;
       $M_RES_ADDRS <>					     ;;AN000;; Resident addresses
 							     ;;
-      include COPYRIGH.INC				     ;;AN001;; Include Copyright 1988 Microsoft
+      include copyrigh.inc				     ;;AN001;; Include Copyright 1988 Microsoft
 							     ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     ENDIF						     ;;AN000;; END of include of Data table

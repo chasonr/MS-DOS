@@ -252,16 +252,16 @@ old_parse_ptr	DW	0			;AN057; SI position before calling parser
 .xlist
 .xcref
 
-INCLUDE SYSMSG.INC				;AN000; get message services routine
+INCLUDE sysmsg.inc				;AN000; get message services routine
 
 .list
 .cref
 
 ASSUME DS:RESGROUP,ES:RESGROUP,CS:RESGROUP
 
-MSG_UTILNAME <COMMAND>				;AN000; define utility name
+MSG_UTILNAME <command>				;AN000; define utility name
 
-MSG_SERVICES <COMR,COMMAND.CLB> 		;AN000; include initialization messages
+MSG_SERVICES <COMR,command.clb> 		;AN000; include initialization messages
 
 include msgdcl.inc
 
