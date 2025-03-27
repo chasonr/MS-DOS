@@ -1,228 +1,214 @@
 #*************************** Makefile for DOS ***************************
 
-msg	=..\messages
-inc	=..\inc
-hinc	=..\hinc
-make	=nmake -i
-dos	=.
+msg	=../messages
+inc	=../inc
+
+COUNTRY = usa-ms
+
+AS = jwasm
+ASFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 #
 ###################### Dependencies begin here ##########################
 #
 
+DOSSYM_INC = $(inc)/dossym.inc $(inc)/dbcs.sw $(inc)/dosmac.inc \
+             $(inc)/versiona.inc $(inc)/bpb.inc $(inc)/buffer.inc \
+             $(inc)/sysvar.inc $(inc)/version.inc $(inc)/vector.inc \
+             $(inc)/mult.inc $(inc)/dirent.inc $(inc)/dpb.inc \
+             $(inc)/curdir.inc $(inc)/cpmfcb.inc $(inc)/find.inc \
+             $(inc)/pdb.inc $(inc)/exe.inc $(inc)/sf.inc $(inc)/arena.inc \
+             $(inc)/intnat.inc $(inc)/mi.inc $(inc)/filemode.inc \
+             $(inc)/error.inc $(inc)/syscall.inc
+
 all: msdos.sys
 
-msdos.cl1: msdos.skl \
-	$(msg)\$(COUNTRY).msg 
+msbio.cl1: msbio.cl1.base $(msg)/$(COUNTRY).cat
+	$(msg)/substmsg.rb $< $@ $(msg)/$(COUNTRY).cat
 
-dossym.inc: $(inc)\dosmac.inc $(inc)\bpb.inc \
-    $(inc)\buffer.inc $(inc)\sysvar.inc $(inc)\vector.inc \
-    $(inc)\mult.inc $(inc)\dirent.inc $(inc)\dpb.inc $(inc)\curdir.inc \
-    $(inc)\cpmfcb.inc $(inc)\find.inc $(inc)\pdb.inc $(inc)\exe.inc \
-    $(inc)\sf.inc $(inc)\arena.inc $(inc)\intnat.inc $(inc)\mi.inc \
-    $(inc)\filemode.inc $(inc)\error.inc $(inc)\syscall.inc
-	echo "touch dossym.inc; files that are in ..\inc"
+msbio.cl3: msbio.cl3.base $(msg)/$(COUNTRY).cat
+	$(msg)/substmsg.rb $< $@ $(msg)/$(COUNTRY).cat
 
-$(inc)\nibdos.obj: 
-	cd ..\inc
-	$(make)
-	cd ..\dos		   
 
-$(inc)\const2.obj: 
-	cd ..\inc
-	$(make)
-	cd ..\dos	   
+$(inc)/nibdos.obj: 
+	$(MAKE) -C $(inc) nibdos.obj
 
-$(inc)\msdata.obj: 
-	cd ..\inc
-	$(make)
-	cd ..\dos	   
+$(inc)/const2.obj: 
+	$(MAKE) -C $(inc) const2.obj
+
+$(inc)/msdata.obj: 
+	$(MAKE) -C $(inc) msdata.obj
 		   
-$(inc)\mstable.obj:
-	cd ..\inc
-	$(make)
-	cd ..\dos	   
+$(inc)/mstable.obj:
+	$(MAKE) -C $(inc) mstable.obj
 		   
-$(inc)\msdosme.obj:
-	cd ..\inc
-	$(make)
-	cd ..\dos
+$(inc)/msdosme.obj:
+	$(MAKE) -C $(inc) msdosme.obj
 
-msdisp.obj: msdisp.asm mssw.asm disp.asm \
-	     $(inc)\dossym.inc $(inc)\dosseg.asm
+.SUFFIXES: .asm .obj
 
-mscode.obj: mscode.asm mssw.asm ms_code.asm \
-	     $(inc)\dossym.inc $(inc)\dosseg.asm $(inc)\devsym.inc
+.asm.obj:
+	$(AS) $(ASFLAGS) -Fo$@ $<
 
-time.obj: time.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-	  $(inc)\devsym.inc
+msdisp.obj: msdisp.asm mssw.asm $(inc)/version.inc disp.asm $(DOSSYM_INC) \
+            $(inc)/dosseg.asm
 
-getset.obj: getset.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc
+mscode.obj: mscode.asm mssw.asm $(inc)/version.inc ms_code.asm $(DOSSYM_INC) \
+            $(inc)/devsym.inc $(inc)/dosseg.asm $(inc)/ifssym.inc \
+            $(inc)/fastopen.inc $(inc)/fastxxxx.inc
 
-parse.obj: parse.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc
+time.obj: time.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc
 
-misc.obj: misc.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc $(inc)\bugtyp.asm
+getset.obj: getset.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc \
+            $(inc)/doscntry.inc
 
-misc2.obj: misc2.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\bugtyp.asm
+parse.obj: parse.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc
 
-crit.obj: crit.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\bugtyp.asm
+misc.obj: misc.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc
 
-cpmio.obj: cpmio.asm $(inc)\dosseg.asm \
-    $(inc)\dossym.inc \
-    $(inc)\devsym.inc \
-    kstrin.asm strin.asm
+misc2.obj: misc2.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/fastseek.inc \
+           $(inc)/fastxxxx.inc
 
-cpmio2.obj: cpmio2.asm $(inc)\dosseg.asm \
-    $(inc)\dossym.inc $(inc)\devsym.inc
+crit.obj: crit.asm $(inc)/dosseg.asm $(DOSSYM_INC)
 
-fcbio.obj: fcbio.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc $(inc)\sf.inc $(inc)\fastopen.inc
+cpmio.obj: cpmio.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc \
+           $(inc)/doscntry.inc kstrin.asm strin.asm
 
-fcbio2.obj: fcbio2.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc
+cpmio2.obj: cpmio2.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc
 
-search.obj: search.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc
+fcbio.obj: fcbio.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc \
+           $(inc)/fastopen.inc
 
-path.obj: path.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc
+fcbio2.obj: fcbio2.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc \
+            $(inc)/version.inc
 
-ioctl.obj: ioctl.asm $(inc)\ioctl.inc $(inc)\dosseg.asm \
-    $(inc)\dossym.inc $(inc)\devsym.inc
+search.obj: search.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc \
+            $(inc)/fastopen.inc $(inc)/fastxxxx.inc
 
-delete.obj: delete.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc $(inc)\sf.inc $(inc)\fastxxxx.inc $(inc)\fastopen.inc
+path.obj: path.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc
 
-rename.obj: rename.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc $(inc)\sf.inc
+ioctl.obj: ioctl.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc \
+           $(inc)/ioctl.inc $(inc)/ifssym.inc
 
-finfo.obj: finfo.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc
+delete.obj: delete.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc \
+            $(inc)/fastopen.inc $(inc)/fastseek.inc $(inc)/fastxxxx.inc
 
-dup.obj: dup.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc
+rename.obj: rename.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc
 
-create.obj: create.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc
+finfo.obj: finfo.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc \
+           $(inc)/fastxxxx.inc $(inc)/fastopen.inc
 
-open.obj: open.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc $(inc)\fastopen.inc
+dup.obj: dup.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc
 
-dinfo.obj: dinfo.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-   $(inc)\devsym.inc $(inc)\bugtyp.asm $(inc)\buffer.inc
+create.obj: create.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc \
+            $(inc)/version.inc
 
-isearch.obj: isearch.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc
+open.obj: open.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc \
+          $(inc)/fastopen.inc $(inc)/fastxxxx.inc $(inc)/ifssym.inc
 
-abort.obj: abort.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc $(inc)\sf.inc
+dinfo.obj: dinfo.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc
 
-close.obj: close.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc $(inc)\buffer.inc
+isearch.obj: isearch.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc \
+             $(inc)/fastopen.inc $(inc)/fastxxxx.inc
 
-dircall.obj: dircall.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc $(inc)\buffer.inc $(inc)\fastopen.inc
+abort.obj: abort.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc
 
-disk.obj: disk.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc
+close.obj: close.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc
 
-disk2.obj: disk2.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc $(inc)\buffer.inc
+dircall.obj: dircall.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc \
+             $(inc)/fastopen.inc $(inc)/fastxxxx.inc
 
-disk3.obj: disk3.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc
+disk.obj: disk.asm $(inc)/dosseg.asm $(inc)/fastseek.inc $(inc)/fastxxxx.inc \
+          $(DOSSYM_INC) $(inc)/devsym.inc $(inc)/version.inc
 
-dir.obj: dir.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-	 $(inc)\buffer.inc $(inc)\fastopen.inc
+disk2.obj: disk2.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc \
+           $(inc)/version.inc
 
-dir2.obj: dir2.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-	  $(inc)\buffer.inc $(inc)\fastopen.inc
+disk3.obj: disk3.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc \
+           $(inc)/version.inc
 
-dev.obj: dev.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc
+dir.obj: dir.asm $(inc)/dosseg.asm $(inc)/fastopen.inc $(DOSSYM_INC)
 
-mknode.obj: mknode.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc  $(inc)\buffer.inc $(inc)\fastopen.inc \
-    $(inc)\filemode.inc
+dir2.obj: dir2.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc \
+          $(inc)/fastopen.inc
 
-rom.obj: rom.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc  $(inc)\buffer.inc
+dev.obj: dev.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc \
+         $(inc)/version.inc
 
-fcb.obj: fcb.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc
+mknode.obj: mknode.asm $(inc)/dosseg.asm $(inc)/fastopen.inc $(DOSSYM_INC) \
+            $(inc)/devsym.inc
 
-msctrlc.obj: msctrlc.asm mssw.asm ctrlc.asm \
-    $(inc)\dosseg.asm $(inc)\dossym.inc $(inc)\devsym.inc \
-    $(inc)\bugtyp.asm
+rom.obj: rom.asm $(inc)/dosseg.asm $(inc)/fastseek.inc $(inc)/fastxxxx.inc \
+         $(inc)/version.inc $(DOSSYM_INC) $(inc)/devsym.inc $(inc)/ea.inc
 
-fat.obj: fat.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc $(inc)\buffer.inc $(inc)\curdir.inc
+fcb.obj: fcb.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc \
+         $(inc)/doscntry.inc
 
-buf.obj: buf.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc $(inc)\buffer.inc
+msctrlc.obj: msctrlc.asm mssw.asm $(inc)/version.inc ctrlc.asm \
+             $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc \
+             $(inc)/version.inc
 
-proc.obj: proc.asm \
-    $(inc)\dosseg.asm $(inc)\dossym.inc $(inc)\devsym.inc \
-    $(inc)\curdir.inc \
-    exec.asm
+fat.obj: fat.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc
 
-alloc.obj: alloc.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc
+buf.obj: buf.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc \
+         $(inc)/version.inc
 
-srvcall.obj: srvcall.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc
+proc.obj: proc.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc exec.asm \
+          $(inc)/ea.inc $(inc)/version.inc
 
-util.obj: util.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc
+alloc.obj: alloc.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc
 
-macro.obj: macro.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc  $(inc)\curdir.inc
+srvcall.obj: srvcall.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc \
+             $(inc)/dpl.asm
 
-macro2.obj: macro2.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc $(inc)\curdir.inc
+util.obj: util.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc
 
-handle.obj: handle.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc $(inc)\bugtyp.asm
+macro.obj: macro.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc
 
-file.obj: file.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc $(inc)\bugtyp.asm $(inc)\fastopen.inc \
-    $(inc)\filemode.inc
+macro2.obj: macro2.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc
 
-lock.obj: lock.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc
+handle.obj: handle.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc \
+            $(inc)/ea.inc $(inc)/version.inc
 
-share.obj: share.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc
+file.obj: file.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc \
+          $(inc)/fastopen.inc $(inc)/ea.inc $(inc)/version.inc
 
-extattr.obj: extattr.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc $(inc)\ea.inc $(inc)\buffer.inc
+lock.obj: lock.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc \
+          $(inc)/lock.inc
 
-ifs.obj: ifs.asm $(inc)\dosseg.asm $(inc)\dossym.inc \
-    $(inc)\devsym.inc $(inc)\doscntry.inc $(inc)\buffer.inc
+share.obj: share.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc
 
-msdos.sys: msdos.cl1 $(inc)\nibdos.obj $(inc)\const2.obj  \
-    $(inc)\msdata.obj mscode.obj $(inc)\msdosme.obj time.obj getset.obj \
-    parse.obj misc.obj misc2.obj crit.obj cpmio.obj cpmio2.obj \
-    $(inc)\mstable.obj msdisp.obj fcbio.obj fcbio2.obj \
-    search.obj path.obj ioctl.obj delete.obj rename.obj finfo.obj \
-    dup.obj create.obj open.obj dinfo.obj isearch.obj buf.obj \
-    abort.obj close.obj dircall.obj disk.obj disk2.obj disk3.obj dir.obj \
-    dir2.obj dev.obj mknode.obj rom.obj fcb.obj msctrlc.obj fat.obj \
-    proc.obj alloc.obj srvcall.obj util.obj macro.obj macro2.obj ifs.obj \
-    handle.obj file.obj lock.obj share.obj extattr.obj \
-    makefile msdos.lnk
-	link @msdos.lnk
-	exe2bin msdos.exe msdos.sys
-	del msdos.exe
+extattr.obj: extattr.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc \
+             $(inc)/ea.inc
+
+ifs.obj: ifs.asm $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc \
+         $(inc)/doscntry.inc
+
+DOS_OBJS = $(inc)/nibdos.obj $(inc)/const2.obj $(inc)/msdata.obj mscode.obj \
+           $(inc)/msdosme.obj time.obj getset.obj parse.obj misc.obj \
+           misc2.obj crit.obj cpmio.obj cpmio2.obj $(inc)/mstable.obj \
+           msdisp.obj fcbio.obj fcbio2.obj search.obj path.obj ioctl.obj \
+           delete.obj rename.obj finfo.obj dup.obj create.obj open.obj \
+           dinfo.obj isearch.obj buf.obj abort.obj close.obj dircall.obj \
+           disk.obj disk2.obj disk3.obj dir.obj dir2.obj dev.obj mknode.obj \
+           rom.obj fcb.obj msctrlc.obj fat.obj proc.obj alloc.obj srvcall.obj \
+           util.obj macro.obj macro2.obj ifs.obj handle.obj file.obj lock.obj \
+           share.obj extattr.obj
+
+msdos.sys: $(DOS_OBJS)
+	echo 'system dos' >resp.txt
+	echo 'option map=msdos.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name msdos.exe' >>resp.txt
+	for x in $(DOS_OBJS); do echo "file $$x" >>resp.txt; done
+	wlink @resp.txt
+	exe2bin -q msdos.exe msdos.sys
 
 clean:
-	@if exist *.obj del *.obj
-	@if exist msdos.cl1 del msdos.cl1
-	@if exist msdos.cl3 del msdos.cl3
-	@if exist msdos.sys del msdos.sys
-	@if exist msdos.map del msdos.map
+	rm -f *.obj *.lst *.err
+	@rm -f msdos.cl1
+	@rm -f msdos.cl3
+	rm -f msdos.exe
+	rm -f msdos.sys
+	rm -f msdos.map
+	rm -f resp.txt
