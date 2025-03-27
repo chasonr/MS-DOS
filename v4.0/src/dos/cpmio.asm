@@ -42,8 +42,8 @@ CODE	SEGMENT BYTE PUBLIC  'CODE'
 
 .xcref
 .xlist
-INCLUDE DOSSYM.INC
-INCLUDE DEVSYM.INC
+INCLUDE dossym.inc
+INCLUDE devsym.inc
 include doscntry.inc			;AN000		2/12/KK
 .list
 .cref

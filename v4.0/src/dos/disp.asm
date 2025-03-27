@@ -6,7 +6,7 @@
 
 .xlist
 .xcref
-INCLUDE DOSSYM.INC
+INCLUDE dossym.inc
 include dosseg.asm
 .cref
 .list

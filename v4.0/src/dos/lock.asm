@@ -17,8 +17,8 @@ CODE	SEGMENT BYTE PUBLIC  'CODE'
 
 .xlist
 .xcref
-INCLUDE DOSSYM.INC
-INCLUDE DEVSYM.INC
+INCLUDE dossym.inc
+INCLUDE devsym.inc
 include lock.inc		     ;AN000;
 .cref
 .list

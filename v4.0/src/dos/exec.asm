@@ -80,7 +80,7 @@ PAGE
 ;
 ;	 A000	version 4.00  Jan. 1988
 ;
-include EA.INC
+include ea.inc
 include version.inc
 
 	I_Need	   Temp_Var2,WORD	     ;AN000;file type from $open

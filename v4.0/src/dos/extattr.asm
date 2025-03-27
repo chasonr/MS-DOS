@@ -36,9 +36,9 @@ CODE	SEGMENT BYTE PUBLIC  'CODE'          ;AN000;
 	ASSUME	SS:DOSGROUP,CS:DOSGROUP      ;AN000;
 
 .xcref
-INCLUDE DOSSYM.INC			     ;AN000;
-INCLUDE DEVSYM.INC			     ;AN000;
-include EA.inc				     ;AN000;
+INCLUDE dossym.inc			     ;AN000;
+INCLUDE devsym.inc			     ;AN000;
+include ea.inc				     ;AN000;
 .cref
 .list
 .sall

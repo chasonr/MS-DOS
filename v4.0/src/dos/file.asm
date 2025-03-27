@@ -37,7 +37,7 @@ CODE	SEGMENT BYTE PUBLIC  'CODE'
 include dossym.inc
 include devsym.inc
 include fastopen.inc
-include EA.inc			     ;AN000;
+include ea.inc			     ;AN000;
 include version.inc
 .cref
 .list

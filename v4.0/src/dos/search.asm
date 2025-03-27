@@ -31,8 +31,8 @@ CODE	SEGMENT BYTE PUBLIC  'CODE'
 	ASSUME	SS:DOSGroup,CS:DOSGroup
 
 .xcref
-INCLUDE DOSSYM.INC
-INCLUDE DEVSYM.INC
+INCLUDE dossym.inc
+INCLUDE devsym.inc
 INCLUDE fastopen.inc
 INCLUDE fastxxxx.inc
 .cref
