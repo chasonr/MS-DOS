@@ -10,7 +10,7 @@ ImageName = "dos40.img"
 # 360 KB Disk 1
 Distribution360_1 = [
     # These two must be first
-    'src/BIOS/io.sys',
+    'src/bios/io.sys',
     'src/DOS/msdos.sys',
 
     'src/CMD/COMMAND/command.com',
