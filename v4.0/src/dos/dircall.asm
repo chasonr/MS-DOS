@@ -82,7 +82,7 @@ BREAK <DOS_MkDir - Make a directory entry>
 
 	Invoke_fn TestNet
 	JNC	local_mkdir
-IFNDEF Installed
+IFE Installed
 	transfer NET_MKDIR
 ELSE
 	MOV	AX,(multNET SHL 8) OR 3
@@ -238,7 +238,7 @@ BREAK <DOS_ChDir -- Verify a directory>
 
 	Invoke_fn TestNet
 	JNC	LOCAL_CHDIR
-IFNDEF Installed
+IFE Installed
 	transfer NET_CHDIR
 ELSE
 	MOV	AX,(multNET SHL 8) OR 5
@@ -309,7 +309,7 @@ BREAK <DOS_RmDir -- Remove a directory>
 
 	Invoke_fn TestNet
 	JNC	Local_RmDIR
-IFNDEF Installed
+IFE Installed
 	transfer NET_RMDIR
 ELSE
 	MOV	AX,(multNET SHL 8) OR 1

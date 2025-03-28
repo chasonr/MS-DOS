@@ -260,8 +260,8 @@ CANCHAR DB	CANCEL			;Cancel line character
 ESCCHAR DB	ESCCH			;Lead-in character for escape sequences
 	IF	NOT Rainbow
 ESCTAB	LABEL BYTE
-	IFNDEF IBM
-	IFDEF	WANG
+	IFE IBM
+	IF	WANG
 	DB	0C0h			; ^Z inserter
 	DB	0C1H			; Copy one char
 	DB	0C1H			; Copy one char

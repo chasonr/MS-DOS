@@ -168,7 +168,7 @@ chk08:										;AN000;
 	CMP	AL,8				      ; reset inuse ?		;AN000;
 	JZ	srinuse 			      ; yes			;AN000;
 
-	IFNDEF INSTALLED
+	IFE INSTALLED
 	transfer NET_ASSOPER
 	ELSE
 	PUSH	AX
@@ -322,7 +322,7 @@ ASSUME	DS:NOTHING
 
 UserPrint:
 	ASSUME	ES:NOTHING
-IFNDEF Installed
+IFE Installed
 	transfer PRINTER_GETSET_STRING
 ELSE
 	PUSH	AX

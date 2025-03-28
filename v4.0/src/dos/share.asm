@@ -46,7 +46,7 @@ Installed = True
 	DOSAssume   CS,<DS>,"Share_Check"
 	ASSUME  ES:NOTHING
 
-ifdef installed
+if installed
 	call    JShare + 1 * 4
 else
 	Call    MFT_Enter
@@ -103,7 +103,7 @@ EndProc SHARE_VIOLATION
 	DOSAssume   CS,<DS>,"ShareEnd"
 	ASSUME  ES:NOTHING
 
-ifdef installed
+if installed
 	Call    JShare + 2 * 4
 else
 	Call    MFTClose

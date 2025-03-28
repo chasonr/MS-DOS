@@ -151,7 +151,7 @@ ASSUME	DS:NOTHING,ES:NOTHING
 	STOSW		; Adjust Refcount
 	MOV	DI,OFFSET DOSGROUP:SySInitTable
 
-	IFNDEF Installed
+	IFE Installed
 	invoke_fn NETWINIT
 ;	ELSE
 ;	invoke_fn NETWINIT
@@ -449,7 +449,7 @@ ISET2:
 
 	MOV	AX,BP		; Final DOS segment to AX
 
-IFDEF installed
+IF installed
 ; the following two are in the Code segment, thus the CS
 ; overrides
 	MOV	WORD PTR DS:[02FH * 4],OFFSET DOSGROUP:INT2F

@@ -359,7 +359,7 @@ Break	<DOS_Commit - update directory entries>
 	jnz	ret_l_5
 	TEST	BX,sf_isnet
 	JZ	LOCAL_COMMIT
-IFNDEF Installed
+IFE Installed
 	transfer NET_COMMIT
 ELSE
 	MOV	AX,(multNET SHL 8) OR 7
@@ -421,7 +421,7 @@ Procedure   SetSFTTimes,NEAR
 	MOV	ES:[DI.sf_date],AX
 	MOV	ES:[DI.sf_time],DX
 	XOR	AX,AX
-ifdef installed
+if installed
 	call	JShare + 14 * 4
 else
 	call	ShSU

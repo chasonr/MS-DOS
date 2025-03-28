@@ -2369,7 +2369,7 @@ Check_IBM_PageID	proc	near
 	push	dx				;AN000;
 	push	di				;AN010;
 
-IF	NOT BUFFERFLAG
+IFE BUFFERFLAG
 
 	mov	ax, 1B00h			;AN029;AN030;AN0 Check EMS int 2fh installed.
 	int	2fh				;AN029;

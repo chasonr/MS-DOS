@@ -419,7 +419,7 @@ dos_call_done:
 	popf
 ENDIF
 
-IF	NOT	BUFFERFLAG
+IFE	BUFFERFLAG
 	JC	ReadError		; if error, say bye bye
 ELSE
 	jmp	tmp_rerr
@@ -704,7 +704,7 @@ filetimes_set:
 	MOV	ES:[DI.sf_Date],DX	; and date
 	XOR	AX,AX
 do_share:
-ifdef installed
+if installed
 	Call	JShare + 14 * 4
 else
 	Call	ShSU

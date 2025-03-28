@@ -442,7 +442,7 @@ ELSE
 	JMP	SHORT SaveSFN
 ENDIF
 SaveLocal:
-	IFDEF	Installed
+	IF	Installed
 	Invoke_fn CheckShare
 	JZ	SaveNoShare		; no sharer
 	JMP	SaveShare		; sharer present
@@ -487,7 +487,7 @@ SaveShare:
 ;
 ;----- In share support -----
 ;
-ifdef installed
+if installed
 	Call	JShare + 10 * 4
 else
 	Call	ShSave
@@ -661,7 +661,7 @@ lru25:
 lru3:
 	TEST	ES:[DI].sf_flags,sf_isnet   ;	  if (!net[i]
 	JNZ	lru35
-ifdef installed
+if installed
 	Invoke_fn CheckShare		;		&& !sharing)
 	JZ	lru5			;	  else
 ENDIF
@@ -756,7 +756,7 @@ lru11:
 ;
 	TEST	ES:[DI].sf_flags,sf_isNet
 	JNZ	LRUClose
-IFDEF INSTALLED
+IF INSTALLED
 	Invoke_fn CheckShare
 	JZ	LRUDone
 ENDIF
@@ -1031,7 +1031,7 @@ Procedure   CheckFCB,NEAR
 ;
 ;----- In share support -----
 ;
-ifdef installed
+if installed
 	Call	JShare + 11 * 4
 else
 	Call	ShChk

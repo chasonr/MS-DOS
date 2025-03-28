@@ -135,7 +135,7 @@ nofiles:
 ifsshare:
 
 
-IFNDEF Installed
+IFE Installed
 	transfer NET_DELETE
 ELSE
 	MOV	AX,(multNET SHL 8) OR 19
@@ -401,7 +401,7 @@ ASSUME	DS:DOSGROUP
 ;
 ; Close the file if possible by us.
 ;
-ifdef installed
+if installed
 	Call	JShare + 13 * 4
 else
 	Call	ShCloseFile

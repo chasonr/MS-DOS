@@ -60,7 +60,7 @@ Break	<DISK_INFO -- Get Disk Drive Information>
 
 	Invoke_fn TestNet
 	JNC	LOCAL_INFO
-IFNDEF Installed
+IFE Installed
 	transfer NET_DISK_INFO
 ELSE
 	MOV	AX,(multNET SHL 8) OR 12

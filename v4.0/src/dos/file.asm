@@ -223,7 +223,7 @@ OpenOK:
 ; sharer.
 ;
 	MOV	AX,JFN
-ifdef installed
+if installed
 	Call	JShare + 12 * 4
 else
 	Call	ShCol

@@ -184,7 +184,7 @@ READ_OK2:				;AN000;
 ;	LeaveCrit   critDisk		;AN000;;IFS. leave critical section
 IFS_HAS_SHARE:				;AN000;
 
-IFNDEF Installed
+IFE Installed
 	transfer NET_READ
 ELSE
 	MOV	AX,(multNET SHL 8) OR 8
@@ -495,7 +495,7 @@ WRITE_NO_MODE:
 IFS_HAS_SHARE2: 			;AN000;
 
 
-IFNDEF Installed
+IFE Installed
 	transfer NET_WRITE
 ELSE
 	MOV	AX,(multNET SHL 8) OR 9

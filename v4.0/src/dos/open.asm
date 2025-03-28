@@ -144,7 +144,7 @@ NOEXTOP:
 ;Extended open hooks
 
 
-IFNDEF Installed
+IFE Installed
 	transfer NET_SEQ_OPEN
 ELSE
 	PUSH	AX
@@ -166,7 +166,7 @@ TEST_RE_NET:
 	JNZ	IFS_extopen		    ;FT. isuue extended open		;AN000;
 ;Extended open hooks
 
-IFNDEF Installed
+IFE Installed
 	transfer NET_OPEN
 ELSE
 	PUSH	AX
@@ -298,7 +298,7 @@ NORM0:
 SHARE_OK:
 	MOV	AX,3
 	LES	DI,ThisSFT
-ifdef installed
+if installed
 	call	JShare + 14 * 4
 else
 	Call	ShSU

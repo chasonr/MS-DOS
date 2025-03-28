@@ -176,7 +176,7 @@ ok_ret_2:
 CLOSE_NAME:
 ASSUME	DS:NOTHING,ES:NOTHING
 
-ifdef installed
+if installed
 	Call	JShare + 5 * 4
 else
 	Call	MFTcloN
@@ -192,7 +192,7 @@ err_ret_2:
 CLOSE_UID:
 ASSUME	DS:NOTHING,ES:NOTHING
 
-ifdef installed
+if installed
 	Call	JShare + 3 * 4
 else
 	Call	MFTclU
@@ -202,7 +202,7 @@ endif
 CLOSE_UID_PID:
 ASSUME	DS:NOTHING,ES:NOTHING
 
-ifdef installed
+if installed
 	Call	JShare + 4 * 4
 else
 	Call	MFTCloseP
@@ -211,7 +211,7 @@ endif
 
 GET_LIST:
 ASSUME	DS:NOTHING,ES:NOTHING
-ifdef installed
+if installed
 	Call	JShare + 9 * 4
 else
 	Call	MFT_get

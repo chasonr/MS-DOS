@@ -196,7 +196,7 @@ DOS_Unlock:
 	CallInstall Net_Xlock,multNet,10
 	JMP	SHORT ValChk
 LOCAL_UNLOCK:
-ifdef installed
+if installed
 	Call	JShare + 7 * 4
 else
 	Call	clr_block
@@ -216,7 +216,7 @@ DOS_Lock:
 	CallInstall NET_XLock,multNet,10
 	JMP	ValChk
 LOCAL_LOCK:
-ifdef installed
+if installed
 	Call	JShare + 6 * 4
 else
 	Call	Set_Block
@@ -312,7 +312,7 @@ BREAK <Set_Lock_Buffer>
 	MOV	BX,RetryCount		; Number retries
 LockRetry:
 	SaveReg <BX,AX> 		; MS. save regs 			;AN000;
-ifdef installed
+if installed
 	call	JShare + 8 * 4
 else
 	Call	chk_block
@@ -366,7 +366,7 @@ EndProc LOCK_CHECK
 
 EndProc LOCK_VIOLATION
 
-IFDEF  INSTALLED
+IF  INSTALLED
 ;
 ; do a retz to return error
 ;

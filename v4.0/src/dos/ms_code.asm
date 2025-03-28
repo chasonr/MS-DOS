@@ -447,7 +447,7 @@ EndProc ETAB_LK
 
 BREAK <DOS 2F Handler and default NET 2F handler>
 
-IFDEF installed
+IF installed
 
 ;
 ; SetBad sets up info for bad functions

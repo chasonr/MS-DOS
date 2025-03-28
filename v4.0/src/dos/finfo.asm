@@ -92,7 +92,7 @@ share_okok:
 ;	POP	WORD PTR [DMAADD]	       ;IFS. retor DMAADD		;AN000;
 ;	POP	WORD PTR [DMAADD+2]	       ;IFS.				;AN000;
 ifsshare:
-IFNDEF Installed
+IFE Installed
 	transfer NET_GET_FILE_INFO
 ELSE
 	MOV	AX,(multNET SHL 8) OR 15
@@ -205,7 +205,7 @@ set_look:
 	Invoke_fn TestNet
 	JNC	Local_Set
 
-IFNDEF Installed
+IFE Installed
 	transfer NET_SEQ_SET_FILE_ATTRIBUTE
 ELSE
 	PUSH	AX

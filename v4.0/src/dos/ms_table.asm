@@ -409,7 +409,7 @@ VAL1    =       ($-DISPATCH)/2 - 1
 VAL2    =       ($-DISPATCH)/2 - 1
 
 
-        Ifdef      Installed
+        If      Installed
 
 PUBLIC FOO
 FOO     LABEL WORD
@@ -502,14 +502,14 @@ Header  LABEL   BYTE
         DB      (MINOR_VERSION MOD 10) + "0"
         ENDIF
 
-        IFNDEF IBM
+        IFE IBM
         DB      13,10,"MS-DOS version "
         DB      MAJOR_VERSION + "0"
         DB      "."
         DB      (MINOR_VERSION / 10) + "0"
         DB      (MINOR_VERSION MOD 10) + "0"
 
-        IFDEF   HIGHMEM
+        IF      HIGHMEM
         DB      "H"
         ENDIF
 
