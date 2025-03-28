@@ -15,8 +15,13 @@ ASFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 all: sys.com
 
+.SUFFIXES: .asm .obj
+
+.asm.obj:
+	$(AS) $(ASFLAGS) -Fo$@ $<
+
 $(inc)/boot.inc: $(boot)/msboot.asm $(msg)/$(COUNTRY).msg
-        make -C $(inc) boot.inc
+	make -C $(boot) boot.inc
 
 sys.cl1: sys.cl1.base $(msg)/$(COUNTRY).cat
 	$(msg)/substmsg.rb $< $@ $(msg)/$(COUNTRY).cat
@@ -59,9 +64,6 @@ syssr.obj: syssr.asm $(inc)/parse.asm \
 OBJS = sys1.obj syssr.obj sys1.obj sys2.obj
 
 sys.com: $(OBJS)
-        link @sys.lnk
-        exe2bin sys.exe sys.com
-        del sys.exe
 	echo 'system dos' >resp.txt
 	echo 'option map=sys.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
