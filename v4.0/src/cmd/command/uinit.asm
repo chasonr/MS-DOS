@@ -11,14 +11,14 @@ include ifequ.asm
 .LIST
 .CREF
 
-addr macro sym,name
-     public name
-     ifidn <name>,<>
+addr_ macro sym,name_
+     public name_
+     ifidn <name_>,<>
 
 	    dw offset resgroup:sym
      else
 
-name	    dw	offset resgroup:sym
+name_	    dw	offset resgroup:sym
      endif
      endm
 

@@ -489,7 +489,7 @@ init_chk_delim:
 	lodsb					;AN057; Get the char after the switch
 	invoke_fn itestkanj			;AN057; Is it DBCS?
 	jnz	parse_line_error_disp		;AN057; Yes - can't be /C
-	invoke_fn iupconv 			;AN057; upper case it
+	call	iupconv 			;AN057; upper case it
 	cmp	al,scswitch			;AN057; it is /C?
 	jnz	parse_line_error_disp		;AN057;
 	pop	dx				;AN057; even up stack

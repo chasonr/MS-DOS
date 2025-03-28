@@ -159,13 +159,14 @@ PATHDONE:
 NOPSTORE:
 	MOV	[PATHPOS],SI
 	MOV	[PATHCNT],CX
+ret_l_1:
 	return
 
 PGETARG:
 	MOV	SI,80H
 	LODSB
 	OR	AL,AL
-	retz
+	jz	short ret_l_1
 	CALL	PSCANOFF
 	CMP	AL,13
 	return
@@ -209,6 +210,7 @@ NOREDIR:
 	POP	DX
 	POP	DS
 ASSUME	DS:NOTHING
+ret_l_2:
 	return
 
 TESTDOREIN:
@@ -216,7 +218,7 @@ TESTDOREIN:
 ASSUME	DS:RESGROUP
 
 	CMP	[RE_INSTR],0
-	retz
+	jz	short ret_l_2
 	PUSH	DS
 	PUSH	CS
 	POP	DS
@@ -378,6 +380,7 @@ DLoop:	LODSB
 	JNZ	DLoop
 	SUB	SI,CX
 	RestoreReg  <AX>
+ret_l_3:
 	return
 
 EndProc DSTRLEN
@@ -399,7 +402,7 @@ Break	<Extended error support>
 
 Procedure TriageError,NEAR
 
-	retnc					; no carry => do nothing...
+	jnc	short ret_l_3			; no carry => do nothing...
 	PUSHF
 	SaveReg <BX,CX,SI,DI,BP,ES,DS,AX,DX>
 	MOV	AH,GetExtendedError

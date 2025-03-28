@@ -307,7 +307,7 @@ notest3:
 	cmp	al, 0FFH			; Did an error occur??
 	jnz	renameok
 
-	invoke_fn get_ext_error_number		;AN022; get extended error
+	call	get_ext_error_number		;AN022; get extended error
 	SaveReg <AX>				;AC022; Save results
 	mov	al, 0FFH			; Restore original error state
 
@@ -316,7 +316,9 @@ renameok:
 	invoke_fn restudir
 	pop	ax
 	inc	al
-	retnz
+	jz	@F
+	ret
+	@@:
 
 	RestoreReg  <AX>			;AC022; get the error number back
 	cmp	ax,error_file_not_found 	;AN022; error file not found?
@@ -392,7 +394,7 @@ nowilds:
 Typerr: 					;AN022;
 	push	cs				;AN022; make sure we have local segment
 	pop	ds				;AN022;
-	invoke_fn set_ext_error_msg		;AN022;
+	call	set_ext_error_msg		;AN022;
 
 Typerr2:					;AN022;
 	mov	string_ptr_2,offset trangroup:srcbuf ;AC022; get address of failed string
@@ -412,7 +414,10 @@ ASSUME	DS:NOTHING
 
 typelp:
 	cmp	cs:[zflag],0			;AC050; Is the ^Z flag set?
-	retnz					; Yes, return
+	jz	@F				; Yes, return
+ret_l_1:
+	ret
+	@@:
 	mov	cx,cs:[bytcnt]			;AC056; No, continue
 	mov	ah,read
 	int	int_command
@@ -452,14 +457,14 @@ typecont2:					;  will quit after this write.
 	jz	typelp
 	dec	cx
 	cmp	ax,cx
-	retz					; One less byte OK (^Z)
+	jz	ret_l_1				; One less byte OK (^Z)
 
 Error_outputj:
 	mov	bx,1
 	mov	ax,IOCTL SHL 8
 	int	int_command
 	test	dl,devid_ISDEV
-	retnz					; If device, no error message
+	jnz	ret_l_1				; If device, no error message
 	jmp	error_output
 
 typelp_ret:

@@ -556,7 +556,9 @@ mmessage:
 	mov	dl,byte ptr DS:[FCB]
 	int	int_command
 	cmp	ax,-1
-	retz
+	jnz	@F
+	ret
+	@@:
 	mul	cx				; AX is bytes per cluster
 	mul	bx
 	mov	bytes_free,ax			;AC000;

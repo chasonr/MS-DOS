@@ -34,10 +34,18 @@ memS       EQU     1			; Small model
 IBMVER     EQU     TRUE
 IBMCOPYRIGHT EQU   FALSE
 
-BUFFERFLAG	EQU	NOT IBMCOPYRIGHT
+if IBMCOPYRIGHT
+    BUFFERFLAG	EQU	FALSE
+else
+    BUFFERFLAG	EQU	TRUE
+endif
 
 ifndef	MSVER	
-MSVER      EQU     NOT IBMVER
+    if IBMVER
+	MSVER      EQU     FALSE
+    else
+	MSVER      EQU     TRUE
+    endif
 endif
 IBM	   EQU	   IBMVER
 ;

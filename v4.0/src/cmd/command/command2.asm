@@ -474,6 +474,7 @@ GetRawFlushedByte:
 	INT	int_command		; Get char without testing or echo
 	MOV	AX,(STD_CON_INPUT_FLUSH SHL 8) + 0
 	INT	int_command
+ret_l_1:
 	return
 
 LOADCOM:				; Load in transient
@@ -517,7 +518,7 @@ WRONGCOM1:
 	POPF
 	JC	WRONGCOM		; If error on READ
 	CMP	AX,CX
-	retz				; Size matched
+	jz	ret_l_1			; Size matched
 WRONGCOM:
 	MOV	DX,COMBAD		;AC000;
 	CALL	GETCOMDSK

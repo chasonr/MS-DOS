@@ -80,7 +80,10 @@ ADD_PROMPT2:
 	PUSH	SI
 	CALL	GETARG
 	POP	SI
-	retz					; PRE SCAN FOR ARGUMENTS
+	jnz	@F				; PRE SCAN FOR ARGUMENTS
+ret_l_6:
+	ret
+	@@:
 	CALL	MOVE_NAME			; MOVE IN NAME
 	CALL	GETARG
 	PUSH	SI
@@ -132,7 +135,7 @@ ONEQ:
 	CALL	DELETE_NAME_IN_ENVIRONMENT
 	POP	BX
 	DEC	BH
-	retz
+	jz	ret_l_6
 
 	CALL	SCAN_DOUBLE_NULL
 	mov	bx,di				; Save ptr to beginning of env var name
@@ -171,7 +174,8 @@ add_name1:
 add_name_ret:
 	pop	si
 	cmp	comspec_flag,0			; If the new env var is comspec,
-	retz					;  copy the value into the
+ret_l_6a:
+	jz	ret_l_6				;  copy the value into the
 ;
 ; We have changed the COMSPEC variable.  We need to update the resident
 ; pieces necessary to reread in the info.  First, skip all delimiters
@@ -245,7 +249,7 @@ ASSUME	DS:NOTHING
 
 PENVLP:
 	CMP	BYTE PTR [SI],0
-	retz
+	jz	ret_l_6a
 	mov	di,offset trangroup:arg_buf
 
 PENVLP2:
@@ -292,6 +296,7 @@ DELETE_NAME_IN_environment:
 DEL1:
 	POP	DS
 	POP	SI
+ret_l_1:
 	return
 
 FIND_PATH:
@@ -309,7 +314,7 @@ FIND_NAME_IN_environment:
 ;	  carry flag is set if name not valid format
 ;
 	CALL	FIND				; FIND THE NAME
-	retc					; CARRY MEANS NOT FOUND
+	jc	short ret_l_1					; CARRY MEANS NOT FOUND
 	JMP	SCASB1				; SCAN FOR = SIGN
 ;
 ; On return of FIND1, ES:DI points to beginning of name
@@ -353,7 +358,7 @@ FIND12:
 	POP	DI
 	POP	SI
 	POP	CX
-	retz
+	jz	short ret_l_1
 	PUSH	CX
 	CALL	SCASB2				; SCAN FOR A NUL
 	POP	CX
@@ -380,11 +385,12 @@ COUNTX:
 	POP	CX
 	SUB	DI,CX
 	XCHG	DI,CX
+ret_l_2:
 	return
 
 MOVE_NAME:
 	CMP	BYTE PTR DS:[SI],13
-	retz
+	jz	short ret_l_2
 	LODSB
 
 ;;;;	IF	KANJI			3/3/KK
@@ -402,15 +408,17 @@ NOTKANJ1:
 	CALL	STORE_CHAR
 	CMP	AL,'='
 	JNZ	MOVE_NAME
+ret_l_3:
 	return
 
 GETARG:
 	MOV	SI,80H
 	LODSB
 	OR	AL,AL
-	retz
+	jz	short ret_l_3
 	invoke_fn SCANOFF
 	CMP	AL,13
+ret_l_4:
 	return
 
 ;
@@ -428,7 +436,7 @@ ASSUME	ES:NOTHING
 ;
 SDN1:
 	cmp	byte ptr es:[di],0		; nul string?
-	retz					; yep, all done
+	jz	short ret_l_4					; yep, all done
 	CALL	SCASB2
 	JMP	SDN1
 
@@ -605,6 +613,7 @@ GETENVSIZ:
 	MOV	CX,AX
 	POP	AX
 	POP	ES
+ret_l_5:
 	return
 
 
@@ -618,7 +627,7 @@ ASSUME	DS:RESGROUP
 	CMP	[RESTDIR],0
 	POP	DS
 ASSUME	DS:TRANGROUP
-	retz
+	jz	short ret_l_5
 
 RESTUDIR:
 	MOV	DX,OFFSET TRANGROUP:USERDIR1

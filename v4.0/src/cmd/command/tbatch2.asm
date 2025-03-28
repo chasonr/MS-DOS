@@ -56,7 +56,7 @@ ASSUME	CS:TRANGROUP,DS:NOTHING,ES:NOTHING,SS:NOTHING
 	EXTRN	docom1:near
 	EXTRN	tcommand:near
 
-	public	$if,iferlev,goto,shift,ifexists,ifnot,forerror,$call
+	public	$if,iferlev,go_to,shift,ifexists,ifnot,forerror,$call
 
 
 Break	<GetBatByt - retrieve a byte from the batch file>
@@ -449,7 +449,10 @@ Procedure   Shift,NEAR
 ASSUME	DS:RESGROUP
 	MOV	AX,[BATCH]			; get batch pointer
 	OR	AX,AX				; in batch mode?
-	retz					; no, done.
+	jnz	@F				; no, done.
+ret_l_1:
+	ret
+	@@:
 	MOV	ES,AX				; operate in batch segment
 	MOV	DS,AX
 
@@ -467,7 +470,7 @@ ASSUME	DS:NOTHING,ES:NOTHING
 ; We have copied it into the previous position
 ;
 	CMP	WORD PTR [DI],-1		; if last one was not in use then
-	retz					; No new parm
+	jz	ret_l_1				; No new parm
 ;
 ; This last pointer is NOT nul.  Get it and scan to find the next argument.
 ; Assume, first, that there is no next argument
@@ -487,7 +490,7 @@ SKIPCRLP:
 ; initialized to indicate it.
 ;
 	CMP	BYTE PTR [SI],0
-	retz					; End of parms
+	jz	ret_l_1				; End of parms
 	MOV	[DI],SI 			; Pointer to next parm as %9
 
 	return
@@ -512,6 +515,7 @@ Procedure   SkipDelim,NEAR
 
 SkipErr:
 	stc
+ret_l_2:
 	return
 
 EndProc SkipDelim
@@ -563,15 +567,15 @@ NoPipe:
 
 	ret
 
-	break	Goto
+	break	Go_to
 
-GOTO:
+GO_TO:
 
 assume	ds:trangroup,es:trangroup
 	MOV	DS,[RESSEG]
 ASSUME	DS:RESGROUP
 	TEST	[BATCH],-1
-	retz					; If not in batch mode, a nop
+	jz	ret_l_2				; If not in batch mode, a nop
 	XOR	DX,DX
 	PUSH	DS
 	MOV	DS,Batch

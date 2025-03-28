@@ -195,6 +195,7 @@ EXISTS:
 	INC	[TERMREAD]			; Tell Read to give up
 
 RET60:
+ret_l_1:
 	return
 
 NOCHECKING:
@@ -216,15 +217,16 @@ ASSUME	DS:TRANGROUP
 	MOV	DX,OFFSET TRANGROUP:NOSPACE_ptr
 	JC	xa_set_error_Jmp		;AC022; Failure
 	sub	cx,ax
-	retz					; Wrote all supposed to
+	jz	short ret_l_1					; Wrote all supposed to
 	test	[DESTISDEV],devid_ISDEV
 	jz	COPERR				; Is a file, error
 	test	[DESTISDEV],devid_RAW
 	jnz	DEVWRTERR			; Is a raw device, error
 	cmp	[INEXACT],0
-	retnz					; INEXACT so OK
+	jnz	short ret_l_1					; INEXACT so OK
 	dec	cx
-	retz					; Wrote one byte less (the ^Z)
+ret_l_1a:
+	jz	short ret_l_1					; Wrote one byte less (the ^Z)
 
 DEVWRTERR:
 	MOV	DX,OFFSET TRANGROUP:DEVWMES_ptr
@@ -261,7 +263,7 @@ SEEKEND:
 	mov	ax,(LSEEK SHL 8) OR 1
 	INT	int_command			; Seek ahead in the file
 	cmp	[RDEOF],0
-	retz
+	jz	short ret_l_1a
 ;
 ; If a ^Z has been read we must set the file size to the current
 ; file pointer location

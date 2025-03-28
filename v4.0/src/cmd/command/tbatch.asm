@@ -84,12 +84,14 @@ Break	<PromptBat - Open or wait for batch file>
 Procedure   PromptBat,NEAR
 	ASSUME	DS:ResGroup,ES:NOTHING
 	invoke_fn BATOPEN 			; attempt to open batch file
-	retnc
+	jc	@F
+	ret
+	@@:
 	cmp	dx,error_file_not_found 	;AN022; Ask for diskette if file not found
 	jz	Bat_Remcheck			;AN022;
 	cmp	dx,error_path_not_found 	;AN022; Ask for diskette if path not found
 	jz	Bat_Remcheck			;AN022;    Otherwise, issue message and exit
-	invoke_fn output_batch_name		;AN022; set up batch name in bwdbuf
+	call	output_batch_name		;AN022; set up batch name in bwdbuf
 	jmp	short BatDie			;AN022;
 
 Bat_Remcheck:					;AN022; Go see if media is removable
@@ -275,6 +277,7 @@ NOPLINE:
 	invoke_fn GetBatByt			; eat trailing LF
 	TEST	[BATCH],-1			; are we done with the batch file?
 	JNZ	TESTNOP 			; no, go get another line
+ret_l_1:
 	return					; Hit EOF
 
 ;
@@ -322,7 +325,7 @@ Found_EOL:
 Reset:
 	PUSH	CS				;  question.  (Profound, huh?)
 	POP	DS				; Go back to local segment
-	retz					; no echoing here...
+	jz	short ret_l_1			; no echoing here...
 ;
 ; Echo the command line with appropriate CRLF...
 ;
@@ -549,7 +552,9 @@ Procedure   SkipToEOL,NEAR
 	ASSUME	DS:ResGroup,ES:NOTHING
 
 	TEST	Batch,-1
-	retz					; no batch file in effect
+	jnz	@F				; no batch file in effect
+	ret
+	@@:
 	invoke_fn GetBatByt
 	CMP	AL,0Dh				; eol character?
 	JNZ	SkipToEOL			; no, go eat another

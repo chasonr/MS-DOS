@@ -121,6 +121,7 @@ $CHDIR:
 bwdJ:
 	invoke_fn build_dir_for_chdir		; Drive only specified
 	call	crlf2
+ret_l_1:
 	return
 
 REALCD:
@@ -139,7 +140,7 @@ REALCD:
 	JNZ	BadChdir
 	MOV	AH,CHDIR
 	INT	int_command
-	retnc
+	jnc	short ret_l_1
 
 	invoke_fn get_ext_error_number		;AN022; get the extended error
 	cmp	ax,error_path_not_found 	;AN022; see if path not found
@@ -152,6 +153,7 @@ BadChDir:
 
 ChDirErr:
 	invoke_fn Std_Eprintf
+ret_l_2:
 	return
 
 break	$Mkdir
@@ -163,7 +165,7 @@ $MKDIR:
 	JC	MkDirErr
 	MOV	AH,MKDIR
 	INT	int_command
-	retnc
+	jnc	short ret_l_2
 
 	invoke_fn get_ext_error_number		;AN022; get the extended error
 	cmp	ax,error_path_not_found 	;AN022; see if path not found
@@ -191,6 +193,7 @@ MD_other_err:					;AN006;
 	MOV	DX,OFFSET TRANGROUP:BADMKD_ptr
 MkDirErr:
 	invoke_fn Std_Eprintf
+ret_l_3:
 	return
 
 Break	<Common MkDir/RmDir set up code>
@@ -240,11 +243,12 @@ mrdir_move_filename:				;AN000; put filespec in srcxname
 	mov	di,offset trangroup:parse_mrdir ;AC000; get address of parse_mrdir
 	invoke_fn parse_check_eol 		;AC000; are we at end of line?
 	pop	dx				;AC000; get address of SRCXNAME
-	retz					;yes - return no error
+	jz	short ret_l_3			;yes - return no error
 NOARGERR:
 	mov	dx,offset TranGroup:Extend_Buf_ptr  ;AC000; get extended message pointer
 	XOR	AX,AX
 	STC
+ret_l_4:
 	return
 
 break	$Rmdir
@@ -257,7 +261,7 @@ $RMDIR:
 	JNZ	BADRDERR
 	MOV	AH,RMDIR
 	INT	int_command
-	retnc
+	jnc	short ret_l_4
 
 	invoke_fn get_ext_error_number		;AN022; get the extended error
 	cmp	ax,error_path_not_found 	;AN022; see if path not found
@@ -273,6 +277,7 @@ BADRDERR:
 
 RmDirErr:
 	invoke_fn STD_Eprintf
+ret_l_5:
 	return
 
 ;****************************************************************
@@ -343,7 +348,7 @@ ASSUME	DS:NOTHING
 	MOV	SI,DI
 	MOV	AH,CURRENT_DIR			; Get the Directory Text
 	INT	int_command
-	retc
+	jc	short ret_l_5
 	PUSH	CS
 	POP	DS
 ASSUME	DS:TRANGROUP
@@ -376,6 +381,7 @@ SCANOFF:
 	CALL	DELIM
 	JZ	SCANOFF
 	DEC	SI				; Point to first non-delimiter
+ret_l_6:
 	return
 
 ;
@@ -387,15 +393,15 @@ SCANOFF:
 
 DELIM:
 	CMP	AL,' '
-	retz
+	jz	short ret_l_6
 	CMP	AL,'='
-	retz
+	jz	short ret_l_6
 	CMP	AL,','
-	retz
+	jz	short ret_l_6
 	CMP	AL,';'
-	retz
+	jz	short ret_l_6
 	CMP	AL,9				; Check for TAB character
-	retz
+	jz	short ret_l_6
 	CMP	AL,0ah				; Check for line feed character - BAS
 	return
 
@@ -434,6 +440,7 @@ EXTNAME:
 GOTNAME:
 	XOR	AL,AL
 	STOSB
+ret_l_7:
 	return
 
 STRCOMP:
@@ -442,9 +449,9 @@ STRCOMP:
 ; SI,DI destroyed.
 ;
 	CMPSB
-	retnz					; Strings not equal
+	jnz	short ret_l_7			; Strings not equal
 	cmp	byte ptr [SI-1],0		; Hit NUL terminator?
-	retz					; Yes, strings equal
+	jz	short ret_l_7			; Yes, strings equal
 	jmp	short STRCOMP			; Equal so far, keep going
 
 
@@ -631,13 +638,14 @@ pcrunch_cderr:
 	mov	[msg_numb],ax			;AN022; set up message flag
 	or	si,si				;AN022; set up zero flag to not zero
 	stc					;AN022; set up carry flag
+ret_l_8:
 	return
 
 BADRET:
 	MOV	AL,[SI]
 	CALL	PATHCHRCMP			; Special case 'DIRCHAR'file
 	STC
-	retnz
+	jnz	short ret_l_8
 	XOR	BL,BL
 	XCHG	BL,[SI+1]
 	MOV	AH,CHDIR

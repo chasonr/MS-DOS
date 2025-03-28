@@ -341,10 +341,10 @@ break <Arg_Switch>
 ; DATA:
 ;---------------
 
-TRANSPACE	SEGMENT PUBLIC BYTE		;AC000;
-    extrn   switch_list:byte
-    switch_count    EQU     $-switch_list
-transpace   ends
+;RLC TRANSPACE	SEGMENT PUBLIC BYTE		;AC000;
+;RLC     extrn   switch_list:byte
+;RLC     switch_count    EQU     $-switch_list
+;RLC transpace   ends
 
 ;---------------
 Arg_Switch:

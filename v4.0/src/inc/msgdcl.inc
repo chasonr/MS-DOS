@@ -37,8 +37,8 @@ $M_DECLARE    macro	numcls	       ;
 ENDM				       ;
 				       ;
 $M_DECLARE2   macro   innum	       ;
-  IF NOT COMR			       ; IF Not resident COMMAND.COM
-    IF NOT COMT 			 ; IF Not transient COMMAND.COM
+  IFE COMR			       ; IF Not resident COMMAND.COM
+    IFE COMT 				 ; IF Not transient COMMAND.COM
       IFNDEF  $M_CLS_&innum		 ; IF class is not in this assembly,
 	IF	FARmsg			 ;
 	  EXTRN   $M_CLS_&innum:FAR	 ;    Must be external

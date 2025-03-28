@@ -773,6 +773,7 @@ CLOSESRC:
 	mov	bx,[SRCHAND]
 	mov	ah,CLOSE
 	INT	int_command
+ret_l_1:
 	return
 
 ;
@@ -781,9 +782,9 @@ CLOSESRC:
 ;
 CLOSEDEST:
 	cmp	[DESTCLOSED],0
-	retnz					; Don't double close
+	jnz	short ret_l_1			; Don't double close
 	MOV	AL,BYTE PTR [DESTSWITCH]
-	invoke_fn SETASC				; Check for B or A switch on destination
+	invoke_fn SETASC			; Check for B or A switch on destination
 	JZ	BINCLOS
 	MOV	BX,[NXTADD]
 	CMP	BX,[BYTCNT]			; Is memory full?

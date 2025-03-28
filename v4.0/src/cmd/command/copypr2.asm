@@ -341,6 +341,7 @@ Store_pchar:					;AN000; 3/3/KK
 GOTSRCSLSH:
 	or	[bp.INFO],6
 	call	SETSTARS
+ret_l_1:
 	return
 
 
@@ -355,7 +356,7 @@ notpdir_try:					;AN022;
 	mov	[bp.ISDIR],0			; assume pure file
 	mov	bh,[bp.INFO]
 	test	bh,4
-	retz					; Know pure file, no path seps
+	jz	short ret_l_1			; Know pure file, no path seps
 	mov	[bp.ISDIR],2			; assume d:/file
 	mov	si,[bp.TTAIL]
 	cmp	byte ptr [si],0
@@ -405,7 +406,7 @@ DoCdr:						;AN000;  3/3/KK
 	mov	ah,CHDIR
 	INT	int_command
 	xchg	bl,[SI]
-	retnc
+	jnc	short ret_l_1
 	invoke_fn get_ext_error_number		;AN022; get the extended error
 
 EXTEND_SETUPJ:					;AN022;

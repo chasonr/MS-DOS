@@ -55,7 +55,7 @@ TRANCODE	SEGMENT PUBLIC BYTE
 	EXTRN	extend_setup:near	;AN022;
 
 	PUBLIC	CNTRLC
-	PUBLIC	ECHO
+	PUBLIC	ECHO_
 	PUBLIC	GetDate
 	PUBLIC	NOTEST2
 	PUBLIC	PRINT_DATE
@@ -108,9 +108,12 @@ ASKAGN:
 	JZ	ASKAGN
 	INVOKE_FN SCANOFF
 	call	char_in_xlat			;G Convert to upper case
-	retc					;AN000; return if function not supported
+	jnc	@F				;AN000; return if function not supported
+ret_l_1:
+	ret
+	@@:
 	CMP	AL,CAPITAL_N			;G
-	retz
+	jz	short ret_l_1
 	CMP	AL,CAPITAL_Y			;G
 	PUSHF
 	CALL	CRLF2
@@ -204,7 +207,9 @@ Not_del_root:					;AN000;
 	jz	slashp_askagn			;AN000; no - ask again
 	invoke_fn scanoff 			;AN000; scan off leading delimiters
 	call	char_in_xlat			;AN000; yes - upper case it
-	retc					;AN000; return if function not supported
+	jnc	@F				;AN000; return if function not supported
+	ret
+	@@:
 	cmp	al,capital_n			;AN000; was it no?
 	jz	next_del_file			;AN000; yes - don't delete file
 	cmp	al,capital_y			;AN000; was it yes?
@@ -242,11 +247,11 @@ good_erase_exit:
 ;************************************************
 ; ECHO, BREAK, and VERIFY commands. Check for "ON" and "OFF"
 
-	break	Echo
+	break	Echo_
 
 assume	ds:trangroup,es:trangroup
 
-ECHO:
+ECHO_:
 	CALL	ON_OFF
 	JC	DOEMES
 	MOV	DS,[RESSEG]

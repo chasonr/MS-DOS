@@ -202,7 +202,7 @@ ENDIF							     ;;AN000;;
     ENDIF						     ;;AN000;; END of include of Data table
 
 ; 
-    IF	    NOT  $M_MSGDATA_ONLY			     ;;AN000;; IF this was a request for only the data table THEN
+    IFE  $M_MSGDATA_ONLY				     ;;AN000;; IF this was a request for only the data table THEN
 							     ;; 	don't include any more code
 							     ;;AN000;; Figure out what other code to include
       IF      DISK_PROC 				     ;;AN003;;	 Is the request to include the READ_DISK code
@@ -569,11 +569,11 @@ ENDIF							     ;;
 							     ;;AN000;;
 	CALL	$M_GET_DBCS_VEC 			     ;;AN000;; Save the DBCS vector
 
-IF	NOT	NOCHECKSTDIN				     ;;AN000;; IF EOF check is not to be suppressed
+IFE	NOCHECKSTDIN		        		     ;;AN000;; IF EOF check is not to be suppressed
 	CALL	$M_CHECKSTDIN				     ;;AN000;;	 Set EOF CHECK
 ENDIF							     ;;AN000;;
 							     ;;AN000;;
-IF	NOT	NOCHECKSTDOUT				     ;;AN000;; IF Disk Full check is not to be suppressed
+IFE	NOCHECKSTDOUT		        		     ;;AN000;; IF Disk Full check is not to be suppressed
 	CALL	$M_CHECKSTDOUT				     ;;AN000;;	 Set Disk Full CHECK
 ENDIF							     ;;AN000;;
 							     ;;AN000;;
@@ -586,7 +586,7 @@ ENDIF							     ;;AN000;;
 							     ;;        Error ?
 ;	$IF	NC					     ;;AN000;; No.
 	JC $MIF20
-IF	  NOT	  NOVERCHECKmsg 			     ;;AN000;;	IF version check was not supressed
+IFE	  NOVERCHECKmsg 				     ;;AN000;;	IF version check was not supressed
 	  POP	  CX					     ;;AN000;;	Reset stack
 ENDIF							     ;;AN000;;
 	  POP	  DI					     ;;AN000;;	Restore REGS
@@ -751,7 +751,7 @@ $M_VERSION_CHECK PROC NEAR				     ;;AN000;;
 ;	  $ELSE 					     ;;AN000;; ELSE
 	  JMP SHORT $MEN25
 $MIF25:
-IF	    NOT     COMR				     ;;  ** Special case for RESIDENT COMMAND.COM
+IFE     COMR						     ;;  ** Special case for RESIDENT COMMAND.COM
 	    CMP     AX,LOWEST_4CH_VERSION		     ;;AN000;; Does this version support AH = 4CH
 ;	    $IF     B					     ;;AN000;; No,
 	    JNB $MIF27
@@ -1417,7 +1417,7 @@ $M_DISPLAY_$_STRING PROC NEAR				     ;;AN000;;
 	PUSH	DS					     ;;AN000;;
 	PUSH	ES					     ;;AN000;;
 	POP	DS					     ;;AN000;; Set DS to segment of message text
-IF	NOT	COMR
+IFE	COMR
 	CMP	CX,$M_SINGLE_CHAR			     ;;AN000;; Is this a single character?
 ;	$IF	E					     ;;AN000;; Yes,
 	JNE $MIF119
@@ -1454,7 +1454,7 @@ $MDO123:
 ;	  $ENDDO  Z					     ;;AN002;; No,
 	  JNZ $MDO123
 $MEN123:
-IF	  NOT	  COMR
+IFE	  COMR
 ;	$ENDIF						     ;;AN000;;
 $MEN119:
 ENDIF
@@ -1464,7 +1464,7 @@ ENDIF
 							     ;;
 $M_DISPLAY_$_STRING ENDP				     ;;AN000;;
 							     ;;
-IF	NOT	COMR
+IFE	COMR
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;	PROC NAME: $M_DISPLAY_H_STRING
@@ -1675,7 +1675,7 @@ $MEN146:
 ;	$LEAVE	Z					     ;;AN000;; No,
 	JZ $MEN145
 $MLL149:
-IF	  NOT	  COMR
+IFE	  COMR
 	  CMP	  CX,$M_FIRST_THOU			     ;;AN000;; Are we at the first thousands mark
 ;	  $IF	  E					     ;;AN000;; Yes,
 	  JNE $MIF150
@@ -1984,7 +1984,7 @@ ENDIF							     ;;AN000;;
 ;	  $ELSE 					     ;;AN000;;
 	  JMP SHORT $MEN199
 $MIF199:
-IF	    NOT     COMR
+IFE     COMR
 	    CALL    $M_EXT_PAR_REPLACE			     ;;AN000;;
 ENDIF
 ;	  $ENDIF					     ;;AN000;;
@@ -2020,7 +2020,7 @@ $MEN165:
 	RET						     ;;AN000;; Return
 							     ;;
 $M_DISPLAY_MESSAGE ENDP 				     ;;AN000;;
-IF	NOT	COMR
+IFE	COMR
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;	PROC NAME: $M_EXT_PAR_REPLACE
@@ -2385,7 +2385,7 @@ $M_FIND_SPECIFIED_MSG ENDP				     ;;AN000;;
 $M_DISPLAY_REPLACE PROC NEAR				     ;;AN000;;
 							     ;;
 	  XOR	  BX,BX 				     ;;AN000;; Use BX for buffer count
-IF	  NOT	  COMR
+IFE	  COMR
 	  CMP	  $M_SL.$M_S_ID,$M_SPECIAL_CASE-30H	     ;;AN000;; Is this the special case (convert to ASCII)
 ;	  $IF	  E					     ;;AN000;; Yes,
 	  JNE $MIF276
@@ -2665,7 +2665,7 @@ $M_BIN2ASC_REPLACE PROC NEAR				     ;;AN000;;
 	    XOR     AX,AX				     ;;AN000;; Prepare for get binary value (LOW)
 	    MOV     $M_RT.$M_DIVISOR,$M_BASE16		     ;;AN000;; Set default divisor
 	    XOR     BX,BX				     ;;AN000;; Use BP as the NEG flag (if applicable)
-IF	    NOT     COMR
+IFE     COMR
 	    TEST    $M_SL.$M_S_FLAG,NOT $M_BYTE AND $M_SIZE_MASK ;;AN000;; Was BYTE specified?
 ;	    $IF     Z					     ;;AN000;;
 	    JNZ $MIF325
@@ -2719,7 +2719,7 @@ $MIF338:
 ;	      $ELSE					     ;;AN000;;
 	      JMP SHORT $MEN333
 $MIF333:
-IF		NOT	COMR
+IFE	COMR
 		MOV	AX, WORD PTR ES:[DI]		     ;;AN000;; Setup Double word in DX:AX
 		MOV	DX, WORD PTR ES:[DI]+2		     ;;AN000;;
 		TEST	$M_SL.$M_S_FLAG,NOT Sgn_Bin_Type AND $M_TYPE_MASK ;;AN000;; Was Signed binary specified?
@@ -2748,7 +2748,7 @@ $MEN333:
 $MEN325:
 							     ;;
 	    CALL    $M_CONVERT2ASC			     ;;AN000;; Convert to ASCII string
-IF	    NOT     COMR
+IFE     COMR
 	    OR	    BX,BX				     ;;AN000;;
 ;	    $IF     NZ					     ;;AN000;; Was number negative?
 	    JZ $MIF349
