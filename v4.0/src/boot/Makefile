@@ -1,32 +1,48 @@
 #******************** makefile for boot *****************************
 
-msg	=..\messages
-dos	=..\dos
-inc	=..\inc
-hinc	=..\h
+msg	=../messages
+inc	=../inc
+tools = ../tools
+
+COUNTRY = usa-ms
+
+AS = jwasm
+ASFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 #
 #################### dependencies begin here ############################
 #
 
-all: msboot.bin
+.SUFFIXES: .asm .obj
 
-boot.cl1: boot.skl \
-	$(msg)\$(COUNTRY).MSG \
-	makefile
+.asm.obj:
+	$(AS) $(ASFLAGS) -Fo$@ $<
+
+all: $(inc)/boot.inc
+
+$(inc)/boot.inc: msboot.bin
+	$(tools)/hexify.rb msboot.bin $(inc)/boot.inc 7c00 200
+
+boot.cl1: boot.cl1.base $(msg)/$(COUNTRY).cat
+	$(msg)/substmsg.rb $< $@ $(msg)/$(COUNTRY).cat
 
 msboot.obj: msboot.asm boot.cl1
 
-msboot.bin: msboot.obj
-	link msboot;
+OBJS = msboot.obj
+
+msboot.bin: $(OBJS)
+	echo 'system dos' >resp.txt
+	echo 'option map=msboot.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name msboot.exe' >>resp.txt
+	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
+	wlink @resp.txt
 	exe2bin msboot.exe msboot.bin
-	dbof msboot.bin boot.inc 7c00 200
-	copy boot.inc $(inc)
-	del boot.inc
 
 clean:
-	@if exist *.obj del *.obj
-	@if exist msboot.exe del msboot.exe
-	@if exist boot.cl1 del boot.cl1
-	@if exist msboot.bin del msboot.bin
-	@if exist $(inc)\boot.inc del $(inc)\boot.inc
+	rm -f *.obj *.err *.lst
+	rm -f msboot.exe
+	rm -f boot.cl1
+	rm -f msboot.bin
+	rm -f $(inc)/boot.inc
+	rm -f resp.txt

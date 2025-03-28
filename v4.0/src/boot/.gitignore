@@ -1,6 +1,6 @@
 *.exe
-*.EXE
 *.obj
-*.OBJ
+*.lst
+*.err
 msboot.bin
-MSBOOT.BIN
+resp.txt
