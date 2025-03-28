@@ -163,7 +163,7 @@ COMMAND_OBJS = command1.obj command2.obj rucode.obj rdata.obj init.obj \
 
 command.com: $(COMMAND_OBJS) 
 	echo 'system dos' >resp.txt
-	echo 'option map=msdos.map' >>resp.txt
+	echo 'option map=command.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
 	echo 'name command.exe' >>resp.txt
 	for x in $(COMMAND_OBJS); do echo "file $$x" >>resp.txt; done
