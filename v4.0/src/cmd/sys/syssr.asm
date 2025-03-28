@@ -1,18 +1,18 @@
-	INCLUDE SYSHDR.INC
+	INCLUDE syshdr.inc
 
 ; include SYSMSG.INC
 
 .xlist
 .xcref
 
-	include SYSMSG.INC		;				       ;AN000;
+	include sysmsg.inc		;				       ;AN000;
 
 .cref
 .list
 
-	MSG_UTILNAME <SYS>		;				       ;AN000;
+	MSG_UTILNAME <sys>		;				       ;AN000;
 
-CODE	SEGMENT PARA PUBLIC
+CODE	SEGMENT PARA PUBLIC "CODE"
 
 ASSUME	CS:CODE,DS:nothing,ES:nothing
 
@@ -26,7 +26,7 @@ ASSUME	CS:CODE,DS:nothing,ES:nothing
 .xlist
 .xcref
 
-	MSG_SERVICES <SYS.CL1,SYS.CL2,SYS.CLA,SYS.CLB,SYS.CLC,SYS.CLD> ;       ;AN000;
+	MSG_SERVICES <sys.cl1,sys.cl2,sys.cla,sys.clb,sys.clc,sys.cld> ;       ;AN000;
 
 .cref
 .list

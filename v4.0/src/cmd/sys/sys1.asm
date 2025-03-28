@@ -1,11 +1,11 @@
 	TITLE	SYS-1-	Program
-	INCLUDE SYSHDR.INC
+	INCLUDE syshdr.inc
 	include version.inc
 	page	80,132
 
 false	= 0
 
-DATA	SEGMENT PARA PUBLIC
+DATA	SEGMENT PARA PUBLIC "DATA"
 
 	public	TargDrvNum, TargSpec, bio_owns_it, DOS_VER
 	public	packet, packet_sectors, packet_buffer
@@ -178,7 +178,7 @@ fat_16			DB   "FAT16   " ; 16 or 32 bit FAT
 .xlist
 			include sysmsg.inc
 
-			MSG_UTILNAME <SYS> ;				       ;AN000;
+			MSG_UTILNAME <sys> ;				       ;AN000;
 
 			MSG_SERVICES <MSGDATA> ;			       ;AN000;
 .list
@@ -260,7 +260,7 @@ pDOSEnd 		DW   ?		; offset of end of DOS in buffer
 public			boot
 BOOT			LABEL BYTE
 .xlist
-			INCLUDE BOOT.INC
+			INCLUDE boot.inc
 .list
 					;
 					; Following structure used by Generic IOCTL call Get Device Parameters to get
@@ -270,10 +270,10 @@ DeviceParameters	a_DeviceParameters <1,DEV_HARDDISK>
 
 DATA			ENDS
 
-CODE			SEGMENT PARA PUBLIC
+CODE			SEGMENT PARA PUBLIC "CODE"
 
 			EXTRN SYSLOADMSG:near, SYSDISPMSG:near, SYSPARSE:near
-			EXTRN Data_Space:WORD, Find_DPB:near,
+			EXTRN Data_Space:WORD, Find_DPB:near
 			EXTRN Move_DIR_Entry:near, Free_Cluster:near, Direct_Access:near
 
 			BREAK <SYS - Main>

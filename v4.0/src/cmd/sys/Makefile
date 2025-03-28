@@ -61,7 +61,7 @@ syssr.obj: syssr.asm $(inc)/parse.asm \
     $(inc)/psdata.inc $(inc)/msgserv.asm $(inc)/sysmsg.inc \
     sys.ctl sys.cl1 sys.cl2 sys.cla sys.clb sys.clc sys.cld
 
-OBJS = sys1.obj syssr.obj sys1.obj sys2.obj
+OBJS = sys1.obj sys2.obj syssr.obj
 
 sys.com: $(OBJS)
 	echo 'system dos' >resp.txt

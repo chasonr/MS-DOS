@@ -1,6 +1,6 @@
 	TITLE	SYS-2-	Program
 	include version.inc
-	INCLUDE SYSHDR.INC
+	INCLUDE syshdr.inc
 
 	page	80,132
 	BREAK	<SYS2 - Program Organization>
@@ -59,7 +59,7 @@
 ;******************+ END OF PSEUDOCODE +*****************************************
 	BREAK	<SYS2 - Data space>
 
-	DATA	SEGMENT PARA PUBLIC
+	DATA	SEGMENT PARA PUBLIC "DATA"
 
 	extrn	TargDrvNum:BYTE, TargSpec:WORD, bio_owns_it:BYTE, DOS_VER:BYTE
 	extrn	packet_sectors:WORD, packet_buffer:WORD, packet:WORD
@@ -140,7 +140,7 @@ BUF			LABEL BYTE	; beginning of area for file reads
 
 ;  $SALUT (4,4,9,41)
 
-   CODE SEGMENT PARA PUBLIC
+   CODE SEGMENT PARA PUBLIC "CODE"
 
    ASSUME cs:CODE, ds:nothing, es:nothing
 

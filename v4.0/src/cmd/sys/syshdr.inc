@@ -127,6 +127,10 @@
 ;            "Licenced Material - Program Property of Microsoft"
 ;
 ;******************* END OF SPECIFICATIONS *************************************
+        ifndef debug
+            debug equ 0
+        endif
+        include dosmac.inc
         BREAK   <SYS1 - Program Organization>
 ;******************+ START OF PSEUDOCODE +**************************************
 ;
@@ -207,7 +211,7 @@
 ;       INCLUDE DOSSYM.INC              ;also defines version of dos
 .xlist
 .xcref
-        INCLUDE DOSSYM.INC
+        INCLUDE dossym.inc
 .cref
 .list
 
@@ -215,7 +219,7 @@
 ;       INCLUDE IOCTL.INC               ; Get / Set Device Parameters IOCTL
 .xlist
 .xcref
-        INCLUDE IOCTL.INC
+        INCLUDE ioctl.inc
 .cref
 .list
 
@@ -223,24 +227,24 @@
 ;       INCLUDE BOOTFORM.INC            ; Boot Record Structure
 .xlist
 .xcref
-        INCLUDE BOOTFORM.INC
+        INCLUDE bootform.inc
 .cref
 
 
 ;       INCLUDE PATHMAC.INC            ; PATH macro for PATHGEN
 .xlist
 .xcref
-        INCLUDE PATHMAC.INC
+        INCLUDE pathmac.inc
 .cref
 .list
 
 IBMJAPVER EQU   FALSE                   ; this and the following are mutually
 IBMVER  EQU     TRUE                    ; exclusive
 
-CODE    SEGMENT PARA PUBLIC
+CODE    SEGMENT PARA PUBLIC "CODE"
 CODE    ENDS
 
-DATA    SEGMENT PARA PUBLIC
+DATA    SEGMENT PARA PUBLIC "DATA"
 DATA    ENDS
 
 ;                       $SALUT (4,25,30,41)
