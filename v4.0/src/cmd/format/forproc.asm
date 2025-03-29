@@ -7,12 +7,12 @@ BREAK	MACRO	subtitle
 	PAGE
 ENDM
 
-	INCLUDE FORCHNG.INC
-	INCLUDE SYSCALL.INC
-	INCLUDE FOREQU.INC
-	INCLUDE FORMACRO.INC
-	INCLUDE FORSWTCH.INC
-	INCLUDE IOCTL.INC
+	INCLUDE forchng.inc
+	INCLUDE syscall.inc
+	INCLUDE forequ.inc
+	INCLUDE formacro.inc
+	INCLUDE forswtch.inc
+	INCLUDE ioctl.inc
 .cref
 .list
 data	segment public para 'DATA'

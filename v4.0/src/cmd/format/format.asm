@@ -279,21 +279,21 @@ data	ends
 
 debug	equ	0
 	.xlist
-	INCLUDE VERSIONA.INC
-	INCLUDE DOSMAC.INC
-	INCLUDE SYSCALL.INC
-	INCLUDE ERROR.INC
-	INCLUDE DPB.INC
-	INCLUDE CPMFCB.INC
-	INCLUDE DIRENT.INC
-	INCLUDE CURDIR.INC
-	INCLUDE PDB.INC
-	INCLUDE BPB.INC
-	INCLUDE FOREQU.INC
-	INCLUDE FORMACRO.INC
-	INCLUDE IOCTL.INC
-	INCLUDE FORSWTCH.INC
-	INCLUDE SYSVAR.INC
+	INCLUDE versiona.inc
+	INCLUDE dosmac.inc
+	INCLUDE syscall.inc
+	INCLUDE error.inc
+	INCLUDE dpb.inc
+	INCLUDE cpmfcb.inc
+	INCLUDE dirent.inc
+	INCLUDE curdir.inc
+	INCLUDE pdb.inc
+	INCLUDE bpb.inc
+	INCLUDE forequ.inc
+	INCLUDE formacro.inc
+	INCLUDE ioctl.inc
+	INCLUDE forswtch.inc
+	INCLUDE sysvar.inc
 	.list
 
 
@@ -694,7 +694,7 @@ BadClus 	proc		near		;an000; mark bad clusters
 	push	es
 
 	mov	es, word ptr fatSpace + 2	;an005; obtain seg of FAT
-	CMP	fBigFat,TRUE			;an005; 16 bit fat?
+	CMP	fBigFat,TRUE and 0FFh			;an005; 16 bit fat?
 ;	$if	ne				;an005; no - 12-bit fat
 	JE $$IF8
 		push	ax			;an000; save ax - contains low cluster number
@@ -1058,7 +1058,7 @@ NotRemove:
 ;				Flags
 ;
 DSKPRM:
-	CMP	fLastChance,TRUE
+	CMP	fLastChance,TRUE and 0FFh
 	JE	PrmptRet
 
 	CMP	deviceParameters.DP_DeviceType, DEV_HARDDISK
@@ -1263,6 +1263,7 @@ NotCLSALL:
 	pop	ax				; dcl 8/23/86
 
 	JNC	Found_COMMAND			;mt 12/8/86 P894
+ret_l_1:
 	return					;mt 12/8/86
 
 Found_COMMAND:					;mt 12/8/86
@@ -1320,7 +1321,8 @@ WRITEDOS:
 	MOV	DI,ES
 	pop	es
 	CALL	MAKEFIL
-	retc
+ret_l_1a:
+	jc	short ret_l_1
 
 	MOV	[TempHandle],BX
 	TEST	BYTE PTR FILSTAT,00000010B
@@ -1339,7 +1341,8 @@ Got_WBIOS:
 	MOV	WORD PTR [IOCNT+2],DI
 	MOV	BP,OFFSET bios
 	CALL	GOTTARG
-	retc
+ret_l_1z:
+	jc	short ret_l_1a
 	JMP	SHORT BIOSDONE
 
 GOTALLBIO:
@@ -1365,7 +1368,8 @@ BIOSDONE:
 	MOV	DI,ES
 	pop	es
 	CALL	MAKEFIL
-	retc
+ret_l_1b:
+	jc	short ret_l_1z
 
 GOTNDOS:
 	MOV	[TempHandle],BX
@@ -1382,7 +1386,8 @@ Got_WDOS:
 	MOV	WORD PTR [dos.fileOffset],0
 	MOV	WORD PTR [dos.fileOffset+2],0
 	CALL	GETSYS3
-	retc
+ret_l_1y:
+	jc	short ret_l_1b
 	JMP	SHORT DOSDONE
 
 PARTDOS:
@@ -1393,7 +1398,8 @@ PARTDOS:
 	MOV	WORD PTR [IOCNT],SI
 	MOV	WORD PTR [IOCNT+2],DI
 	CALL	GOTTARG
-	retc
+ret_l_1x:
+	jc	short ret_l_1y
 	JMP	SHORT DOSDONE
 
 GOTALLDOS:
@@ -1421,7 +1427,8 @@ DOSDONE:
 	MOV	DI,ES
 	pop	es
 	CALL	MAKEFIL
-	retc
+ret_l_1c:
+	jc	short ret_l_1x
 
 	MOV	[TempHandle],BX
 	TEST	BYTE PTR FILSTAT,00100000B
@@ -1437,7 +1444,8 @@ Got_WCOM:
 	MOV	WORD PTR [command.fileOffset],0
 	MOV	WORD PTR [command.fileOffset+2],0
 	CALL	GETSYS3
-	retc
+ret_l_1w:
+	jc	short ret_l_1c
 	JMP	SHORT COMDONE
 
 PARTCOM:
@@ -1448,7 +1456,7 @@ PARTCOM:
 	MOV	WORD PTR [IOCNT],SI
 	MOV	WORD PTR [IOCNT+2],DI
 	CALL	GOTTARG
-	retc
+	jc	short ret_l_1w
 	JMP	SHORT COMDONE
 
 GOTALLCOM:
@@ -1513,6 +1521,7 @@ MAKEFIL:
 	MOV	DX,CX
 	MOV	AX,LSEEK SHL 8
 	INT	21H				; Seek back to start
+ret_l_2:
 	return
 
 ;
@@ -1521,7 +1530,7 @@ MAKEFIL:
 ;
 CheckMany:
 	CMP	AX,error_too_many_open_files
-	retnz
+	jnz	short ret_l_2
 	Extended_Message			;				;AC006;
 	JMP	FEXIT
 
@@ -1534,6 +1543,7 @@ CLOSETARG:
 	INT	21H
 	MOV	AH,CLOSE
 	INT	21H
+ret_l_3:
 	return
 
 ;****************************************
@@ -1564,7 +1574,7 @@ ASSUME	DS:DATA
 	CALL	WRITEFILE			; Write next part
 	pop	ds
 	assume	ds:data
-	retc
+	jc	short ret_l_3
 
 	push	es
 	LES	AX,ds:[BP.fileOffset]
@@ -1818,6 +1828,7 @@ WRITEFILE:
 	MOV	BP,WRITE SHL 8
 	CALL	FILIO
 	POP	BP
+ret_l_4:
 	return
 
 FILIO:
@@ -1826,10 +1837,10 @@ FILIO:
 	JCXZ	K64IO
 	MOV	AX,BP
 	INT	21H
-	retc
+	jc	short ret_l_4
 	ADD	DX,AX
 	CMP	AX,CX				; If not =, AX<CX, carry set.
-	retnz
+	jnz	short ret_l_4
 	CALL	NORMALIZE
 K64IO:
 	CLC
@@ -1837,10 +1848,10 @@ K64IO:
 	JCXZ	IORET
 	MOV	AX,BP
 	INT	21H
-	retc
+	jc	short ret_l_4
 	ADD	DX,AX
 	CMP	AX,CX				; If not =, AX<CX, carry set.
-	retnz
+	jnz	short ret_l_4
 	CALL	NORMALIZE
 	MOV	CX,DI
 K64M1:
@@ -1912,6 +1923,7 @@ NORMALIZE:
 	POP	AX
 	POP	DX
 	AND	DX,0FH				; Clears carry
+ret_l_5:
 	return
 
 ;-------------------------------------------------------------------------------
@@ -1965,7 +1977,7 @@ SetMTsupp:
 
 ; Check switches against parameters and use switches to modify device parameters
 	call	CheckSwitches
-	retc
+	jc	short ret_l_5
 
 IF ShipDisk
 
@@ -2009,7 +2021,8 @@ TrackLayoutSet:
 	shr	bx, 1
 	mov	ah, Alloc
 	int	21H
-	retc
+ret_l_5a:
+	jc	short ret_l_5
 	mov	word ptr directorySector+2, ax
 	xor	ax,ax
 	mov	word ptr directorySector, ax
@@ -2028,7 +2041,7 @@ TrackLayoutSet:
 	mov	bx,ax
 	mov	ah,Alloc
 	int	21H
-	retc
+	jc	short ret_l_5a
 	mov	word ptr fatSpace+2,ax
 	xor	ax,ax
 	mov	word ptr fatSpace,ax
@@ -2081,7 +2094,7 @@ SetfBigFat proc near
 	cmp	deviceParameters.DP_BPB.BPB_BigTotalSectors+2,0 ; > 32mb part?	;AN000;
 ;	$IF	NE				;Yes, big FAT	;AC000;
 	JE $$IF21
-	   mov	   fBigFat, TRUE		;Set flag	;AN000;
+	   mov	   fBigFat, TRUE and 0FFh	;Set flag	;AN000;
 ;	$ELSE					;Nope, < 32,b	 ;AC000;
 	JMP SHORT $$EN21
 $$IF21:
@@ -2101,7 +2114,7 @@ $$IF23:
 	   cmp	   ax,BIG_FAT_THRESHOLD 	;Is clusters >= 4086?
 ;	   $IF	   AE
 	   JNAE $$IF25
-	      mov     fBigFAT,TRUE		;16 bit FAT if >=4096
+	      mov     fBigFAT,TRUE and 0FFh	;16 bit FAT if >=4096
 						;** END fix for PTM PCDOS P51
 ;	   $ENDIF
 $$IF25:
@@ -2167,7 +2180,7 @@ NotBigTotalSectors:
 	les	bx, directorySector
 ; If Old_Dir = TRUE then put the first letter of each directory entry must be 0E5H
 	xor	al, al
-	cmp	old_Dir, TRUE
+	cmp	old_Dir, TRUE and 0FFh
 	jne	StickE5
 	mov	al, 0e5H
 StickE5:
@@ -2258,7 +2271,7 @@ DiskFormat proc near
 	mov	ah, 0ffH
 	stosw
 	mov	ax, 00ffH
-	test	fBigFat, TRUE
+	test	fBigFat, TRUE and 0FFh
 	jz	NotBig
 	mov	ax, 0ffffH
 NotBig: stosw
@@ -2357,7 +2370,7 @@ StdBPB:
 FormatLoop:
 	call	Format_Loop							;an015; dms;Format until CY occurs
 
-	cmp	Format_End,True 						;an015; dms;End of Format?
+	cmp	Format_End,True and 0FFh 					;an015; dms;End of Format?
 ;	$if	e								;an015; dms;yes
 	JNE $$IF36
 		mov	FormatError,0						;an015; dms;signal good format
@@ -2441,11 +2454,11 @@ BadSector proc	near
 ContinueFormat:
 	call	Adj_Track_Count 						;an015; dms;decrease track counter
 	call	NextTrack							;an015; dms;adjust head and cylinder
-	cmp	Format_End,True 						;an015; dms;end of format?
+	cmp	Format_End,True and 0FFh 					;an015; dms;end of format?
 ;	$if	ne								;an015; dms;no
 	JE $$IF44
 		call	Format_Loop						;an015; dms;format until CY
-		cmp	Format_End,True 					;an015; dms;end of format?
+		cmp	Format_End,True and 0FFh 				;an015; dms;end of format?
 ;		$if	ne							;an015; dms;no
 		JE $$IF45
 			call	CheckError					;an015; dms;must be error - which error?
@@ -2642,7 +2655,9 @@ WriteFileSystem proc near
 
 
 	call	WriteBootSector
-	retc
+	jnc	@F
+	ret
+	@@:
 
 	Set_Data_Segment			;Set DS,ES = DATA		;AN000;
 ; Write out each of the FATs
@@ -3568,7 +3583,7 @@ $$DO115:
 		JA $$EN115
 		push	cx							;an000; dms;save cx
 
-		cmp	Cluster_Boundary_Flag,True				;an000; dms;full buffer there?
+		cmp	Cluster_Boundary_Flag,True and 0FFh			;an000; dms;full buffer there?
 ;		$if	e							;an000; dms;yes
 		JNE $$IF117
 			call	Calc_Cluster_Boundary				;an000; dms;see if on boundary
@@ -3970,7 +3985,7 @@ Procedure Cluster_Buffer_Allocate						;an000; dms;
 		mov	ax,(Alloc shl 8)					;an000; dms;
 		int	21h							;an000; dms;
 		mov	Cluster_Boundary_Buffer_Seg,ax				;an000; dms;save pointer to buffer
-		mov	Cluster_Boundary_Flag,True				;an000; dms;signal space available
+		mov	Cluster_Boundary_Flag,True and 0FFh			;an000; dms;signal space available
 ;	$else									;an000; dms;not enough room
 	JMP SHORT $$EN137
 $$IF137:
@@ -4123,7 +4138,7 @@ Procedure NextTrack								;an015; dms;
 ;	$if	e								;an015; dms;yes
 	JNE $$IF149
 		stc								;an015; dms;signal end of format
-		mov	Format_End,True
+		mov	Format_End,True and 0FFh
 ;	$else
 	JMP SHORT $$EN149
 $$IF149:
