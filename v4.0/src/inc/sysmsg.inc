@@ -50,7 +50,9 @@
 INCLUDE        versiona.inc	       ;;AN003;;
 
 FALSE	       = 0		       ;;
+IFNDEF TRUE
 TRUE	       = NOT FALSE	       ;;    List message services and flags
+ENDIF
 				       ;;
 
 ; Control Characters For Message Skeleton file
