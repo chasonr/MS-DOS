@@ -6,7 +6,7 @@ inc	=../../inc
 COUNTRY = usa-ms
 
 AS = jwasm
-ASFLAGS = -q -Zm -Zg -I$(inc) -I$(boot) -Fl
+ASFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 .SUFFIXES: .asm .obj
 
