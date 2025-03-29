@@ -3,7 +3,7 @@ page	60,120
 .sall
 title	APPEND
 include sysmsg.inc
-msg_utilname<APPEND>
+msg_utilname<append>
 ;-----------------------------------------------------------------------------
 ;
 ;      Title:	       APPEND
@@ -429,7 +429,7 @@ si_seg	    dw	0	;put segment of command line here			;an010;bgb
 
 MSG_SERVICES <MSGDATA>
 MSG_SERVICES <DISPLAYmsg,CHARmsg>						;an010;bgb
-MSG_SERVICES <APPEND.CLA,APPEND.CL1,APPEND.CTL>
+MSG_SERVICES <append.cla,append.cl1,append.ctl>
 
 .xlist
 ;-----------------------------------------------------------------------------
@@ -3442,7 +3442,7 @@ do_parse_err	ENDP								;an010;bgb
 ;-------------------------------------------------------------------
 
 MSG_SERVICES <LOADmsg>
-MSG_SERVICES <APPEND.CLB,APPEND.CL2,APPEND.CTL>
+MSG_SERVICES <append.clb,append.cl2,append.ctl>
 
 end_address:				; this is the end of the TSR stuff		 ;AN004;
 

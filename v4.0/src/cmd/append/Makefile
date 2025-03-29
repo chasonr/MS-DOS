@@ -31,7 +31,8 @@ append.cla: append.cla.base $(msg)/$(COUNTRY).cat
 append.clb: append.clb.base $(msg)/$(COUNTRY).cat
 	$(msg)/substmsg.rb $< $@ $(msg)/$(COUNTRY).cat
 
-append.obj: append.asm appendp.inc $(inc)/parse.asm append.ctl
+append.obj: append.asm appendp.inc $(inc)/parse.asm append.ctl \
+            append.cl1 append.cl2 append.cla append.clb
 
 OBJS = append.obj
 
