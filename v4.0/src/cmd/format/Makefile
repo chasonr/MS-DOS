@@ -81,7 +81,7 @@ format.com: $(OBJS)
 	echo 'name format.exe' >>resp.txt
 	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
-	@#exe2bin -q format.exe format.com
+	../../tools/make-com.rb format.exe format.com
 
 clean:
 	rm -f *.obj *.exe *.lst *.err
