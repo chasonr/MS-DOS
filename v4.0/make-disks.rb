@@ -52,6 +52,7 @@ Distribution360_2 = [
     'src/CMD/SORT/sort.exe',
     'src/CMD/SUBST/subst.exe',
     'src/CMD/TREE/tree.com',
+    'src/DEV/VDISK/vdisk.sys',
     'src/CMD/XCOPY/xcopy.exe',
 ]
 
@@ -174,6 +175,7 @@ Distribution720_2 = [
     'src/CMD/SORT/sort.exe',
     'src/CMD/SUBST/subst.exe',
     'src/CMD/TREE/tree.com',
+    'src/DEV/VDISK/vdisk.sys',
     'src/CMD/XCOPY/xcopy.exe',
     # Missing: readme.txt
     'src/DEV/XMAEM/xmaem.sys',
@@ -243,6 +245,7 @@ Distribution1440 = [
     'src/CMD/SUBST/subst.exe',
     'src/CMD/SYS/sys.com',
     'src/CMD/TREE/tree.com',
+    'src/DEV/VDISK/vdisk.sys',
     'src/CMD/XCOPY/xcopy.exe',
     'src/DEV/XMA2EMS/xma2ems.sys',
     'src/DEV/XMAEM/xmaem.sys',
