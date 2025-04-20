@@ -13,14 +13,21 @@ COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
 #################### dependencies begin here ############################
 #
 
+.SUFFIXES: .asm .obj
+
+AS = jwasm
+AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.asm.obj:
+	$(AS) $(AFLAGS) -Fo$@ $<
+
 all: msboot.bin
 
 boot.cl1: BOOT.SKL \
 	$(msg)/$(COUNTRY).MSG
 	dosemu -t --Fdrive_c ../.. -E "src\domsg1.bat src\boot $(subst /,\,$<) $(country);"
 
-msboot.obj: MSBOOT.ASM boot.cl1
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\boot $(subst /,\,$<) $(subst /,\,$@);"
+msboot.obj: msboot.asm boot.cl1
 
 OBJS = msboot.obj
 

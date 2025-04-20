@@ -2,6 +2,7 @@
 *.EXE
 *.obj
 *.OBJ
+*.lst
 msboot.bin
 MSBOOT.BIN
 resp.txt

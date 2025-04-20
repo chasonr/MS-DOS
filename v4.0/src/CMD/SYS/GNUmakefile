@@ -17,7 +17,7 @@ COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
 
 all: sys.com
 
-$(inc)/boot.inc: $(boot)/MSBOOT.ASM $(msg)/$(COUNTRY).MSG
+$(inc)/boot.inc: $(boot)/msboot.asm $(msg)/$(COUNTRY).MSG
 	$(MAKE) -C $(boot)
 
 sys.ctl sys.cl1 sys.cl2 sys.cla sys.clb sys.clc sys.cld: SYS.SKL $(msg)/$(COUNTRY).MSG

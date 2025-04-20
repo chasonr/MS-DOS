@@ -38,25 +38,25 @@ $(inc)/printf.obj: $(inc)/PRINTF.ASM
 $(inc)/kstring.obj: $(inc)/KSTRING.C $(hinc)/INTERNAT.H
 	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\fc $(subst /,\,$<) $(subst /,\,$@)"
 
-getl.obj: GETL.ASM $(inc)/CMACROS.INC $(inc)/VERSION.INC
+getl.obj: GETL.ASM $(inc)/CMACROS.INC $(inc)/version.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\fc $(subst /,\,$<) $(subst /,\,$@)"
 
-itoupper.obj: ITOUPPER.ASM  $(inc)/CMACROS.INC $(inc)/VERSION.INC
+itoupper.obj: ITOUPPER.ASM  $(inc)/CMACROS.INC $(inc)/version.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\fc $(subst /,\,$<) $(subst /,\,$@)"
 
-maxmin.obj: MAXMIN.ASM $(inc)/CMACROS.INC $(inc)/VERSION.INC
+maxmin.obj: MAXMIN.ASM $(inc)/CMACROS.INC $(inc)/version.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\fc $(subst /,\,$<) $(subst /,\,$@)"
 
 messages.obj: MESSAGES.ASM
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\fc $(subst /,\,$<) $(subst /,\,$@)"
 
-move.obj: MOVE.ASM $(inc)/CMACROS.INC $(inc)/VERSION.INC
+move.obj: MOVE.ASM $(inc)/CMACROS.INC $(inc)/version.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\fc $(subst /,\,$<) $(subst /,\,$@)"
 
-string.obj: STRING.ASM $(inc)/CMACROS.INC $(inc)/VERSION.INC
+string.obj: STRING.ASM $(inc)/CMACROS.INC $(inc)/version.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\fc $(subst /,\,$<) $(subst /,\,$@)"
 
-xtab.obj: XTAB.ASM $(inc)/CMACROS.INC $(inc)/VERSION.INC
+xtab.obj: XTAB.ASM $(inc)/CMACROS.INC $(inc)/version.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\fc $(subst /,\,$<) $(subst /,\,$@)"
 
 error.obj: ERROR.C TOOLS.H TTYPES.H
