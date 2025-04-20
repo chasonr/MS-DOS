@@ -83,14 +83,14 @@ DosFindClose  proc   far
         mov     si,offset FindSegment:FindHandles
 
 CheckForClose:
-        test    ds:[si],OpenedHandle       ; handle is open ??
+        test    word ptr ds:[si],OpenedHandle ; handle is open ??
         jnz     OkToClose                  ; go and close if it is open
 
         mov     ax,6                       ; else load error code
         jmp     ErrorExit                  ; return
 
 OkToClose:
-        and     ds:[si],not OpenedHandle   ; set close flag
+        and     word ptr ds:[si],OpenedHandle XOR 0FFFFh ; set close flag
         xor     ax,ax                      ; set good return code
 
 ErrorExit:

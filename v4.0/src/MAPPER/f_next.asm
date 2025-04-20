@@ -105,7 +105,7 @@ DosFindNext  proc   far
         mov     si,offset FindSegment:FindHandles
 
 CheckForNext:
-        test    ds:[si],OpenedHandle
+        test    word ptr ds:[si],OpenedHandle
         jnz     OkToFindNext
 
         mov     ax,6

@@ -1,185 +1,96 @@
 #************************** makefile for mapper ***************************
 
-msg	=../messages
-dos	=../dos
-inc	=../inc
-hinc	=../h
+inc	 = ../INC
 
 #
 #######################	dependencies begin here. #########################
 #
 
+.SUFFIXES: .asm .obj
+
+AS = jwasm
+AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.asm.obj:
+	$(AS) $(AFLAGS) -Fo$@ $<
+
 all: mapper.lib
 
-chdir.obj:  CHDIR.ASM  MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+f_first.obj: f_first.asm macros.inc find.inc
 
-getver.obj: GETVER.ASM MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+write.obj:  write.asm macros.inc
 
-f_first.obj: F_FIRST.ASM MACROS.INC  FIND.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+beep.obj:   beep.asm macros.inc
 
-set_tod.obj: SET_TOD.ASM MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+exit.obj:   exit.asm macros.inc
 
-write.obj:  WRITE.ASM MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+delete.obj: delete.asm macros.inc
 
-beep.obj:   BEEP.ASM MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+getcntry.obj: getcntry.asm  macros.inc
 
-mkdir.obj:  MKDIR.ASM MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+f_close.obj: f_close.asm  macros.inc  find.inc
 
-exit.obj:   EXIT.ASM MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+open.obj:   open.asm  macros.inc
 
-delete.obj: DELETE.ASM MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+read.obj:   read.asm  macros.inc
 
-getcntry.obj: GETCNTRY.ASM  MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+qcurdir.obj: qcurdir.asm  macros.inc
 
-f_close.obj: F_CLOSE.ASM  MACROS.INC  FIND.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+qcurdsk.obj: qcurdsk.asm  macros.inc
 
-open.obj:   OPEN.ASM  MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+qfilemod.obj: qfilemod.asm macros.inc
 
-read.obj:   READ.ASM  MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+sfilemod.obj: sfilemod.asm macros.inc
 
-rmdir.obj:  RMDIR.ASM  MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+lseek.obj:  lseek.asm macros.inc
 
-qcurdir.obj: QCURDIR.ASM  MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+sfileinf.obj: sfileinf.asm macros.inc
 
-qcurdsk.obj: QCURDSK.ASM  MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+close.obj:   close.asm macros.inc
 
-qverify.obj: QVERIFY.ASM  MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+allocseg.obj: allocseg.asm macros.inc
 
-qfilemod.obj: QFILEMOD.ASM MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+freeseg.obj: freeseg.asm  macros.inc
 
-sverify.obj: SVERIFY.ASM  MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+sel_disk.obj: sel_disk.asm macros.inc
 
-sfilemod.obj: SFILEMOD.ASM MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+qfsinfo.obj: qfsinfo.asm  macros.inc error.inc
 
-lseek.obj:  LSEEK.ASM MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+f_next.obj: f_next.asm	macros.inc	find.inc
 
-sfileinf.obj: SFILEINF.ASM MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+get_tod.obj: get_tod.asm  macros.inc
 
-close.obj:   CLOSE.ASM MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+devconfg.obj: devconfg.asm  macros.inc
 
-allocseg.obj: ALLOCSEG.ASM MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+casemap.obj: casemap.asm  macros.inc
 
-freeseg.obj: FREESEG.ASM  MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+dbcs.obj:   dbcs.asm  macros.inc
 
-sel_disk.obj: SEL_DISK.ASM MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+ioctl.obj:  ioctl.asm  macros.inc
 
-qfsinfo.obj: QFSINFO.ASM  MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+sighand.obj: sighand.asm  macros.inc msc.inc
 
-f_next.obj: F_NEXT.ASM	MACROS.INC	FIND.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+error.obj:  error.asm  macros.inc
 
-getmsg.obj: GETMSG.ASM	MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+setint24.obj:  setint24.asm  macros.inc
 
-get_tod.obj: GET_TOD.ASM  MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+qfileinf.obj: qfileinf.asm  macros.inc
 
-charin.obj: CHARIN.ASM MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+scurpos.obj: scurpos.asm macros.inc
 
-flushbuf.obj: FLUSHBUF.ASM  MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+scrollup.obj: scrollup.asm  macros.inc
 
-devconfg.obj: DEVCONFG.ASM  MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+wchstra.obj: wchstra.asm  macros.inc
 
-reallseg.obj: REALLSEG.ASM  MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
+setfsinf.obj: setfsinf.asm macros.inc error.inc
 
-putmsg.obj: PUTMSG.ASM	MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
-
-execpgm.obj: EXECPGM.ASM  MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
-
-qhandtyp.obj: QHANDTYP.ASM  MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
-
-cwait.obj:  CWAIT.ASM  MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
-
-kbdgstat.obj: KBDGSTAT.ASM  MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
-
-kbdsstat.obj: KBDSSTAT.ASM MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
-
-casemap.obj: CASEMAP.ASM  MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
-
-dbcs.obj:   DBCS.ASM  MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
-
-ioctl.obj:  IOCTL.ASM  MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
-
-sighand.obj: SIGHAND.ASM  MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
-
-error.obj:  ERROR.ASM  MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
-
-setint24.obj:  SETINT24.ASM  MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
-
-qfileinf.obj: QFILEINF.ASM  MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
-
-scurpos.obj: SCURPOS.ASM MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
-
-scrollup.obj: SCROLLUP.ASM  MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
-
-wchstra.obj: WCHSTRA.ASM  MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
-
-scntry.obj: SCNTRY.ASM	MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
-
-setfsinf.obj: SETFSINF.ASM MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
-
-gmachmod.obj: GMACHMOD.ASM MACROS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\mapper $(subst /,\,$<) $(subst /,\,$@);"
-
-OFILES = chdir.obj getver.obj f_first.obj set_tod.obj write.obj beep.obj \
-         mkdir.obj exit.obj delete.obj getcntry.obj f_close.obj open.obj \
-         read.obj rmdir.obj qcurdir.obj qcurdsk.obj qverify.obj qfilemod.obj \
-         sverify.obj sfilemod.obj lseek.obj sfileinf.obj close.obj \
-         allocseg.obj freeseg.obj sel_disk.obj qfsinfo.obj f_next.obj \
-         getmsg.obj get_tod.obj charin.obj flushbuf.obj devconfg.obj \
-         reallseg.obj putmsg.obj execpgm.obj qhandtyp.obj cwait.obj \
-         kbdgstat.obj kbdsstat.obj casemap.obj dbcs.obj ioctl.obj \
-         sighand.obj error.obj setint24.obj qfileinf.obj scurpos.obj \
-         scrollup.obj wchstra.obj scntry.obj setfsinf.obj gmachmod.obj
+OFILES = f_first.obj write.obj beep.obj exit.obj delete.obj getcntry.obj \
+         f_close.obj open.obj read.obj qcurdir.obj qcurdsk.obj qfilemod.obj \
+         sfilemod.obj lseek.obj sfileinf.obj close.obj allocseg.obj \
+         freeseg.obj sel_disk.obj qfsinfo.obj f_next.obj get_tod.obj \
+         devconfg.obj casemap.obj dbcs.obj ioctl.obj sighand.obj error.obj \
+         setint24.obj qfileinf.obj scurpos.obj scrollup.obj wchstra.obj \
+         setfsinf.obj
 
 mapper.lib: $(OFILES)
 	rm -f $@
@@ -189,6 +100,6 @@ mapper.lib: $(OFILES)
 
 clean:
 	rm -f *.obj
+	rm -f *.lst
 	rm -f mapper.lib
-	rm -f mapper.lst
 	rm -f resp.txt

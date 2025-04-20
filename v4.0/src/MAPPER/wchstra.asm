@@ -44,7 +44,7 @@ attr    dd      ?       ; attribute pointer
 column  dw      ?       ; column number
 row     dw      ?       ; starting position for output
 lngth   dw      ?       ; length of the string
-addr    dd      ?       ; string to be written (pointer)
+address dd      ?       ; string to be written (pointer)
 str     ends
 
 viowrtcharstratt proc   far
@@ -68,7 +68,7 @@ viowrtcharstratt proc   far
         popal
         lds     si,[bp].attr             ; Set up attribute in BL
         mov     bl,byte ptr ds:[si]
-        lds     si,[bp].addr             ; DS:SI is pointer to string
+        lds     si,[bp].address          ; DS:SI is pointer to string
         mov     di,[bp].lngth
                                          ;  ****************************
 ;       cmp     bl,15                    ;  ** assume good attribute! **

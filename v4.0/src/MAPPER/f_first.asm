@@ -154,7 +154,7 @@ DosFindFirst  proc   far
 ; if it is a valid (ie - previously allocated by us) DirHandle
 
         mov     si,ax                     ; verify it is an active handle
-        test    ds:[si],OpenedHandle
+        test    word ptr ds:[si],OpenedHandle
         jnz     HandleFound               ; jump if true
 
         mov     ax,6                      ; else set error code
@@ -167,7 +167,7 @@ AllocateHandle:
         dec     cx
 
 FindHandleLoop:
-        test    ds:[si],OpenedHandle
+        test    word ptr ds:[si],OpenedHandle
         jz      HandleFound
 
         add     si,2
@@ -183,7 +183,7 @@ FindHandleLoop:
 
 HandleFound:
         mov     ax,ds:[si]              ; get the dta pointer
-        or      ds:[si],OpenedHandle    ; allocate the handle
+        or      word ptr ds:[si],OpenedHandle ; allocate the handle
         and     ax,not OpenedHandle
         mov     CurrentDTA,ax
 
