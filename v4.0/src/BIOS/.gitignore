@@ -5,3 +5,7 @@
 *.obj
 *.OBJ
 IO.SYS
+io.sys
+MSBIO.BIN
+msbio.bin
+resp.txt
