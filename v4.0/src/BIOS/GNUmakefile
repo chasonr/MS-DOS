@@ -161,13 +161,12 @@ MSBIO_OBJS = msbio1.obj mscon.obj msaux.obj mslpt.obj msclock.obj msdisk.obj \
              sysinit2.obj sysimes.obj
 
 msbio.bin: $(MSBIO_OBJS)
-	dosemu -t --Fdrive_c ../.. -E "src\dolink src\bios @msbio.lnk"
-#	echo 'system dos' >resp.txt
-#	echo 'option map=msbio.map' >>resp.txt
-#	echo 'option nocaseexact' >>resp.txt
-#	echo 'name msbio.exe' >>resp.txt
-#	for x in $(MSBIO_OBJS); do echo "file $$x" >>resp.txt; done
-#	wlink @resp.txt
+	echo 'system dos' >resp.txt
+	echo 'option map=msbio.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name msbio.exe' >>resp.txt
+	for x in $(MSBIO_OBJS); do echo "file $$x" >>resp.txt; done
+	wlink @resp.txt
 	exe2bin -q -l=0x0070 msbio.exe msbio.bin
 
 $(dest).sys: msload.com msbio.bin
