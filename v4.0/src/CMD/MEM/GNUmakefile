@@ -22,8 +22,8 @@ mem.ctl mem.cl1 mem.cl2 mem.cla mem.clb:        MEM.SKL                         
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\mem $(subst /,\,$<) $(country)"
 
 _parse.obj:     _PARSE.ASM                      \
-                $(inc)/PARSE.ASM                \
-                $(inc)/PSDATA.INC
+                $(inc)/parse.asm                \
+                $(inc)/psdata.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\mem $(subst /,\,$<) $(subst /,\,$@)"
 
 _msgret.obj:    _MSGRET.ASM                     \

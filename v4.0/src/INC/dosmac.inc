@@ -55,7 +55,7 @@ ENDM
 ;
 ; call a procedure that may be external.  The call will be short.
 ;
-invoke  MACRO   name
+InvokeFn  MACRO   name
 .xcref
 	IF2
 	    IFNDEF name
@@ -65,7 +65,12 @@ invoke  MACRO   name
 .cref
 	CALL    name
 ENDM
-.xcref  invoke
+.xcref  InvokeFn
+ifndef __JWASM__
+Invoke MACRO name
+    InvokeFn name
+endm
+endif
 
 PAGE
 ;
@@ -362,11 +367,11 @@ ENDM
 BREAK <Critical section macros>
 
 EnterCrit MACRO section
-	Invoke  E&section
+	InvokeFn  E&section
 ENDM
 
 LeaveCrit MACRO section
-	Invoke  L&section
+	InvokeFn  L&section
 ENDM
 
 Break   <message - display a message>
@@ -411,7 +416,7 @@ ENDIF
 	PUSH    AX
 cargs = cargs + 2
 ENDM
-	invoke  PFMT
+	InvokeFn  PFMT
 	ADD     SP,Cargs
 	POP     BP
 	POP     AX
@@ -459,7 +464,7 @@ ELSE
 	MOV     AX,OFFSET DOSGroup:a
 ENDIF
 	PUSH    AX
-	Invoke  SegCheck
+	InvokeFn  SegCheck
 	POP     AX
 IF NOT SHAREF
 Table   SEGMENT
@@ -510,13 +515,13 @@ a:
 	    ENDIF
     PUSH    AX
 	    IFIDN   <kind>,<ISBUF>
-	Invoke  BUFCheck
+	InvokeFn  BUFCheck
 	    ENDIF
 	    IFIDN   <kind>,<ISSFT>
-	Invoke  SFTCheck
+	InvokeFn  SFTCheck
 	    ENDIF
 	    IFIDN   <kind>,<ISDPB>
-	Invoke  DPBCheck
+	InvokeFn  DPBCheck
 	    ENDIF
     POP     AX
 	    IF SHAREF
@@ -549,7 +554,7 @@ IF Installed
 	RestoreReg  <restore>
     ENDIF
 ELSE
-	Invoke  name
+	InvokeFn  name
 ENDIF
 ENDM
 

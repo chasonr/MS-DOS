@@ -21,30 +21,30 @@ diskcomp.ctl diskcomp.cl1 diskcomp.cl2 diskcomp.cla: DISKCOMP.SKL \
 
 diskcomp.obj: DISKCOMP.ASM \
    DCMPMACR.INC \
-   $(inc)/BOOTFORM.INC \
+   $(inc)/bootform.inc \
    DISKCOMP.EQU
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\diskcomp $(subst /,\,$<) $(subst /,\,$@)"
 
 compinit.obj: COMPINIT.ASM \
    DCMPMACR.INC \
-   $(inc)/BOOTFORM.INC \
+   $(inc)/bootform.inc \
    DISKCOMP.EQU
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\diskcomp $(subst /,\,$<) $(subst /,\,$@)"
 
 dcompp.obj: DCOMPP.ASM \
-   $(inc)/PARSE.ASM
+   $(inc)/parse.asm
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\diskcomp $(subst /,\,$<) $(subst /,\,$@)"
 
 dcompsm.obj: DCOMPSM.ASM \
    $(inc)/SYSMSG.INC \
    $(inc)/MSGHAN.INC \
-   $(inc)/VERSIONA.INC \
+   $(inc)/versiona.inc \
    diskcomp.ctl \
    diskcomp.cla \
    diskcomp.cl1 \
    diskcomp.cl2 \
    DCOMPMS.INC \
-   $(inc)/COPYRIGH.INC
+   $(inc)/copyrigh.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\diskcomp $(subst /,\,$<) $(subst /,\,$@)"
 
 dcomppar.obj: DCOMPPAR.ASM

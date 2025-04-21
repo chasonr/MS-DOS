@@ -29,10 +29,10 @@ prtint2f.obj:	PRTINT2F.ASM CPSPEQU.INC $(inc)/STRUC.INC
 
 cpspi07.obj:	CPSPI07.ASM CPSPEQU.INC \
 		$(inc)/SYSMSG.INC printer.ctl \
-		$(inc)/VERSIONA.INC
+		$(inc)/versiona.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\printer $(subst /,\,$<) $(subst /,\,$@)"
 
-parser.obj:	PARSER.ASM CPSPEQU.INC $(inc)/PARSE.ASM \
+parser.obj:	PARSER.ASM CPSPEQU.INC $(inc)/parse.asm \
 		$(inc)/STRUC.INC
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\printer $(subst /,\,$<) $(subst /,\,$@)"
 

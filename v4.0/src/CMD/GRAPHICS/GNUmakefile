@@ -34,7 +34,7 @@ grinst.obj: GRINST.ASM	GRLOAD.EXT GRLOAD2.EXT GRCTRL.EXT GRPRINT.EXT \
 grcpsd.obj: GRCPSD.ASM GRCTRL.EXT GRCTRL.STR
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\graphics $(subst /,\,$<) $(subst /,\,$@)"
 
-grparse.obj: GRPARSE.ASM $(inc)/STRUC.INC $(inc)/PARSE.ASM $(inc)/PSDATA.INC
+grparse.obj: GRPARSE.ASM $(inc)/STRUC.INC $(inc)/parse.asm $(inc)/psdata.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\graphics $(subst /,\,$<) $(subst /,\,$@)"
 
 grpattrn.obj: GRPATTRN.ASM GRPATTRN.STR

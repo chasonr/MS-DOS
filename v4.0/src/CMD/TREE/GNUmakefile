@@ -24,13 +24,13 @@ tree.obj: TREE.ASM \
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\tree $(subst /,\,$<) $(subst /,\,$@)"
 
 treesysp.obj: TREESYSP.ASM \
-    $(inc)/PSDATA.INC \
-    $(inc)/PARSE.ASM
+    $(inc)/psdata.inc \
+    $(inc)/parse.asm
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\tree $(subst /,\,$<) $(subst /,\,$@)"
 
 treesysm.obj: TREESYSM.ASM \
-    $(inc)/COPYRIGH.INC \
-    $(inc)/VERSIONA.INC \
+    $(inc)/copyrigh.inc \
+    $(inc)/versiona.inc \
     $(inc)/SYSMSG.INC \
     $(inc)/MSGSERV.ASM \
     tree.ctl \

@@ -31,15 +31,15 @@ nlsfunc.obj: NLSFUNC.ASM	  \
 	     DOESMAC.INC       \
 	     $(inc)/MULT.INC     \
 	     $(inc)/MSGSERV.ASM   \
-	     $(inc)/DOSCNTRY.INC \
-	     $(inc)/DEVSYM.INC   \
+	     $(inc)/doscntry.inc \
+	     $(inc)/devsym.inc   \
 	     $(inc)/STRUC.INC    \
-	     $(inc)/COPYRIGH.INC
+	     $(inc)/copyrigh.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\nlsfunc $(subst /,\,$<) $(subst /,\,$@)"
 
 nlsparm.obj:  NLSPARM.ASM	  \
-	      $(inc)/PARSE.ASM \
-	      $(inc)/PSDATA.INC
+	      $(inc)/parse.asm \
+	      $(inc)/psdata.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\nlsfunc $(subst /,\,$<) $(subst /,\,$@)"
 
 OBJS = nlsfunc.obj nlsparm.obj

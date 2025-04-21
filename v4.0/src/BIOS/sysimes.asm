@@ -13,8 +13,8 @@
 ;==============================================================================
 
 iTEST = 0
-include MSequ.INC
-include MSmacro.INC
+include msequ.inc
+include msmacro.inc
 
 SYSINITSEG	SEGMENT PUBLIC BYTE 'SYSTEM_INIT'
 
@@ -28,7 +28,7 @@ SYSINITSEG	SEGMENT PUBLIC BYTE 'SYSTEM_INIT'
 
 
 ;include sysimes.inc
-include MSbio.cl3				;AN002;
+include msbio.cl3				;AN002;
 
 SYSSIZE LABEL	BYTE
 

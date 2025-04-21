@@ -22,7 +22,7 @@ diskcopy.ctl diskcopy.cl1 diskcopy.cl2 diskcopy.cla: DISKCOPY.SKL \
 diskcopy.obj: DISKCOPY.ASM \
    DCPYMACR.INC \
    DISKCOPY.EQU \
-   $(inc)/BOOTFORM.INC
+   $(inc)/bootform.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\diskcopy $(subst /,\,$<) $(subst /,\,$@)"
 
 copyinit.obj: COPYINIT.ASM \
@@ -31,19 +31,19 @@ copyinit.obj: COPYINIT.ASM \
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\diskcopy $(subst /,\,$<) $(subst /,\,$@)"
 
 dcopyp.obj: DCOPYP.ASM \
-   $(inc)/PARSE.ASM
+   $(inc)/parse.asm
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\diskcopy $(subst /,\,$<) $(subst /,\,$@)"
 
 dcopysm.obj: DCOPYSM.ASM \
    $(inc)/SYSMSG.INC \
    $(inc)/MSGHAN.INC \
-   $(inc)/VERSIONA.INC \
+   $(inc)/versiona.inc \
    diskcopy.ctl \
    diskcopy.cla \
    diskcopy.cl1 \
    diskcopy.cl2 \
    DCOPYMS.INC \
-   $(inc)/COPYRIGH.INC
+   $(inc)/copyrigh.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\diskcopy $(subst /,\,$<) $(subst /,\,$@)"
 
 dcopypar.obj: DCOPYPAR.ASM

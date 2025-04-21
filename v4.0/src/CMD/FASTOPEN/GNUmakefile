@@ -28,13 +28,13 @@ fastinit.obj: FASTINIT.ASM $(inc)/DOSSYM.INC $(inc)/FASTOPEN.INC
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\fastopen $(subst /,\,$<) $(subst /,\,$@)"
 
 fastp.obj: FASTP.ASM \
-	$(inc)/PSDATA.INC \
-	$(inc)/PARSE.ASM
+	$(inc)/psdata.inc \
+	$(inc)/parse.asm
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\fastopen $(subst /,\,$<) $(subst /,\,$@)"
 
 fastsm.obj: FASTSM.ASM \
-	$(inc)/VERSIONA.INC \
-	$(inc)/COPYRIGH.INC \
+	$(inc)/versiona.inc \
+	$(inc)/copyrigh.inc \
 	$(inc)/SYSMSG.INC \
 	$(inc)/MSGSERV.ASM \
 	fastopen.ctl \

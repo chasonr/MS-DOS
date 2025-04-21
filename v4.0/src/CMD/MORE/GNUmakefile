@@ -25,12 +25,12 @@ more.obj: MORE.ASM             \
           more.cla             \
           more.cl1             \
           more.cl2             \
-          $(inc)/SYSCALL.INC   \
+          $(inc)/syscall.inc   \
           $(inc)/STRUC.INC     \
           $(inc)/MSGSERV.ASM   \
           $(inc)/SYSMSG.INC    \
-          $(inc)/VERSIONA.INC  \
-          $(inc)/COPYRIGH.INC
+          $(inc)/versiona.inc  \
+          $(inc)/copyrigh.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\more $(subst /,\,$<) $(subst /,\,$@)"
 
 OBJS = more.obj

@@ -67,14 +67,14 @@ DOSSIZE EQU	0A000H
 ;dossize equ	 0C000H 	;J.K. for the debugging version of IBMDOS.
 
 .xlist
-;	INCLUDE dossym.INC
+;	INCLUDE dossym.inc
 	include smdossym.inc	;J.K. Reduced version of DOSSYM.INC
-	INCLUDE devsym.INC
-	include ioctl.INC
-	include BIOSTRUC.INC
+	INCLUDE devsym.inc
+	include ioctl.inc
+	include biostruc.inc
 	include smifssym.inc		;AN000;
 	include defems.inc		;AN010;
-	include DEVMARK.inc		;AN005;
+	include devmark.inc		;AN005;
 	include cputype.inc
 
 	include version.inc
@@ -211,9 +211,9 @@ ASSUME	CS:SYSINITSEG,DS:NOTHING,ES:NOTHING,SS:NOTHING
 SYSINIT$:
 	IF	STACKSW
 .SALL
-	  include MSSTACK.INC		;Main stack program and data definitions
-;	  include STKMES.INC		;Fatal stack error message
-	  include MSBIO.CL5		;Fatal stack error message
+	  include msstack.inc		;Main stack program and data definitions
+;	  include stkmes.inc		;Fatal stack error message
+	  include msbio.cl5		;Fatal stack error message
 .XALL
 	    public Endstackcode
 Endstackcode	label byte
@@ -632,7 +632,7 @@ ASSUME	DS:SYSINITSEG
 					; start of free memory
 	IF	ALTVECT
 	MOV	DX,OFFSET BOOTMES
-	invoke	PRINT			;Print message DOSINIT couldn't
+	InvokeFn PRINT			;Print message DOSINIT couldn't
 	ENDIF
 
 	POP	DS
@@ -845,7 +845,7 @@ OKLD:
 
 COMERR:
 	MOV	DX,OFFSET BADCOM	;WANT TO PRINT COMMAND ERROR
-	INVOKE	BADFIL
+	InvokeFn BADFIL
 STALL:	JMP	STALL
 
 	PUBLIC	TEMPCDS
@@ -978,7 +978,7 @@ MulTrk_Flag_Done:			    ;AN002;
 
 	PUSH	CS
 	POP	DS
-	INVOKE	ROUND
+	InvokeFn ROUND
 	MOV	AL,[FILES]
 	SUB	AL,5
 	JBE	DOFCBS
@@ -1006,7 +1006,7 @@ MulTrk_Flag_Done:			    ;AN002;
 	MOV	AX,6
 	ADD	[MEMLO],AX		;REMEMBER THE HEADER TOO
 	or	[SetDevMarkFlag], FOR_DEVMARK ;AN005;
-	INVOKE	ROUND			; Check for mem error before the STOSB
+	InvokeFn ROUND			; Check for mem error before the STOSB
 	ADD	DI,AX
 	XOR	AX,AX
 	REP	STOSB			;CLEAN OUT THE STUFF
@@ -1017,7 +1017,7 @@ MulTrk_Flag_Done:			    ;AN002;
 DOFCBS:
 	PUSH	CS
 	POP	DS
-	INVOKE	ROUND
+	InvokeFn ROUND
 	mov	al, DEVMARK_FCBS	;AN005;='X'
 	call	SetDevMark		;AN005;
 	MOV	AL,[FCBS]
@@ -1045,7 +1045,7 @@ DOFCBS:
 	MOV	AX,size sf-2
 	ADD	[MEMLO],AX		;REMEMBER THE HEADER TOO
 	or	[SetDevMarkFlag], FOR_DEVMARK ;AN005;
-	INVOKE	ROUND			; Check for mem error before the STOSB
+	InvokeFn ROUND			; Check for mem error before the STOSB
 	ADD	DI,AX			;Skip over header
 	MOV	AL,"A"
 FillLoop:
@@ -1307,7 +1307,7 @@ $$IF1:
 	    mov   ds:[bx.HASH_COUNT], ax	;AN000;
 ;	$ENDIF					;AN000;
 $$EN1:
-	invoke Round				;AN000; get [MEMHI]:[MEMLO]
+	InvokeFn Round				;AN000; get [MEMHI]:[MEMLO]
 	mov	al, DEVMARK_BUF 		;AN005; ='B'
 	call	SetDevMark			;AN005;
 ;Now, allocate Hash table at [memhi]:[memlo]. AX = Hash_Count.
@@ -1385,7 +1385,7 @@ $$IF16:
 ; Allocate CDSs
 ;------------------------------------------------------------------------------
 BUF1:
-	INVOKE	ROUND
+	InvokeFn ROUND
 	push	ax				;AN005;
 	mov	ax, DEVMARK_CDS 		;AN005;='L'
 	call	SetDevMark			;AN005;
@@ -1408,7 +1408,7 @@ GOTNCDS:
 	call	ParaRound
 	ADD	[MEMHI],AX
 	or	[SetDevMarkFlag], FOR_DEVMARK	;AN005;
-	INVOKE	ROUND				; Check for mem error before initializing
+	InvokeFn ROUND				; Check for mem error before initializing
 	LDS	SI,ES:[DI.SYSI_DPB]
 ASSUME	DS:NOTHING
 	LES	DI,ES:[DI.SYSI_CDS]
@@ -1483,7 +1483,7 @@ DoInstallStack:
 	call	ParaRound			; Convert size to pargraphs
 	ADD	[MEMHI], AX
 	or	[SetDevMarkFlag], FOR_DEVMARK	;AN005;To set the DEVMARK_SIZE for Stack by ROUND routine.
-	INVOKE	ROUND				; Check for memory error before
+	InvokeFn ROUND				; Check for memory error before
 						; continuing
 	CALL	StackInit			; Initialize hardware stack. CS=DS=sysinitseg, ES=Relocated stack code & data
 
@@ -1514,7 +1514,7 @@ RCCLLOOP:					;Close everybody but standard output
 	STC					; Set for possible INT 24
 	INT	21H
 	JNC	GOAUX
-	INVOKE	BADFIL
+	InvokeFn BADFIL
 	JMP	SHORT GOAUX2
 
 GOAUX:	PUSH	AX
@@ -1531,11 +1531,11 @@ GOAUX:	PUSH	AX
 
 GOAUX2: MOV	DX,OFFSET AUXDEV
 	MOV	AL,2				;READ/WRITE ACCESS
-	INVOKE	OPEN_DEV
+	InvokeFn OPEN_DEV
 
 	MOV	DX,OFFSET PRNDEV
 	MOV	AL,1				;WRITE ONLY
-	INVOKE	OPEN_DEV
+	InvokeFn OPEN_DEV
 
 ;J.K.9/29/86 *******************
 ;Global Rearm command for Shared Interrupt devices attached in the system;
@@ -1677,7 +1677,7 @@ Set_Sysinit_Base:
 ;------------------------------------------------------------------------------
 ;Skip_SYSINIT_BASE:				;AN021;
 
-	INVOKE	ROUND
+	InvokeFn ROUND
 	MOV	BX,[MEMHI]
 	MOV	AX,[AREA]
 	mov	[Old_Area], ax			;AN013; Save [AREA]
@@ -1934,8 +1934,8 @@ Sysinit_Base_SS  equ $-Sysinit_Base		;AN000;
 Sysinit_Base_SP  equ $-Sysinit_Base		;AN000;
 		dw	?			;AN000;
 Mem_Alloc_Err_msg equ $-Sysinit_Base		;AN000;
-;include BASEMES.INC				;AN000; Memory allocation error message
-include MSBIO.CL4				;AN011; Memory allocation error message
+;include basemes.inc				;AN000; Memory allocation error message
+include msbio.cl4				;AN011; Memory allocation error message
 End_Sysinit_Base	label	byte		;AN000;
 SIZE_SYSINIT_BASE	equ $-Sysinit_Base	;AN000;
 
@@ -2414,7 +2414,7 @@ Cp_IBM_ID:					 ;AN010;
 
 ;	int	3
 find_page:
-	cmp	es:[di], 0a000h ; is current page above 640K
+	cmp	word ptr es:[di], 0a000h ; is current page above 640K
 	jb	next		; NO - goto check_last
 
 	inc	dx		; count the no. of pages above 640K
@@ -2569,7 +2569,7 @@ Roundup endp
 	IF	STACKSW
 .SALL
 
-INCLUDE STKINIT.INC
+INCLUDE stkinit.inc
 
 .XALL
 	ENDIF
@@ -2658,11 +2658,10 @@ LShare_Set_Filename:				;AN021;
 	push	cs				;AN021;
 	pop	ds				;AN021;
 	mov	dx, offset ShareWarnMsg 	;AN021;WARNING! SHARE should be loaded...
-	invoke	Print				;AN021;
+	InvokeFn Print				;AN021;
 LShare_Ret:					;AN021;
 	ret					;AN021;
 LoadShare	endp				;AN021;
 
 SYSINITSEG	ENDS
 	   END
-

@@ -107,10 +107,10 @@ fdboot.inc: $(BOOT_OBJS)
 	rm fdboot.exe
 	dosemu -t --Fdrive_c ../../.. -E "src\tools\dbof src\cmd\fdisk\fdboot.bin src\cmd\fdisk\fdboot.inc 600 200"
 
-_parse.obj : _PARSE.ASM $(inc)/PSDATA.INC $(inc)/PARSE.ASM
+_parse.obj : _PARSE.ASM $(inc)/psdata.inc $(inc)/parse.asm
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\fdisk $(subst /,\,$<) $(subst /,\,$@)"
 
-_msgret.obj : _MSGRET.ASM $(inc)/PSDATA.INC \
+_msgret.obj : _MSGRET.ASM $(inc)/psdata.inc \
              fdisk.ctl fdisk.cla fdisk.clb fdisk.cl1 fdisk.cl2
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\fdisk $(subst /,\,$<) $(subst /,\,$@)"
 

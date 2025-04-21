@@ -15,12 +15,12 @@ COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
 
 all: command.com
 
-$(inc)/DOSSYM.INC: $(inc)/DOSMAC.INC $(inc)/BPB.INC \
-    $(inc)/BUFFER.INC $(inc)/SYSVAR.INC $(inc)/VECTOR.INC \
-    $(inc)/MULT.INC $(inc)/DIRENT.INC $(inc)/DPB.INC $(inc)/CURDIR.INC \
-    $(inc)/CPMFCB.INC $(inc)/FIND.INC $(inc)/PDB.INC $(inc)/EXE.INC \
-    $(inc)/SF.INC $(inc)/ARENA.INC $(inc)/INTNAT.INC $(inc)/MI.INC \
-    $(inc)/FILEMODE.INC $(inc)/ERROR.INC $(inc)/SYSCALL.INC
+$(inc)/DOSSYM.INC: $(inc)/dosmac.inc $(inc)/bpb.inc \
+    $(inc)/buffer.inc $(inc)/sysvar.inc $(inc)/vector.inc \
+    $(inc)/MULT.INC $(inc)/dirent.inc $(inc)/dpb.inc $(inc)/curdir.inc \
+    $(inc)/CPMFCB.INC $(inc)/FIND.INC $(inc)/pdb.inc $(inc)/exe.inc \
+    $(inc)/sf.inc $(inc)/arena.inc $(inc)/intnat.inc $(inc)/mi.inc \
+    $(inc)/FILEMODE.INC $(inc)/ERROR.INC $(inc)/syscall.inc
 	echo "touch $(inc)/DOSSYM.INC"
 
 command.ctl command.cl1 command.cl2 command.cl3 command.cl4 command.cl5 command.cla command.clb command.clc command.cld command.cle command.clf: \
@@ -28,48 +28,48 @@ command.ctl command.cl1 command.cl2 command.cl3 command.cl4 command.cl5 command.
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\command $(subst /,\,$<) $(country)"
 
 command1.obj:  COMMAND1.ASM $(inc)/DOSSYM.INC \
-    $(inc)/DEVSYM.INC COMSW.ASM COMEQU.ASM RESMSG.EQU \
+    $(inc)/devsym.inc COMSW.ASM COMEQU.ASM RESMSG.EQU \
     ENVDATA.ASM
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\command $(subst /,\,$<) $(subst /,\,$@)"
 
 command2.obj:  COMMAND2.ASM $(inc)/DOSSYM.INC \
-    $(inc)/DEVSYM.INC COMSW.ASM COMEQU.ASM RESMSG.EQU \
+    $(inc)/devsym.inc COMSW.ASM COMEQU.ASM RESMSG.EQU \
     ENVDATA.ASM
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\command $(subst /,\,$<) $(subst /,\,$@)"
 
 copy.obj:  COPY.ASM COMSW.ASM $(inc)/DOSSYM.INC \
-    $(inc)/DEVSYM.INC COMSEG.ASM COMEQU.ASM
+    $(inc)/devsym.inc COMSEG.ASM COMEQU.ASM
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\command $(subst /,\,$<) $(subst /,\,$@)"
 
 copypr1.obj:  COPYPR1.ASM COMSW.ASM $(inc)/DOSSYM.INC \
-    $(inc)/DEVSYM.INC COMSEG.ASM COMEQU.ASM
+    $(inc)/devsym.inc COMSEG.ASM COMEQU.ASM
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\command $(subst /,\,$<) $(subst /,\,$@)"
 
 copypr2.obj:  COPYPR2.ASM COMSW.ASM $(inc)/DOSSYM.INC \
-    $(inc)/DEVSYM.INC COMSEG.ASM COMEQU.ASM
+    $(inc)/devsym.inc COMSEG.ASM COMEQU.ASM
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\command $(subst /,\,$<) $(subst /,\,$@)"
 
 cparse.obj:  CPARSE.ASM COMSW.ASM $(inc)/DOSSYM.INC \
-    $(inc)/DEVSYM.INC COMSEG.ASM COMEQU.ASM
+    $(inc)/devsym.inc COMSEG.ASM COMEQU.ASM
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\command $(subst /,\,$<) $(subst /,\,$@)"
 
-init.obj:  INIT.ASM $(inc)/DOSSYM.INC $(inc)/DEVSYM.INC \
+init.obj:  INIT.ASM $(inc)/DOSSYM.INC $(inc)/devsym.inc \
     COMSW.ASM COMSEG.ASM COMEQU.ASM RESMSG.EQU $(inc)/SYSMSG.INC \
     $(inc)/MSGSERV.ASM command.ctl
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\command $(subst /,\,$<) $(subst /,\,$@)"
 
-iparse.obj:  IPARSE.ASM COMSEG.ASM $(inc)/PARSE.ASM $(inc)/PSDATA.INC
+iparse.obj:  IPARSE.ASM COMSEG.ASM $(inc)/parse.asm $(inc)/psdata.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\command $(subst /,\,$<) $(subst /,\,$@)"
 
-parse2.obj:  PARSE2.ASM $(inc)/DOSSYM.INC $(inc)/DEVSYM.INC COMSW.ASM \
+parse2.obj:  PARSE2.ASM $(inc)/DOSSYM.INC $(inc)/devsym.inc COMSW.ASM \
     COMSEG.ASM COMEQU.ASM
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\command $(subst /,\,$<) $(subst /,\,$@)"
 
-path1.obj:  PATH1.ASM $(inc)/DOSSYM.INC $(inc)/DEVSYM.INC COMSW.ASM \
+path1.obj:  PATH1.ASM $(inc)/DOSSYM.INC $(inc)/devsym.inc COMSW.ASM \
     COMSEG.ASM COMEQU.ASM
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\command $(subst /,\,$<) $(subst /,\,$@)"
 
-path2.obj:  PATH2.ASM $(inc)/DOSSYM.INC $(inc)/DEVSYM.INC COMSW.ASM \
+path2.obj:  PATH2.ASM $(inc)/DOSSYM.INC $(inc)/devsym.inc COMSW.ASM \
     COMSEG.ASM COMEQU.ASM
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\command $(subst /,\,$<) $(subst /,\,$@)"
 
@@ -78,74 +78,74 @@ rdata.obj:  RDATA.ASM COMSW.ASM COMSEG.ASM $(inc)/SYSMSG.INC \
     command.cld command.clc command.cle command.ctl
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\command $(subst /,\,$<) $(subst /,\,$@)"
 
-rucode.obj:  RUCODE.ASM $(inc)/DOSSYM.INC $(inc)/DEVSYM.INC \
-    $(inc)/DOSCNTRY.INC RESMSG.EQU $(inc)/SYSMSG.INC \
+rucode.obj:  RUCODE.ASM $(inc)/DOSSYM.INC $(inc)/devsym.inc \
+    $(inc)/doscntry.inc RESMSG.EQU $(inc)/SYSMSG.INC \
     $(inc)/MSGSERV.ASM COMSW.ASM COMSEG.ASM COMEQU.ASM command.ctl
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\command $(subst /,\,$<) $(subst /,\,$@)"
 
-tbatch.obj:  TBATCH.ASM COMSW.ASM $(inc)/DOSSYM.INC $(inc)/DOSCNTRY.INC \
-    $(inc)/DEVSYM.INC COMSEG.ASM COMEQU.ASM IFEQU.ASM
+tbatch.obj:  TBATCH.ASM COMSW.ASM $(inc)/DOSSYM.INC $(inc)/doscntry.inc \
+    $(inc)/devsym.inc COMSEG.ASM COMEQU.ASM IFEQU.ASM
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\command $(subst /,\,$<) $(subst /,\,$@)"
 
-tbatch2.obj:  TBATCH2.ASM COMSW.ASM $(inc)/DOSSYM.INC $(inc)/DOSCNTRY.INC \
-    $(inc)/DEVSYM.INC COMSEG.ASM COMEQU.ASM IFEQU.ASM
+tbatch2.obj:  TBATCH2.ASM COMSW.ASM $(inc)/DOSSYM.INC $(inc)/doscntry.inc \
+    $(inc)/devsym.inc COMSEG.ASM COMEQU.ASM IFEQU.ASM
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\command $(subst /,\,$<) $(subst /,\,$@)"
 
-tcmd1a.obj:  TCMD1A.ASM COMSW.ASM $(inc)/DOSSYM.INC $(inc)/IOCTL.INC \
-    $(inc)/DEVSYM.INC COMSEG.ASM COMEQU.ASM IFEQU.ASM
+tcmd1a.obj:  TCMD1A.ASM COMSW.ASM $(inc)/DOSSYM.INC $(inc)/ioctl.inc \
+    $(inc)/devsym.inc COMSEG.ASM COMEQU.ASM IFEQU.ASM
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\command $(subst /,\,$<) $(subst /,\,$@)"
 
-tcmd1b.obj:  TCMD1B.ASM COMSW.ASM $(inc)/DOSSYM.INC $(inc)/IOCTL.INC \
-    $(inc)/DEVSYM.INC COMSEG.ASM COMEQU.ASM IFEQU.ASM $(inc)/EA.INC
+tcmd1b.obj:  TCMD1B.ASM COMSW.ASM $(inc)/DOSSYM.INC $(inc)/ioctl.inc \
+    $(inc)/devsym.inc COMSEG.ASM COMEQU.ASM IFEQU.ASM $(inc)/EA.INC
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\command $(subst /,\,$<) $(subst /,\,$@)"
 
-tcmd2a.obj:  TCMD2A.ASM COMSW.ASM $(inc)/DOSSYM.INC $(inc)/IOCTL.INC \
-    $(inc)/DEVSYM.INC COMSEG.ASM COMEQU.ASM IFEQU.ASM
+tcmd2a.obj:  TCMD2A.ASM COMSW.ASM $(inc)/DOSSYM.INC $(inc)/ioctl.inc \
+    $(inc)/devsym.inc COMSEG.ASM COMEQU.ASM IFEQU.ASM
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\command $(subst /,\,$<) $(subst /,\,$@)"
 
 tcmd2b.obj:  TCMD2B.ASM COMSW.ASM $(inc)/DOSSYM.INC \
-    $(inc)/DEVSYM.INC COMSEG.ASM COMEQU.ASM IFEQU.ASM
+    $(inc)/devsym.inc COMSEG.ASM COMEQU.ASM IFEQU.ASM
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\command $(subst /,\,$<) $(subst /,\,$@)"
 
 tcode.obj:  TCODE.ASM COMSW.ASM $(inc)/DOSSYM.INC \
-    $(inc)/DEVSYM.INC COMSEG.ASM COMEQU.ASM IFEQU.ASM \
+    $(inc)/devsym.inc COMSEG.ASM COMEQU.ASM IFEQU.ASM \
     $(inc)/MSHALO.ASM
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\command $(subst /,\,$<) $(subst /,\,$@)"
 
-tdata.obj:  TDATA.ASM COMSW.ASM COMSEG.ASM $(inc)/CURDIR.INC \
+tdata.obj:  TDATA.ASM COMSW.ASM COMSEG.ASM $(inc)/curdir.inc \
     $(inc)/ERROR.INC IFEQU.ASM COMEQU.ASM $(inc)/SYSMSG.INC \
     $(inc)/MSGSERV.ASM TRANMSG.ASM command.clf command.cl1 command.cl2 \
     command.ctl  $(inc)/EA.INC
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\command $(subst /,\,$<) $(subst /,\,$@)"
 
-tenv.obj:  TENV.ASM COMSW.ASM $(inc)/DOSSYM.INC $(inc)/DEVSYM.INC \
-    COMSEG.ASM COMEQU.ASM IFEQU.ASM $(inc)/DOSCNTRY.INC
+tenv.obj:  TENV.ASM COMSW.ASM $(inc)/DOSSYM.INC $(inc)/devsym.inc \
+    COMSEG.ASM COMEQU.ASM IFEQU.ASM $(inc)/doscntry.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\command $(subst /,\,$<) $(subst /,\,$@)"
 
-tenv2.obj:  TENV2.ASM COMSW.ASM $(inc)/DOSSYM.INC $(inc)/DEVSYM.INC \
+tenv2.obj:  TENV2.ASM COMSW.ASM $(inc)/DOSSYM.INC $(inc)/devsym.inc \
     COMSEG.ASM COMEQU.ASM IFEQU.ASM
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\command $(subst /,\,$<) $(subst /,\,$@)"
 
-tfor.obj:  TFOR.ASM COMSW.ASM $(inc)/DOSSYM.INC $(inc)/DEVSYM.INC \
+tfor.obj:  TFOR.ASM COMSW.ASM $(inc)/DOSSYM.INC $(inc)/devsym.inc \
     COMSEG.ASM COMEQU.ASM IFEQU.ASM FORDATA.ASM
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\command $(subst /,\,$<) $(subst /,\,$@)"
 
 tmisc1.obj:  TMISC1.ASM COMSW.ASM $(inc)/DOSSYM.INC \
-    $(inc)/DEVSYM.INC COMSEG.ASM COMEQU.ASM IFEQU.ASM
+    $(inc)/devsym.inc COMSEG.ASM COMEQU.ASM IFEQU.ASM
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\command $(subst /,\,$<) $(subst /,\,$@)"
 
-tmisc2.obj:  TMISC2.ASM COMSW.ASM $(inc)/DOSSYM.INC $(inc)/IOCTL.INC \
-    $(inc)/DEVSYM.INC COMSEG.ASM COMEQU.ASM IFEQU.ASM
+tmisc2.obj:  TMISC2.ASM COMSW.ASM $(inc)/DOSSYM.INC $(inc)/ioctl.inc \
+    $(inc)/devsym.inc COMSEG.ASM COMEQU.ASM IFEQU.ASM
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\command $(subst /,\,$<) $(subst /,\,$@)"
 
-tparse.obj:  TPARSE.ASM COMSEG.ASM $(inc)/PARSE.ASM $(inc)/PSDATA.INC
+tparse.obj:  TPARSE.ASM COMSEG.ASM $(inc)/parse.asm $(inc)/psdata.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\command $(subst /,\,$<) $(subst /,\,$@)"
 
 tpipe.obj:  TPIPE.ASM COMSW.ASM $(inc)/DOSSYM.INC \
-    $(inc)/DEVSYM.INC COMSEG.ASM COMEQU.ASM IFEQU.ASM
+    $(inc)/devsym.inc COMSEG.ASM COMEQU.ASM IFEQU.ASM
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\command $(subst /,\,$<) $(subst /,\,$@)"
 
-tprintf.obj:  TPRINTF.ASM COMSW.ASM $(inc)/DOSMAC.INC \
+tprintf.obj:  TPRINTF.ASM COMSW.ASM $(inc)/dosmac.inc \
     COMSEG.ASM COMEQU.ASM $(inc)/SYSMSG.INC $(inc)/MSGSERV.ASM \
     command.ctl
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\command $(subst /,\,$<) $(subst /,\,$@)"
@@ -154,7 +154,7 @@ tspc.obj:  TSPC.ASM COMSW.ASM $(inc)/DOSSYM.INC COMEQU.ASM \
     IFEQU.ASM COMSEG.ASM  $(inc)/EA.INC
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\command $(subst /,\,$<) $(subst /,\,$@)"
 
-tucode.obj:  TUCODE.ASM $(inc)/DOSMAC.INC $(inc)/DOSSYM.INC \
+tucode.obj:  TUCODE.ASM $(inc)/dosmac.inc $(inc)/DOSSYM.INC \
     COMSW.ASM COMSEG.ASM COMEQU.ASM IFEQU.ASM
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\command $(subst /,\,$<) $(subst /,\,$@)"
 

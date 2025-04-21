@@ -9,17 +9,24 @@ country = usa-ms
 
 COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
 
-#.SUFFIXES: .ASM .obj .cl1 .skl
-#
-#.asm.obj:
-#	dosemu --Fdrive_c ${root} -E "c:\src\tools\masm -Mx -t ${extasw} -I. -I${inc} -I${dos} $(subst /,\,$<),$(subst /,\,$@);"
-#
-#.skl.cl1:
-#	dosemu --Fdrive_c ${root} -E "c:\src\tools\nosrvbld $(subst /,\,$<) $(subst /,\,${msg}/${COUNTRY}.msg)"
-
 #
 #######################	dependencies begin here. #########################
 #
+
+.SUFFIXES: .asm .obj
+
+AS = jwasm
+AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.asm.obj:
+	$(AS) $(AFLAGS) -Fo$@ $<
+
+SMDOSSYM_INC = $(inc)/smdossym.inc $(inc)/arena.inc $(inc)/bpb.inc \
+               $(inc)/buffer.inc $(inc)/curdir.inc $(inc)/dirent.inc \
+               $(inc)/doscntry.inc $(inc)/dosmac.inc $(inc)/dpb.inc \
+               $(inc)/exe.inc $(inc)/intnat.inc $(inc)/mi.inc $(inc)/pdb.inc \
+               $(inc)/sf.inc $(inc)/syscall.inc $(inc)/sysvar.inc \
+               $(inc)/vector.inc $(inc)/versiona.inc $(inc)/version.inc
 
 all: $(dest).sys
 
@@ -27,12 +34,11 @@ msbio.cl1 msbio.cl2 msbio.cl3 msbio.cl4 msbio.cl5: MSBIO.SKL \
 	$(msg)/$(COUNTRY).MSG
 	dosemu -t --Fdrive_c ../.. -E "src\domsg1.bat src\bios $(subst /,\,$<) $(country);"
 
-msload.obj: MSLOAD.ASM \
+msload.obj: msload.asm \
 	msbio.cl1 \
-	$(inc)/BOOTFORM.INC \
-	$(inc)/VERSIONA.INC \
-	MSLOAD.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\bios $(subst /,\,$<) $(subst /,\,$@);"
+	$(inc)/bootform.inc \
+	$(inc)/versiona.inc \
+	msload.inc
 
 MSLOAD_OBJS = msload.obj
 
@@ -45,133 +51,110 @@ msload.com: $(MSLOAD_OBJS)
 	wlink @resp.txt
 	exe2bin -q msload.exe msload.com
 
-msbio1.obj: MSBIO1.ASM \
-   	MSBDATA.INC \
-	MSGROUP.INC \
-	JUMPMAC.INC \
-	PUSHPOP.INC \
-	$(inc)/DEVSYM.INC \
-	MSDSKPR.INC \
-	MSMACRO.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\bios $(subst /,\,$<) $(subst /,\,$@);"
+msbio1.obj: msbio1.asm \
+   	msbdata.inc \
+	msgroup.inc \
+	jumpmac.inc \
+	pushpop.inc \
+	$(inc)/devsym.inc \
+	msdskpr.inc \
+	msmacro.inc
 
-mscon.obj: MSCON.ASM \
-	MSGROUP.INC \
-	JUMPMAC.INC \
-	MSMACRO.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\bios $(subst /,\,$<) $(subst /,\,$@);"
+mscon.obj: mscon.asm \
+	msgroup.inc \
+	jumpmac.inc \
+	msequ.inc $(inc)/msbds.inc \
+	msmacro.inc
 
-msaux.obj: MSAUX.ASM \
-	MSGROUP.INC \
-	JUMPMAC.INC \
-	MSMACRO.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\bios $(subst /,\,$<) $(subst /,\,$@);"
+msaux.obj: msaux.asm \
+	msgroup.inc \
+	jumpmac.inc \
+	msmacro.inc
 
-mslpt.obj: MSLPT.ASM \
-	MSGROUP.INC \
-	MSEQU.INC \
-	$(inc)/MSBDS.INC \
-	MSMACRO.INC \
-	$(inc)/DEVSYM.INC \
-	$(inc)/IOCTL.INC $(inc)/BPB.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\bios $(subst /,\,$<) $(subst /,\,$@);"
+mslpt.obj: mslpt.asm \
+	msgroup.inc \
+	msequ.inc \
+	$(inc)/msbds.inc \
+	msmacro.inc \
+	$(inc)/devsym.inc \
+	$(inc)/ioctl.inc $(inc)/bpb.inc
 
-msclock.obj: MSCLOCK.ASM \
-	MSGROUP.INC \
-	MSMACRO.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\bios $(subst /,\,$<) $(subst /,\,$@);"
+msclock.obj: msclock.asm \
+	msgroup.inc \
+	msmacro.inc
 
-msdisk.obj: MSDISK.ASM \
-	MSGROUP.INC \
-	MSEQU.INC \
-	$(inc)/MSBDS.INC \
-	PUSHPOP.INC \
-	MSMACRO.INC \
-	$(inc)/DEVSYM.INC \
-	MSDSKPR.INC \
-	MSIOCTL.INC $(inc)/IOCTL.INC $(inc)/BPB.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\bios $(subst /,\,$<) $(subst /,\,$@);"
+msdisk.obj: msdisk.asm \
+	msgroup.inc \
+	msequ.inc \
+	$(inc)/msbds.inc \
+	pushpop.inc \
+	msmacro.inc \
+	$(inc)/devsym.inc \
+	msdskpr.inc \
+	biostruc.inc \
+	msioctl.inc $(inc)/ioctl.inc $(inc)/bpb.inc
 
-msinit.obj: MSINIT.ASM \
-	MSGROUP.INC \
-	MSDSKPR.INC  \
-	MSEQU.INC $(inc)/MSBDS.INC \
-	$(inc)/CPUTYPE.INC \
-	MSMACRO.INC   \
-	READCLOC.INC  \
-	CLOCKSUB.INC   \
-	MSEXTRN.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\bios $(subst /,\,$<) $(subst /,\,$@);"
+msinit.obj: msinit.asm \
+	msgroup.inc \
+	msdskpr.inc  \
+	msequ.inc $(inc)/msbds.inc \
+	$(inc)/cputype.inc \
+	msmacro.inc   \
+	readcloc.inc  \
+	clocksub.inc   \
+	msextrn.inc \
+	biostruc.inc \
+	cmosequ.inc \
 
-
-sysinit1.obj: SYSINIT1.ASM \
-	MSSTACK.INC \
+sysinit1.obj: sysinit1.asm \
+	msstack.inc \
 	msbio.cl4 \
 	msbio.cl5 \
-	STKINIT.INC \
-	DEVMARK.INC \
-	$(inc)/SMIFSSYM.INC \
-	$(inc)/DEVSYM.INC \
-	$(inc)/IOCTL.INC \
-	$(inc)/CPUTYPE.INC \
-	$(inc)/SMDOSSYM.INC $(inc)/DOSMAC.INC $(inc)/BPB.INC $(inc)/BUFFER.INC \
-	$(inc)/SYSVAR.INC $(inc)/VECTOR.INC $(inc)/DIRENT.INC \
-	$(inc)/DPB.INC $(inc)/CURDIR.INC \
-	$(inc)/PDB.INC $(inc)/EXE.INC $(inc)/SF.INC $(inc)/ARENA.INC \
-	$(inc)/INTNAT.INC $(inc)/MI.INC \
-	$(inc)/SYSCALL.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\bios $(subst /,\,$<) $(subst /,\,$@);"
+	stkinit.inc \
+	devmark.inc \
+    biostruc.inc \
+    defems.inc \
+	$(inc)/smifssym.inc \
+	$(inc)/devsym.inc \
+	$(inc)/ioctl.inc \
+	$(inc)/cputype.inc \
+    $(SMDOSSYM_INC)
+
+sysconf.obj: sysconf.asm \
+	psoption.inc \
+	devmark.inc \
+	biostruc.inc \
+	$(inc)/psdata.inc \
+	$(inc)/parse.asm \
+	$(inc)/smifssym.inc \
+	$(inc)/devsym.inc \
+	$(inc)/ioctl.inc \
+    $(SMDOSSYM_INC)
 
 
-sysconf.obj: SYSCONF.ASM \
-	PSOPTION.INC \
-	DEVMARK.INC \
-	$(inc)/PSDATA.INC \
-	$(inc)/PARSE.ASM \
-	$(inc)/SMIFSSYM.INC \
-	$(inc)/DEVSYM.INC \
-	$(inc)/IOCTL.INC \
-	$(inc)/SMDOSSYM.INC $(inc)/DOSMAC.INC $(inc)/BPB.INC $(inc)/BUFFER.INC \
-	$(inc)/SYSVAR.INC $(inc)/VECTOR.INC $(inc)/DIRENT.INC \
-	$(inc)/DPB.INC $(inc)/CURDIR.INC \
-	$(inc)/PDB.INC $(inc)/EXE.INC $(inc)/SF.INC $(inc)/ARENA.INC \
-	$(inc)/INTNAT.INC $(inc)/MI.INC \
-	$(inc)/SYSCALL.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\bios $(subst /,\,$<) $(subst /,\,$@);"
+sysinit2.obj: sysinit2.asm \
+	devmark.inc \
+	$(inc)/copyrigh.inc \
+	$(inc)/devsym.inc \
+	$(inc)/ioctl.inc \
+    $(SMDOSSYM_INC)
 
-sysinit2.obj: SYSINIT2.ASM \
-	DEVMARK.INC \
-	$(inc)/COPYRIGH.INC \
-	$(inc)/SMIFSSYM.INC \
-	$(inc)/DEVSYM.INC \
-	$(inc)/IOCTL.INC \
-	$(inc)/SMDOSSYM.INC $(inc)/DOSMAC.INC $(inc)/BPB.INC $(inc)/BUFFER.INC \
- 	$(inc)/SYSVAR.INC $(inc)/VECTOR.INC $(inc)/DIRENT.INC \
-	$(inc)/DPB.INC $(inc)/CURDIR.INC \
-	$(inc)/PDB.INC $(inc)/EXE.INC $(inc)/SF.INC $(inc)/ARENA.INC \
-	$(inc)/INTNAT.INC $(inc)/MI.INC \
-	$(inc)/SYSCALL.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\bios $(subst /,\,$<) $(subst /,\,$@);"
-
-sysimes.obj: SYSIMES.ASM \
-	MSMACRO.INC \
+sysimes.obj: sysimes.asm \
+	msmacro.inc \
 	msbio.cl3 \
-	MSEQU.INC $(inc)/MSBDS.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\bios $(subst /,\,$<) $(subst /,\,$@);"
+	msequ.inc $(inc)/msbds.inc
 
-msbio2.obj: MSBIO2.ASM \
-	MSGROUP.INC \
-	MSEQU.INC \
-	$(inc)/MSBDS.INC \
-	$(inc)/DEVSYM.INC \
-	PUSHPOP.INC \
-	MSMACRO.INC \
+msbio2.obj: msbio2.asm \
+	msgroup.inc \
+	msequ.inc \
+	$(inc)/msbds.inc \
+	$(inc)/devsym.inc \
+	pushpop.inc \
+	msmacro.inc \
 	msbio.cl2 \
-	MS96TPI.INC MSVOLID.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\bios $(subst /,\,$<) $(subst /,\,$@);"
+	ms96tpi.inc msvolid.inc
 
-mshard.obj:  MSHARD.ASM $(inc)/POSTEQU.INC $(inc)/DSEG.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\bios $(subst /,\,$<) $(subst /,\,$@);"
+mshard.obj:  mshard.asm
 
 MSBIO_OBJS = msbio1.obj mscon.obj msaux.obj mslpt.obj msclock.obj msdisk.obj \
              msbio2.obj mshard.obj msinit.obj sysinit1.obj sysconf.obj \
@@ -192,6 +175,8 @@ $(dest).sys: msload.com msbio.bin
 
 clean:
 	rm -f *.obj
+	rm -f *.lst
+	rm -f *.err
 	rm -f $(dest).sys
 	rm -f msbio.cl[1-5]
 	rm -f msbio.map

@@ -20,16 +20,16 @@ assign.ctl assign.cl1 assign.cl2 assign.cla: ASSIGN.SKL \
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\assign $(subst /,\,$<) $(country)"
 
 assgparm.obj: ASSGPARM.ASM \
-	$(inc)/PSDATA.INC \
-	$(inc)/PARSE.ASM
+	$(inc)/psdata.inc \
+	$(inc)/parse.asm
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\assign $(subst /,\,$<) $(subst /,\,$@)"
 
 assgmain.obj: ASSGMAIN.ASM \
-	$(inc)/DOSMAC.INC \
-	$(inc)/SYSVAR.INC \
+	$(inc)/dosmac.inc \
+	$(inc)/sysvar.inc \
 	$(inc)/MULT.INC \
-	$(inc)/PDB.INC \
-	$(inc)/SYSCALL.INC \
+	$(inc)/pdb.inc \
+	$(inc)/syscall.inc \
 	$(inc)/MSGSERV.ASM \
 	$(inc)/SYSMSG.INC \
 	ASSGPARM.INC \
@@ -38,7 +38,7 @@ assgmain.obj: ASSGMAIN.ASM \
 	assign.cla \
 	assign.cl1 \
 	assign.cl2 \
-	$(inc)/CURDIR.INC
+	$(inc)/curdir.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\assign $(subst /,\,$<) $(subst /,\,$@)"
 
 OBJS = assgmain.obj assgparm.obj

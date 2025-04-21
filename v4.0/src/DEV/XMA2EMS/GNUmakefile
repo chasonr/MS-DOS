@@ -18,10 +18,10 @@ all: xma2ems.sys
 xma2ems.ctl xma2ems.cl1: XMA2EMS.SKL $(msg)/$(COUNTRY).MSG
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg1.bat src\dev\xma2ems $(subst /,\,$<) $(country)"
 
-xma2ems.obj:	XMA2EMS.ASM XMA1DIAG.INC xma2ems.cl1 $(inc)/COPYRIGH.INC \
+xma2ems.obj:	XMA2EMS.ASM XMA1DIAG.INC xma2ems.cl1 $(inc)/copyrigh.inc \
 		PARMPARS.INC LIM40.INC PS2_5060.INC \
 		EMSINIT.INC GENIOCTL.INC XMA2EMSP.INC LIM40B.INC ROMSCAN.INC \
-		$(inc)/PSDATA.INC
+		$(inc)/psdata.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\xma2ems $(subst /,\,$<) $(subst /,\,$@)"
 
 xma2ems.sys: xma2ems.obj

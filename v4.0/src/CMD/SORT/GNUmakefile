@@ -24,15 +24,15 @@ sort.obj: SORT.ASM              \
           sort.cla              \
           sort.cl1              \
           sort.cl2              \
-          $(inc)/PARSE.ASM      \
-          $(inc)/PSDATA.INC     \
-          $(inc)/SYSCALL.INC    \
+          $(inc)/parse.asm      \
+          $(inc)/psdata.inc     \
+          $(inc)/syscall.inc    \
           $(inc)/MSGSERV.ASM    \
           $(inc)/SYSMSG.INC
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\sort $(subst /,\,$<) $(subst /,\,$@)"
 
 sortmes.obj: SORTMES.ASM           \
-          $(inc)/SYSCALL.INC
+          $(inc)/syscall.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\sort $(subst /,\,$<) $(subst /,\,$@)"
 
 OBJS = sort.obj sortmes.obj

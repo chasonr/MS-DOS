@@ -21,7 +21,7 @@ keyb.ctl keyb.cl1 keyb.cl2 keyb.cla: KEYB.SKL $(msg)/$(COUNTRY).MSG
 keybcmd.obj: KEYBCMD.ASM \
              $(inc)/STRUC.INC \
              $(inc)/SYSMSG.INC \
-             $(inc)/VERSIONA.INC \
+             $(inc)/versiona.inc \
              KEYBEQU.INC  \
              KEYBSYS.INC  \
              KEYBI9.INC   \
@@ -66,7 +66,7 @@ keybi9c.obj: KEYBI9C.ASM
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\keyb $(subst /,\,$<) $(subst /,\,$@)"
 
 parser.obj:  PARSER.ASM \
-             $(inc)/PARSE.ASM \
+             $(inc)/parse.asm \
              $(inc)/STRUC.INC \
              KEYBDCL.INC
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\keyb $(subst /,\,$<) $(subst /,\,$@)"

@@ -21,8 +21,8 @@ $(map)/mapper.lib:
 	$(MAKE) -C $(map)/mapper.lib:
 
 _parse.obj:	_PARSE.ASM			\
-		$(inc)/PARSE.ASM		\
-		$(inc)/PSDATA.INC
+		$(inc)/parse.asm		\
+		$(inc)/psdata.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\backup $(subst /,\,$<) $(subst /,\,$@)"
 
 backup.ctl backup.cl1 backup.cl2 backup.cla:	BACKUP.SKL			\
@@ -33,8 +33,8 @@ _msgret.obj:	_MSGRET.ASM			\
 		backup.ctl			\
 		$(inc)/MSGSERV.ASM		\
 		$(inc)/SYSMSG.INC		\
-		$(inc)/VERSIONA.INC		\
-		$(inc)/COPYRIGH.INC
+		$(inc)/versiona.inc		\
+		$(inc)/copyrigh.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\backup $(subst /,\,$<) $(subst /,\,$@)"
 
 backup.obj:  BACKUP.C  BACKPARS.H BACKUP.H  \

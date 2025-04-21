@@ -23,26 +23,26 @@ $(inc)/boot.inc: $(boot)/msboot.asm $(msg)/$(COUNTRY).MSG
 sys.ctl sys.cl1 sys.cl2 sys.cla sys.clb sys.clc sys.cld: SYS.SKL $(msg)/$(COUNTRY).MSG
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\sys $(subst /,\,$<) $(country)"
 
-sys1.obj: SYS1.ASM $(inc)/DOSSYM.INC $(inc)/DOSMAC.INC \
-    $(inc)/BPB.INC $(inc)/BUFFER.INC $(inc)/SYSVAR.INC \
-    $(inc)/MULT.INC $(inc)/DIRENT.INC $(inc)/DPB.INC \
-    $(inc)/CURDIR.INC $(inc)/CPMFCB.INC $(inc)/FIND.INC \
-    $(inc)/PDB.INC $(inc)/SF.INC $(inc)/ARENA.INC $(inc)/INTNAT.INC \
-    $(inc)/ERROR.INC $(inc)/SYSCALL.INC $(inc)/IOCTL.INC \
-    $(inc)/BOOTFORM.INC $(inc)/boot.inc SYSHDR.INC
+sys1.obj: SYS1.ASM $(inc)/DOSSYM.INC $(inc)/dosmac.inc \
+    $(inc)/bpb.inc $(inc)/buffer.inc $(inc)/sysvar.inc \
+    $(inc)/MULT.INC $(inc)/dirent.inc $(inc)/dpb.inc \
+    $(inc)/curdir.inc $(inc)/CPMFCB.INC $(inc)/FIND.INC \
+    $(inc)/pdb.inc $(inc)/sf.inc $(inc)/arena.inc $(inc)/intnat.inc \
+    $(inc)/ERROR.INC $(inc)/syscall.inc $(inc)/ioctl.inc \
+    $(inc)/bootform.inc $(inc)/boot.inc SYSHDR.INC
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\sys $(subst /,\,$<) $(subst /,\,$@)"
 
-sys2.obj: SYS2.ASM $(inc)/DOSSYM.INC $(inc)/DOSMAC.INC \
-    $(inc)/BPB.INC $(inc)/BUFFER.INC $(inc)/SYSVAR.INC \
-    $(inc)/MULT.INC $(inc)/DIRENT.INC $(inc)/DPB.INC \
-    $(inc)/CURDIR.INC $(inc)/CPMFCB.INC $(inc)/FIND.INC \
-    $(inc)/PDB.INC $(inc)/SF.INC $(inc)/ARENA.INC $(inc)/INTNAT.INC \
-    $(inc)/ERROR.INC $(inc)/SYSCALL.INC $(inc)/IOCTL.INC \
-    $(inc)/BOOTFORM.INC $(inc)/boot.inc SYSHDR.INC
+sys2.obj: SYS2.ASM $(inc)/DOSSYM.INC $(inc)/dosmac.inc \
+    $(inc)/bpb.inc $(inc)/buffer.inc $(inc)/sysvar.inc \
+    $(inc)/MULT.INC $(inc)/dirent.inc $(inc)/dpb.inc \
+    $(inc)/curdir.inc $(inc)/CPMFCB.INC $(inc)/FIND.INC \
+    $(inc)/pdb.inc $(inc)/sf.inc $(inc)/arena.inc $(inc)/intnat.inc \
+    $(inc)/ERROR.INC $(inc)/syscall.inc $(inc)/ioctl.inc \
+    $(inc)/bootform.inc $(inc)/boot.inc SYSHDR.INC
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\sys $(subst /,\,$<) $(subst /,\,$@)"
 
-syssr.obj: SYSSR.ASM $(inc)/PARSE.ASM \
-    $(inc)/PSDATA.INC $(inc)/MSGSERV.ASM $(inc)/SYSMSG.INC \
+syssr.obj: SYSSR.ASM $(inc)/parse.asm \
+    $(inc)/psdata.inc $(inc)/MSGSERV.ASM $(inc)/SYSMSG.INC \
     sys.ctl sys.cl1 sys.cl2 sys.cla sys.clb sys.clc sys.cld
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\sys $(subst /,\,$<) $(subst /,\,$@)"
 

@@ -20,8 +20,8 @@ xcopy.ctl xcopy.cl1 xcopy.cl2 xcopy.cla: XCOPY.SKL \
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\xcopy $(subst /,\,$<) $(country)"
 
 xcopy.obj: XCOPY.ASM \
-   $(inc)/VERSIONA.INC \
-   $(inc)/COPYRIGH.INC \
+   $(inc)/versiona.inc \
+   $(inc)/copyrigh.inc \
    $(inc)/SYSMSG.INC \
    $(inc)/MSGSERV.ASM \
    DOS.EQU \
@@ -34,15 +34,15 @@ xcopy.obj: XCOPY.ASM \
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\xcopy $(subst /,\,$<) $(subst /,\,$@)"
 
 xcpyinit.obj: XCPYINIT.ASM \
-   $(inc)/VERSIONA.INC \
+   $(inc)/versiona.inc \
    XCOPY.EQU \
    DOS.EQU \
    XINITMSG.EQU
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\xcopy $(subst /,\,$<) $(subst /,\,$@)"
 
 xcopypar.obj: XCOPYPAR.ASM \
-   $(inc)/PSDATA.INC \
-   $(inc)/PARSE.ASM
+   $(inc)/psdata.inc \
+   $(inc)/parse.asm
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\xcopy $(subst /,\,$<) $(subst /,\,$@)"
 
 OBJS = xcopy.obj xcpyinit.obj xcopypar.obj

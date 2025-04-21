@@ -9,14 +9,14 @@
 ;==============================================================================
 
 	itest=0
-	INCLUDE MSGROUP.INC	;DEFINE CODE SEGMENT
-	INCLUDE JUMPMAC.INC
-	INCLUDE MSEQU.INC
-	INCLUDE MSMACRO.INC
+	INCLUDE msgroup.inc	;DEFINE CODE SEGMENT
+	INCLUDE jumpmac.inc
+	INCLUDE msequ.inc
+	INCLUDE msmacro.inc
 
 ;*** DOS 3.3 will not support more than 25 rows
-;	INCLUDE DEVSYM.INC	;J.K. 4/29/86 for CON$GENIOCTL support
-;	INCLUDE IOCTL.INC	;J.K. 4/29/86 for CON$GENIOCTL support
+;	INCLUDE devsym.inc	;J.K. 4/29/86 for CON$GENIOCTL support
+;	INCLUDE ioctl.inc	;J.K. 4/29/86 for CON$GENIOCTL support
 
 	EXTRN EXIT:NEAR 	;MSBIO1
 	EXTRN BUS$EXIT:NEAR	;MSBIO1
@@ -90,6 +90,7 @@ ALT10:
 	JNZ	ALT_Ext_Chk		;AN000;
 	MOV	AL,16
 	jmp	KeyRet			;AN000;
+	nop ; RLCTEST
 ALT_Ext_Chk:
 ;SB34CON001**************************************************************
 ;SB  IF operation was extended function (i.e. KEYRD_Func != 0) THEN
@@ -160,7 +161,7 @@ NOCHR:
 	JZ	CONBUSJ
 	LDS	BX,[PTRSAV]
 	ASSUME	DS:NOTHING
-	TEST	[BX].STATUS,0400H	; SYSTEM WAIT ENABLED?
+	TEST	WORD PTR [BX].STATUS,0400H	; SYSTEM WAIT ENABLED?
 	JZ	CONBUSJ
 
 ;********************************

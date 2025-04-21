@@ -29,34 +29,34 @@ display.obj:    DISPLAY.ASM FOREQU.INC FORMSG.INC FORMACRO.INC \
                 format.clb format.clc FORMACRO.INC
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\format $(subst /,\,$<) $(subst /,\,$@)"
 
-forexec.obj:    FOREXEC.ASM FOREQU.INC $(inc)/SYSCALL.INC \
+forexec.obj:    FOREXEC.ASM FOREQU.INC $(inc)/syscall.inc \
                 FORMACRO.INC
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\format $(subst /,\,$<) $(subst /,\,$@)"
 
 forlabel.obj:   FORLABEL.ASM FOREQU.INC FORMACRO.INC \
-                $(inc)/SYSCALL.INC $(inc)/IOCTL.INC $(inc)/DOSMAC.INC \
+                $(inc)/syscall.inc $(inc)/ioctl.inc $(inc)/dosmac.inc \
                 FORSWTCH.INC
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\format $(subst /,\,$<) $(subst /,\,$@)"
 
-format.obj:     FORMAT.ASM $(inc)/DOSMAC.INC $(inc)/BPB.INC \
-                $(inc)/DIRENT.INC $(inc)/DPB.INC $(inc)/CURDIR.INC \
-                $(inc)/CPMFCB.INC $(inc)/PDB.INC \
-                $(inc)/ERROR.INC $(inc)/SYSCALL.INC $(inc)/IOCTL.INC \
+format.obj:     FORMAT.ASM $(inc)/dosmac.inc $(inc)/bpb.inc \
+                $(inc)/dirent.inc $(inc)/dpb.inc $(inc)/curdir.inc \
+                $(inc)/CPMFCB.INC $(inc)/pdb.inc \
+                $(inc)/ERROR.INC $(inc)/syscall.inc $(inc)/ioctl.inc \
                 FOREQU.INC FORMACRO.INC FORSWTCH.INC
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\format $(subst /,\,$<) $(subst /,\,$@)"
 
 forinit.obj:    FORINIT.ASM FOREQU.INC FORMACRO.INC \
-                $(inc)/SYSCALL.INC $(inc)/IOCTL.INC FORPARSE.INC \
-                FORSWTCH.INC $(inc)/PARSE.ASM $(inc)/PSDATA.INC
+                $(inc)/syscall.inc $(inc)/ioctl.inc FORPARSE.INC \
+                FORSWTCH.INC $(inc)/parse.asm $(inc)/psdata.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\format $(subst /,\,$<) $(subst /,\,$@)"
 
-msfor.obj:      MSFOR.ASM $(inc)/DOSMAC.INC $(inc)/SYSCALL.INC $(inc)/BPB.INC \
-                $(inc)/DIRENT.INC boot.cl1 $(inc)/IOCTL.INC \
+msfor.obj:      MSFOR.ASM $(inc)/dosmac.inc $(inc)/syscall.inc $(inc)/bpb.inc \
+                $(inc)/dirent.inc boot.cl1 $(inc)/ioctl.inc \
                 $(inc)/boot.inc $(inc)/BOOT11.INC \
-                $(inc)/BOOTFORM.INC FILESIZE.INC FOREQU.INC FORMACRO.INC FORSWTCH.INC
+                $(inc)/bootform.inc FILESIZE.INC FOREQU.INC FORMACRO.INC FORSWTCH.INC
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\format $(subst /,\,$<) $(subst /,\,$@)"
 
-forproc.obj:    FORPROC.ASM $(inc)/SYSCALL.INC FOREQU.INC \
+forproc.obj:    FORPROC.ASM $(inc)/syscall.inc FOREQU.INC \
                 FORMACRO.INC FORSWTCH.INC
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\format $(subst /,\,$<) $(subst /,\,$@)"
 

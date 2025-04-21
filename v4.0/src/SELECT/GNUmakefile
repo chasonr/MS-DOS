@@ -117,7 +117,7 @@ gen_coms.obj: GEN_COMS.ASM $(inc)/STRUC.INC $(inc)/SYSMSG.INC CASEXTRN.INC \
               MACROS8.INC PCEQUATE.INC 
 	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\select $(subst /,\,$<) $(subst /,\,$@);"
 
-mparse.obj: MPARSE.ASM $(inc)/PARSE.ASM DATA.MAC 
+mparse.obj: MPARSE.ASM $(inc)/parse.asm DATA.MAC 
 	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\select $(subst /,\,$<) $(subst /,\,$@);"
 
 initmem.obj: INITMEM.ASM $(inc)/STRUC.INC MACROS.INC MACROS2.INC MACROS3.INC \

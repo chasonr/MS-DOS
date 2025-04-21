@@ -84,13 +84,13 @@ DOSSIZE EQU	0A000H
 ;dossize equ	 0C000H 	;J.K. for the debugging version of IBMDOS.
 
 .xlist
-;	INCLUDE dossym.INC
+;	INCLUDE dossym.inc
 	include smdossym.inc	;J.K. Reduced version of DOSSYM.INC
-	INCLUDE devsym.INC
-	include ioctl.INC
-	include BIOSTRUC.INC
+	INCLUDE devsym.inc
+	include ioctl.inc
+	include biostruc.inc
 	include smifssym.inc	;AN000; Reduced version of IFSSYM.INC.
-	include DEVMARK.inc	;AN004;
+	include devmark.inc	;AN004;
 	include version.inc
 .list
 
@@ -209,8 +209,8 @@ XMAEM_file	db	'XMAEM.SYS',0	;AN029;
 ;SYSTEM parser data and code.
 ;******************************************************************************
 .xlist
-	include PSOPTION.INC			;Parsing options for SYSCONF.
-	include PARSE.ASM			;together with PSDATA.INC
+	include psoption.inc			;Parsing options for SYSCONF.
+	include parse.asm			;together with PSDATA.INC
 .list
 ;Control block definitions for PARSER.
 ;---------------------------------------------------
@@ -619,7 +619,7 @@ ENDCONF:
 
 
 BADOP:	MOV	DX,OFFSET BADOPM	;WANT TO PRINT COMMAND ERROR "Unrecognized command..."
-	invoke	PRINT
+	InvokeFn PRINT
 	call	Error_Line		;show "Error in CONFIG.SYS ..." .
 	JMP	COFF
 
@@ -629,7 +629,7 @@ Badop_p 	proc	near		;AN000;
 	push	cs
 	pop	ds			;set ds to CONFIGSYS seg.
 	mov	dx, offset badopm
-	invoke	PRINT
+	InvokeFn PRINT
 	call	Error_Line
 	ret
 Badop_p 	endp
@@ -647,7 +647,7 @@ Badparm_p	proc	near		;AN007;
 	push	cs			;AN007;
 	pop	ds			;AN007;
 	mov	dx, offset Badparm	;AN007;
-	invoke	PRINT			;AN007;"Bad command or parameters - "
+	InvokeFn PRINT			;AN007;"Bad command or parameters - "
 	lds	si, Badparm_ptr 	;AN007;
 Badparm_Prt:				;AN007;print "xxxx" until CR.
 	mov	dl, byte ptr [si]	;AN007;
@@ -659,7 +659,7 @@ Badparm_Prt:				;AN007;print "xxxx" until CR.
 	push	cs			;AN007;
 	pop	ds			;AN007;
 	mov	dx, offset CRLFM	;AN007;
-	invoke	PRINT			;AN007;
+	InvokeFn PRINT			;AN007;
 	call	Error_Line		;AN007;
 	pop	si			;AN007;
 	pop	dx			;AN007;
@@ -757,7 +757,7 @@ Multi_Pass:				;AN018;AN026; called to execute IFS=,  INSTALL= commands
 	call	GetChr			;AN018;
 	jmp	Conflp			;AN018;
 GETCOM:
-	invoke	ORGANIZE		;ORGANIZE THE FILE
+	InvokeFn ORGANIZE		;ORGANIZE THE FILE
 	CALL	GETCHR
 
 CONFLP: JC	ENDCONV
@@ -783,7 +783,7 @@ ENDIF
 
 COFF:	PUSH	CS
 	POP	DS
-	invoke	NEWLINE
+	InvokeFn NEWLINE
 	JMP	CONFLP
 Blank_Line:				;AN000;
 	call	Getchr			;AN000;
@@ -1418,7 +1418,7 @@ Skip0_ResetMEMHI:
 	jne	BADBRK_1
 	jmp	BADOP			;show "Unrecognized command in CONFIG.SYS"
 BADBRK_1:
-	invoke	BADLOAD
+	InvokeFn BADLOAD
 	JMP	COFF
 
 GOODLD:
@@ -1474,9 +1474,9 @@ Got_Device_Com_Cont:			;AN017;
 	pop	si			;AN017;
 	pop	ds			;AN017;
 	MOV	BX,SDEVSTRAT
-	invoke	CALLDEV 		;   CallDev (SDevStrat);
+	InvokeFn CALLDEV 		;   CallDev (SDevStrat);
 	MOV	BX,SDEVINT
-	invoke	CALLDEV 		;   CallDev (SDevInt);
+	InvokeFn CALLDEV 		;   CallDev (SDevInt);
 End_Init_Call:
 	RestoreReg  <SI,DS>
 	MOV	BYTE PTR [SI],0 	;   *p = 0;
@@ -1495,7 +1495,7 @@ End_Init_Call:
 	mov	word ptr [Break_addr], 0	   ;AN000;
 	mov	word ptr [Break_addr+2], ax	   ;AN000;
 	or	cs:[SetDevMarkFlag], FOR_DEVMARK       ;AN004;
-	invoke	Set_Break		;AN000; Will also check the memory size too.
+	InvokeFn Set_Break		;AN000; Will also check the memory size too.
 	push	es			;AN000; Save it again, in case, for Erase_Dev_Do.
 	push	si			;AN000;
 	jc	Erase_Dev_do		;AN000;
@@ -1546,7 +1546,7 @@ BREAKOK:
 	TEST	AX,DEVTYP		;TEST IF BLOCK DEV
 	JZ	ISBLOCK
 	or	cs:[SetDevMarkFlag],FOR_DEVMARK ;AN004;
-	invoke	Set_Break		; Go ahead and alloc mem for device
+	InvokeFn Set_Break		; Go ahead and alloc mem for device
 	jc	Erase_Dev_do		;device driver's Init routien failed.
 	TEST	AX,ISCIN		;IS IT A CONSOLE IN?
 	JZ	TRYCLK
@@ -1580,12 +1580,12 @@ BadNumBlock:				;AN017;
 	PUSH	CS
 	POP	DS
 	MOV	DX,OFFSET BADBLOCK
-	invoke	PRINT
+	InvokeFn PRINT
 	JMP	ERASE_DEV_do
 
 OK_BLOCK:
 	or	cs:[SetDevMarkFlag],FOR_DEVMARK ;AN004;
-	invoke	SET_BREAK		; Alloc the device
+	InvokeFn SET_BREAK		; Alloc the device
 	ADD	ES:[DI.SYSI_NUMIO],AL	;UPDATE THE AMOUNT
 	ADD	CS:DriveNumber,AL	; remember amount for next device
 	LDS	BX,CS:[BPB_ADDR]	;POINT TO BPB ARRAY
@@ -1664,7 +1664,7 @@ Bad_BPB_Size_Sector:
 	MOV	DX,OFFSET BADSIZ_PRE
 ;	 MOV	 BX,OFFSET BADSIZ_POST
 	mov	bx, offset CRLFM	;AN???;
-	invoke	PRNERR
+	InvokeFn PRNERR
 	test	[SetDevMarkFlag],SETBRKDONE ;AN004;If already Set_Break is done,
 	jnz	Skip2_ResetMEMHI	;AN004; then do not
 	dec	[MEMHI] 		;AN004;Adjust MEMHI by a paragrah of DEVMARK.
@@ -1906,7 +1906,7 @@ TryQChkErr:
 	push	cs
 	pop	ds			;retore DS to SYSINIT_SEG
 	jnc	CoffJ4			;if no error, then exit
-	invoke	PRINT			;else show error message
+	InvokeFn PRINT			;else show error message
 	call	Error_Line		;AN000;
 CoffJ4:
 	mov	bx, CntryFileHandle
@@ -1933,7 +1933,7 @@ $$IF61:
 	     mov	dx, offset BadCountryCom ;"Error in CONTRY command"
 ;	$ENDIF
 $$EN61:
-	invoke	Print
+	InvokeFn Print
 	call	Error_Line
 	ret
 Cntry_Error	endp
@@ -2082,10 +2082,10 @@ $$SR70:
 TRYP:
 	CMP	AH,'P'
 	JNZ	TRYK
-	invoke	PARSELINE
+	InvokeFn PARSELINE
 	JC	TryPBad
-	invoke	SETPARMS
-	INVOKE	DIDDLEBACK
+	InvokeFn SETPARMS
+	InvokeFn DIDDLEBACK
 	jc	TryPBad
 	JMP	COFF
 TryPBad:jmp	Badop
@@ -3389,4 +3389,3 @@ EMS_Stub_Handler	endp			;AN030;
 
 SYSINITSEG	ENDS
 	END
-

@@ -20,14 +20,14 @@ attrib.ctl attrib.cl1 attrib.cl2 attrib.cla attrib.clb: ATTRIB.SKL \
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\attrib $(subst /,\,$<) $(country)"
 
 _parse.obj: _PARSE.ASM \
-	$(inc)/PARSE.ASM \
-	$(inc)/PSDATA.INC
+	$(inc)/parse.asm \
+	$(inc)/psdata.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\attrib $(subst /,\,$<) $(subst /,\,$@)"
 
 _msgret.obj: _MSGRET.ASM \
 	$(inc)/MSGSERV.ASM \
 	$(inc)/SYSMSG.INC  \
-	$(inc)/COPYRIGH.INC \
+	$(inc)/copyrigh.inc \
 	ATTRIB.SKL \
 	attrib.ctl \
 	attrib.cl1 \

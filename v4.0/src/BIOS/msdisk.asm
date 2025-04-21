@@ -28,12 +28,12 @@
 	itest=0
 	EXTRN NUMERR:ABS		;MSDATA
 
-	INCLUDE MSGROUP.INC	;DEFINE CODE SEGMENT
-	INCLUDE MSEQU.INC
-	INCLUDE PUSHPOP.INC
-	INCLUDE MSMACRO.INC
-	INCLUDE DEVSYM.INC
-	INCLUDE MSDSKPR.INC
+	INCLUDE msgroup.inc	;DEFINE CODE SEGMENT
+	INCLUDE msequ.inc
+	INCLUDE pushpop.inc
+	INCLUDE msmacro.inc
+	INCLUDE devsym.inc
+	INCLUDE msdskpr.inc
 	include biostruc.inc
 
 	EXTRN INT2F_DISK:FAR		;MSBIO2
@@ -103,6 +103,8 @@
 	extrn Boot_System_ID:byte	;AN000; msbdata
 	extrn Model_Byte:Byte		;MSBIO2
 	extrn Secondary_Model_Byte:Byte ;MSBIO2
+
+?stackdepth = 0
 
 ;-----------------------------------------------------------------
 ;
@@ -2265,7 +2267,7 @@ BAD13:
 	RET	2
 BLOCK13 ENDP
 	PAGE
-	INCLUDE MSIOCTL.INC
+	INCLUDE msioctl.inc
 	PAGE
 ; CHECK_WRAP IS A ROUTINE THAT ADJUSTS THE STARTING SECTOR, STARTING HEAD
 ; AND STARTING CYLINDER FOR AN INT 13 REQUEST THAT REQUESTS I/O OF A LOT

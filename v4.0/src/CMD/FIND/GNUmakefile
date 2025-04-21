@@ -25,9 +25,9 @@ find.obj: FIND.ASM              \
           find.cl1              \
           find.cl2              \
           FIND.INC              \
-          $(inc)/PARSE.ASM      \
-          $(inc)/PSDATA.INC     \
-          $(inc)/SYSCALL.INC    \
+          $(inc)/parse.asm      \
+          $(inc)/psdata.inc     \
+          $(inc)/syscall.inc    \
           $(inc)/MSGSERV.ASM    \
           $(inc)/SYSMSG.INC
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\find $(subst /,\,$<) $(subst /,\,$@)"

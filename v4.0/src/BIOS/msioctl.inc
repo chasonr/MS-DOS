@@ -1,5 +1,5 @@
 	%OUT MSIOCTL.SIL...
-	INCLUDE IOCTL.INC
+	INCLUDE ioctl.inc
 ;	$SALUT $ioctl$
 
 ;==============================================================================
@@ -1359,4 +1359,3 @@ SAF_Done:						    ;AN007;
 	ret						    ;AN007;
 SetAccessFlag	endp					    ;AN007;
 
-

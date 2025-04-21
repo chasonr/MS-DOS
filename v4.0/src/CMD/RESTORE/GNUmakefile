@@ -22,8 +22,8 @@ $(map)/mapper.lib:
 	$(MAKE) -C $(map) mapper.lib
 
 _parse.obj :	_PARSE.ASM			\
-		$(inc)/PARSE.ASM		\
-		$(inc)/PSDATA.INC
+		$(inc)/parse.asm		\
+		$(inc)/psdata.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\restore $(subst /,\,$<) $(subst /,\,$@)"
 
 restore.ctl restore.cl1 restore.cl2 restore.cla:	RESTORE.SKL			\

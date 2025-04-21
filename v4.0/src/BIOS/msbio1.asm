@@ -53,13 +53,13 @@ POPFF	MACRO
 	CALL	$-2
 	ENDM
 
-	INCLUDE MSGROUP.INC	;DEFINE CODE SEGMENT
+	INCLUDE msgroup.inc	;DEFINE CODE SEGMENT
 
 SYSINITSEG SEGMENT PUBLIC 'SYSTEM_INIT'
 SYSINITSEG ENDS
 
 
-	INCLUDE JUMPMAC.INC
+	INCLUDE jumpmac.inc
 PATHSTART MACRO INDEX,ABBR
 	IFDEF	PATHGEN
 	    PUBLIC  ABBR&INDEX&S,ABBR&INDEX&E
@@ -73,8 +73,8 @@ PATHEND MACRO	INDEX,ABBR
 	ENDIF
 	ENDM
 
-	INCLUDE PUSHPOP.INC
-	INCLUDE DEVSYM.INC		;MJB001
+	INCLUDE pushpop.inc
+	INCLUDE devsym.inc		;MJB001
 
 ;   REV 2.1	5/1/83 ARR ADDED TIMER INT HANDLER AND CHANGED ORDER OF AUX
 ;		    PRN INIT FOR HAL0
@@ -119,7 +119,7 @@ PATHEND MACRO	INDEX,ABBR
 ;
 ;:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-	INCLUDE MSDSKPR.INC
+	INCLUDE msdskpr.inc
 
 LF	=	10			;LINE FEED
 CR	=	13			;CARRIAGE RETURN
@@ -171,7 +171,7 @@ EOI	=	20H
 	extrn	Start_Sec_H:word	;AN000; Starting sector high word for
 					;disk I/O request. IBMDISK.ASM
 
-	INCLUDE MSBDATA.INC
+	INCLUDE msbdata.inc
 
 	IF	iTEST
 	    PUBLIC  MSGNUM
@@ -300,7 +300,7 @@ Outchar proc	near
 Outchar endp
 
 	ENDIF
-	INCLUDE MSMACRO.INC
+	INCLUDE msmacro.inc
 
 ;---------------------------------------------------
 ;

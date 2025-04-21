@@ -21,8 +21,8 @@ mode.ctl mode.cl1 mode.cl2 mode.cla mode.clb: MODE.SKL \
 
 
 main.obj: MAIN.ASM \
-  $(inc)/COPYRIGH.INC \
-  $(inc)/VERSIONA.INC \
+  $(inc)/copyrigh.inc \
+  $(inc)/versiona.inc \
   $(inc)/STRUC.INC \
   $(inc)/SYSMSG.INC \
   $(inc)/MSGSERV.ASM \
@@ -93,14 +93,14 @@ invoke.obj: INVOKE.ASM \
 
 modepars.obj: MODEPARS.ASM \
   $(inc)/STRUC.INC \
-  $(inc)/PSDATA.INC \
+  $(inc)/psdata.inc \
 	      MODEQUAT.INC \
 	      COMMON.STC
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\mode $(subst /,\,$<) $(subst /,\,$@)"
 
 
 parshell.obj: PARSHELL.ASM \
-  $(inc)/PARSE.ASM
+  $(inc)/parse.asm
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\mode $(subst /,\,$<) $(subst /,\,$@)"
 
 

@@ -4,6 +4,8 @@
 *.EXE
 *.obj
 *.OBJ
+*.lst
+*.err
 IO.SYS
 io.sys
 MSBIO.BIN

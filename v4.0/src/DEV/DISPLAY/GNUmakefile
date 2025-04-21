@@ -32,7 +32,7 @@ init.obj: INIT.ASM \
           MACROS.INC \
           DEF-EQU.INC \
           $(inc)/SYSMSG.INC \
-          $(inc)/VERSIONA.INC \
+          $(inc)/versiona.inc \
           display.ctl \
           TABLES.INC
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\display $(subst /,\,$<) $(subst /,\,$@)"
@@ -40,7 +40,7 @@ init.obj: INIT.ASM \
 parser.obj: PARSER.ASM \
         DEF-EQU.INC  \
         $(inc)/STRUC.INC \
-        $(inc)/PARSE.ASM
+        $(inc)/parse.asm
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\display $(subst /,\,$<) $(subst /,\,$@)"
 
 OBJS = display.obj init.obj parser.obj

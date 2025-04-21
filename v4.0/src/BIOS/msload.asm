@@ -50,8 +50,8 @@ dosloadseg	ends
 cseg		segment public para 'code'
 		assume	cs:cseg,ds:nothing,es:nothing,ss:nothing
 
-include MSload.inc
-include Bootform.inc		;AN000; Extended bpb, boot record defintion.
+include msload.inc
+include bootform.inc		;AN000; Extended bpb, boot record defintion.
 include versiona.inc		;AN001; Version number for SYS.COM
 
 sec9	equ	522h		;;** 8/3/87 DCL
@@ -974,7 +974,7 @@ Got_16_Bit:
 	jae	Got_Cluster_Done
 
 Not_Last_Cluster:
-	mov	cs:EOF,not END_OF_FILE		  ;Assume last cluster
+	mov	cs:EOF,END_OF_FILE xor 0FFh	;Assume last cluster
 
 Got_Cluster_Done:
 	pop	es
@@ -1080,7 +1080,7 @@ Write	endp
 ;
 
 ;include MSbtmes.inc	       ;AN000;
-include MSbio.cl1	       ;AN001;
+include msbio.cl1	       ;AN001;
 
 Relocate_Length   equ  $ - start
 Total_Length label byte

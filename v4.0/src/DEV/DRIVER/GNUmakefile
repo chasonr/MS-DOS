@@ -18,8 +18,8 @@ all: driver.sys
 driver.ctl driver.cl1 driver.cl2 driver.cla: DRIVER.SKL  $(msg)/$(COUNTRY).MSG
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\dev\driver $(subst /,\,$<) $(country)"
 
-driver.obj: DRIVER.ASM  $(inc)/MSBDS.INC $(inc)/VERSIONA.INC \
-            $(inc)/PARSE.ASM $(inc)/PSDATA.INC \
+driver.obj: DRIVER.ASM  $(inc)/msbds.inc $(inc)/versiona.inc \
+            $(inc)/parse.asm $(inc)/psdata.inc \
             driver.ctl $(inc)/SYSMSG.INC $(inc)/MSGSERV.ASM
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\driver $(subst /,\,$<) $(subst /,\,$@)"
 

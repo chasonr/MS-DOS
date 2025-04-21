@@ -51,11 +51,11 @@ NOEXEC	EQU	FALSE
 DOSSIZE EQU	0A000H
 
 .xlist
-;	INCLUDE dossym.INC
+;	INCLUDE dossym.inc
 	include smdossym.inc	;J.K. Reduced version of DOSSYM.INC
-	INCLUDE devsym.INC
-	include ioctl.INC
-	include DEVMARK.inc
+	INCLUDE devsym.inc
+	include ioctl.inc
+	include devmark.inc
 .list
 
 	IF	NOT IBM
@@ -77,14 +77,14 @@ ASSUME	CS:SYSINITSEG,DS:NOTHING,ES:NOTHING,SS:NOTHING
 ;	 EXTRN	 BADSIZ_POST:BYTE,BADLD_POST:BYTE
 	EXTRN	SYSSIZE:BYTE,BADCOUNTRY:BYTE
 
-	EXTRN  dosinfo:dword,entry_point:dword,
+	EXTRN  dosinfo:dword,entry_point:dword
 	EXTRN  MEMORY_SIZE:WORD,fcbs:byte,keep:byte
 	EXTRN  DEFAULT_DRIVE:BYTE,confbot:word,alloclim:word
 	EXTRN  BUFFERS:WORD,zero:byte,sepchr:byte
 	EXTRN  FILES:BYTE
 	EXTRN  count:word,chrptr:word
 	EXTRN  bufptr:byte,memlo:word,prmblk:byte,memhi:word
-	EXTRN  ldoff:word,area:word,PACKET:BYTE,UNITCOUNT:BYTE,
+	EXTRN  ldoff:word,area:word,PACKET:BYTE,UNITCOUNT:BYTE
 	EXTRN  BREAK_ADDR:DWORD,BPB_ADDR:DWORD,drivenumber:byte
 	extrn  COM_Level:byte, CMMT:byte, CMMT1:byte, CMMT2:byte
 	extrn  Cmd_Indicator:byte
@@ -191,7 +191,7 @@ getparm:
 	mov	word ptr Switches,BX	     ; save switches read so far
 	jc	swterr
 get_next:
-	invoke	getchr
+	InvokeFn getchr
 	jc	done_line
 	jmp	NextSwtch
 swterr:
@@ -225,7 +225,7 @@ put_back:
 ; error.
 ;
 Check_Switch:
-	invoke	getchr
+	InvokeFn getchr
 	jc	err_check
 	and	al,0DFH 	    ; convert it to upper case
 	cmp	al,'A'
@@ -248,11 +248,11 @@ Check_Switch:
 	mov	cx,ax
 	test	ax, switchnum	; test against switches that require number to follow
 	jz	done_swtch
-	invoke	getchr
+	InvokeFn getchr
 	jc	err_Swtch
 	cmp	al,':'
 	jnz	err_swtch
-	invoke	getchr
+	InvokeFn getchr
 	push	bx			; preserve switches
 	mov	byte ptr cs:sepchr,' '          ; allow space separators
 	call	GetNum
@@ -345,7 +345,7 @@ Set_RecBPB:
 	mov	di,offset DeviceParameters.DP_BPB	 ; es:di -> BPB
 	mov	cx,size a_BPB
 	cld
-	repe	movsb
+	rep	movsb
 	pop	es
 ASSUME ES:NOTHING
 	test	word ptr switches,flagseclim
@@ -636,6 +636,7 @@ GET2:
 	MOV	AL,ES:[SI]
 	INC	SI
 	DEC	CX
+ret_l_1:
 	return
 
 ;GET:	 JCXZ	 NOGET
@@ -683,18 +684,18 @@ No_Commt:			;AN000;
 
 DELIM:
 	CMP	AL,'/'          ;J.K. 5/30/86. IBM will assume "/" as an delimeter.
-	retz
+	jz	ret_l_1
 	cmp	al, 0		;J.K. 5/23/86 Special case for sysinit!!!
-	retz
+	jz	ret_l_1
 Org_Delim:			;AN000;  Used by Organize routine except for getting
 	CMP	AL,' '          ;the filename.
-	retz
+	jz	ret_l_1
 	CMP	AL,9
-	retz
+	jz	ret_l_1
 	CMP	AL,'='
-	retz
+	jz	ret_l_1
 	CMP	AL,','
-	retz
+	jz	ret_l_1
 	CMP	AL,';'
 	return
 
@@ -704,6 +705,7 @@ NOGET:	POP	CX
 	mov	Org_Count, DI	;AN012;
 	XOR	SI,SI
 	MOV	CHRPTR,SI
+ret_l_2:
 	return
 
 ;Get3:	 jcxz	 NOGET		 ;J.K.do not consider '/',',' as a delim.
@@ -724,11 +726,11 @@ NOGET:	POP	CX
 ;
 ;  NEWLINE RETURNS WITH FIRST CHARACTER OF NEXT LINE
 ;
-NEWLINE:invoke	GETCHR			;SKIP NON-CONTROL CHARACTERS
-	retc
+NEWLINE:InvokeFn GETCHR			;SKIP NON-CONTROL CHARACTERS
+	jc	ret_l_2
 	CMP	AL,LF			;LOOK FOR LINE FEED
 	JNZ	NEWLINE
-	invoke	GETCHR
+	InvokeFn GETCHR
 	return
 
 MAPCASE:
@@ -833,7 +835,7 @@ ROUND:
 	PUSH	AX
 	MOV	AX,[MEMLO]
 
-	invoke	ParaRound		; para round up
+	InvokeFn ParaRound		; para round up
 
 	ADD	[MEMHI],AX
 	MOV	[MEMLO],0
@@ -908,7 +910,7 @@ B2:	CALL	ToDigit 		; do we have a digit
 	JC	BADNUM			; too big a number
 	XCHG	AX,BX			; stash total
 
-	invoke	GETCHR			;GET NEXT DIGIT
+	InvokeFn GETCHR			;GET NEXT DIGIT
 	JC	B1			; no more characters
 	cmp	al, ' '                 ;J.K. 5/23/86 space?
 	jz	B15			;J.K. 5/23/86 then end of digits
@@ -1421,6 +1423,7 @@ OPEN_DEV:
 OPEN_DEV1:
 	MOV	DX,OFFSET NULDEV
 	CALL	OPEN_FILE
+ret_l_3:
 	return
 
 OPEN_DEV3:
@@ -1429,7 +1432,7 @@ OPEN_DEV3:
 	MOV	AH,IOCTL
 	INT	21H
 	TEST	DL,10000000B
-	retnz
+	jnz	ret_l_3
 	MOV	AH,CLOSE
 	INT	21H
 	JMP	OPEN_DEV1

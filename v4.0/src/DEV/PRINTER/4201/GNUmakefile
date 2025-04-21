@@ -11,7 +11,7 @@ msg	=../../../MESSAGE
 
 all: 4201.cpi
 
-4201.obj:  4201.ASM  $(inc)/COPYRIGH.INC
+4201.obj:  4201.ASM  $(inc)/copyrigh.inc
 	dosemu -t --Fdrive_c ../../../.. -E "src\domasm.bat src\dev\printer\4201 $(subst /,\,$<) $(subst /,\,$@)"
 
 OBJS = 4201.obj

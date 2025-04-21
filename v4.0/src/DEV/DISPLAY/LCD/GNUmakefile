@@ -26,7 +26,7 @@ all: lcd.cpi
 850-cpi.obj:  850-CPI.ASM
 	dosemu -t --Fdrive_c ../../../.. -E "src\domasm.bat src\dev\display\lcd $(subst /,\,$<) $(subst /,\,$@)"
 
-copyrigh.obj: COPYRIGH.ASM $(inc)/COPYRIGH.INC
+copyrigh.obj: COPYRIGH.ASM $(inc)/copyrigh.inc
 	dosemu -t --Fdrive_c ../../../.. -E "src\domasm.bat src\dev\display\lcd $(subst /,\,$<) $(subst /,\,$@)"
 
 font-r3.obj:  FONT-R3.ASM

@@ -11,11 +11,11 @@
 ;AN001 - P156 KBMLPT device driver's retry logic.                  8/18/87 J.K.
 ;==============================================================================
 	itest=0
-	INCLUDE MSGROUP.INC	;DEFINE CODE SEGMENT
-	INCLUDE MSEQU.INC
-	INCLUDE MSMACRO.INC
-	INCLUDE DEVSYM.INC
-	INCLUDE IOCTL.INC
+	INCLUDE msgroup.inc	;DEFINE CODE SEGMENT
+	INCLUDE msequ.inc
+	INCLUDE msmacro.inc
+	INCLUDE devsym.inc
+	INCLUDE ioctl.inc
 
 	EXTRN BUS$EXIT:NEAR		;MSBIO1
 	EXTRN ERR$CNT:NEAR		;MSBIO1

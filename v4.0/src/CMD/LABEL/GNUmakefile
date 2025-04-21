@@ -24,7 +24,7 @@ label.obj: LABEL.ASM
 
 labelm.obj: LABELM.ASM  \
   labl.ctl 		\
-  $(inc)/COPYRIGH.INC   \
+  $(inc)/copyrigh.inc   \
   $(inc)/SYSMSG.INC     \
   $(inc)/MSGSERV.ASM
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\label $(subst /,\,$<) $(subst /,\,$@)"

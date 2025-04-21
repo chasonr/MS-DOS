@@ -21,33 +21,33 @@ print.ctl print.cl1 print.cl2 print.cla print.clb print.clc print.cld: \
 
 print_r.obj: PRINT_R.ASM \
     PRIDEFS.INC print.ctl \
-    $(inc)/DEVSYM.INC \
-    $(inc)/SYSCALL.INC \
+    $(inc)/devsym.inc \
+    $(inc)/syscall.inc \
     $(inc)/ERROR.INC \
-    $(inc)/SYSVAR.INC \
+    $(inc)/sysvar.inc \
     $(inc)/FIND.INC \
     $(inc)/EA.INC
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\print $(subst /,\,$<) $(subst /,\,$@)"
 
 print_rm.obj: PRINT_RM.ASM \
     PRIDEFS.ASM print.ctl \
-    $(inc)/PARSE.ASM \
-    $(inc)/PSDATA.INC
+    $(inc)/parse.asm \
+    $(inc)/psdata.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\print $(subst /,\,$<) $(subst /,\,$@)"
 
 print_t.obj: PRINT_T.ASM \
     PRIDEFS.ASM \
-    $(inc)/DEVSYM.INC \
-    $(inc)/SYSCALL.INC \
+    $(inc)/devsym.inc \
+    $(inc)/syscall.inc \
     $(inc)/ERROR.INC \
-    $(inc)/SYSVAR.INC \
+    $(inc)/sysvar.inc \
     $(inc)/FIND.INC
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\print $(subst /,\,$<) $(subst /,\,$@)"
 
 print_tm.obj: PRINT_TM.ASM \
     PRIDEFS.ASM print.ctl \
-    $(inc)/PARSE.ASM \
-    $(inc)/PSDATA.INC \
+    $(inc)/parse.asm \
+    $(inc)/psdata.inc \
     $(inc)/MSGSERV.ASM \
     $(inc)/SYSMSG.INC
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\print $(subst /,\,$<) $(subst /,\,$@)"

@@ -27,12 +27,12 @@ comppar.obj: COMPPAR.ASM \
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\comp $(subst /,\,$<) $(subst /,\,$@)"
 
 compp.obj: COMPP.ASM \
-    $(inc)/PARSE.ASM
+    $(inc)/parse.asm
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\comp $(subst /,\,$<) $(subst /,\,$@)"
 
 compsm.obj: COMPSM.ASM \
-    $(inc)/COPYRIGH.INC \
-    $(inc)/VERSIONA.INC \
+    $(inc)/copyrigh.inc \
+    $(inc)/versiona.inc \
     $(inc)/SYSMSG.INC \
     $(inc)/MSGHAN.INC \
     comp.ctl \

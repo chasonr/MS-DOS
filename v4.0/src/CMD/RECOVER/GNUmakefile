@@ -25,8 +25,8 @@ recover.obj: RECOVER.ASM			  \
 	     RECMSG.INC 			  \
 	     recover.ctl recover.cl1		  \
 	     recover.cl2 recover.cla		  \
-	     $(inc)/DOSSYM.INC $(inc)/SYSCALL.INC \
-	     $(inc)/SYSMSG.INC $(inc)/PARSE.ASM
+	     $(inc)/DOSSYM.INC $(inc)/syscall.inc \
+	     $(inc)/SYSMSG.INC $(inc)/parse.asm
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\recover $(subst /,\,$<) $(subst /,\,$@)"
 
 recinit.obj: RECINIT.ASM			 \
@@ -35,8 +35,8 @@ recinit.obj: RECINIT.ASM			 \
 	     RECMSG.INC 			 \
 	     recover.ctl recover.cl1		  \
 	     recover.cl2 recover.cla		  \
-	     $(inc)/DOSSYM.INC $(inc)/SYSCALL.INC \
-	     $(inc)/SYSMSG.INC $(inc)/PARSE.ASM
+	     $(inc)/DOSSYM.INC $(inc)/syscall.inc \
+	     $(inc)/SYSMSG.INC $(inc)/parse.asm
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\recover $(subst /,\,$<) $(subst /,\,$@)"
 
 
@@ -46,8 +46,8 @@ recproc.obj: RECPROC.ASM			 \
 	     RECMSG.INC 			 \
 	     recover.ctl recover.cl1		  \
 	     recover.cl2 recover.cla		  \
-	     $(inc)/DOSSYM.INC $(inc)/SYSCALL.INC \
-	     $(inc)/SYSMSG.INC $(inc)/PARSE.ASM
+	     $(inc)/DOSSYM.INC $(inc)/syscall.inc \
+	     $(inc)/SYSMSG.INC $(inc)/parse.asm
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\recover $(subst /,\,$<) $(subst /,\,$@)"
 
 recdisp.obj: RECDISP.ASM			 \
@@ -56,8 +56,8 @@ recdisp.obj: RECDISP.ASM			 \
 	     RECMSG.INC 			 \
 	     recover.ctl recover.cl1		  \
 	     recover.cl2 recover.cla		  \
-	     $(inc)/DOSSYM.INC $(inc)/SYSCALL.INC \
-	     $(inc)/SYSMSG.INC $(inc)/PARSE.ASM
+	     $(inc)/DOSSYM.INC $(inc)/syscall.inc \
+	     $(inc)/SYSMSG.INC $(inc)/parse.asm
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\recover $(subst /,\,$<) $(subst /,\,$@)"
 
 OBJS = recdisp.obj recinit.obj recproc.obj recover.obj

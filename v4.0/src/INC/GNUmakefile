@@ -33,7 +33,7 @@ cds.obj: 	CDS.C \
 
 dpb.obj: 	DPB.C \
   		$(hinc)/DPB.H \
-  		DPB.INC
+  		dpb.inc
 	dosemu -t --Fdrive_c ../.. -E "src\domsc.bat src\inc $(subst /,\,$<) $(subst /,\,$@)"
 
 string.obj:	STRING.C \
@@ -45,20 +45,20 @@ nibdos.obj:	NIBDOS.ASM $(dos)/MSSW.ASM $(dos)/MSCONST.ASM \
            	DOSSYM.INC DOSSEG.ASM MSHEAD.ASM
 	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\inc $(subst /,\,$<) $(subst /,\,$@);"
 
-const2.obj: 	CONST2.ASM DOSSYM.INC DEVSYM.INC \
+const2.obj: 	CONST2.ASM DOSSYM.INC devsym.inc \
          	DOSSEG.ASM
 	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\inc $(subst /,\,$<) $(subst /,\,$@);"
 
 msdata.obj: 	MSDATA.ASM $(dos)/MSSW.ASM DOSSEG.ASM \
-            	DOSMAC.INC MSDATA.ASM $(dos)/MSINIT.ASM \
-            	DEVSYM.INC VECTOR.INC BUFFER.INC \
-            	DIRENT.INC DPB.INC CURDIR.INC \
-            	FIND.INC PDB.INC \
-            	SF.INC ARENA.INC MI.INC
+            	dosmac.inc MSDATA.ASM $(dos)/MSINIT.ASM \
+            	devsym.inc vector.inc buffer.inc \
+            	dirent.inc dpb.inc curdir.inc \
+            	FIND.INC pdb.inc \
+            	sf.inc arena.inc mi.inc
 	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\inc $(subst /,\,$<) $(subst /,\,$@);"
 
 msdosme.obj: 	MSDOSME.ASM $(dos)/MSSW.ASM DOSSEG.ASM \
-             	$(dos)/DOSMES.ASM DOSMAC.INC INTNAT.INC \
+             	$(dos)/DOSMES.ASM dosmac.inc intnat.inc \
              	DIVMES.ASM
 	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\inc $(subst /,\,$<) $(subst /,\,$@);"
 
@@ -67,11 +67,11 @@ mstable.obj:	MSTABLE.ASM $(dos)/MSSW.ASM	      \
      		$(dos)/MISC2.ASM
 	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\inc $(subst /,\,$<) $(subst /,\,$@);"
 
-printf.obj:	PRINTF.ASM ARENA.INC BPB.INC BUFFER.INC CPMFCB.INC \
-        	CURDIR.INC dbcs.sw DIRENT.INC DOSMAC.INC DPB.INC ERROR.INC \
-        	EXE.INC FILEMODE.INC FIND.INC INTNAT.INC MI.INC MULT.INC \
-        	PDB.INC SF.INC SYSCALL.INC SYSVAR.INC VECTOR.INC VERSIONA.INC \
-        	VERSION.INC
+printf.obj:	PRINTF.ASM arena.inc bpb.inc buffer.inc CPMFCB.INC \
+        	curdir.inc dbcs.sw dirent.inc dosmac.inc dpb.inc ERROR.INC \
+        	exe.inc FILEMODE.INC FIND.INC intnat.inc mi.inc MULT.INC \
+        	pdb.inc sf.inc syscall.inc sysvar.inc vector.inc versiona.inc \
+        	version.inc
 	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\inc $(subst /,\,$<) $(subst /,\,$@);"
 
 clean:

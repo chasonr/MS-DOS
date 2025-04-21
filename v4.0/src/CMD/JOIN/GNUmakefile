@@ -51,8 +51,8 @@ _msgret.obj: _MSGRET.ASM \
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\join $(subst /,\,$<) $(subst /,\,$@)"
 
 _parse.obj: _PARSE.ASM  \
-  $(inc)/PARSE.ASM      \
-  $(inc)/PSDATA.INC
+  $(inc)/parse.asm      \
+  $(inc)/psdata.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\join $(subst /,\,$<) $(subst /,\,$@)"
 
 join.obj: JOIN.C        \

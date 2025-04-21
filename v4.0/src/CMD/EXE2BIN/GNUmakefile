@@ -19,15 +19,15 @@ exe2bin.ctl exe2bin.cl1 exe2bin.cl2 exe2bin.cla exe2bin.clb: EXE2BIN.SKL \
               $(msg)/$(COUNTRY).MSG
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\exe2bin $(subst /,\,$<) $(country)"
 
-e2binit.obj : E2BINIT.ASM  $(inc)/SYSCALL.INC E2BPARSE.INC  E2BMACRO.INC \
+e2binit.obj : E2BINIT.ASM  $(inc)/syscall.inc E2BPARSE.INC  E2BMACRO.INC \
               E2BEQU.INC  $(inc)/SYSMSG.INC  E2BTABLE.INC  exe2bin.ctl   \
-              LOCATE.ASM $(inc)/DOSSYM.INC $(inc)/DOSMAC.INC \
-              $(inc)/BPB.INC $(inc)/BUFFER.INC $(inc)/SYSVAR.INC \
-              $(inc)/MULT.INC $(inc)/DIRENT.INC $(inc)/DPB.INC \
-              $(inc)/CURDIR.INC $(inc)/CPMFCB.INC $(inc)/FIND.INC \
-              $(inc)/PDB.INC $(inc)/SF.INC $(inc)/ARENA.INC $(inc)/INTNAT.INC \
-              $(inc)/ERROR.INC $(inc)/SYSCALL.INC $(inc)/PARSE.ASM \
-              $(inc)/PSDATA.INC
+              LOCATE.ASM $(inc)/DOSSYM.INC $(inc)/dosmac.inc \
+              $(inc)/bpb.inc $(inc)/buffer.inc $(inc)/sysvar.inc \
+              $(inc)/MULT.INC $(inc)/dirent.inc $(inc)/dpb.inc \
+              $(inc)/curdir.inc $(inc)/CPMFCB.INC $(inc)/FIND.INC \
+              $(inc)/pdb.inc $(inc)/sf.inc $(inc)/arena.inc $(inc)/intnat.inc \
+              $(inc)/ERROR.INC $(inc)/syscall.inc $(inc)/parse.asm \
+              $(inc)/psdata.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\exe2bin $(subst /,\,$<) $(subst /,\,$@)"
 
 display.obj : DISPLAY.ASM

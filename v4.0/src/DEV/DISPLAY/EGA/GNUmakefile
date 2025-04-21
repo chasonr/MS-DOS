@@ -44,7 +44,7 @@ cpi-head.obj: CPI-HEAD.ASM
              865-8X8.ASM
 	dosemu -t --Fdrive_c ../../../.. -E "src\domasm.bat src\dev\display\ega $(subst /,\,$<) $(subst /,\,$@)"
 
-copyrigh.obj: COPYRIGH.ASM  $(inc)/COPYRIGH.INC
+copyrigh.obj: COPYRIGH.ASM  $(inc)/copyrigh.inc
 	dosemu -t --Fdrive_c ../../../.. -E "src\domasm.bat src\dev\display\ega $(subst /,\,$<) $(subst /,\,$@)"
 
 OBJS = cpi-head.obj 437-cpi.obj 850-cpi.obj 860-cpi.obj 863-cpi.obj \
