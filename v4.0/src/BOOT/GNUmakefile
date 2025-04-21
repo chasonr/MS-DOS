@@ -44,6 +44,7 @@ msboot.bin: msboot.obj
 
 clean:
 	rm -f *.obj
+	rm -f *.lst
 	rm -f msboot.exe
 	rm -f msboot.map
 	rm -f boot.cl1
