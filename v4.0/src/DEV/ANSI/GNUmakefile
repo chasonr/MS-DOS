@@ -19,7 +19,7 @@ ansi.ctl ansi.cl1 ansi.cl2 ansi.cla: ANSI.SKL $(msg)/$(COUNTRY).MSG
 
 ansi.obj:       ANSI.ASM ANSI.INC \
                 $(inc)/vector.inc \
-                $(inc)/MULT.INC \
+                $(inc)/mult.inc \
                 $(inc)/STRUC.INC
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\ansi $(subst /,\,$<) $(subst /,\,$@)"
 

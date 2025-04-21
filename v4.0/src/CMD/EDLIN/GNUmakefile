@@ -21,30 +21,30 @@ edlin.ctl edlin.cl1 edlin.cl2 edlin.cla edlin.clb edlin.clc: EDLIN.SKL   \
 
 
 edlin.obj:      EDLIN.ASM EDLEQU.ASM EDLSTDSW.INC \
-                $(inc)/DOSSYM.INC \
+                $(inc)/dossym.inc \
                 $(inc)/dosmac.inc $(inc)/bpb.inc $(inc)/buffer.inc \
-                $(inc)/sysvar.inc $(inc)/MULT.INC $(inc)/dirent.inc \
-                $(inc)/dpb.inc $(inc)/curdir.inc $(inc)/CPMFCB.INC \
-                $(inc)/FIND.INC $(inc)/pdb.inc $(inc)/sf.inc $(inc)/arena.inc \
-                $(inc)/intnat.inc $(inc)/ERROR.INC $(inc)/syscall.inc
+                $(inc)/sysvar.inc $(inc)/mult.inc $(inc)/dirent.inc \
+                $(inc)/dpb.inc $(inc)/curdir.inc $(inc)/cpmfcb.inc \
+                $(inc)/find.inc $(inc)/pdb.inc $(inc)/sf.inc $(inc)/arena.inc \
+                $(inc)/intnat.inc $(inc)/error.inc $(inc)/syscall.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\edlin $(subst /,\,$<) $(subst /,\,$@)"
 
 edlcmd1.obj:    EDLCMD1.ASM EDLEQU.ASM EDLSTDSW.INC \
-                $(inc)/DOSSYM.INC \
+                $(inc)/dossym.inc \
                 $(inc)/dosmac.inc $(inc)/bpb.inc $(inc)/buffer.inc \
-                $(inc)/sysvar.inc $(inc)/MULT.INC $(inc)/dirent.inc \
-                $(inc)/dpb.inc $(inc)/curdir.inc $(inc)/CPMFCB.INC \
-                $(inc)/FIND.INC $(inc)/pdb.inc $(inc)/sf.inc $(inc)/arena.inc \
-                $(inc)/intnat.inc $(inc)/ERROR.INC $(inc)/syscall.inc
+                $(inc)/sysvar.inc $(inc)/mult.inc $(inc)/dirent.inc \
+                $(inc)/dpb.inc $(inc)/curdir.inc $(inc)/cpmfcb.inc \
+                $(inc)/find.inc $(inc)/pdb.inc $(inc)/sf.inc $(inc)/arena.inc \
+                $(inc)/intnat.inc $(inc)/error.inc $(inc)/syscall.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\edlin $(subst /,\,$<) $(subst /,\,$@)"
 
 edlcmd2.obj:    EDLCMD2.ASM EDLEQU.ASM EDLSTDSW.INC \
-                $(inc)/DOSSYM.INC \
+                $(inc)/dossym.inc \
                 $(inc)/dosmac.inc $(inc)/bpb.inc $(inc)/buffer.inc \
-                $(inc)/sysvar.inc $(inc)/MULT.INC $(inc)/dirent.inc \
-                $(inc)/dpb.inc $(inc)/curdir.inc $(inc)/CPMFCB.INC \
-                $(inc)/FIND.INC $(inc)/pdb.inc $(inc)/sf.inc $(inc)/arena.inc \
-                $(inc)/intnat.inc $(inc)/ERROR.INC $(inc)/syscall.inc
+                $(inc)/sysvar.inc $(inc)/mult.inc $(inc)/dirent.inc \
+                $(inc)/dpb.inc $(inc)/curdir.inc $(inc)/cpmfcb.inc \
+                $(inc)/find.inc $(inc)/pdb.inc $(inc)/sf.inc $(inc)/arena.inc \
+                $(inc)/intnat.inc $(inc)/error.inc $(inc)/syscall.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\edlin $(subst /,\,$<) $(subst /,\,$@)"
 
 edlmes.obj:     EDLMES.ASM $(inc)/SYSMSG.INC  \

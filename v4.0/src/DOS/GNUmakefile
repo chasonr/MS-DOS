@@ -13,19 +13,28 @@ COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
 ###################### Dependencies begin here ##########################
 #
 
+.SUFFIXES: .asm .obj
+
+AS = jwasm
+AFLAGS = -q -Zm -Zg -I$(inc) -Fl -Sa
+
+.asm.obj:
+	$(AS) $(AFLAGS) -Fo$@ $<
+
 all: msdos.sys
 
 msdos.cl1: MSDOS.SKL \
 	$(msg)/$(COUNTRY).MSG 
 	dosemu -t --Fdrive_c ../.. -E "src\domsg1.bat src\dos $(subst /,\,$<) $(country);"
 
-DOSSYM.INC: $(inc)/dosmac.inc $(inc)/bpb.inc \
-    $(inc)/buffer.inc $(inc)/sysvar.inc $(inc)/vector.inc \
-    $(inc)/MULT.INC $(inc)/dirent.inc $(inc)/dpb.inc $(inc)/curdir.inc \
-    $(inc)/CPMFCB.INC $(inc)/FIND.INC $(inc)/pdb.inc $(inc)/exe.inc \
-    $(inc)/sf.inc $(inc)/arena.inc $(inc)/intnat.inc $(inc)/mi.inc \
-    $(inc)/FILEMODE.INC $(inc)/ERROR.INC $(inc)/syscall.inc
-	echo "touch DOSSYM.INC; files that are in ../inc"
+DOSSYM_INC = $(inc)/dossym.inc $(inc)/arena.inc $(inc)/bpb.inc \
+             $(inc)/buffer.inc $(inc)/cpmfcb.inc $(inc)/curdir.inc \
+             $(inc)/dbcs.sw $(inc)/dirent.inc $(inc)/dosmac.inc \
+             $(inc)/dpb.inc $(inc)/error.inc $(inc)/exe.inc \
+             $(inc)/filemode.inc $(inc)/find.inc $(inc)/intnat.inc \
+             $(inc)/mi.inc $(inc)/mult.inc $(inc)/pdb.inc $(inc)/sf.inc \
+             $(inc)/syscall.inc $(inc)/sysvar.inc $(inc)/vector.inc \
+             $(inc)/versiona.inc $(inc)/version.inc
 
 $(inc)/nibdos.obj: 
 	$(MAKE) -C $(inc) nibdos.obj
@@ -42,212 +51,162 @@ $(inc)/mstable.obj:
 $(inc)/msdosme.obj:
 	$(MAKE) -C $(inc) msdosme.obj
 
-msdisp.obj: MSDISP.ASM MSSW.ASM DISP.ASM \
-	     $(inc)/DOSSYM.INC $(inc)/DOSSEG.ASM
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
+msdisp.obj: msdisp.asm mssw.asm disp.asm \
+	     $(DOSSYM_INC) $(inc)/dosseg.asm
 
-mscode.obj: MSCODE.ASM MSSW.ASM MS_CODE.ASM \
-	     $(inc)/DOSSYM.INC $(inc)/DOSSEG.ASM $(inc)/devsym.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
+mscode.obj: mscode.asm mssw.asm ms_code.asm \
+	     $(DOSSYM_INC) $(inc)/dosseg.asm $(inc)/devsym.inc \
+            $(inc)/fastopen.inc $(inc)/fastxxxx.inc
 
-time.obj: TIME.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
+time.obj: time.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
 	  $(inc)/devsym.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
 
-getset.obj: GETSET.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
+getset.obj: getset.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
+    $(inc)/devsym.inc $(inc)/doscntry.inc
+
+parse.obj: parse.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
     $(inc)/devsym.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
 
-parse.obj: PARSE.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
-    $(inc)/devsym.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
+misc.obj: misc.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
+    $(inc)/devsym.inc $(inc)/bugtyp.asm
 
-misc.obj: MISC.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
-    $(inc)/devsym.inc $(inc)/BUGTYP.ASM
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
+misc2.obj: misc2.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
+    $(inc)/bugtyp.asm
 
-misc2.obj: MISC2.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
-    $(inc)/BUGTYP.ASM
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
+crit.obj: crit.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
+    $(inc)/bugtyp.asm
 
-crit.obj: CRIT.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
-    $(inc)/BUGTYP.ASM
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
-
-cpmio.obj: CPMIO.ASM $(inc)/DOSSEG.ASM \
-    $(inc)/DOSSYM.INC \
+cpmio.obj: cpmio.asm $(inc)/dosseg.asm \
+    $(DOSSYM_INC) \
     $(inc)/devsym.inc \
-    KSTRIN.ASM STRIN.ASM
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
+    kstrin.asm strin.asm
 
-cpmio2.obj: CPMIO2.ASM $(inc)/DOSSEG.ASM \
-    $(inc)/DOSSYM.INC $(inc)/devsym.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
+cpmio2.obj: cpmio2.asm $(inc)/dosseg.asm \
+    $(DOSSYM_INC) $(inc)/devsym.inc
 
-fcbio.obj: FCBIO.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
-    $(inc)/devsym.inc $(inc)/sf.inc $(inc)/FASTOPEN.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
+fcbio.obj: fcbio.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
+    $(inc)/devsym.inc $(inc)/sf.inc $(inc)/fastopen.inc
 
-fcbio2.obj: FCBIO2.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
+fcbio2.obj: fcbio2.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
     $(inc)/devsym.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
 
-search.obj: SEARCH.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
+search.obj: search.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
     $(inc)/devsym.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
 
-path.obj: PATH.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
+path.obj: path.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
     $(inc)/devsym.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
 
-ioctl.obj: IOCTL.ASM $(inc)/ioctl.inc $(inc)/DOSSEG.ASM \
-    $(inc)/DOSSYM.INC $(inc)/devsym.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
+ioctl.obj: ioctl.asm $(inc)/ioctl.inc $(inc)/dosseg.asm \
+    $(DOSSYM_INC) $(inc)/devsym.inc
 
-delete.obj: DELETE.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
-    $(inc)/devsym.inc $(inc)/sf.inc $(inc)/FASTXXXX.INC $(inc)/FASTOPEN.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
+delete.obj: delete.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
+    $(inc)/devsym.inc $(inc)/sf.inc $(inc)/fastxxxx.inc $(inc)/fastopen.inc
 
-rename.obj: RENAME.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
+rename.obj: rename.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
     $(inc)/devsym.inc $(inc)/sf.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
 
-finfo.obj: FINFO.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
+finfo.obj: finfo.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
     $(inc)/devsym.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
 
-dup.obj: DUP.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
+dup.obj: dup.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
     $(inc)/devsym.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
 
-create.obj: CREATE.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
+create.obj: create.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
     $(inc)/devsym.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
 
-open.obj: OPEN.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
-    $(inc)/devsym.inc $(inc)/FASTOPEN.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
+open.obj: open.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
+    $(inc)/devsym.inc $(inc)/fastopen.inc
 
-dinfo.obj: DINFO.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
-   $(inc)/devsym.inc $(inc)/BUGTYP.ASM $(inc)/buffer.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
+dinfo.obj: dinfo.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
+   $(inc)/devsym.inc $(inc)/bugtyp.asm $(inc)/buffer.inc
 
-isearch.obj: ISEARCH.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
+isearch.obj: isearch.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
     $(inc)/devsym.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
 
-abort.obj: ABORT.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
+abort.obj: abort.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
     $(inc)/devsym.inc $(inc)/sf.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
 
-close.obj: CLOSE.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
+close.obj: close.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
     $(inc)/devsym.inc $(inc)/buffer.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
 
-dircall.obj: DIRCALL.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
-    $(inc)/devsym.inc $(inc)/buffer.inc $(inc)/FASTOPEN.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
+dircall.obj: dircall.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
+    $(inc)/devsym.inc $(inc)/buffer.inc $(inc)/fastopen.inc
 
-disk.obj: DISK.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
+disk.obj: disk.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
     $(inc)/devsym.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
 
-disk2.obj: DISK2.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
+disk2.obj: disk2.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
     $(inc)/devsym.inc $(inc)/buffer.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
 
-disk3.obj: DISK3.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
+disk3.obj: disk3.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
     $(inc)/devsym.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
 
-dir.obj: DIR.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
-	 $(inc)/buffer.inc $(inc)/FASTOPEN.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
+dir.obj: dir.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
+	 $(inc)/buffer.inc $(inc)/fastopen.inc
 
-dir2.obj: DIR2.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
-	  $(inc)/buffer.inc $(inc)/FASTOPEN.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
+dir2.obj: dir2.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
+	  $(inc)/buffer.inc $(inc)/fastopen.inc
 
-dev.obj: DEV.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
+dev.obj: dev.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
     $(inc)/devsym.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
 
-mknode.obj: MKNODE.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
-    $(inc)/devsym.inc  $(inc)/buffer.inc $(inc)/FASTOPEN.INC \
-    $(inc)/FILEMODE.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
+mknode.obj: mknode.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
+    $(inc)/devsym.inc  $(inc)/buffer.inc $(inc)/fastopen.inc \
+    $(inc)/filemode.inc
 
-rom.obj: ROM.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
+rom.obj: rom.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
     $(inc)/devsym.inc  $(inc)/buffer.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
 
-fcb.obj: FCB.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
+fcb.obj: fcb.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
     $(inc)/devsym.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
 
-msctrlc.obj: MSCTRLC.ASM MSSW.ASM CTRLC.ASM \
-    $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC $(inc)/devsym.inc \
-    $(inc)/BUGTYP.ASM
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
+msctrlc.obj: msctrlc.asm mssw.asm ctrlc.asm \
+    $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc
 
-fat.obj: FAT.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
+fat.obj: fat.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
     $(inc)/devsym.inc $(inc)/buffer.inc $(inc)/curdir.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
 
-buf.obj: BUF.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
+buf.obj: buf.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
     $(inc)/devsym.inc $(inc)/buffer.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
 
-proc.obj: PROC.ASM \
-    $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC $(inc)/devsym.inc \
+proc.obj: proc.asm \
+    $(inc)/dosseg.asm $(DOSSYM_INC) $(inc)/devsym.inc \
     $(inc)/curdir.inc \
-    EXEC.ASM
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
+    exec.asm
 
-alloc.obj: ALLOC.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
+alloc.obj: alloc.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
     $(inc)/devsym.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
 
-srvcall.obj: SRVCALL.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
+srvcall.obj: srvcall.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
     $(inc)/devsym.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
 
-util.obj: UTIL.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
+util.obj: util.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
     $(inc)/devsym.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
 
-macro.obj: MACRO.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
+macro.obj: macro.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
     $(inc)/devsym.inc  $(inc)/curdir.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
 
-macro2.obj: MACRO2.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
+macro2.obj: macro2.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
     $(inc)/devsym.inc $(inc)/curdir.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
 
-handle.obj: HANDLE.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
-    $(inc)/devsym.inc $(inc)/BUGTYP.ASM
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
+handle.obj: handle.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
+    $(inc)/devsym.inc $(inc)/bugtyp.asm
 
-file.obj: FILE.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
-    $(inc)/devsym.inc $(inc)/BUGTYP.ASM $(inc)/FASTOPEN.INC \
-    $(inc)/FILEMODE.INC
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
+file.obj: file.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
+    $(inc)/devsym.inc $(inc)/bugtyp.asm $(inc)/fastopen.inc \
+    $(inc)/filemode.inc
 
-lock.obj: LOCK.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
+lock.obj: lock.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
     $(inc)/devsym.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
 
-share.obj: SHARE.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
+share.obj: share.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
     $(inc)/devsym.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
 
-extattr.obj: EXTATTR.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
-    $(inc)/devsym.inc $(inc)/EA.INC $(inc)/buffer.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
+extattr.obj: extattr.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
+    $(inc)/devsym.inc $(inc)/ea.inc $(inc)/buffer.inc
 
-ifs.obj: IFS.ASM $(inc)/DOSSEG.ASM $(inc)/DOSSYM.INC \
+ifs.obj: ifs.asm $(inc)/dosseg.asm $(DOSSYM_INC) \
     $(inc)/devsym.inc $(inc)/doscntry.inc $(inc)/buffer.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\dos $(subst /,\,$<) $(subst /,\,$@);"
 
 OBJS = $(inc)/nibdos.obj $(inc)/const2.obj $(inc)/msdata.obj \
        $(inc)/mstable.obj msdisp.obj mscode.obj $(inc)/msdosme.obj time.obj \
@@ -261,18 +220,19 @@ OBJS = $(inc)/nibdos.obj $(inc)/const2.obj $(inc)/msdata.obj \
        extattr.obj ifs.obj
 
 msdos.sys: msdos.cl1 $(OBJS)
-	dosemu -t --Fdrive_c ../.. -E "src\dolink src\dos @msdos.lnk"
-#	echo 'system dos' >resp.txt
-#	echo 'option map=msdos.map' >>resp.txt
-#	echo 'option nocaseexact' >>resp.txt
-#	echo 'name msdos.exe' >>resp.txt
-#	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
-#	wlink @resp.txt
+	echo 'system dos' >resp.txt
+	echo 'option map=msdos.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name msdos.exe' >>resp.txt
+	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
+	wlink @resp.txt
 	exe2bin -q msdos.exe msdos.sys
 	rm msdos.exe
 
 clean:
 	rm -f *.obj
+	rm -f *.err
+	rm -f *.lst
 	rm -f msdos.cl1
 	rm -f msdos.cl3
 	rm -f msdos.sys

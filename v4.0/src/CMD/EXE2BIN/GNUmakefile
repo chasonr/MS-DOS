@@ -21,12 +21,12 @@ exe2bin.ctl exe2bin.cl1 exe2bin.cl2 exe2bin.cla exe2bin.clb: EXE2BIN.SKL \
 
 e2binit.obj : E2BINIT.ASM  $(inc)/syscall.inc E2BPARSE.INC  E2BMACRO.INC \
               E2BEQU.INC  $(inc)/SYSMSG.INC  E2BTABLE.INC  exe2bin.ctl   \
-              LOCATE.ASM $(inc)/DOSSYM.INC $(inc)/dosmac.inc \
+              LOCATE.ASM $(inc)/dossym.inc $(inc)/dosmac.inc \
               $(inc)/bpb.inc $(inc)/buffer.inc $(inc)/sysvar.inc \
-              $(inc)/MULT.INC $(inc)/dirent.inc $(inc)/dpb.inc \
-              $(inc)/curdir.inc $(inc)/CPMFCB.INC $(inc)/FIND.INC \
+              $(inc)/mult.inc $(inc)/dirent.inc $(inc)/dpb.inc \
+              $(inc)/curdir.inc $(inc)/cpmfcb.inc $(inc)/find.inc \
               $(inc)/pdb.inc $(inc)/sf.inc $(inc)/arena.inc $(inc)/intnat.inc \
-              $(inc)/ERROR.INC $(inc)/syscall.inc $(inc)/parse.asm \
+              $(inc)/error.inc $(inc)/syscall.inc $(inc)/parse.asm \
               $(inc)/psdata.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\exe2bin $(subst /,\,$<) $(subst /,\,$@)"
 

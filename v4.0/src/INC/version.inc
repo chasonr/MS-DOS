@@ -34,10 +34,10 @@ memS       EQU     1			; Small model
 IBMVER     EQU     TRUE
 IBMCOPYRIGHT EQU   FALSE
 
-BUFFERFLAG	EQU	NOT IBMCOPYRIGHT
+BUFFERFLAG	EQU	IBMCOPYRIGHT eq 0
 
 ifndef	MSVER	
-MSVER      EQU     NOT IBMVER
+MSVER      EQU     IBMVER eq 0
 endif
 IBM	   EQU	   IBMVER
 ;
@@ -50,7 +50,7 @@ IBM	   EQU	   IBMVER
 	      %OUT ... CLONE version build switch on ...
 	    ENDIF
 	ELSE
-	    IF NOT IBMCOPYRIGHT
+	    IF IBMCOPYRIGHT eq 0
 	      %OUT ... MS version build switch on ...
 	    ELSE
 	      %OUT !!!!!!!!!  VERSION SWITCHES SET INCORECTLY  !!!!!!!!!

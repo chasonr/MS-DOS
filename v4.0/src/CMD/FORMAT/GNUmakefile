@@ -40,8 +40,8 @@ forlabel.obj:   FORLABEL.ASM FOREQU.INC FORMACRO.INC \
 
 format.obj:     FORMAT.ASM $(inc)/dosmac.inc $(inc)/bpb.inc \
                 $(inc)/dirent.inc $(inc)/dpb.inc $(inc)/curdir.inc \
-                $(inc)/CPMFCB.INC $(inc)/pdb.inc \
-                $(inc)/ERROR.INC $(inc)/syscall.inc $(inc)/ioctl.inc \
+                $(inc)/cpmfcb.inc $(inc)/pdb.inc \
+                $(inc)/error.inc $(inc)/syscall.inc $(inc)/ioctl.inc \
                 FOREQU.INC FORMACRO.INC FORSWTCH.INC
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\format $(subst /,\,$<) $(subst /,\,$@)"
 

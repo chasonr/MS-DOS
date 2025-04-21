@@ -28,64 +28,64 @@ chkinit.obj: CHKINIT.ASM   \
 chkdsk1.obj: CHKDSK1.ASM \
 	     CHKEQU.INC CHKMACRO.INC CHKCHNG.INC \
 	     CHKSEG.INC CHKDATA.INC \
-		$(inc)/DOSSYM.INC $(inc)/SYSMSG.INC  $(inc)/devsym.inc	 \
-		$(inc)/CPMFCB.INC $(inc)/dosmac.inc $(inc)/ioctl.inc	 \
+		$(inc)/dossym.inc $(inc)/SYSMSG.INC  $(inc)/devsym.inc	 \
+		$(inc)/cpmfcb.inc $(inc)/dosmac.inc $(inc)/ioctl.inc	 \
 		$(inc)/syscall.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\chkdsk $(subst /,\,$<) $(subst /,\,$@)"
 
 chkdsk2.obj: CHKDSK2.ASM \
 	     CHKEQU.INC CHKMACRO.INC CHKCHNG.INC \
 	     CHKSEG.INC \
-		$(inc)/DOSSYM.INC $(inc)/SYSMSG.INC  $(inc)/devsym.inc	 \
-		$(inc)/CPMFCB.INC $(inc)/dosmac.inc $(inc)/ioctl.inc	 \
+		$(inc)/dossym.inc $(inc)/SYSMSG.INC  $(inc)/devsym.inc	 \
+		$(inc)/cpmfcb.inc $(inc)/dosmac.inc $(inc)/ioctl.inc	 \
 		$(inc)/syscall.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\chkdsk $(subst /,\,$<) $(subst /,\,$@)"
 
 chkproc.obj: CHKPROC.ASM \
 	     CHKEQU.INC CHKMACRO.INC CHKCHNG.INC \
 	     CHKSEG.INC \
-		$(inc)/DOSSYM.INC $(inc)/SYSMSG.INC  $(inc)/devsym.inc	 \
-		$(inc)/CPMFCB.INC $(inc)/dosmac.inc $(inc)/ioctl.inc	 \
+		$(inc)/dossym.inc $(inc)/SYSMSG.INC  $(inc)/devsym.inc	 \
+		$(inc)/cpmfcb.inc $(inc)/dosmac.inc $(inc)/ioctl.inc	 \
 		$(inc)/syscall.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\chkdsk $(subst /,\,$<) $(subst /,\,$@)"
 
 chkproc2.obj: CHKPROC2.ASM \
 	     CHKEQU.INC CHKMACRO.INC CHKCHNG.INC \
 	     CHKSEG.INC \
-		$(inc)/DOSSYM.INC $(inc)/SYSMSG.INC  $(inc)/devsym.inc	 \
-		$(inc)/CPMFCB.INC $(inc)/dosmac.inc $(inc)/ioctl.inc	 \
+		$(inc)/dossym.inc $(inc)/SYSMSG.INC  $(inc)/devsym.inc	 \
+		$(inc)/cpmfcb.inc $(inc)/dosmac.inc $(inc)/ioctl.inc	 \
 		$(inc)/syscall.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\chkdsk $(subst /,\,$<) $(subst /,\,$@)"
 
 chkdisk.obj:  CHKDISK.ASM  \
 	     CHKEQU.INC CHKMACRO.INC CHKCHNG.INC \
 	     CHKSEG.INC \
-		$(inc)/DOSSYM.INC $(inc)/SYSMSG.INC  $(inc)/devsym.inc	 \
-		$(inc)/CPMFCB.INC $(inc)/dosmac.inc $(inc)/ioctl.inc	 \
+		$(inc)/dossym.inc $(inc)/SYSMSG.INC  $(inc)/devsym.inc	 \
+		$(inc)/cpmfcb.inc $(inc)/dosmac.inc $(inc)/ioctl.inc	 \
 		$(inc)/syscall.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\chkdsk $(subst /,\,$<) $(subst /,\,$@)"
 
 chkfat.obj:   CHKFAT.ASM   \
 	     CHKEQU.INC CHKMACRO.INC CHKCHNG.INC \
 	     CHKSEG.INC \
-		$(inc)/DOSSYM.INC $(inc)/SYSMSG.INC  $(inc)/devsym.inc	 \
-		$(inc)/CPMFCB.INC $(inc)/dosmac.inc $(inc)/ioctl.inc	 \
+		$(inc)/dossym.inc $(inc)/SYSMSG.INC  $(inc)/devsym.inc	 \
+		$(inc)/cpmfcb.inc $(inc)/dosmac.inc $(inc)/ioctl.inc	 \
 		$(inc)/syscall.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\chkdsk $(subst /,\,$<) $(subst /,\,$@)"
 
 chkprmt.obj: CHKPRMT.ASM \
 	     CHKEQU.INC CHKMACRO.INC CHKCHNG.INC \
 	     CHKSEG.INC \
-		$(inc)/DOSSYM.INC $(inc)/SYSMSG.INC  $(inc)/devsym.inc	 \
-		$(inc)/CPMFCB.INC $(inc)/dosmac.inc $(inc)/ioctl.inc	 \
+		$(inc)/dossym.inc $(inc)/SYSMSG.INC  $(inc)/devsym.inc	 \
+		$(inc)/cpmfcb.inc $(inc)/dosmac.inc $(inc)/ioctl.inc	 \
 		$(inc)/syscall.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\chkdsk $(subst /,\,$<) $(subst /,\,$@)"
 
 #chkexec.obj: CHKEXEC.ASM  /							;an038;bgb #commented out when received from IBM (mrw)
 #	      CHKEQU.INC CHKMACRO.INC CHKCHNG.INC /				;an038;bgb
 #	      CHKSEG.INC /						;an038;bgb
-#		 $(inc)/DOSSYM.INC $(inc)/SYSMSG.INC  $(inc)/devsym.inc   /	;an038;bgb
-#		 $(inc)/CPMFCB.INC $(inc)/dosmac.inc $(inc)/ioctl.inc	  /	;an038;bgb
+#		 $(inc)/dossym.inc $(inc)/SYSMSG.INC  $(inc)/devsym.inc   /	;an038;bgb
+#		 $(inc)/cpmfcb.inc $(inc)/dosmac.inc $(inc)/ioctl.inc	  /	;an038;bgb
 #		 $(inc)/syscall.inc						;an038;bgb
 
 chkdisp.obj: CHKDISP.ASM    \
@@ -93,8 +93,8 @@ chkdisp.obj: CHKDISP.ASM    \
 	chkdsk.cla chkdsk.clb chkdsk.clc chkdsk.cld chkdsk.cl1 chkdsk.cl2 \
 	     CHKEQU.INC CHKMACRO.INC CHKPARSE.INC CHKMSG.INC CHKCHNG.INC \
 	     CHKSEG.INC \
-		$(inc)/DOSSYM.INC $(inc)/SYSMSG.INC  $(inc)/devsym.inc	 \
-		$(inc)/CPMFCB.INC $(inc)/dosmac.inc $(inc)/ioctl.inc	 \
+		$(inc)/dossym.inc $(inc)/SYSMSG.INC  $(inc)/devsym.inc	 \
+		$(inc)/cpmfcb.inc $(inc)/dosmac.inc $(inc)/ioctl.inc	 \
 		$(inc)/syscall.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\chkdsk $(subst /,\,$<) $(subst /,\,$@)"
 

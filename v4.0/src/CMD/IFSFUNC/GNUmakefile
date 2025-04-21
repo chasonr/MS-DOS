@@ -18,57 +18,57 @@ all: ifsfunc.exe
 ifsfunc.ctl ifsfunc.cl1 ifsfunc.cl2 ifsfunc.cla: IFSFUNC.SKL  $(msg)/$(COUNTRY).MSG
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\ifsfunc $(subst /,\,$<) $(country)"
 
-$(inc)/DOSSYM.INC:	 $(inc)/versiona.inc $(inc)/dosmac.inc	      \
+$(inc)/dossym.inc:	 $(inc)/versiona.inc $(inc)/dosmac.inc	      \
      $(inc)/bpb.inc	 $(inc)/buffer.inc   $(inc)/sysvar.inc	      \
-     $(inc)/vector.inc	 $(inc)/MULT.INC     $(inc)/dirent.inc	      \
-     $(inc)/dpb.inc	 $(inc)/curdir.inc   $(inc)/CPMFCB.INC	      \
-     $(inc)/FIND.INC	 $(inc)/pdb.inc      $(inc)/exe.inc	      \
+     $(inc)/vector.inc	 $(inc)/mult.inc     $(inc)/dirent.inc	      \
+     $(inc)/dpb.inc	 $(inc)/curdir.inc   $(inc)/cpmfcb.inc	      \
+     $(inc)/find.inc	 $(inc)/pdb.inc      $(inc)/exe.inc	      \
      $(inc)/sf.inc	 $(inc)/arena.inc    $(inc)/intnat.inc	      \
-     $(inc)/mi.inc	 $(inc)/FILEMODE.INC $(inc)/ERROR.INC	      \
+     $(inc)/mi.inc	 $(inc)/filemode.inc $(inc)/error.inc	      \
      $(inc)/syscall.inc
-	echo " touch $(inc)/DOSSYM.INC "
+	echo " touch $(inc)/dossym.inc "
 
-ifssess.obj: IFSSESS.ASM $(inc)/IFSSYM.INC	   IFSFSYM.INC	      \
-     $(inc)/DOSSYM.INC	 $(inc)/devsym.inc   $(inc)/DOSSEG.ASM
+ifssess.obj: IFSSESS.ASM $(inc)/ifssym.inc	   IFSFSYM.INC	      \
+     $(inc)/dossym.inc	 $(inc)/devsym.inc   $(inc)/dosseg.asm
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\ifsfunc $(subst /,\,$<) $(subst /,\,$@)"
 
-ifsdir.obj: IFSDIR.ASM	 $(inc)/IFSSYM.INC	    IFSFSYM.INC       \
-     $(inc)/DOSSYM.INC	 $(inc)/devsym.inc   $(inc)/DOSSEG.ASM
+ifsdir.obj: IFSDIR.ASM	 $(inc)/ifssym.inc	    IFSFSYM.INC       \
+     $(inc)/dossym.inc	 $(inc)/devsym.inc   $(inc)/dosseg.asm
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\ifsfunc $(subst /,\,$<) $(subst /,\,$@)"
 
-ifsfile.obj: IFSFILE.ASM $(inc)/IFSSYM.INC	   IFSFSYM.INC	      \
-     $(inc)/DOSSYM.INC	 $(inc)/devsym.inc   $(inc)/DOSSEG.ASM	      \
+ifsfile.obj: IFSFILE.ASM $(inc)/ifssym.inc	   IFSFSYM.INC	      \
+     $(inc)/dossym.inc	 $(inc)/devsym.inc   $(inc)/dosseg.asm	      \
      $(inc)/doscntry.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\ifsfunc $(subst /,\,$<) $(subst /,\,$@)"
 
-ifshand.obj: IFSHAND.ASM $(inc)/IFSSYM.INC	   IFSFSYM.INC	      \
-     $(inc)/DOSSYM.INC	 $(inc)/devsym.inc   $(inc)/DOSSEG.ASM
+ifshand.obj: IFSHAND.ASM $(inc)/ifssym.inc	   IFSFSYM.INC	      \
+     $(inc)/dossym.inc	 $(inc)/devsym.inc   $(inc)/dosseg.asm
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\ifsfunc $(subst /,\,$<) $(subst /,\,$@)"
 
-ifsdev.obj:  IFSDEV.ASM  $(inc)/IFSSYM.INC	    IFSFSYM.INC       \
-     $(inc)/DOSSYM.INC	 $(inc)/devsym.inc   $(inc)/DOSSEG.ASM
+ifsdev.obj:  IFSDEV.ASM  $(inc)/ifssym.inc	    IFSFSYM.INC       \
+     $(inc)/dossym.inc	 $(inc)/devsym.inc   $(inc)/dosseg.asm
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\ifsfunc $(subst /,\,$<) $(subst /,\,$@)"
 
-ifsutil.obj: IFSUTIL.ASM $(inc)/IFSSYM.INC	    IFSFSYM.INC       \
-     $(inc)/DOSSYM.INC	 $(inc)/devsym.inc   $(inc)/DOSSEG.ASM	      \
-     $(inc)/BUGTYP.ASM
+ifsutil.obj: IFSUTIL.ASM $(inc)/ifssym.inc	    IFSFSYM.INC       \
+     $(inc)/dossym.inc	 $(inc)/devsym.inc   $(inc)/dosseg.asm	      \
+     $(inc)/bugtyp.asm
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\ifsfunc $(subst /,\,$<) $(subst /,\,$@)"
 
-ifserror.obj: IFSERROR.ASM $(inc)/IFSSYM.INC	     IFSFSYM.INC      \
-     $(inc)/DOSSYM.INC	 $(inc)/devsym.inc   $(inc)/DOSSEG.ASM	      \
+ifserror.obj: IFSERROR.ASM $(inc)/ifssym.inc	     IFSFSYM.INC      \
+     $(inc)/dossym.inc	 $(inc)/devsym.inc   $(inc)/dosseg.asm	      \
      ifsfunc.ctl  ifsfunc.cla  ifsfunc.cl1  ifsfunc.cl2
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\ifsfunc $(subst /,\,$<) $(subst /,\,$@)"
 
-ifsfdos.obj:  IFSFDOS.ASM $(inc)/IFSSYM.INC	    IFSFSYM.INC       \
-     $(inc)/DOSSYM.INC	 $(inc)/devsym.inc   $(inc)/DOSSEG.ASM	      \
-     $(inc)/MSDATA.ASM	 $(inc)/BUGTYP.ASM   $(inc)/SYSMSG.INC	      \
+ifsfdos.obj:  IFSFDOS.ASM $(inc)/ifssym.inc	    IFSFSYM.INC       \
+     $(inc)/dossym.inc	 $(inc)/devsym.inc   $(inc)/dosseg.asm	      \
+     $(inc)/msdata.asm	 $(inc)/bugtyp.asm   $(inc)/SYSMSG.INC	      \
      $(inc)/psdata.inc	 $(inc)/MSGSERV.ASM	  IFSPARSE.INC	      \
      $(inc)/parse.asm
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\ifsfunc $(subst /,\,$<) $(subst /,\,$@)"
 
-ifsinit.obj:  IFSINIT.ASM $(inc)/IFSSYM.INC	    IFSFSYM.INC       \
-     $(inc)/DOSSYM.INC	 $(inc)/devsym.inc   $(inc)/DOSSEG.ASM	      \
-     $(inc)/MSDATA.ASM	 $(inc)/BUGTYP.ASM   $(inc)/SYSMSG.INC	      \
+ifsinit.obj:  IFSINIT.ASM $(inc)/ifssym.inc	    IFSFSYM.INC       \
+     $(inc)/dossym.inc	 $(inc)/devsym.inc   $(inc)/dosseg.asm	      \
+     $(inc)/msdata.asm	 $(inc)/bugtyp.asm   $(inc)/SYSMSG.INC	      \
      $(inc)/psdata.inc	 $(inc)/MSGSERV.ASM	  IFSPARSE.INC	      \
      $(inc)/parse.asm						      \
      ifsfunc.ctl  ifsfunc.cla  ifsfunc.cl1  ifsfunc.cl2
@@ -96,7 +96,7 @@ $(dos)/mscode.obj:
 	$(MAKE) -C $(dos) mscode.obj
 
 ifsflink.obj: IFSFLINK.ASM					      \
-     $(inc)/DOSSYM.INC
+     $(inc)/dossym.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\ifsfunc $(subst /,\,$<) $(subst /,\,$@)"
 
 OBJS = ifssess.obj ifsdir.obj ifsfile.obj ifshand.obj ifsdev.obj ifsutil.obj \

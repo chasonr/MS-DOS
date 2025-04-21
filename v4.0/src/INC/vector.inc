@@ -15,7 +15,7 @@ ALTBASE EQU	4 * ALTTAB
 ;
 ; interrupt assignments
 ;
-	IF	NOT ALTVECT
+	IF	ALTVECT eq 0
 int_abort	    EQU     INTTAB	; abort process
 int_command	    EQU     int_abort+1 ; call MSDOS
 int_terminate	    EQU     int_abort+2 ; int to terminate address

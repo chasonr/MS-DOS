@@ -18,21 +18,21 @@ all: share.exe
 share.ctl share.cl1 share.cl2 share.cla: SHARE.SKL $(msg)/$(COUNTRY).MSG
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\share $(subst /,\,$<) $(country)"
 
-$(inc)/DOSSYM.INC: $(inc)/dosmac.inc $(inc)/bpb.inc $(inc)/curdir.inc \
+$(inc)/dossym.inc: $(inc)/dosmac.inc $(inc)/bpb.inc $(inc)/curdir.inc \
                    $(inc)/buffer.inc $(inc)/sysvar.inc $(inc)/vector.inc \
-                   $(inc)/MULT.INC $(inc)/dirent.inc $(inc)/dpb.inc \
-                   $(inc)/CPMFCB.INC $(inc)/FIND.INC $(inc)/pdb.inc \
+                   $(inc)/mult.inc $(inc)/dirent.inc $(inc)/dpb.inc \
+                   $(inc)/cpmfcb.inc $(inc)/find.inc $(inc)/pdb.inc \
                    $(inc)/exe.inc $(inc)/sf.inc $(inc)/arena.inc \
-                   $(inc)/intnat.inc $(inc)/mi.inc $(inc)/FILEMODE.INC \
-                   $(inc)/ERROR.INC $(inc)/syscall.inc
-	              	   echo " touch DOSSYM.INC "
+                   $(inc)/intnat.inc $(inc)/mi.inc $(inc)/filemode.inc \
+                   $(inc)/error.inc $(inc)/syscall.inc
+	              	   echo " touch dossym.inc "
 
-gshare.obj: GSHARE.ASM $(inc)/DOSSYM.INC $(inc)/MFT.INC \
-            $(inc)/BUGTYP.ASM
+gshare.obj: GSHARE.ASM $(inc)/dossym.inc $(inc)/MFT.INC \
+            $(inc)/bugtyp.asm
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\share $(subst /,\,$<) $(subst /,\,$@)"
 
-gshare2.obj: GSHARE2.ASM $(inc)/DOSSYM.INC $(inc)/DOSSEG.ASM $(inc)/MFT.INC \
-             $(inc)/BUGTYP.ASM
+gshare2.obj: GSHARE2.ASM $(inc)/dossym.inc $(inc)/dosseg.asm $(inc)/MFT.INC \
+             $(inc)/bugtyp.asm
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\share $(subst /,\,$<) $(subst /,\,$@)"
 
 sharesr.obj: SHARESR.ASM $(inc)/parse.asm $(inc)/psdata.inc

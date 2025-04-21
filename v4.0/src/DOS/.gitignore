@@ -1,4 +1,6 @@
 *.obj
 *.OBJ
+*.err
+*.lst
 msdos.sys
 MSDOS.SYS

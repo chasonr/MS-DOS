@@ -27,7 +27,7 @@ assgparm.obj: ASSGPARM.ASM \
 assgmain.obj: ASSGMAIN.ASM \
 	$(inc)/dosmac.inc \
 	$(inc)/sysvar.inc \
-	$(inc)/MULT.INC \
+	$(inc)/mult.inc \
 	$(inc)/pdb.inc \
 	$(inc)/syscall.inc \
 	$(inc)/MSGSERV.ASM \

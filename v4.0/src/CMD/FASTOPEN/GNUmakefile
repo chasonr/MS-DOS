@@ -18,13 +18,13 @@ all: fastopen.exe
 fastopen.ctl fastopen.cl1 fastopen.cl2 fastopen.cla: FASTOPEN.SKL  $(msg)/$(COUNTRY).MSG
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\fastopen $(subst /,\,$<) $(country)"
 
-fastopen.obj: FASTOPEN.ASM $(inc)/FASTOPEN.INC
+fastopen.obj: FASTOPEN.ASM $(inc)/fastopen.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\fastopen $(subst /,\,$<) $(subst /,\,$@)"
 
-fastseek.obj: FASTSEEK.ASM $(inc)/FASTOPEN.INC
+fastseek.obj: FASTSEEK.ASM $(inc)/fastopen.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\fastopen $(subst /,\,$<) $(subst /,\,$@)"
 
-fastinit.obj: FASTINIT.ASM $(inc)/DOSSYM.INC $(inc)/FASTOPEN.INC
+fastinit.obj: FASTINIT.ASM $(inc)/dossym.inc $(inc)/fastopen.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\fastopen $(subst /,\,$<) $(subst /,\,$@)"
 
 fastp.obj: FASTP.ASM \

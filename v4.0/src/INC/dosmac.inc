@@ -36,7 +36,7 @@ BREAK <I_NEED: declare a variable external, if necessary, and allocate a size>
 ;
 AsmVar  InstalledData
 I_NEED  MACRO   sym,len
-IF NOT InstalledData
+IF InstalledData eq 0
 	DATA    SEGMENT WORD PUBLIC 'DATA'
     IFIDN   <len>,<WORD>
 	EXTRN   &sym:WORD
@@ -197,7 +197,7 @@ name    LABEL BYTE
     IFB <init>
 	DB  I_AM_SIZE*I_AM_LEN DUP (?)
     ELSE
-IF NOT InstalledData
+IF InstalledData eq 0
 	IRP itm,<init>
 	    IF I_AM_LEN EQ 1
 		DB  itm
@@ -391,7 +391,7 @@ ENDIF
 	PUSH    AX
 	PUSH    BP
 	MOV     BP,SP
-If (not sharef) and (not redirector)
+If (sharef eq 0) and (redirector eq 0)
 Table   segment
 a       db      fmts,0
 Table   ends
@@ -466,7 +466,7 @@ ENDIF
 	PUSH    AX
 	InvokeFn  SegCheck
 	POP     AX
-IF NOT SHAREF
+IF SHAREF eq 0
 Table   SEGMENT
 a       DB      message,0
 Table   ends

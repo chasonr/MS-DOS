@@ -23,10 +23,10 @@ print_r.obj: PRINT_R.ASM \
     PRIDEFS.INC print.ctl \
     $(inc)/devsym.inc \
     $(inc)/syscall.inc \
-    $(inc)/ERROR.INC \
+    $(inc)/error.inc \
     $(inc)/sysvar.inc \
-    $(inc)/FIND.INC \
-    $(inc)/EA.INC
+    $(inc)/find.inc \
+    $(inc)/ea.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\print $(subst /,\,$<) $(subst /,\,$@)"
 
 print_rm.obj: PRINT_RM.ASM \
@@ -39,9 +39,9 @@ print_t.obj: PRINT_T.ASM \
     PRIDEFS.ASM \
     $(inc)/devsym.inc \
     $(inc)/syscall.inc \
-    $(inc)/ERROR.INC \
+    $(inc)/error.inc \
     $(inc)/sysvar.inc \
-    $(inc)/FIND.INC
+    $(inc)/find.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\print $(subst /,\,$<) $(subst /,\,$@)"
 
 print_tm.obj: PRINT_TM.ASM \
