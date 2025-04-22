@@ -93,9 +93,6 @@
 	IF1
 	    %OUT    COMPONENT=ASSIGN, MODULE=ASSPARM.SAL...
 	ENDIF
-; =  =	=  =  =  =  =  =  =  =	=  =
-	HEADER	<MACRO DEFINITION>
-; =  =	=  =  =  =  =  =  =  =	=  =
 
 HEADER	MACRO	TEXT
 .XLIST
@@ -103,6 +100,10 @@ HEADER	MACRO	TEXT
 .LIST
 	PAGE
 	ENDM
+
+; =  =	=  =  =  =  =  =  =  =	=  =
+	HEADER	<MACRO DEFINITION>
+; =  =	=  =  =  =  =  =  =  =	=  =
 
 ; =  =	=  =  =  =  =  =  =  =	=  =
 	HEADER	<SYSPARSE - SYSTEM COMMAND LINE PARSER> ;			;AN000;
@@ -133,9 +134,8 @@ QUSSW	EQU	0			;SUPPRESS SUPPORT OF QUOTED STRING FORMAT
 					;PARSE WORK AREA & EQUATES
 
 .xlist
-	INCLUDE PARSE.ASM
+	INCLUDE parse.asm
 .list
 
 CODE	ENDS
 	END
-

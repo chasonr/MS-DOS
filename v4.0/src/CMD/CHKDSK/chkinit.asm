@@ -56,13 +56,13 @@ page	,132					;
 .xlist										;an000;bgb
 include chkseg.inc					   ;an005;bgb		;an000;bgb
 include pathmac.inc								;an000;bgb
-INCLUDE CHKEQU.INC				;				;an000;bgb;AN000;
-INCLUDE CHKCHNG.INC				;List of changes		;an000;bgb
+INCLUDE chkequ.inc				;				;an000;bgb;AN000;
+INCLUDE chkchng.inc				;List of changes		;an000;bgb
 include dossym.inc								;an000;bgb
-INCLUDE SYSCALL.INC				;				;an000;bgb;AN000;
-INCLUDE CHKMACRO.INC				;				;an000;bgb;AN000;
-INCLUDE CHKPARSE.INC				;				;an000;bgb;AN000;
-INCLUDE IOCTL.INC								;an000;bgb
+INCLUDE syscall.inc				;				;an000;bgb;AN000;
+INCLUDE chkmacro.inc				;				;an000;bgb;AN000;
+INCLUDE chkparse.inc				;				;an000;bgb;AN000;
+INCLUDE ioctl.inc								;an000;bgb
 .list										;an000;bgb
 										;an000;bgb
 										;an000;bgb
@@ -602,7 +602,7 @@ Procedure Parse_Command_Line			;				;an000;bgb;AN000;
 	mov	si,Command_Line_Parms		;Point at command line		;an000;bgb;AN000;
 	lea	di,Command_Line_Buffer		;Where to put a copy of it	;an000;bgb;AN000;
 	mov	cx,Command_Line_Length		;How long was input?		;an000;bgb;AN000;
-	repnz	movsb				;Copy it			;an000;bgb;AN000;
+	rep	movsb				;Copy it			;an000;bgb;AN000;
 	lea	Di,Command_Line_Buffer		;				;an046;bgb
 public nextdi									;an046;bgb
 nextdi: 									;an046;bgb
@@ -953,6 +953,7 @@ ELSE
 ;			$IF   NE
 			JE $$IF56
 			jmp   baddrv
+	nop ; RLCTEMP
 ;			$ENDIF
 $$IF56:
 ;		  $ENDIF
@@ -976,7 +977,7 @@ $$IF61:
 	      JNE $$IF63
 baddrv: 	  mov  fatal_error,yes						;an000;bgb;an033;bgb
 		  mov	  dx,offset dg:inval_media				;an000;bgb;an033;bgb
-		  invoke  printf_crlf						;an000;bgb;an033;bgb
+		  InvokeFn printf_crlf						;an000;bgb;an033;bgb
 ;	      $ENDIF								;an000;bgb;an033;bgb
 $$IF63:
 Exit_Baddrv:					;AN099;
@@ -1545,4 +1546,3 @@ Multiply_32_Bits endp								;an000;bgb
 code	ends									;an000;bgb
 	end									;an000;bgb
 										;an000;bgb
-

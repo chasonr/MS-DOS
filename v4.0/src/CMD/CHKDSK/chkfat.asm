@@ -3,10 +3,10 @@ page	,132					;
 
 	.xlist
 	include chkseg.inc							;an005;bgb
-	INCLUDE CHKCHNG.inc
-	INCLUDE DOSSYM.inc
-	INCLUDE CHKEQU.inc
-	INCLUDE CHKMACRO.inc
+	INCLUDE chkchng.inc
+	INCLUDE dossym.inc
+	INCLUDE chkequ.inc
+	INCLUDE chkmacro.inc
 	include pathmac.inc
 
 
@@ -53,7 +53,7 @@ ASSUME	CS:DG,DS:DG,ES:DG,SS:DG
 public calc_fatmap_seg, MARKMAP, CHKMAP, CHKMAPLP, ORPHAN, CONTLP, RET18
 public PromptRecover, NOCHAINREC, CHKMAPLP2, NEXTCLUS
 public DISPFRB, FINDCHAIN, CHKMAPLP3, CHAINLP, INSERTEOF, FAT12_4, CHKCHHEAD
-public ADDCHAIN, CHGOON, NEXTCLUS2,
+public ADDCHAIN, CHGOON, NEXTCLUS2
 public CHAINREC, MAKFILLP, GOTENT, OPAGAIN, GOTORPHNAM, ENTMADE, NEXTENT
 public NXTORP, RET100, nextorph
 public AMDONE, REWRITE, WRTLOOP
@@ -853,6 +853,7 @@ ENTMADE:    restorereg <ax,di,si>					     ;ac048;bgb;an049;bgb
 ;	    $IF     Z			;neither are zero		     ;an049;bgb
 	    JNZ $$IF41
 		jmp	RET100		    ; yes,we are done			    ;ac048;bgb;an049;bgb
+	nop ; RLCTEMP
 ;	    $endif							     ;an049;bgb
 $$IF41:
 	    call    NEXTORPH		;get the cluster of the next one	;ac048;bgb
@@ -1061,4 +1062,3 @@ ENDIF
 
 CODE	ENDS
 	END
-

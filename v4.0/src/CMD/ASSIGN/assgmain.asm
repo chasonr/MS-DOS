@@ -116,13 +116,14 @@ page
 DEBUG	=	0
 
 .xlist
-	INCLUDE SYSMSG.INC		;AN000;
-	INCLUDE SYSVAR.INC
-	INCLUDE CURDIR.INC
-	INCLUDE MULT.INC
-	INCLUDE PDB.INC
+	INCLUDE dosmac.inc
+	INCLUDE sysmsg.inc		;AN000;
+	INCLUDE sysvar.inc
+	INCLUDE curdir.inc
+	INCLUDE mult.inc
+	INCLUDE pdb.inc
 
-MSG_UTILNAME <ASSIGN>
+MSG_UTILNAME <assign>
 
 .list
 
@@ -1124,8 +1125,8 @@ inv		dd	?
 STring		dd	?			;AN000;string holder
 
 
-INCLUDE ASSGPARM.INC				;AN000;
-INCLUDE ASSGMSG.INC				;AN000;
+INCLUDE assgparm.inc				;AN000;
+INCLUDE assgmsg.inc				;AN000;
 
 
 assume	cs:code, ds:code, ss:code, es:code
@@ -1768,4 +1769,3 @@ include msgdcl.inc
 
 code	ends
 	end	ENTRY_POINT
-

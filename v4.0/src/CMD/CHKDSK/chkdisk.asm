@@ -3,10 +3,10 @@ page	,132					;
 
 	.xlist
 	include chkseg.inc							;an005;bgb
-	INCLUDE CHKCHNG.INC
-	INCLUDE DOSSYM.INC
-	INCLUDE CHKEQU.INC
-	INCLUDE CHKMACRO.INC
+	INCLUDE chkchng.inc
+	INCLUDE dossym.inc
+	INCLUDE chkequ.inc
+	INCLUDE chkmacro.inc
 	include pathmac.inc
 
 
@@ -325,4 +325,3 @@ EndProc ReadFt									;an005;bgb
 	pathlabl chkdisk
 CODE	ENDS
 	END
-

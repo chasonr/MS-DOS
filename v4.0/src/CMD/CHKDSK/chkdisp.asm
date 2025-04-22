@@ -19,12 +19,12 @@ page	,132	;								;an000;bgb
 .xlist										;an000;bgb
 include pathmac.inc								;an040;bgb
 include chkseg.inc								;an000;bgb
-INCLUDE CPMFCB.INC								;an000;bgb
-INCLUDE CHKEQU.INC								;an000;bgb
+INCLUDE cpmfcb.inc								;an000;bgb
+INCLUDE chkequ.inc								;an000;bgb
 .list										;an000;bgb
-INCLUDE CHKMSG.INC								;an000;bgb
+INCLUDE chkmsg.inc								;an000;bgb
 .xlist										;an000;bgb
-INCLUDE SYSMSG.INC								;an000;bgb
+INCLUDE sysmsg.inc								;an000;bgb
 .list										;an000;bgb
       ; 									;an000;bgb
 cstack	 segment para stack 'STACK'                                             ;an000;bgb
@@ -35,7 +35,7 @@ cstack	 ends									;an000;bgb
 ;*****************************************************************************	;an000;bgb
 ; Message Services								;an000;bgb
 ;*****************************************************************************	;an000;bgb
-MSG_UTILNAME  <CHKDSK>								;an000;bgb
+MSG_UTILNAME  <chkdsk>								;an000;bgb
 										;an000;bgb
 ;.xlist 									 ;an000;bgb
 data	segment public para 'DATA'                                              ;an000;bgb
@@ -48,7 +48,7 @@ Msg_Services	<NEARmsg>							;an000;bgb
 Msg_Services	<LOADmsg>							;an000;bgb
 Msg_Services	<DISPLAYmsg,CHARmsg,NUMmsg,TIMEmsg,DATEmsg>			;an000;bgb
 pathlabl	msgret								;an040;bgb
-Msg_Services	<CHKDSK.CLA,CHKDSK.CLB,CHKDSK.CLC,CHKDSK.CLD,CHKDSK.CL1,CHKDSK.CL2,CHKDSK.CTL> ;an037;bgb
+Msg_Services	<chkdsk.cla,chkdsk.clb,chkdsk.clc,chkdsk.cld,chkdsk.cl1,chkdsk.cl2,chkdsk.ctl> ;an037;bgb
 code	ends									;an000;bgb
 .list										;an000;bgb
 										;an000;bgb

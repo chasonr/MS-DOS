@@ -3,10 +3,10 @@ page	,132					;
 
 	.xlist
 	include chkseg.inc
-	INCLUDE CHKCHNG.INC
-	INCLUDE DOSSYM.INC
-	INCLUDE CHKEQU.INC
-	INCLUDE CHKMACRO.INC
+	INCLUDE chkchng.inc
+	INCLUDE dossym.inc
+	INCLUDE chkequ.inc
+	INCLUDE chkmacro.inc
 	include pathmac.inc
 	.list
 
@@ -29,7 +29,7 @@ DATA	SEGMENT PUBLIC PARA 'DATA'
 	EXTRN	HIDCNT:dword,HIDSIZ:word,FILCNT:dword,FILSIZ:word	   ;an049;bgb
 	EXTRN	DIRCNT:dword							;an049;bgb
 	EXTRN	DIRSIZ:word							;an049;bgb
-	EXTRN	DIRTYFAT:byte,
+	EXTRN	DIRTYFAT:byte
 	EXTRN	HECODE:byte
 	EXTRN	ALLDRV:byte,FIXMFLG:byte,DIRCHAR:byte
 	EXTRN	BIGFAT:byte,EOFVAL:word,BADVAL:word
@@ -202,6 +202,7 @@ CANTREC:    INC     [DOTSNOGOOD]						;ac048;bgb
 ;	    $endif								;ac048;bgb
 $$IF5:
 	    jmp     dotgoon							;ac048;bgb
+	nop ; RLCTEMP
 ;	$endif									;ac048;bgb
 $$IF4:
 
@@ -307,6 +308,7 @@ CANTREC2:
 	JZ	DOTSBAD2
 	MOV	DX,OFFSET DG:NORECDDOT
 	JMP	DOTSBAD
+	nop ; RLCTEMP
 
 NULLDIRERR label far	    ;dir is empty
 	CMP	[NOISY],OFF			;				;AC000;
@@ -320,7 +322,7 @@ DOEXTMES3:
 DOTSBAD:					;Can't recover
 	mov	[file_arg2],offset dg:badtarg2
 	inc	byte ptr [nul_arg]
-	MOV	fTrunc,TRUE
+	MOV	fTrunc,TRUE and 0FFh
 	CALL	EPRINT
 dotsbad2:
 	CALL	DOTDOTHARDWAY
@@ -405,12 +407,14 @@ $$IF16:
 	JNC $$IF18
 ;;;;;;;;;;;;JC	    nulldirerr			    ; Not spliced, error
 	    jmp     nulldirerr
+	nop ; RLCTEMP
+	nop ; RLCTEMP
 ;	$endif
 $$IF18:
 JOINERR:
 	MOV	SI,OFFSET DG:NUL
 	CALL	get_currdir
-	mov	fTrunc,TRUE
+	mov	fTrunc,TRUE and 0FFh
 	mov	dx,offset dg:joinmes		;				;AC000;
 	call	Printf_Crlf			;				;AC000;
 	mov	dx,offset dg:badtarg2		;				;AC000;
@@ -495,6 +499,8 @@ CHKDOTDOT:					;Come here after . failure
 	OR	AL,AL
 	JZ	DOTDOTOK
 	 JMP	NODDOT				;No ..
+	nop ; RLCTEMP
+	nop ; RLCTEMP
 DOTDOTOK:
 	MOV	SI,OFFSET DG:DIRBUF + DIRNAM
 	MOV	DI,OFFSET DG:DDOTENT
@@ -503,6 +509,8 @@ DOTDOTOK:
 ;	$if	nz
 	JZ $$IF23
 	    jmp     noddot
+	nop ; RLCTEMP
+	nop ; RLCTEMP
 ;;; ;;;;;;;;JNZ     NODDOT			    ;No ..
 ;	$endif
 $$IF23:
@@ -540,6 +548,7 @@ DDLINKOK:
 ;	$if	z
 	JNZ $$IF25
 	    jmp     DDSIZOK
+	nop ; RLCTEMP
 ;	$endif
 $$IF25:
 BADDDSIZ:					;.. size should be 0
@@ -636,11 +645,15 @@ hidenfile:
 	adc	word ptr hidcnt+2,0	;add high word if > 64k files	     ;an049;bgb
 	add	hidsiz,cx		;it was this many bytes 	     ;an049;bgb
 	JMP	ddsizok 			;Next
+	nop ; RLCTEMP
+	nop ; RLCTEMP
 NORMFILE:
 	add	word ptr filcnt,1	;inc file counter		     ;an049;bgb
 	adc	word ptr filcnt+2,0	;add high word if >64k files	     ;an049;bgb
 	add	filsiz,cx		;add in size of file		     ;an049;bgb
 	JMP	ddsizok 			;Next
+	nop ; RLCTEMP
+	nop ; RLCTEMP
 
 
 ;***************************************************************************
@@ -669,6 +682,8 @@ CONVDIR:				;yes, dir size truncated
 	POP	BX			;Get my SRCH FCB pointer back
 	POP	[ERRSUB]		;restore from prev dir
 	JMP	ddsizok 			;Next
+	nop ; RLCTEMP
+	nop ; RLCTEMP
 DPROC2:
 	add	dirsiz,cx		;add in siz of clusters 		;an049;bgb
 ; put 4 words on the stack - for next call to dirproc?
@@ -696,6 +711,8 @@ DPROC2:
 	CMP	[DOTSNOGOOD],0
 	JNZ	ASKCONV
 	JMP	ddsizok 			;Next
+	nop ; RLCTEMP
+	nop ; RLCTEMP
 ;newdir error routines
 CANTTARG:
 ;cant chdir
@@ -703,9 +720,11 @@ CANTTARG:
 	mov	SI,dx				; Pointer to bad DIR
 	CALL	get_currdirERR
 	MOV	DX,OFFSET DG:BADTarg_PTR
-	mov	fTrunc,TRUE
+	mov	fTrunc,TRUE and 0FFh
 	call	printf_crlf
 	JMP	ddsizok 			;Next
+	nop ; RLCTEMP
+	nop ; RLCTEMP
 BogusDir:
 ;bad dir entry
 	ADD	SP,8				; clean off stack
@@ -718,6 +737,8 @@ ASKCONV:
 ;	$if	nz
 	JZ $$IF31
 	    jmp    ddsizok
+	nop ; RLCTEMP
+	nop ; RLCTEMP
 ;;;;;;;;;;;;JNZ     DDSIZOK			    ;Leave on second pass
 ;	$endif
 $$IF31:
@@ -734,6 +755,8 @@ PRINTTRMES:
 ;	$if	nz
 	JZ $$IF35
 	    jmp    ddsizok
+	nop ; RLCTEMP
+	nop ; RLCTEMP
 ;;;;;;;;;;; JNZ     DDSIZOK			    ;Leave on second pass
 ;	$endif
 $$IF35:
@@ -1343,8 +1366,8 @@ $$DO48:
 	      pop     ax			;Get haed mark back		;AN000;
 ;	   $EXITIF C				;Quit if crosslink		;AC000;
 	   JNC $$IF48
-	      mov     IsCross,True		;Set crosslink flag		;AC000;
-	      cmp     SecondPass,True		;Handle crosslink 2nd pass only ;AC000;
+	      mov     IsCross,True and 0FFh	;Set crosslink flag		;AC000;
+	      cmp     SecondPass,True and 0FFh	;Handle crosslink 2nd pass only ;AC000;
 ;	      $IF     E 			;This is first pass		;AC000;
 	      JNE $$IF50
 		 mov	 Cross_Clus,di		;Put cluster in message 	;AN000;
@@ -1473,7 +1496,7 @@ $$LL62:
 		mov	dx,offset DG:NulNZ	  ;1st cluster number is invalid;an025;bgb
 		call	EPrint			  ;Go print file and error	;an025;bgb
 		mov	word ptr [si].dirclus,0   ;set cluster number to 0	;an025;bgb
-		mov	zerotrunc,true	;modified the file size 		;an026;bgb
+		mov	zerotrunc,true and 0FFh	;modified the file size 		;an026;bgb
 ;	    $ENDIF			;already set to 0, dont print err msg	;an025;bgb
 $$IF63:
 	    mov     word ptr [si].DIRESIZ,0   ;set file size to 0	      ;Kill the file size	      ;AC000;
@@ -1889,4 +1912,3 @@ Chkprmt_End label byte
 	pathlabl chkproc
 CODE	ENDS
 	END
-

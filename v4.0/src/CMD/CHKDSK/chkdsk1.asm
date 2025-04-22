@@ -3,12 +3,12 @@ page	,132					;
 
 	.xlist
 	include chkseg.inc							;an005;bgb
-	INCLUDE CHKCHNG.INC
-	INCLUDE DOSSYM.INC
+	INCLUDE chkchng.inc
+	INCLUDE dossym.inc
 	INCLUDE syscall.inc							;an041;bgb
 	INCLUDE ioctl.inc							;an041;bgb;an041;bgb
-	INCLUDE CHKEQU.INC
-	INCLUDE CHKMACRO.INC
+	INCLUDE chkequ.inc
+	INCLUDE chkmacro.inc
 	include chkdata.inc							;an005;bgb
 	include pathmac.inc
 
@@ -194,7 +194,7 @@ Root_CD_Ok:					 ;				;AN000;
 ;   $IF     B			     ; if not, display error msg
     JNB $$IF9
 	MOV	DX,OFFSET DG:no_mem_arg
-	invoke	printf_crlf
+	InvokeFn printf_crlf
 	jmp	alldone 	     ;finished with pgm
 ;   $ENDIF
 $$IF9:
@@ -283,7 +283,7 @@ $$IF15:
 ;	xor	ah,ah			; Make it a word
 ;	mov	[badrw_num],ax
 ;	mov	dx,offset dg:badr_arg
-;	invoke	printf_crlf
+;	InvokeFn printf_crlf
 ;	restorereg <ax,cx,di,dx>						;an005;bgb
 ;	INC	AH
 ;	ADD	DX,DI
@@ -315,6 +315,7 @@ RDOK:	;**Check_for_FAT_ID**********************************************
 	JZ $$IF18
 ;;;;;;;;;;;;JZ	    IDOK
 	    JMP     ALLDONE		    ;User said stop
+	nop ; RLCTEMP
 ;	$ENDIF
 $$IF18:
 ;   $ENDIF
@@ -336,7 +337,7 @@ checkit:
     CALL    DIRPROC
     CALL    CHKMAP		    ;Look for badsectors, orphans
     CALL    CHKCROSS		    ;Check for second pass
-    INVOKE  DOCRLF		     ;display new line
+    InvokeFn DOCRLF		     ;display new line
     CALL    REPORT		     ;finished, display data to screen
 
 ;*****************************************************************************
@@ -384,6 +385,7 @@ doagain: MOV	 AL,[DIRCHAR]		 ;try to find '\' in path name
 	    JMP SHORT $$EN22
 $$IF22:
 		jmp	GotPath 	;found a '\' and not dbcs		;an055;bgb
+	nop ; RLCTEMP
 ;	    $ENDIF								;an055;bgb
 $$EN22:
 ;	$ENDIF									;an055;bgb
@@ -419,9 +421,9 @@ NOT_ROOT_DIR:
 	POP	DI			; Recall loc
 	POP	WORD PTR [DI]		; recall chars
 	JNC	VALID_PATH
-	INVOKE	DOCRLF
+	InvokeFn DOCRLF
 	MOV	DX,OFFSET DG:INVPATH_arg
-	invoke	printf_crlf
+	InvokeFn printf_crlf
 	JMP	CDONE1
 
 ;*****************************************************************************
@@ -445,7 +447,7 @@ ParseName:
 ;
 	MOV	BYTE PTR es:[DI],-1
 ScanFile:
-	INVOKE	DOCRLF
+	InvokeFn DOCRLF
 ;set dma pointer to here
 	MOV	DX,OFFSET DG:DIRBUF	;FOR ALL SEARCHING
 	MOV	BP,DX
@@ -497,7 +499,7 @@ NXTCHK: 	      ;reached the end of a file
 	CALL	get_THISEL2
 ; print it out
 	mov	dx,offset dg:extent_arg
-	invoke	printf_crlf
+	InvokeFn printf_crlf
 GETNXT:
 	MOV	AH,DIR_SEARCH_NEXT	    ;Look for the next file
 	JMP	FRAGCHK
@@ -509,14 +511,14 @@ MSGCHK:
 	MOV	SI,pFileName
 	CALL	get_currdir
 	mov	dx,offset dg:OPNERR_arg
-	invoke	printf_crlf		    ;bad file spec
+	InvokeFn printf_crlf		    ;bad file spec
 	jmp	short cdone
 FILSPOK:
 	CMP	BYTE PTR [FRAGMENT],2
 	JZ	CDONE
 ; all files were ok
 	mov	dx,offset dg:NOEXT_arg
-	invoke	printf_crlf
+	InvokeFn printf_crlf
 CDONE:
 	CMP	BYTE PTR [DIR_FIX],0
 	JZ	CDONE1
@@ -679,4 +681,3 @@ endproc Get_Serial_Num			   ;AN000;S					;an024;bgb
 	pathlabl chkdsk1							;an024;bgb
 CODE	ENDS
 	END	CHKDSK
-

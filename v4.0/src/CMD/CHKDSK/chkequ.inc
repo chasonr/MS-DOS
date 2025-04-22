@@ -7,7 +7,7 @@ chk_Error   equ     1
 Stderr	equ	2
 
 FALSE	EQU	0
-TRUE	EQU	NOT FALSE
+;RLC TRUE	EQU	NOT FALSE
 
 ; NOTE WARNING DANGER.
 ; THIS EQU DEFINES AN OFFSET INTO THE SEARCH FCB OF THE LASTENT VALUE.
@@ -138,7 +138,7 @@ Sublist_Min	db	?			;				;AN000;
 Sublist_Char	db	?			;				;AN000;
 Sublist_Struc ends
 
-A_DeviceParameters	struc
+A_DeviceParameters2	struc
 
 SpecialFunctions	db	?    ;1  0
 DeviceType		db	?    ;1  1
@@ -159,7 +159,7 @@ HiddenSectors		dd	?
 Ext_Total_Sectors	dd	?
 ReservedArea		db	6 dup(?)
 
-A_DeviceParameters	ends
+A_DeviceParameters2	ends
 
 
 
@@ -202,5 +202,3 @@ DIRENT	ENDS					;
 ENTSIZ	EQU	SIZE DIRENT
 
 ;-------------------------------------------------------------------------------
-
-

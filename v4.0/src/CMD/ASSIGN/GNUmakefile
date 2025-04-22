@@ -13,18 +13,25 @@ COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
 #######################	dependencies begin here. #########################
 #
 
+.SUFFIXES: .asm .obj
+
+AS = jwasm
+AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.asm.obj:
+	$(AS) $(AFLAGS) -Fo$@ $<
+
 all: assign.com
 
 assign.ctl assign.cl1 assign.cl2 assign.cla: ASSIGN.SKL \
 	$(msg)/$(COUNTRY).MSG
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\assign $(subst /,\,$<) $(country)"
 
-assgparm.obj: ASSGPARM.ASM \
+assgparm.obj: assgparm.asm \
 	$(inc)/psdata.inc \
 	$(inc)/parse.asm
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\assign $(subst /,\,$<) $(subst /,\,$@)"
 
-assgmain.obj: ASSGMAIN.ASM \
+assgmain.obj: assgmain.asm \
 	$(inc)/dosmac.inc \
 	$(inc)/sysvar.inc \
 	$(inc)/mult.inc \
@@ -32,14 +39,13 @@ assgmain.obj: ASSGMAIN.ASM \
 	$(inc)/syscall.inc \
 	$(inc)/msgserv.asm \
 	$(inc)/sysmsg.inc \
-	ASSGPARM.INC \
-	ASSGMSG.INC \
+	assgparm.inc \
+	assgmsg.inc \
 	assign.ctl \
 	assign.cla \
 	assign.cl1 \
 	assign.cl2 \
 	$(inc)/curdir.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\assign $(subst /,\,$<) $(subst /,\,$@)"
 
 OBJS = assgmain.obj assgparm.obj
 assign.com: $(OBJS)
@@ -54,6 +60,8 @@ assign.com: $(OBJS)
 
 clean:
 	rm -f *.obj
+	rm -f *.err
+	rm -f *.lst
 	rm -f assign.com
 	rm -f assign.cl[12a]
 	rm -f assign.ctl

@@ -3,10 +3,10 @@ page	,132					;
 
 	.xlist
 	include chkseg.inc
-	INCLUDE CHKCHNG.INC
-	INCLUDE DOSSYM.INC
-	INCLUDE CHKEQU.INC
-	INCLUDE CHKMACRO.INC
+	INCLUDE chkchng.inc
+	INCLUDE dossym.inc
+	INCLUDE chkequ.inc
+	INCLUDE chkmacro.inc
 	include pathmac.inc
 	.list
 
@@ -189,7 +189,7 @@ DOINT26:
 ;      $IF	C								;ac048;bgb;an045;bgb
        JNC $$IF7
 	   mov	   dx,offset dg:write_fault					;ac048;bgb;an045;bgb
-	   invoke  printf_crlf							;ac048;bgb;an045;bgb
+	   call    printf_crlf							;ac048;bgb;an045;bgb
 ;      $ENDIF									;ac048;bgb;an045;bgb
 $$IF7:
 ;										;ac048;bgb;ac048;bgb;an045;bgb
@@ -446,4 +446,3 @@ DOCRLF: mov	dx,offset dg:crlf_arg
 	pathlabl chkdsk2
 CODE	ENDS
 	END
-

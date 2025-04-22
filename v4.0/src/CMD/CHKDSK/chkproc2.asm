@@ -3,10 +3,10 @@ page	,132					;
 
 	.xlist
 	include chkseg.inc							;an005;bgb
-	INCLUDE CHKCHNG.INC
-	INCLUDE DOSSYM.INC
-	INCLUDE CHKEQU.INC
-	INCLUDE CHKMACRO.INC
+	INCLUDE chkchng.inc
+	INCLUDE dossym.inc
+	INCLUDE chkequ.inc
+	INCLUDE chkmacro.inc
 	include pathmac.inc
 
 CONST	SEGMENT PUBLIC PARA  'DATA'
@@ -239,7 +239,7 @@ CHKCROSS:
 	JZ $$IF13
 $$LL13:
 	    CALL    DOCRLF		;display another line
-	    MOV     SecondPass,True	;	     ;				     ;AC000;
+	    MOV     SecondPass,True and 0FFh	;	     ;				     ;AC000;
 	    XOR     AX,AX		;
 	    PUSH    AX
 	    PUSH    AX
@@ -476,4 +476,3 @@ Check_DBCS_CharACter endp			;				;an055;bgb
 	pathlabl chkproc2
 CODE	ENDS
 	END
-
