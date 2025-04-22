@@ -121,14 +121,17 @@ FINDLIN:
 	MOV	DX,[CURRENT]
 	MOV	DI,[POINTER]
 	CMP	BX,DX			; fast find.  Current = requested
-	retz
+	jnz	@F
+ret_l_1:
+	    ret
+	@@:
 	JA	FINDIT			; start scanning at current?
 	OR	BX,BX			; special case of EOF?
 	JZ	FINDIT			; yes
 	MOV	DX,1			; set up for scan at beginning
 	MOV	DI,OFFSET DG:START
 	CMP	BX,DX			; at beginning?
-	retz
+	jz	short ret_l_1
 FINDIT:
 	MOV	CX,[ENDTXT]		; count of bytes in buffer
 	SUB	CX,DI			; for scan
@@ -159,6 +162,7 @@ SHOWNUM:
 	MOV	line_flag," "
 STARLIN:
 	call	std_printf
+ret_l_2:
 ret5:	return
 
 
@@ -180,7 +184,7 @@ DISPLAY:
 
 	MOV	CX,[ENDTXT]
 	SUB	CX,SI
-	retz				; no lines to display
+	jz	short ret_l_2		; no lines to display
 ;=========================================================================
 ; Initialize screen size and line counts for use by display.
 ;
@@ -324,6 +328,7 @@ CALLER:
 	JCXZ	aret
 	CMP	CX,[OLDLEN]
 	jae	sj10
+ret_l_3:
 aret:	return
 sj10:
 	MOV	[SRCHCNT],CX
@@ -349,7 +354,7 @@ SCAN:
 	OR	DI,DI		;Clear zero flag in case CX=0
 	REPNE	SCASB		;look for first byte of string
 
-	retnz			;return if you don't find
+	jnz	short ret_l_3	;return if you don't find
 if	kanji
 	call	kanji_check	;see if the found byte is on a character boundary
 	jnz	scan
@@ -564,6 +569,7 @@ DOMOV:
 	POP	SI
 COPYIN:
 	REP	MOVSB
+ret_l_4:
 	return
 
 MEMERR:
@@ -583,7 +589,7 @@ LOADLP:
 	CMP	AL,13
 	LOOPNZ	LOADLP
 	MOV	[EDITBUF+1],DL
-	retz
+	jz	short ret_l_4
 TRUNCLP:
 	LODSB
 	INC	DX
@@ -914,6 +920,7 @@ $$IF11:
 	mov	dx,offset dg:crlf_ptr	;an000; dms; spit out CRLF
 	call	std_printf		;an000; dms;   and return
 	pop	dx			;an000; dms;   to caller
+ret_l_5:
 	return				;an000; dms;
 
 ;=========================================================================
@@ -933,7 +940,7 @@ NOCRLF:
 
 QUERY:
 	TEST	BYTE PTR [QFLG],-1
-	retz
+	jz	short ret_l_5
 	MOV	DX,OFFSET DG:ASK_ptr
 	call	std_printf
 	PUSH	AX
@@ -952,7 +959,7 @@ IF	KANJI
 ASCII1:
 ENDIF
 	CMP	AL,13		;Carriage return means yes
-	retz
+	jz	short ret_l_5
 ;=========================================================================
 ; We are invoking the VAL_YN proc here.  This will replace the
 ; method of Y/N validation used prior to DOS 4.00.
@@ -976,6 +983,7 @@ Query_Exit:
 ; End of Y/N validation check for ask_ptr
 ;=========================================================================
 
+ret_l_0:
 	return
 
 ;=========================================================================
@@ -1060,7 +1068,7 @@ EDLIN_PG_COUNT		proc	near		;an000;track remaining lines
 
 	push	ax				;an000;save affected regs
 
-	mov	lc_flag,true			;an000;init. flag to signal
+	mov	lc_flag,true and 0FFh		;an000;init. flag to signal
 						;      continue printing
 
 	mov	al,pg_count			;an000;set up for page adj.
@@ -1085,7 +1093,7 @@ $$EN15:
 	    JNBE $$IF19
 		   call    EDLIN_PG_PROMPT	;an000;prompt the user to
 						;      "Continue(Y/N)?"
-		   cmp	  continue,true 	;an000;did user say continue
+		   cmp	  continue,true and 0FFh ;an000;did user say continue
 ;		   $if	  z			;an000;continue
 		   JNZ $$IF20
 			  mov	al,dg:disp_len	;an000;begin init of screen
@@ -1149,7 +1157,7 @@ EPP_Reprompt:
 
 EPP_True_Exit:
 
-	mov	Continue,True			;an000;flag Y found
+	mov	Continue,True and 0FFh		;an000;flag Y found
 	jmp	EPP_Exit			;an000;exit routine
 
 EPP_False_Exit:
@@ -1200,4 +1208,3 @@ val_yn	endp			;an000;end proc
 
 code	ends
 	end
-

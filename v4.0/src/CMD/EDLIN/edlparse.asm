@@ -184,7 +184,7 @@ parse_continue: 				;an000;loop return point
 ;	$else					;an000;
 	JMP SHORT $$EN1
 $$IF1:
-		cmp  parse_switch_b,true	;an000;see if already set
+		cmp  parse_switch_b,true and 0FFh ;an000;see if already set
 ;		$if  nz 			;an000;if not
 		JZ $$IF3
 		     call val_sw		;an000;see which switch
@@ -263,7 +263,7 @@ val_sw		proc	near			;an000;switch determination
 	cmp	es:parse_sw_syn,offset es:sw_b_switch	;an000;/B switch?
 ;	$if	e				;an000;compare good
 	JNE $$IF9
-		mov	dg:parse_switch_b,true	;an000;signal /B found
+		mov	dg:parse_switch_b,true and 0FFh ;an000;signal /B found
 ;	$else					;an000;
 	JMP SHORT $$EN9
 $$IF9:
@@ -278,4 +278,3 @@ val_sw		endp				;an000;end proc
 
 code	ends					;an000;end segment
 	end					;an000;
-

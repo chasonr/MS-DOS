@@ -214,6 +214,7 @@ FULLN1:
 NOMORE:
 	MOV	DX,OFFSET DG:EOF_ptr
 	call	std_printf
+ret_l_1:
 ret3:	return
 
 BAD_READ:
@@ -228,7 +229,7 @@ EOFCHK:
 	TEST	BYTE PTR [HAVEOF],-1
 	JNZ	NOMORE
 	TEST	BYTE PTR [ENDING],-1
-	retnz			;Suppress memory error during End
+	jnz     short ret_l_1	;Suppress memory error during End
 	JMP	MEMERR
 
 EWRITE:
@@ -263,7 +264,7 @@ WRTADD1:
 	MOV	CX,DI
 	MOV	DX,OFFSET DG:START
 	SUB	CX,DX			;Amount to write
-	retz
+	jz      short ret_l_1
 	MOV	BX,[WRT_HANDLE]
 	MOV	AH,WRITE
 	INT	21H
@@ -281,6 +282,7 @@ WRTADD1:
 	DEC	DI			;Point to EOF
 	MOV	[ENDTXT],DI
 	MOV	[CURRENT],1
+ret_l_2:
 	return
 
 WRTERR:
@@ -365,7 +367,9 @@ SOMELEFT:
 	CALL	REPLACE
 REPNXT:
 	CALL	FNDNEXT
-	retnz
+	jz      @F
+	    ret
+	@@:
 	JMP	REPLP
 
 OUTCNT:
@@ -436,6 +440,7 @@ putcursor:
 	CALL	FINDLIN
 	MOV	[CURRENT],DX
 	MOV	[POINTER],DI
+ret_l_3:
 	return
 
 ;
@@ -467,7 +472,7 @@ DelCheck:
 ; be deleted.  Get pointer to beginning of block.  Save location
 ;
 	CALL	FINDLIN 		; Grab line
-	retnz				; If not found => return
+	jnz     short ret_l_3		; If not found => return
 	PUSH	BX
 	PUSH	DI
 ;
@@ -513,6 +518,7 @@ PAGER:
 frstok:
 	cmp	bx,[lastlin]	;check that we are in the buffer
 	jbe	frstok1
+ret_l_4:
 	return			;if not just quit
 frstok1:
 	mov	dx,[param2]
@@ -547,7 +553,7 @@ scndok:
 	mov	dx,[lastlin]	;we are not, take the last line as end
 infile:
 	cmp	dx,bx		;is param1 < param2 ?
-	retz
+	jz      short ret_l_4
 	ja	sj33
 	jmp	comerr		;yes, no backwards listing, print error
 sj33:
@@ -580,7 +586,7 @@ ListOK:
 	MOV	BX,1
 CHKP2:
 	CALL	FINDLIN
-	retnz
+	jnz     short ret_l_4
 	MOV	SI,DI
 	MOV	DI,[PARAM2]
 	INC	DI
@@ -633,10 +639,11 @@ HAVLIN:
 	MOV	[CURRENT],DX
 	MOV	[POINTER],SI
 	jz	sj12
+ret_l_5:
 ret12:	return
 sj12:
 	CMP	SI,[ENDTXT]
-	retz
+	jz      short ret_l_5
 	CALL	LOADBUF
 	MOV	[OLDLEN],DX
 	MOV	SI,[POINTER]
@@ -661,4 +668,3 @@ sj12:
 
 CODE	ENDS
 	END
-

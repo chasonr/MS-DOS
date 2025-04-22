@@ -57,7 +57,7 @@
 
 include sysmsg.inc				;an000;message retriever
 
-msg_utilname <EDLIN>				;an000;EDLIN messages
+msg_utilname <edlin>				;an000;EDLIN messages
 .list
 ;-----------------------------------------------------------------------;
 ;									;
@@ -182,9 +182,9 @@ msg_services <MSGDATA>				;an000;
 
  msg_services <LOADmsg> 			;an000;no version check
  msg_services <DISPLAYmsg,CHARmsg,NUMmsg,INPUTmsg>  ;an000;display messages
- msg_services <EDLIN.CLA,EDLIN.CLB,EDLIN.CLC>	;an000;message types
- msg_services <EDLIN.CL1,EDLIN.CL2>		;an000;message types
- msg_services <EDLIN.CTL>			;an000;
+ msg_services <edlin.cla,edlin.clb,edlin.clc>	;an000;message types
+ msg_services <edlin.cl1,edlin.cl2>		;an000;message types
+ msg_services <edlin.ctl>			;an000;
 
 .list
 
@@ -662,4 +662,3 @@ del_bak_ptr	label	word		;an000;"Access Denied - xxxxxxxx.BAK"
 
 CONST	ENDS
 	END
-

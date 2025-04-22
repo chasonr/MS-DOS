@@ -535,7 +535,7 @@ NOTBAK:
 $$IF12:
 
 	mov	bx,RD_Handle		;an000; dms;set up for call
-	mov	EA_Flag,True		;an000; dms;
+	mov	EA_Flag,True and 0FFh	;an000; dms;
 	call	Get_Extended_Attrib	;an000; dms;get attribs
 
 	Jmp	HavFil			;work with the opened file
@@ -699,7 +699,7 @@ MAKFIL:
 	mov	bx,RW			;an000;open for read/write
 	mov	cx,ATTR 		;an000;file attributes
 	mov	dx,Creat_Open_Flag	;an000;action to take on open
-	cmp	EA_Flag,True		;an000;EA_Buffer used?
+	cmp	EA_Flag,True and 0FFh	;an000;EA_Buffer used?
 ;	$if	e			;an000;yes
 	JNE $$IF14
 		mov	di,offset dg:EA_Parm_List ;an000; point to buffer
@@ -872,6 +872,7 @@ COMMANDJ:
 SKIP1:
 	DEC	SI
 	CALL	Kill_BL
+ret_l_1:
 ret1:	return
 
 Break	<Range Checking and argument parsing>
@@ -884,7 +885,7 @@ Break	<Range Checking and argument parsing>
 
 CHKRANGE:
 	CMP	[PARAM2],0
-	retz
+	jz	short ret_l_1
 	CMP	BX,[PARAM2]
 	JBE	RET1
 	POP	DX			; clean up return address
@@ -940,7 +941,7 @@ NUMLP:
 	JMP	SHORT NUMLP
 NUMCHK:
 	CMP	CL,0
-	retz
+	jz	short ret_l_1
 	OR	DX,DX
 	JZ	COMERR			;Don't allow zero as a parameter
 	return
@@ -1710,7 +1711,7 @@ EDLIN_COMMAND		proc	near		;an000;interface parser
 
 	mov	cx,00h				;an000;cx will count filespec
 						;      length
-	cmp	parse_switch_b,true		;an000;do we have /B switch
+	cmp	parse_switch_b,true and 0FFh	;an000;do we have /B switch
 ;	$if	z				;an000;we have the switch
 	JNZ $$IF20
 		mov	[LOADMOD],01h		;an000;signal switch found
@@ -1839,5 +1840,3 @@ EA_Fail_Exit		endp			;an000; dms;
 
 CODE	ENDS
 	END	EDLIN
-
-

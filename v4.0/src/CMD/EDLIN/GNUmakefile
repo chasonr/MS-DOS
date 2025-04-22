@@ -1,4 +1,4 @@
-#************************** makefile for cmd/append ***************************
+#************************** makefile for cmd/edlin ***************************
 
 msg	=../../MESSAGES
 dos	=../../DOS
@@ -13,67 +13,63 @@ COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
 #######################	dependencies begin here. #########################
 #
 
+.SUFFIXES: .asm .obj
+
+AS = jwasm
+AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.asm.obj:
+	$(AS) $(AFLAGS) -Fo$@ $<
+
 all: edlin.com
+
+DOSSYM_INC = $(inc)/dossym.inc $(inc)/arena.inc $(inc)/bpb.inc \
+             $(inc)/buffer.inc $(inc)/cpmfcb.inc $(inc)/curdir.inc \
+             $(inc)/dbcs.sw $(inc)/dirent.inc $(inc)/dosmac.inc \
+             $(inc)/dpb.inc $(inc)/error.inc $(inc)/exe.inc \
+             $(inc)/filemode.inc $(inc)/find.inc $(inc)/intnat.inc \
+             $(inc)/mi.inc $(inc)/mult.inc $(inc)/pdb.inc $(inc)/sf.inc \
+             $(inc)/syscall.inc $(inc)/sysvar.inc $(inc)/vector.inc \
+             $(inc)/versiona.inc $(inc)/version.inc
 
 edlin.ctl edlin.cl1 edlin.cl2 edlin.cla edlin.clb edlin.clc: EDLIN.SKL   \
                 $(msg)/$(COUNTRY).MSG
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\edlin $(subst /,\,$<) $(country)"
 
+edlin.obj:      edlin.asm edlequ.asm edlstdsw.inc $(DOSSYM_INC)
 
-edlin.obj:      EDLIN.ASM EDLEQU.ASM EDLSTDSW.INC \
-                $(inc)/dossym.inc \
-                $(inc)/dosmac.inc $(inc)/bpb.inc $(inc)/buffer.inc \
-                $(inc)/sysvar.inc $(inc)/mult.inc $(inc)/dirent.inc \
-                $(inc)/dpb.inc $(inc)/curdir.inc $(inc)/cpmfcb.inc \
-                $(inc)/find.inc $(inc)/pdb.inc $(inc)/sf.inc $(inc)/arena.inc \
-                $(inc)/intnat.inc $(inc)/error.inc $(inc)/syscall.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\edlin $(subst /,\,$<) $(subst /,\,$@)"
+edlcmd1.obj:    edlcmd1.asm edlequ.asm edlstdsw.inc $(DOSSYM_INC)
 
-edlcmd1.obj:    EDLCMD1.ASM EDLEQU.ASM EDLSTDSW.INC \
-                $(inc)/dossym.inc \
-                $(inc)/dosmac.inc $(inc)/bpb.inc $(inc)/buffer.inc \
-                $(inc)/sysvar.inc $(inc)/mult.inc $(inc)/dirent.inc \
-                $(inc)/dpb.inc $(inc)/curdir.inc $(inc)/cpmfcb.inc \
-                $(inc)/find.inc $(inc)/pdb.inc $(inc)/sf.inc $(inc)/arena.inc \
-                $(inc)/intnat.inc $(inc)/error.inc $(inc)/syscall.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\edlin $(subst /,\,$<) $(subst /,\,$@)"
+edlcmd2.obj:    edlcmd2.asm edlequ.asm edlstdsw.inc $(DOSSYM_INC)
 
-edlcmd2.obj:    EDLCMD2.ASM EDLEQU.ASM EDLSTDSW.INC \
-                $(inc)/dossym.inc \
-                $(inc)/dosmac.inc $(inc)/bpb.inc $(inc)/buffer.inc \
-                $(inc)/sysvar.inc $(inc)/mult.inc $(inc)/dirent.inc \
-                $(inc)/dpb.inc $(inc)/curdir.inc $(inc)/cpmfcb.inc \
-                $(inc)/find.inc $(inc)/pdb.inc $(inc)/sf.inc $(inc)/arena.inc \
-                $(inc)/intnat.inc $(inc)/error.inc $(inc)/syscall.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\edlin $(subst /,\,$<) $(subst /,\,$@)"
-
-edlmes.obj:     EDLMES.ASM $(inc)/sysmsg.inc  \
+edlmes.obj:     edlmes.asm $(inc)/sysmsg.inc $(inc)/msgdcl.inc \
+                $(inc)/versiona.inc $(inc)/msgserv.asm \
+                $(inc)/copyrigh.inc \
                 edlin.ctl \
                 edlin.cla \
                 edlin.clb \
                 edlin.cl1 \
                 edlin.cl2
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\edlin $(subst /,\,$<) $(subst /,\,$@)"
 
-edlparse.obj:   EDLPARSE.ASM $(inc)/parse.asm
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\edlin $(subst /,\,$<) $(subst /,\,$@)"
+edlparse.obj:   edlparse.asm $(inc)/parse.asm $(inc)/psdata.inc
 
 OBJS = edlin.obj edlcmd1.obj edlcmd2.obj edlmes.obj edlparse.obj
 
 edlin.com: $(OBJS) EDLIN.LNK
-	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\edlin @edlin.lnk"
-#	echo 'system dos' >resp.txt
-#	echo 'option map=edlin.map' >>resp.txt
-#	echo 'option nocaseexact' >>resp.txt
-#	echo 'name edlin.exe' >>resp.txt
-#	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
-#	wlink @resp.txt
+	echo 'system dos' >resp.txt
+	echo 'option map=edlin.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name edlin.exe' >>resp.txt
+	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
+	wlink @resp.txt
 	dosemu -t --Fdrive_c ../../.. -E "src\tools\convert src\cmd\edlin\edlin.exe"
-	rm edlin.exe
 
 clean:
 	rm -f *.obj
+	rm -f *.err
+	rm -f *.lst
 	rm -f edlin.com
+	rm -f edlin.exe
 	rm -f edlin.map
 	rm -f edlin.cl[12a-c]
 	rm -f edlin.ctl

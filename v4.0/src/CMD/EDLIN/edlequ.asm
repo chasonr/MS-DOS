@@ -1,8 +1,8 @@
 	page	60,132			;
 
 	.xlist
-	include DOSSYM.INC
-	include EDLSTDSW.INC
+	include dossym.inc
+	include edlstdsw.inc
 	.list
 
 ;======================= START OF SPECIFICATIONS =========================
@@ -151,6 +151,3 @@ Display_Buffer_Struc Struc		;an000;dms;
 	Display_Length_Char dw	    ?	;an000;dms;# of chars in length
 
 Display_Buffer_Struc ends		;an000;dms;
-
-
-
