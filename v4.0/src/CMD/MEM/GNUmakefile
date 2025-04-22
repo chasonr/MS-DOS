@@ -28,8 +28,8 @@ _parse.obj:     _PARSE.ASM                      \
 
 _msgret.obj:    _MSGRET.ASM                     \
                 mem.ctl                         \
-                $(inc)/MSGSERV.ASM              \
-                $(inc)/SYSMSG.INC
+                $(inc)/msgserv.asm              \
+                $(inc)/sysmsg.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\mem $(subst /,\,$<) $(subst /,\,$@)"
 
 mem.obj:        MEM.C                           \

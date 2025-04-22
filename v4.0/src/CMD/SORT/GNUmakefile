@@ -27,8 +27,8 @@ sort.obj: SORT.ASM              \
           $(inc)/parse.asm      \
           $(inc)/psdata.inc     \
           $(inc)/syscall.inc    \
-          $(inc)/MSGSERV.ASM    \
-          $(inc)/SYSMSG.INC
+          $(inc)/msgserv.asm    \
+          $(inc)/sysmsg.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\sort $(subst /,\,$<) $(subst /,\,$@)"
 
 sortmes.obj: SORTMES.ASM           \

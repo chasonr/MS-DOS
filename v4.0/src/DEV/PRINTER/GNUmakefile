@@ -28,7 +28,7 @@ prtint2f.obj:	PRTINT2F.ASM CPSPEQU.INC $(inc)/STRUC.INC
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\printer $(subst /,\,$<) $(subst /,\,$@)"
 
 cpspi07.obj:	CPSPI07.ASM CPSPEQU.INC \
-		$(inc)/SYSMSG.INC printer.ctl \
+		$(inc)/sysmsg.inc printer.ctl \
 		$(inc)/versiona.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\printer $(subst /,\,$<) $(subst /,\,$@)"
 

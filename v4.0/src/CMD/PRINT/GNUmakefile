@@ -48,8 +48,8 @@ print_tm.obj: PRINT_TM.ASM \
     PRIDEFS.ASM print.ctl \
     $(inc)/parse.asm \
     $(inc)/psdata.inc \
-    $(inc)/MSGSERV.ASM \
-    $(inc)/SYSMSG.INC
+    $(inc)/msgserv.asm \
+    $(inc)/sysmsg.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\print $(subst /,\,$<) $(subst /,\,$@)"
 
 OBJS = print_rm.obj print_r.obj print_t.obj print_tm.obj

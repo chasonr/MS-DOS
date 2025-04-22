@@ -20,7 +20,7 @@ driver.ctl driver.cl1 driver.cl2 driver.cla: DRIVER.SKL  $(msg)/$(COUNTRY).MSG
 
 driver.obj: DRIVER.ASM  $(inc)/msbds.inc $(inc)/versiona.inc \
             $(inc)/parse.asm $(inc)/psdata.inc \
-            driver.ctl $(inc)/SYSMSG.INC $(inc)/MSGSERV.ASM
+            driver.ctl $(inc)/sysmsg.inc $(inc)/msgserv.asm
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\driver $(subst /,\,$<) $(subst /,\,$@)"
 
 OBJS = driver.obj

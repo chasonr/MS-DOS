@@ -30,7 +30,7 @@ nlsfunc.obj: NLSFUNC.ASM	  \
 	     nlsfunc.cl2	  \
 	     DOESMAC.INC       \
 	     $(inc)/mult.inc     \
-	     $(inc)/MSGSERV.ASM   \
+	     $(inc)/msgserv.asm   \
 	     $(inc)/doscntry.inc \
 	     $(inc)/devsym.inc   \
 	     $(inc)/STRUC.INC    \

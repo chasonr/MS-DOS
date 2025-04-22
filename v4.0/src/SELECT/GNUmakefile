@@ -26,91 +26,91 @@ all: select.exe select.dat select.com select.hlp
 select.ctl select.cl1 select.cl2 select.cla select.clb: SELECT.SKL $(msg)/$(COUNTRY).MSG
 	dosemu -t --Fdrive_c ../.. -E "src\domsg2.bat src\select $(subst /,\,$<) $(country);"
 
-select0.obj: SELECT0.ASM $(inc)/STRUC.INC $(inc)/SYSMSG.INC CASEXTRN.INC  \
+select0.obj: SELECT0.ASM $(inc)/STRUC.INC $(inc)/sysmsg.inc CASEXTRN.INC  \
              PANEL.MAC SELECT.INC PAN-LIST.INC CASTRUC.INC MACROS.INC     \
              MACROS2.INC MACROS3.INC MACROS4.INC MACROS5.INC MACROS6.INC  \
              MACROS7.INC MAC_EQU.INC EXT.INC VARSTRUC.INC ROUT_EXT.INC    \
              select.ctl MACROS8.INC PCEQUATE.INC 
 	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\select $(subst /,\,$<) $(subst /,\,$@);"
 
-select1.obj: SELECT1.ASM $(inc)/STRUC.INC $(inc)/SYSMSG.INC CASEXTRN.INC  \
+select1.obj: SELECT1.ASM $(inc)/STRUC.INC $(inc)/sysmsg.inc CASEXTRN.INC  \
              PANEL.MAC SELECT.INC PAN-LIST.INC CASTRUC.INC MACROS.INC     \
              MACROS2.INC MACROS3.INC MACROS4.INC MACROS5.INC MACROS6.INC  \
              MACROS7.INC MAC_EQU.INC EXT.INC VARSTRUC.INC ROUT_EXT.INC    \
              MACROS8.INC PCEQUATE.INC 
 	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\select $(subst /,\,$<) $(subst /,\,$@);"
 
-select2.obj: SELECT2.ASM $(inc)/STRUC.INC $(inc)/SYSMSG.INC CASEXTRN.INC   \
+select2.obj: SELECT2.ASM $(inc)/STRUC.INC $(inc)/sysmsg.inc CASEXTRN.INC   \
              PANEL.MAC SELECT.INC PAN-LIST.INC CASTRUC.INC MACROS.INC      \
              MACROS2.INC MACROS3.INC MACROS4.INC MACROS5.INC MACROS6.INC   \
              MACROS7.INC MAC_EQU.INC EXT.INC VARSTRUC.INC ROUT_EXT.INC     \
              MACROS8.INC PCEQUATE.INC 
 	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\select $(subst /,\,$<) $(subst /,\,$@);"
 
-select2a.obj: SELECT2A.ASM $(inc)/STRUC.INC $(inc)/SYSMSG.INC CASEXTRN.INC \
+select2a.obj: SELECT2A.ASM $(inc)/STRUC.INC $(inc)/sysmsg.inc CASEXTRN.INC \
              PANEL.MAC SELECT.INC PAN-LIST.INC CASTRUC.INC MACROS.INC      \
              MACROS2.INC MACROS3.INC MACROS4.INC MACROS5.INC MACROS6.INC   \
              MACROS7.INC MAC_EQU.INC EXT.INC VARSTRUC.INC ROUT_EXT.INC     \
              MACROS8.INC PCEQUATE.INC 
 	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\select $(subst /,\,$<) $(subst /,\,$@);"
 
-select3.obj: SELECT3.ASM $(inc)/STRUC.INC $(inc)/SYSMSG.INC CASEXTRN.INC   \
+select3.obj: SELECT3.ASM $(inc)/STRUC.INC $(inc)/sysmsg.inc CASEXTRN.INC   \
              PANEL.MAC SELECT.INC PAN-LIST.INC CASTRUC.INC MACROS.INC      \
              MACROS2.INC MACROS3.INC MACROS4.INC MACROS5.INC MACROS6.INC   \
              MACROS7.INC MAC_EQU.INC EXT.INC VARSTRUC.INC ROUT_EXT.INC     \
              MACROS8.INC PCEQUATE.INC 
 	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\select $(subst /,\,$<) $(subst /,\,$@);"
 
-select4.obj: SELECT4.ASM $(inc)/STRUC.INC $(inc)/SYSMSG.INC CASEXTRN.INC   \
+select4.obj: SELECT4.ASM $(inc)/STRUC.INC $(inc)/sysmsg.inc CASEXTRN.INC   \
              PANEL.MAC SELECT.INC PAN-LIST.INC CASTRUC.INC MACROS.INC      \
              MACROS2.INC MACROS3.INC MACROS4.INC MACROS5.INC MACROS6.INC   \
              MACROS7.INC MAC_EQU.INC EXT.INC VARSTRUC.INC ROUT_EXT.INC     \
              MACROS8.INC PCEQUATE.INC 
 	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\select $(subst /,\,$<) $(subst /,\,$@);"
 
-select5.obj: SELECT5.ASM $(inc)/STRUC.INC $(inc)/SYSMSG.INC CASEXTRN.INC   \
+select5.obj: SELECT5.ASM $(inc)/STRUC.INC $(inc)/sysmsg.inc CASEXTRN.INC   \
              PANEL.MAC SELECT.INC PAN-LIST.INC CASTRUC.INC MACROS.INC      \
              MACROS2.INC MACROS3.INC MACROS4.INC MACROS5.INC MACROS6.INC   \
              MACROS7.INC MAC_EQU.INC EXT.INC VARSTRUC.INC ROUT_EXT.INC     \
              MACROS8.INC PCEQUATE.INC 
 	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\select $(subst /,\,$<) $(subst /,\,$@);"
 
-select5a.obj: SELECT5A.ASM $(inc)/STRUC.INC $(inc)/SYSMSG.INC CASEXTRN.INC \
+select5a.obj: SELECT5A.ASM $(inc)/STRUC.INC $(inc)/sysmsg.inc CASEXTRN.INC \
              PANEL.MAC SELECT.INC PAN-LIST.INC CASTRUC.INC MACROS.INC      \
              MACROS2.INC MACROS3.INC MACROS4.INC MACROS5.INC MACROS6.INC   \
              MACROS7.INC MAC_EQU.INC EXT.INC VARSTRUC.INC ROUT_EXT.INC     \
              MACROS8.INC PCEQUATE.INC 
 	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\select $(subst /,\,$<) $(subst /,\,$@);"
 
-select6.obj: SELECT6.ASM $(inc)/STRUC.INC $(inc)/SYSMSG.INC CASEXTRN.INC   \
+select6.obj: SELECT6.ASM $(inc)/STRUC.INC $(inc)/sysmsg.inc CASEXTRN.INC   \
              PANEL.MAC SELECT.INC PAN-LIST.INC CASTRUC.INC MACROS.INC      \
              MACROS2.INC MACROS3.INC MACROS4.INC MACROS5.INC MACROS6.INC   \
              MACROS7.INC MAC_EQU.INC EXT.INC VARSTRUC.INC ROUT_EXT.INC     \
              MACROS8.INC PCEQUATE.INC 
 	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\select $(subst /,\,$<) $(subst /,\,$@);"
 
-select7.obj: SELECT7.ASM $(inc)/STRUC.INC $(inc)/SYSMSG.INC CASEXTRN.INC   \
+select7.obj: SELECT7.ASM $(inc)/STRUC.INC $(inc)/sysmsg.inc CASEXTRN.INC   \
              PANEL.MAC SELECT.INC PAN-LIST.INC CASTRUC.INC MACROS.INC      \
              MACROS2.INC MACROS3.INC MACROS4.INC MACROS5.INC MACROS6.INC   \
              MACROS7.INC MAC_EQU.INC EXT.INC VARSTRUC.INC ROUT_EXT.INC     \
              MACROS8.INC PCEQUATE.INC 
 	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\select $(subst /,\,$<) $(subst /,\,$@);"
 
-select8.obj: SELECT8.ASM $(inc)/STRUC.INC $(inc)/SYSMSG.INC CASEXTRN.INC   \
+select8.obj: SELECT8.ASM $(inc)/STRUC.INC $(inc)/sysmsg.inc CASEXTRN.INC   \
              PANEL.MAC SELECT.INC PAN-LIST.INC CASTRUC.INC MACROS.INC      \
              MACROS2.INC MACROS3.INC MACROS4.INC MACROS5.INC MACROS6.INC   \
              MACROS7.INC MAC_EQU.INC EXT.INC VARSTRUC.INC ROUT_EXT.INC     \
              MACROS8.INC PCEQUATE.INC 
 	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\select $(subst /,\,$<) $(subst /,\,$@);"
 
-select9.obj: SELECT9.ASM $(inc)/STRUC.INC $(inc)/SYSMSG.INC CASEXTRN.INC   \
+select9.obj: SELECT9.ASM $(inc)/STRUC.INC $(inc)/sysmsg.inc CASEXTRN.INC   \
              PANEL.MAC SELECT.INC PAN-LIST.INC CASTRUC.INC MACROS.INC      \
              MACROS2.INC MACROS3.INC MACROS4.INC MACROS5.INC MACROS6.INC   \
              MACROS7.INC MAC_EQU.INC EXT.INC VARSTRUC.INC ROUT_EXT.INC     \
              MACROS8.INC PCEQUATE.INC 
 	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\select $(subst /,\,$<) $(subst /,\,$@);"
 
-gen_coms.obj: GEN_COMS.ASM $(inc)/STRUC.INC $(inc)/SYSMSG.INC CASEXTRN.INC \
+gen_coms.obj: GEN_COMS.ASM $(inc)/STRUC.INC $(inc)/sysmsg.inc CASEXTRN.INC \
               PANEL.MAC SELECT.INC PAN-LIST.INC CASTRUC.INC MACROS.INC     \
               MACROS2.INC MACROS3.INC MACROS4.INC MACROS5.INC MACROS6.INC  \
               MACROS7.INC MAC_EQU.INC EXT.INC VARSTRUC.INC ROUT_EXT.INC    \
@@ -139,7 +139,7 @@ routine2.obj: ROUTINE2.ASM $(inc)/STRUC.INC MAC_EQU.INC EXT.INC VARSTRUC.INC \
               MACROS6.INC MACROS7.INC MACROS8.INC 
 	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\select $(subst /,\,$<) $(subst /,\,$@);"
 
-var.obj:  VAR.ASM $(inc)/SYSMSG.INC SEL_FILE.INC VARSTRUC.INC 
+var.obj:  VAR.ASM $(inc)/sysmsg.inc SEL_FILE.INC VARSTRUC.INC 
 	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\select $(subst /,\,$<) $(subst /,\,$@);"
 
 prn_def.obj: PRN_DEF.ASM $(inc)/STRUC.INC MACROS.INC MACROS2.INC MACROS3.INC \
@@ -241,7 +241,7 @@ select.exe: $(SELECT_OBJS) services.lib
 #######################  make select.com #####################
 #
 
-sstub.obj: SSTUB.ASM $(inc)/SYSMSG.INC select.ctl 
+sstub.obj: SSTUB.ASM $(inc)/sysmsg.inc select.ctl 
 	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\select $(subst /,\,$<) $(subst /,\,$@);"
 
 STUB_OBJS = sstub.obj

@@ -41,8 +41,8 @@ join.ctl join.cl1 join.cl2 join.cla: JOIN.SKL      \
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\join $(subst /,\,$<) $(country)"
 
 _msgret.obj: _MSGRET.ASM \
-  $(inc)/MSGSERV.ASM    \
-  $(inc)/SYSMSG.INC     \
+  $(inc)/msgserv.asm    \
+  $(inc)/sysmsg.inc     \
   join.ctl              \
   join.cla              \
   join.cl1              \

@@ -33,7 +33,7 @@ compp.obj: COMPP.ASM \
 compsm.obj: COMPSM.ASM \
     $(inc)/copyrigh.inc \
     $(inc)/versiona.inc \
-    $(inc)/SYSMSG.INC \
+    $(inc)/sysmsg.inc \
     $(inc)/MSGHAN.INC \
     comp.ctl \
     comp.cl1 \

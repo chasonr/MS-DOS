@@ -22,8 +22,8 @@ replace.ctl replace.cl1 replace.cl2 replace.cla: REPLACE.SKL \
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\replace $(subst /,\,$<) $(country)"
 
 _msgret.obj: _MSGRET.ASM \
-  $(inc)/MSGSERV.ASM    \
-  $(inc)/SYSMSG.INC     \
+  $(inc)/msgserv.asm    \
+  $(inc)/sysmsg.inc     \
   replace.ctl           \
   replace.cla           \
   replace.cl1           \

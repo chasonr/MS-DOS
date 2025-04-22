@@ -37,8 +37,8 @@ subst.ctl subst.cl1 subst.cl2 subst.cla: SUBST.SKL    \
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\subst $(subst /,\,$<) $(country)"
 
 _msgret.obj: _MSGRET.ASM \
-  $(inc)/MSGSERV.ASM    \
-  $(inc)/SYSMSG.INC     \
+  $(inc)/msgserv.asm    \
+  $(inc)/sysmsg.inc     \
   subst.ctl             \
   subst.cla             \
   subst.cl1             \

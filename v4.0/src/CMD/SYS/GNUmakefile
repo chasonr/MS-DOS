@@ -42,7 +42,7 @@ sys2.obj: SYS2.ASM $(inc)/dossym.inc $(inc)/dosmac.inc \
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\sys $(subst /,\,$<) $(subst /,\,$@)"
 
 syssr.obj: SYSSR.ASM $(inc)/parse.asm \
-    $(inc)/psdata.inc $(inc)/MSGSERV.ASM $(inc)/SYSMSG.INC \
+    $(inc)/psdata.inc $(inc)/msgserv.asm $(inc)/sysmsg.inc \
     sys.ctl sys.cl1 sys.cl2 sys.cla sys.clb sys.clc sys.cld
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\sys $(subst /,\,$<) $(subst /,\,$@)"
 

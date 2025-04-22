@@ -61,15 +61,15 @@ ifserror.obj: IFSERROR.ASM $(inc)/ifssym.inc	     IFSFSYM.INC      \
 
 ifsfdos.obj:  IFSFDOS.ASM $(inc)/ifssym.inc	    IFSFSYM.INC       \
      $(inc)/dossym.inc	 $(inc)/devsym.inc   $(inc)/dosseg.asm	      \
-     $(inc)/msdata.asm	 $(inc)/bugtyp.asm   $(inc)/SYSMSG.INC	      \
-     $(inc)/psdata.inc	 $(inc)/MSGSERV.ASM	  IFSPARSE.INC	      \
+     $(inc)/msdata.asm	 $(inc)/bugtyp.asm   $(inc)/sysmsg.inc	      \
+     $(inc)/psdata.inc	 $(inc)/msgserv.asm	  IFSPARSE.INC	      \
      $(inc)/parse.asm
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\ifsfunc $(subst /,\,$<) $(subst /,\,$@)"
 
 ifsinit.obj:  IFSINIT.ASM $(inc)/ifssym.inc	    IFSFSYM.INC       \
      $(inc)/dossym.inc	 $(inc)/devsym.inc   $(inc)/dosseg.asm	      \
-     $(inc)/msdata.asm	 $(inc)/bugtyp.asm   $(inc)/SYSMSG.INC	      \
-     $(inc)/psdata.inc	 $(inc)/MSGSERV.ASM	  IFSPARSE.INC	      \
+     $(inc)/msdata.asm	 $(inc)/bugtyp.asm   $(inc)/sysmsg.inc	      \
+     $(inc)/psdata.inc	 $(inc)/msgserv.asm	  IFSPARSE.INC	      \
      $(inc)/parse.asm						      \
      ifsfunc.ctl  ifsfunc.cla  ifsfunc.cl1  ifsfunc.cl2
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\ifsfunc $(subst /,\,$<) $(subst /,\,$@)"

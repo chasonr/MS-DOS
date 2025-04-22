@@ -30,8 +30,8 @@ assgmain.obj: ASSGMAIN.ASM \
 	$(inc)/mult.inc \
 	$(inc)/pdb.inc \
 	$(inc)/syscall.inc \
-	$(inc)/MSGSERV.ASM \
-	$(inc)/SYSMSG.INC \
+	$(inc)/msgserv.asm \
+	$(inc)/sysmsg.inc \
 	ASSGPARM.INC \
 	ASSGMSG.INC \
 	assign.ctl \

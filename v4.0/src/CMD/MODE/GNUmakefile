@@ -24,8 +24,8 @@ main.obj: MAIN.ASM \
   $(inc)/copyrigh.inc \
   $(inc)/versiona.inc \
   $(inc)/STRUC.INC \
-  $(inc)/SYSMSG.INC \
-  $(inc)/MSGSERV.ASM \
+  $(inc)/sysmsg.inc \
+  $(inc)/msgserv.asm \
   mode.ctl \
   mode.cl1 \
   mode.cl2 \
@@ -69,7 +69,7 @@ modeleng.obj: MODELENG.ASM \
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\mode $(subst /,\,$<) $(subst /,\,$@)"
 
 modemes.obj: MODEMES.ASM \
-  $(inc)/MSGSERV.ASM \
+  $(inc)/msgserv.asm \
 	     MODESUBS.INC \
 	     MODEDEFS.INC \
 	     MODEQUAT.INC \

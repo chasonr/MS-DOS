@@ -30,8 +30,8 @@ grtabp.obj: GRTABP.ASM \
 grtabsm.obj: GRTABSM.ASM \
     $(inc)/copyrigh.inc \
     $(inc)/versiona.inc \
-    $(inc)/SYSMSG.INC \
-    $(inc)/MSGSERV.ASM \
+    $(inc)/sysmsg.inc \
+    $(inc)/msgserv.asm \
     graftabl.ctl \
     graftabl.cl1 \
     graftabl.cl2 \

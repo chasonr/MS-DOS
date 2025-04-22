@@ -20,7 +20,7 @@ exe2bin.ctl exe2bin.cl1 exe2bin.cl2 exe2bin.cla exe2bin.clb: EXE2BIN.SKL \
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\exe2bin $(subst /,\,$<) $(country)"
 
 e2binit.obj : E2BINIT.ASM  $(inc)/syscall.inc E2BPARSE.INC  E2BMACRO.INC \
-              E2BEQU.INC  $(inc)/SYSMSG.INC  E2BTABLE.INC  exe2bin.ctl   \
+              E2BEQU.INC  $(inc)/sysmsg.inc  E2BTABLE.INC  exe2bin.ctl   \
               LOCATE.ASM $(inc)/dossym.inc $(inc)/dosmac.inc \
               $(inc)/bpb.inc $(inc)/buffer.inc $(inc)/sysvar.inc \
               $(inc)/mult.inc $(inc)/dirent.inc $(inc)/dpb.inc \

@@ -4,6 +4,8 @@
 *.EXE
 *.obj
 *.OBJ
+*.err
+*.lst
 resp.txt
 FDISK/fdboot.bin
 FDISK/fdboot.BIN

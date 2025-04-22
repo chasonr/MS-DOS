@@ -24,8 +24,8 @@ format.ctl format.cl1 format.cl2 format.cla format.clb format.clc: \
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\format $(subst /,\,$<) $(country)"
 
 display.obj:    DISPLAY.ASM FOREQU.INC FORMSG.INC FORMACRO.INC \
-                format.ctl format.cl1 format.cl2 format.cla $(inc)/SYSMSG.INC \
-                $(inc)/MSGSERV.ASM \
+                format.ctl format.cl1 format.cl2 format.cla $(inc)/sysmsg.inc \
+                $(inc)/msgserv.asm \
                 format.clb format.clc FORMACRO.INC
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\format $(subst /,\,$<) $(subst /,\,$@)"
 

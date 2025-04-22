@@ -31,7 +31,7 @@ display.obj: DISPLAY.ASM \
 init.obj: INIT.ASM \
           MACROS.INC \
           DEF-EQU.INC \
-          $(inc)/SYSMSG.INC \
+          $(inc)/sysmsg.inc \
           $(inc)/versiona.inc \
           display.ctl \
           TABLES.INC

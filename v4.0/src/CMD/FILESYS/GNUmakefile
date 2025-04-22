@@ -21,8 +21,8 @@ filesys.ctl filesys.cl1 filesys.cl2 filesys.cla: FILESYS.SKL \
 
 _msgret.obj:    _MSGRET.ASM             \
                 filesys.ctl             \
-                $(inc)/MSGSERV.ASM      \
-                $(inc)/SYSMSG.INC
+                $(inc)/msgserv.asm      \
+                $(inc)/sysmsg.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\filesys $(subst /,\,$<) $(subst /,\,$@)"
 
 _parse.obj:     _PARSE.ASM              \

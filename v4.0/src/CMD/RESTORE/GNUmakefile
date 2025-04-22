@@ -34,8 +34,8 @@ restore.ctl restore.cl1 restore.cl2 restore.cla:	RESTORE.SKL			\
 _msgret.obj:	_MSGRET.ASM			\
 		restore.ctl			\
 		restore.cl1			\
-		$(inc)/MSGSERV.ASM		\
-		$(inc)/SYSMSG.INC
+		$(inc)/msgserv.asm		\
+		$(inc)/sysmsg.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\restore $(subst /,\,$<) $(subst /,\,$@)"
 
 

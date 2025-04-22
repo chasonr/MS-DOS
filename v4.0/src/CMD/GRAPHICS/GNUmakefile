@@ -28,7 +28,7 @@ grinst.obj: GRINST.ASM	GRLOAD.EXT GRLOAD2.EXT GRCTRL.EXT GRPRINT.EXT \
 	    GRINT2FH.EXT GRMSG.EQU  graphics.ctl graphics.cla graphics.cl1 \
 	    graphics.clb \
 	    graphics.cl2 graphics.clc \
-	    $(inc)/SYSMSG.INC $(inc)/STRUC.INC GRSHAR.STR
+	    $(inc)/sysmsg.inc $(inc)/STRUC.INC GRSHAR.STR
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\graphics $(subst /,\,$<) $(subst /,\,$@)"
 
 grcpsd.obj: GRCPSD.ASM GRCTRL.EXT GRCTRL.STR

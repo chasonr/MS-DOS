@@ -22,8 +22,8 @@ xcopy.ctl xcopy.cl1 xcopy.cl2 xcopy.cla: XCOPY.SKL \
 xcopy.obj: XCOPY.ASM \
    $(inc)/versiona.inc \
    $(inc)/copyrigh.inc \
-   $(inc)/SYSMSG.INC \
-   $(inc)/MSGSERV.ASM \
+   $(inc)/sysmsg.inc \
+   $(inc)/msgserv.asm \
    DOS.EQU \
    XCOPY.EQU \
    xcopy.ctl \

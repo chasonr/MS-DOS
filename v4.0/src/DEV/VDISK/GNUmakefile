@@ -26,8 +26,8 @@ vdisksys.obj: VDISKSYS.ASM       \
            vdisk.cl2             \
            vdisk.cla             \
            vdisk.cl1             \
-           $(inc)/MSGSERV.ASM \
-           $(inc)/SYSMSG.INC
+           $(inc)/msgserv.asm \
+           $(inc)/sysmsg.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\vdisk $(subst /,\,$<) $(subst /,\,$@)"
 
 OBJS = vdisksys.obj

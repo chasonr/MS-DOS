@@ -35,8 +35,8 @@ fastp.obj: FASTP.ASM \
 fastsm.obj: FASTSM.ASM \
 	$(inc)/versiona.inc \
 	$(inc)/copyrigh.inc \
-	$(inc)/SYSMSG.INC \
-	$(inc)/MSGSERV.ASM \
+	$(inc)/sysmsg.inc \
+	$(inc)/msgserv.asm \
 	fastopen.ctl \
 	fastopen.cl1 \
 	fastopen.cl2 \

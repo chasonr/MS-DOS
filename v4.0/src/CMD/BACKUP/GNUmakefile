@@ -31,8 +31,8 @@ backup.ctl backup.cl1 backup.cl2 backup.cla:	BACKUP.SKL			\
 
 _msgret.obj:	_MSGRET.ASM			\
 		backup.ctl			\
-		$(inc)/MSGSERV.ASM		\
-		$(inc)/SYSMSG.INC		\
+		$(inc)/msgserv.asm		\
+		$(inc)/sysmsg.inc		\
 		$(inc)/versiona.inc		\
 		$(inc)/copyrigh.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\backup $(subst /,\,$<) $(subst /,\,$@)"

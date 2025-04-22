@@ -24,7 +24,7 @@ DOSSYM_INC = dossym.inc arena.inc bpb.inc buffer.inc cpmfcb.inc curdir.inc \
 
 all: 		errtst.obj sysvar.obj cds.obj dpb.obj nibdos.obj \
 		const2.obj msdata.obj msdosme.obj mstable.obj printf.obj \
-		string.obj MSGSERV.ASM
+		string.obj msgserv.asm
 
 msdos.cl1 msdos.cl3:
 	$(MAKE) -C $(dos) msdos.cl1

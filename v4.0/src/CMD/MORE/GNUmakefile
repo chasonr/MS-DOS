@@ -27,8 +27,8 @@ more.obj: MORE.ASM             \
           more.cl2             \
           $(inc)/syscall.inc   \
           $(inc)/STRUC.INC     \
-          $(inc)/MSGSERV.ASM   \
-          $(inc)/SYSMSG.INC    \
+          $(inc)/msgserv.asm   \
+          $(inc)/sysmsg.inc    \
           $(inc)/versiona.inc  \
           $(inc)/copyrigh.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\more $(subst /,\,$<) $(subst /,\,$@)"

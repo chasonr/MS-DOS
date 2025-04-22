@@ -103,7 +103,7 @@ debdata.obj:    DEBDATA.ASM $(inc)/dossym.inc $(inc)/dosmac.inc \
 debems.obj:     DEBEMS.ASM DEBEQU.ASM
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\debug $(subst /,\,$<) $(subst /,\,$@)"
 
-debmes.obj:     DEBMES.ASM $(inc)/MSGSERV.ASM $(inc)/SYSMSG.INC \
+debmes.obj:     DEBMES.ASM $(inc)/msgserv.asm $(inc)/sysmsg.inc \
         debug.ctl \
         debug.cla \
         debug.clb \

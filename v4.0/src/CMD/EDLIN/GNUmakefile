@@ -47,7 +47,7 @@ edlcmd2.obj:    EDLCMD2.ASM EDLEQU.ASM EDLSTDSW.INC \
                 $(inc)/intnat.inc $(inc)/error.inc $(inc)/syscall.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\edlin $(subst /,\,$<) $(subst /,\,$@)"
 
-edlmes.obj:     EDLMES.ASM $(inc)/SYSMSG.INC  \
+edlmes.obj:     EDLMES.ASM $(inc)/sysmsg.inc  \
                 edlin.ctl \
                 edlin.cla \
                 edlin.clb \

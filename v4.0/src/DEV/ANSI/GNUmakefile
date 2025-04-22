@@ -31,7 +31,7 @@ ansiinit.obj:   ANSIINIT.ASM ANSI.INC ANSIVID.INC \
                 $(inc)/STRUC.INC
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\ansi $(subst /,\,$<) $(subst /,\,$@)"
 
-parser.obj:     PARSER.ASM ANSI.INC $(inc)/SYSMSG.INC $(inc)/parse.asm \
+parser.obj:     PARSER.ASM ANSI.INC $(inc)/sysmsg.inc $(inc)/parse.asm \
                 $(inc)/STRUC.INC ansi.ctl $(inc)/versiona.inc
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\ansi $(subst /,\,$<) $(subst /,\,$@)"
 

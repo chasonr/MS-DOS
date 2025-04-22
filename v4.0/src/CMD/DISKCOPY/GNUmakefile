@@ -35,7 +35,7 @@ dcopyp.obj: DCOPYP.ASM \
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\diskcopy $(subst /,\,$<) $(subst /,\,$@)"
 
 dcopysm.obj: DCOPYSM.ASM \
-   $(inc)/SYSMSG.INC \
+   $(inc)/sysmsg.inc \
    $(inc)/MSGHAN.INC \
    $(inc)/versiona.inc \
    diskcopy.ctl \

@@ -20,7 +20,7 @@ keyb.ctl keyb.cl1 keyb.cl2 keyb.cla: KEYB.SKL $(msg)/$(COUNTRY).MSG
 
 keybcmd.obj: KEYBCMD.ASM \
              $(inc)/STRUC.INC \
-             $(inc)/SYSMSG.INC \
+             $(inc)/sysmsg.inc \
              $(inc)/versiona.inc \
              KEYBEQU.INC  \
              KEYBSYS.INC  \

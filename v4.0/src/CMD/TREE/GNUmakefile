@@ -31,8 +31,8 @@ treesysp.obj: TREESYSP.ASM \
 treesysm.obj: TREESYSM.ASM \
     $(inc)/copyrigh.inc \
     $(inc)/versiona.inc \
-    $(inc)/SYSMSG.INC \
-    $(inc)/MSGSERV.ASM \
+    $(inc)/sysmsg.inc \
+    $(inc)/msgserv.asm \
     tree.ctl \
     tree.cl1 \
     tree.cl2 \

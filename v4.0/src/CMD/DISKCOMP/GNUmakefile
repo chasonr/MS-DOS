@@ -36,7 +36,7 @@ dcompp.obj: DCOMPP.ASM \
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\diskcomp $(subst /,\,$<) $(subst /,\,$@)"
 
 dcompsm.obj: DCOMPSM.ASM \
-   $(inc)/SYSMSG.INC \
+   $(inc)/sysmsg.inc \
    $(inc)/MSGHAN.INC \
    $(inc)/versiona.inc \
    diskcomp.ctl \
