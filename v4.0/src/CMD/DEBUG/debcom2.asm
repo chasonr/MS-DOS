@@ -52,8 +52,8 @@
 	ENDIF
 .XLIST
 .XCREF
-	INCLUDE DOSSYM.INC
-	INCLUDE DEBEQU.ASM
+	INCLUDE dossym.inc
+	INCLUDE debequ.asm
 .CREF
 .LIST
 CODE	SEGMENT PUBLIC BYTE
@@ -251,6 +251,7 @@ NOOVER:
 SHOW_CHARS:
 	CALL	PRINTF_CRLF
 
+ret_l_1:
 	RETURN
 
 DISPREGJ:
@@ -321,7 +322,7 @@ NOTPC:
 
 	CALL	SCANB
 
-	RETZ
+	JZ      SHORT ret_l_1
 
 	push	bx				;an000;save bx - we stomp it
 	MOV	CX,4
@@ -437,6 +438,7 @@ COMTAIL:
 	INT	21H
 
 	MOV	BYTE PTR [AXSAVE+1],AL	; Indicate analysis of second parm
+ret_l_2:
 	RETURN
 
 ;  OPENS A XENIX PATHNAME SPECIFIED IN THE UNFORMATTED PARAMETERS
@@ -462,7 +464,7 @@ OPEN_A_FILE:
 	MOV	BYTE PTR [XNXOPT],2	; Try read write
 	CALL	OC_FILE
 
-	RETNC
+	JNC     SHORT ret_l_2
 	MOV	BYTE PTR [XNXCMD],OPEN
 	MOV	BYTE PTR [XNXOPT],0	; Try read only
 	JMP	SHORT OC_FILE
@@ -564,30 +566,32 @@ $$IF3:
 ;if we get here, the char is lowercase, so change it				;an001;bgb
 	sub	al,32			;convert to uppercase			;an001;bgb
 	mov	[si-1],al		;move it back (si points 1 past)	;an001;bgb
+ret_l_3:
 gcur:	return									;an001;bgb
 
 DELIM0:
 	CMP	AL,CHAR_LEFT_BRACKET
-	RETZ
+	JZ      SHORT ret_l_3
 DELIM1:
 	CMP	AL,CHAR_BLANK		; SKIP THESE GUYS
-	RETZ
+	JZ      SHORT ret_l_3
 
 	CMP	AL,CHAR_SEMICOLON
-	RETZ
+	JZ      SHORT ret_l_3
 
 	CMP	AL,CHAR_EQUAL
-	RETZ
+	JZ      SHORT ret_l_3
 
 	CMP	AL,CHAR_TAB
-	RETZ
+	JZ      SHORT ret_l_3
 
 	CMP	AL,CHAR_COMMA
+ret_l_4:
 	RETURN
 
 DELIM2:
 	CMP	AL,CS:[SWITCHAR]	; STOP ON THESE GUYS
-	RETZ
+	JZ      SHORT ret_l_4
 
 	CMP	AL,CR
 	RETURN
@@ -606,6 +610,7 @@ NAMED:
 	MOV	DI,SI			; ES:DI points to DEBUG FCB
 	MOV	CX,82
 	REP	MOVSW
+ret_l_5:
 	RETURN
 
 BADNAM:
@@ -620,7 +625,7 @@ IFHEX:
 
 	MOV	BX,[EXTPTR]
 	CMP	WORD PTR DS:[BX],"EH"	; "HE"
-	RETNZ
+	JNZ     SHORT ret_l_5
 
 	CMP	BYTE PTR DS:[BX+WORD],UPPER_X
 	RETURN
@@ -1092,6 +1097,7 @@ DEBUG_FOUND:
 	MOV	CS:[AXSAVE],AX
 	MOV	CS:[SSSAVE],ES
 	MOV	CS:[SPSAVE],DI
+ret_l_6:
 	RETURN
 
 EXECERR:
@@ -1198,11 +1204,14 @@ NOREAD:
 	JZ	HEXDONE
 
 	OR	AL,AL
-	RETNZ
+	JZ      @F
+            RET
+        @@:
 
 HEXDONE:
 	MOV	[CXSAVE],BP
 	MOV	BXSAVE,0
+ret_l_7:
 	RETURN
 
 HEXDIG:
@@ -1210,7 +1219,7 @@ HEXDIG:
 
 	CALL	HEXCHK
 
-	RETNC
+	JNC     SHORT ret_l_7
 
 	MOV	DX,OFFSET DG:HEXERR_PTR
 RESTARTJ2:
@@ -1305,4 +1314,3 @@ ABSWRT		endp			;an000;end proc
 
 CODE	ENDS
 	END	DEBCOM2
-

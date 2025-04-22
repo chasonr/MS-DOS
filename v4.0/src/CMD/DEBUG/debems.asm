@@ -42,7 +42,7 @@
 ;
 ;======================= END OF SPECIFICATIONS ===========================
 
-INCLUDE DOSSYM.INC
+INCLUDE dossym.inc
 include debequ.asm
 
 
@@ -1124,4 +1124,3 @@ XM_FRAME_BUFFER 	endp			;an000;
 
 CODE	ENDS
 	END	DEBEMS
-

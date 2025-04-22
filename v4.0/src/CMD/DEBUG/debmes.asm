@@ -67,7 +67,7 @@ PAGE	60,132				;
 
 .list
 
-msg_utilname <DEBUG>			;an000;DEBUG messages
+msg_utilname <debug>			;an000;DEBUG messages
 
 ;=========================================================================
 ;revised debmes.asm
@@ -84,7 +84,7 @@ FALSE	EQU	0
 TRUE	EQU	NOT FALSE
 
 ;SYSVER 	 EQU FALSE		 ;if true, i/o direct to bios
-	INCLUDE SYSVER.INC
+	INCLUDE sysver.inc
 
 ;=========================================================================
 ; macro disp_message: the macro takes the message obtained in get_message
@@ -178,9 +178,9 @@ msg_services <MSGDATA>
 msg_services <LOADmsg>			;an000;load the messages
 msg_services <DISPLAYmsg,CHARmsg,NUMmsg>;an000;get and display messages
 msg_services <INPUTmsg> 		;an000;input from keyboard
-msg_services <DEBUG.CLA,DEBUG.CLB>	;an000;message types
-msg_services <DEBUG.CLC,DEBUG.CLD>	;an000;
-msg_services <DEBUG.CL1,DEBUG.CL2>	;an000;
+msg_services <debug.cla,debug.clb>	;an000;message types
+msg_services <debug.clc,debug.cld>	;an000;
+msg_services <debug.cl1,debug.cl2>	;an000;
 
 .list
 
@@ -1521,4 +1521,3 @@ drive	db	?
 
 DATA	ENDS
 	END
-

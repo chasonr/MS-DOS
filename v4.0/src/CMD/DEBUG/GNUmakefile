@@ -1,4 +1,4 @@
-#************************** makefile for cmd/append ***************************
+#************************** makefile for cmd/debug ***************************
 
 msg	=../../MESSAGES
 dos	=../../DOS
@@ -13,97 +13,104 @@ COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
 #######################	dependencies begin here. #########################
 #
 
+.SUFFIXES: .asm .obj
+
+AS = jwasm
+AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.asm.obj:
+	$(AS) $(AFLAGS) -Fo$@ $<
+
 all: debug.com
 
-debug.ctl: DEBUG.SKL   \
+DOSSYM_INC = $(inc)/dossym.inc $(inc)/arena.inc $(inc)/bpb.inc \
+             $(inc)/buffer.inc $(inc)/cpmfcb.inc $(inc)/curdir.inc \
+             $(inc)/dbcs.sw $(inc)/dirent.inc $(inc)/dosmac.inc \
+             $(inc)/dpb.inc $(inc)/error.inc $(inc)/exe.inc \
+             $(inc)/filemode.inc $(inc)/find.inc $(inc)/intnat.inc \
+             $(inc)/mi.inc $(inc)/mult.inc $(inc)/pdb.inc $(inc)/sf.inc \
+             $(inc)/syscall.inc $(inc)/sysvar.inc $(inc)/vector.inc \
+             $(inc)/versiona.inc $(inc)/version.inc
+
+debug.ctl debug.cl1 debug.cl2 debug.cla debug.clb debug.clc debug.cld: DEBUG.SKL   \
                 $(msg)/$(COUNTRY).MSG
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\debug $(subst /,\,$<) $(country)"
 
-debug.obj:      DEBUG.ASM $(inc)/dossym.inc $(inc)/dosmac.inc \
+debug.obj:      debug.asm $(DOSSYM_INC) $(inc)/dosmac.inc \
                 $(inc)/bpb.inc $(inc)/buffer.inc $(inc)/sysvar.inc \
                 $(inc)/mult.inc $(inc)/dirent.inc $(inc)/dpb.inc \
                 $(inc)/curdir.inc $(inc)/cpmfcb.inc $(inc)/find.inc \
                 $(inc)/pdb.inc $(inc)/sf.inc \
                 $(inc)/arena.inc $(inc)/intnat.inc \
-                $(inc)/error.inc $(inc)/syscall.inc DEBEQU.ASM
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\debug $(subst /,\,$<) $(subst /,\,$@)"
+                $(inc)/error.inc $(inc)/syscall.inc debequ.asm
 
-debcom1.obj:    DEBCOM1.ASM $(inc)/dossym.inc $(inc)/dosmac.inc \
+debcom1.obj:    debcom1.asm $(DOSSYM_INC) $(inc)/dosmac.inc \
                 $(inc)/bpb.inc $(inc)/buffer.inc $(inc)/sysvar.inc \
                 $(inc)/mult.inc $(inc)/dirent.inc $(inc)/dpb.inc \
                 $(inc)/curdir.inc $(inc)/cpmfcb.inc $(inc)/find.inc \
                 $(inc)/pdb.inc $(inc)/sf.inc \
                 $(inc)/arena.inc $(inc)/intnat.inc \
-                $(inc)/error.inc $(inc)/syscall.inc DEBEQU.ASM
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\debug $(subst /,\,$<) $(subst /,\,$@)"
+                $(inc)/error.inc $(inc)/syscall.inc debequ.asm
 
-debcom2.obj:    DEBCOM2.ASM $(inc)/dossym.inc $(inc)/dosmac.inc \
+debcom2.obj:    debcom2.asm $(DOSSYM_INC) $(inc)/dosmac.inc \
                 $(inc)/bpb.inc $(inc)/buffer.inc $(inc)/sysvar.inc \
                 $(inc)/mult.inc $(inc)/dirent.inc $(inc)/dpb.inc \
                 $(inc)/curdir.inc $(inc)/cpmfcb.inc $(inc)/find.inc \
                 $(inc)/pdb.inc $(inc)/sf.inc \
                 $(inc)/arena.inc $(inc)/intnat.inc \
-                $(inc)/error.inc $(inc)/syscall.inc DEBEQU.ASM
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\debug $(subst /,\,$<) $(subst /,\,$@)"
+                $(inc)/error.inc $(inc)/syscall.inc debequ.asm
 
-debcom3.obj:    DEBCOM3.ASM $(inc)/dossym.inc $(inc)/dosmac.inc \
+debcom3.obj:    debcom3.asm $(DOSSYM_INC) $(inc)/dosmac.inc \
                 $(inc)/bpb.inc $(inc)/buffer.inc $(inc)/sysvar.inc \
                 $(inc)/mult.inc $(inc)/dirent.inc $(inc)/dpb.inc \
                 $(inc)/curdir.inc $(inc)/cpmfcb.inc $(inc)/find.inc \
                 $(inc)/pdb.inc $(inc)/sf.inc \
                 $(inc)/arena.inc $(inc)/intnat.inc \
-                $(inc)/error.inc $(inc)/syscall.inc DEBEQU.ASM
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\debug $(subst /,\,$<) $(subst /,\,$@)"
+                $(inc)/error.inc $(inc)/syscall.inc debequ.asm
 
-debasm.obj:     DEBASM.ASM $(inc)/dossym.inc $(inc)/dosmac.inc \
+debasm.obj:     debasm.asm $(DOSSYM_INC) $(inc)/dosmac.inc \
                 $(inc)/bpb.inc $(inc)/buffer.inc $(inc)/sysvar.inc \
                 $(inc)/mult.inc $(inc)/dirent.inc $(inc)/dpb.inc \
                 $(inc)/curdir.inc $(inc)/cpmfcb.inc $(inc)/find.inc \
                 $(inc)/pdb.inc $(inc)/sf.inc \
                 $(inc)/arena.inc $(inc)/intnat.inc \
-                $(inc)/error.inc $(inc)/syscall.inc DEBEQU.ASM
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\debug $(subst /,\,$<) $(subst /,\,$@)"
+                $(inc)/error.inc $(inc)/syscall.inc debequ.asm
 
-debuasm.obj:    DEBUASM.ASM $(inc)/dossym.inc $(inc)/dosmac.inc \
+debuasm.obj:    debuasm.asm $(DOSSYM_INC) $(inc)/dosmac.inc \
                 $(inc)/bpb.inc $(inc)/buffer.inc $(inc)/sysvar.inc \
                 $(inc)/mult.inc $(inc)/dirent.inc $(inc)/dpb.inc \
                 $(inc)/curdir.inc $(inc)/cpmfcb.inc $(inc)/find.inc \
                 $(inc)/pdb.inc $(inc)/sf.inc \
                 $(inc)/arena.inc $(inc)/intnat.inc \
-                $(inc)/error.inc $(inc)/syscall.inc DEBEQU.ASM
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\debug $(subst /,\,$<) $(subst /,\,$@)"
+                $(inc)/error.inc $(inc)/syscall.inc debequ.asm
 
-deberr.obj:     DEBERR.ASM $(inc)/dossym.inc $(inc)/dosmac.inc \
+deberr.obj:     deberr.asm $(DOSSYM_INC) $(inc)/dosmac.inc \
                 $(inc)/bpb.inc $(inc)/buffer.inc $(inc)/sysvar.inc \
                 $(inc)/mult.inc $(inc)/dirent.inc $(inc)/dpb.inc \
                 $(inc)/curdir.inc $(inc)/cpmfcb.inc $(inc)/find.inc \
                 $(inc)/pdb.inc $(inc)/sf.inc \
                 $(inc)/arena.inc $(inc)/intnat.inc \
-                $(inc)/error.inc $(inc)/syscall.inc DEBEQU.ASM
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\debug $(subst /,\,$<) $(subst /,\,$@)"
+                $(inc)/error.inc $(inc)/syscall.inc debequ.asm
 
-debconst.obj:   DEBCONST.ASM $(inc)/dossym.inc $(inc)/dosmac.inc \
+debconst.obj:   debconst.asm $(DOSSYM_INC) $(inc)/dosmac.inc \
                 $(inc)/bpb.inc $(inc)/buffer.inc $(inc)/sysvar.inc \
                 $(inc)/mult.inc $(inc)/dirent.inc $(inc)/dpb.inc \
                 $(inc)/curdir.inc $(inc)/cpmfcb.inc $(inc)/find.inc \
                 $(inc)/pdb.inc $(inc)/sf.inc \
                 $(inc)/arena.inc $(inc)/intnat.inc \
-                $(inc)/error.inc $(inc)/syscall.inc DEBEQU.ASM
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\debug $(subst /,\,$<) $(subst /,\,$@)"
+                $(inc)/error.inc $(inc)/syscall.inc debequ.asm
 
-debdata.obj:    DEBDATA.ASM $(inc)/dossym.inc $(inc)/dosmac.inc \
+debdata.obj:    debdata.asm $(DOSSYM_INC) $(inc)/dosmac.inc \
                 $(inc)/bpb.inc $(inc)/buffer.inc $(inc)/sysvar.inc \
                 $(inc)/mult.inc $(inc)/dirent.inc $(inc)/dpb.inc \
                 $(inc)/curdir.inc $(inc)/cpmfcb.inc $(inc)/find.inc \
                 $(inc)/pdb.inc $(inc)/sf.inc \
                 $(inc)/arena.inc $(inc)/intnat.inc \
-                $(inc)/error.inc $(inc)/syscall.inc DEBEQU.ASM
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\debug $(subst /,\,$<) $(subst /,\,$@)"
+                $(inc)/error.inc $(inc)/syscall.inc debequ.asm
 
-debems.obj:     DEBEMS.ASM DEBEQU.ASM
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\debug $(subst /,\,$<) $(subst /,\,$@)"
+debems.obj:     debems.asm debequ.asm
 
-debmes.obj:     DEBMES.ASM $(inc)/msgserv.asm $(inc)/sysmsg.inc \
+debmes.obj:     debmes.asm sysver.inc $(inc)/msgdcl.inc $(inc)/sysmsg.inc \
         debug.ctl \
         debug.cla \
         debug.clb \
@@ -111,25 +118,27 @@ debmes.obj:     DEBMES.ASM $(inc)/msgserv.asm $(inc)/sysmsg.inc \
         debug.cld \
         debug.cl1 \
         debug.cl2
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\debug $(subst /,\,$<) $(subst /,\,$@)"
 
 OBJS = debug.obj debcom1.obj debcom2.obj debcom3.obj debasm.obj debuasm.obj \
        deberr.obj debconst.obj debmes.obj debems.obj debdata.obj
 
 debug.com: $(OBJS) DEBUG.LNK
-	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\debug @debug.lnk"
-#	echo 'system dos' >resp.txt
-#	echo 'option map=debug.map' >>resp.txt
-#	echo 'option nocaseexact' >>resp.txt
-#	echo 'name debug.exe' >>resp.txt
-#	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
-#	wlink @resp.txt
+#	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\debug /map @debug.lnk"
+	echo 'system dos' >resp.txt
+	echo 'option stack=362' >>resp.txt
+	echo 'option map=debug.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name debug.exe' >>resp.txt
+	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
+	wlink @resp.txt
 	dosemu -t --Fdrive_c ../../.. -E "src\tools\convert src\cmd\debug\debug.exe"
-	rm debug.exe
 
 clean:
 	rm -f *.obj
+	rm -f *.err
+	rm -f *.lst
 	rm -f debug.com
+	rm -f debug.exe
 	rm -f debug.map
 	rm -f debug.cl[12a-d]
 	rm -f debug.ctl
