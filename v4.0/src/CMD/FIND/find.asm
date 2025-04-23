@@ -116,14 +116,14 @@ ENDM
 ;---------------------------;
 .xlist                      ;
 .xcref                      ;
-        INCLUDE SYSCALL.INC ;
+        INCLUDE syscall.inc ;
         INCLUDE sysmsg.inc  ;   ;AN000; Include message equates and MACROS
         INCLUDE find.inc    ;   ;AN000; Include find equates and MACROS
 .list                       ;
 .cref                       ;
 ;---------------------------;
 
-MSG_UTILNAME <FIND>             ;AN000;
+MSG_UTILNAME <find>             ;AN000;
 
 ;--------------------------
 ;-      EQUATES
@@ -469,7 +469,7 @@ crlf            db      CR,LF   ;AN000;
 ;*
 ;**************************************************************************
 
-        MSG_SERVICES <FIND.ctl,FIND.cla,FIND.cl1,FIND.cl2>      ;AN000;
+        MSG_SERVICES <find.ctl,find.cla,find.cl1,find.cl2>      ;AN000;
         MSG_SERVICES <DISPLAYmsg,LOADmsg,CHARmsg,NOCHECKSTDIN>  ;AN003; Make retriever services available
 START:
 
