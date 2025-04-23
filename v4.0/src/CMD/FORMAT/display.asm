@@ -53,10 +53,10 @@ End_Of_Memory    ends                           ;
 ;
 
 .xlist
-INCLUDE FORCHNG.INC
-INCLUDE FOREQU.INC
-INCLUDE FORMSG.INC
-INCLUDE SYSMSG.INC
+INCLUDE forchng.inc
+INCLUDE forequ.inc
+INCLUDE formsg.inc
+INCLUDE sysmsg.inc
 .list
 
 ;
@@ -66,7 +66,7 @@ INCLUDE SYSMSG.INC
 ;
 
 
-MSG_UTILNAME  <FORMAT>
+MSG_UTILNAME  <format>
 
 
 data    segment public  para    'DATA'
@@ -77,7 +77,7 @@ code    segment public  para    'CODE'
 Msg_Services    <NEARmsg>
 Msg_Services    <LOADmsg>
 Msg_Services    <DISPLAYmsg,CHARmsg,NUMmsg>
-Msg_Services    <FORMAT.CLA,FORMAT.CLB,FORMAT.CLC,FORMAT.CL1,FORMAT.CL2,FORMAT.CTL>
+Msg_Services    <format.cla,format.clb,format.clc,format.cl1,format.cl2,format.ctl>
 code    ends
 
 ;

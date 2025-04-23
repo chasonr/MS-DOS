@@ -6,7 +6,7 @@
 ;AN002 - D304 Modify Boot record structure for OS2		  11/09/87 J.K.
 ;******************************************************************************
 
-INCLUDE FORCHNG.INC
+INCLUDE forchng.inc
 debug	equ	0
 ;-------------------------------------------------------------------------------
 ; Public for debugging only
@@ -76,8 +76,9 @@ code	segment public para 'CODE'
 	public	BiosFile
 	public	DosFile
 
-data	segment public	para	'DATA'
 	extrn	AddToSystemSize:near
+
+data	segment public	para	'DATA'
 	extrn	currentCylinder:word
 	extrn	currentHead:word
 	extrn	deviceParameters:byte
@@ -126,13 +127,13 @@ data	ends
 ; Constants
 
 .xlist
-INCLUDE DOSMAC.INC
-INCLUDE FORMACRO.INC
-INCLUDE FOREQU.INC
-INCLUDE FORSWTCH.INC
+INCLUDE dosmac.inc
+INCLUDE formacro.inc
+INCLUDE forequ.inc
+INCLUDE forswtch.inc
 
 ; This defines all the int 21H system calls
-INCLUDE SYSCALL.INC
+INCLUDE syscall.inc
 
 ; Limits
 
@@ -141,8 +142,8 @@ INCLUDE filesize.inc
 ;-------------------------------------------------------------------------------
 ; These are the data structures which we will need
 
-INCLUDE DIRENT.INC
-INCLUDE ioctl.INC
+INCLUDE dirent.inc
+INCLUDE ioctl.inc
 INCLUDE version.inc
 
 .list
@@ -188,16 +189,16 @@ boot2	db	0,0,0, "Boot 1.x"
 
 REORG2	LABEL	BYTE
 	ORG	BOOT2
-	INCLUDE BOOT11.INC
+	INCLUDE boot11.inc
 	ORG	REORG2
 
 
 
-INCLUDE BOOTFORM.INC
+INCLUDE bootform.inc
 
 
 BOOT	LABEL	BYTE
-	INCLUDE BOOT.INC
+	INCLUDE boot.inc
 
 scratchBuffer db 512 dup(?)
 
@@ -524,7 +525,7 @@ NotSingleSided:
 	jz	Not8SectorsPerTrack
 	add	ax, 2
 ; /8 implies Old_Dir = TRUE
-	mov	Old_Dir,TRUE
+	mov	Old_Dir,TRUE and 0FFh
 Not8SectorsPerTrack:
 
 ; Ok now we know which BPB to use so lets move it to the device parameters
@@ -537,7 +538,7 @@ Not8SectorsPerTrack:
 	mov	cx, size a_BPB
 	push	ds
 	pop	es
-	repnz	movsb
+	rep	movsb
 
 ;*****************************************************************
 ;*  /N/T DCR stuff.  Possible flaw exists if we are dealing with a
@@ -1024,7 +1025,7 @@ LastChanceToSaveIt proc near
 	cmp	deviceParameters.DP_DeviceType, DEV_5INCH
 	ja	WeCanNotIgnoreThisError
 
-	mov	fLastChance, TRUE
+	mov	fLastChance, TRUE and 0FFh
 
 	or	switchmap, SWITCH_1
 	call	CheckSwitches
@@ -1092,7 +1093,7 @@ Procedure WriteBootSector			;				;AN000;
 	mov	cx, size EXT_BPB_INFO		;  "  " 	"  "		;AC000:
 	push	ds				;Set ES=DS (data segment)	;     ;
 	pop	es				;  "  " 	"  "		;     ;
-	repnz	movsb				;Do the copy			;     ;
+	rep	movsb				;Do the copy			;     ;
 						;Write out the boot record	;     ;
 	mov	al, drive			;Get drive letter		;     ;
 	mov	cx, 1				;Specify 1 sector		;     ;
@@ -1114,7 +1115,7 @@ $$IF62:
 	   rep	   movsb			;  "  "       "  "		;AN000;
 	   call    Create_Serial_ID		;Go create unique ID number	;AN000;
 	   lea	   si,FAT12_String		;Assume 12 bit FAT		;AN000;
-	   cmp	   fBigFAT,TRUE 		;Is it? 			;AN000;
+	   cmp	   fBigFAT,TRUE and 0FFh 	;Is it? 			;AN000;
 ;	   $IF	   E				;Not if fBigFat is set....	;AN000;
 	   JNE $$IF64
 	      lea     si,FAT16_String		;Got 16 bit FAT 		;AN000;
@@ -1123,7 +1124,7 @@ $$IF64:
 						;Copy file system string	;     ;
 	   mov	   cx,8 			; to buffer			;AN000;
 	   lea	   di,Media_ID_Buffer.Media_ID_File_System ;	 "  "		;AN000;
-	   repnz   movsb			;    "   "	  "  "		;AN000;
+	   rep     movsb			;    "   "	  "  "		;AN000;
 	   mov	   al,Generic_IOCtl		;Generic IOCtl call		;AN000;
 	   mov	   bl,Drive			;Get drive			;AN000;
 	   inc	   bl				;Make it 1 based		;AN000;
@@ -1208,18 +1209,21 @@ OemDone proc	near
 	test	switchmap, SWITCH_B
 	jz	Switch8?
 	call	WriteBogusDos
-	retc
+	jnc	@F
+ret_l_1:
+	    ret
+	@@:
 
 Switch8?:
 	test	switchmap, SWITCH_8
 	jz	HardDisk?
 	call	ConvertToOldDirectoryFormat
-	retc
+	jc	short ret_l_1
 
 HardDisk?:
 	cmp	deviceParameters.DP_DeviceType, DEV_HARDDISK
 	clc
-	retnz
+	jnz	short ret_l_1
 	call	SetPartitionTable
 
 	return
@@ -1266,7 +1270,7 @@ end_sys_loop:
 	int	19h				; reboot
 endif
 
-	include BOOT.CL1
+	include boot.cl1
 mesofs	equ	sysmsg - BogusDos
 
 WriteBogusDos proc near
@@ -1318,6 +1322,7 @@ WriteBogusDos proc near
 	call	AddToSystemSize
 
 	clc
+ret_l_2:
 	return
 
 WriteBogusDos endp
@@ -1364,7 +1369,7 @@ wrtdir:
 DirectoryWritten:
 
 	test	switchmap, SWITCH_S		; Was system requested?
-	retnz					; yes, don't write old boot sector
+	jnz	short ret_l_2			; yes, don't write old boot sector
 	mov	al,drive
 	cbw
 	mov	bx,offset boot2 		; no,  write old boot sector
@@ -1377,7 +1382,7 @@ bootset8:
 ;Boot record in 1st 32mb of partition
 	mov	Read_Write_Relative.Start_Sector_High,0 ;		       ;AN000;
 	call	Write_Disk			;				;AC000;
-	retnc
+	jnc	short ret_l_2
 
 	Message msgBootWriteError		;				;AC000;
 	stc
@@ -1609,7 +1614,7 @@ $$IF89:
 ;			$else							;an000; dms; < 32 Mb partition
 			JMP SHORT $$EN91
 $$IF91:
-				cmp	fBigFat,True				;an000;    ;16 bit FAT
+				cmp	fBigFat,True and 0FFh			;an000;    ;16 bit FAT
 ;				$IF	E					;AC000;    ;yes
 				JNE $$IF93
 					mov	[BX].SysInd,FAT16_File_System	;an000;    ;type 4
