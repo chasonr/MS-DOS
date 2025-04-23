@@ -16,6 +16,14 @@ COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
 #######################	dependencies begin here. #########################
 #
 
+.SUFFIXES: .asm .obj
+
+AS = jwasm
+AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.asm.obj:
+	$(AS) $(AFLAGS) -Fo$@ $<
+
 all: join.exe
 
 $(inc)/errtst.obj:
@@ -40,20 +48,20 @@ join.ctl join.cl1 join.cl2 join.cla: JOIN.SKL      \
   $(msg)/$(COUNTRY).MSG
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\join $(subst /,\,$<) $(country)"
 
-_msgret.obj: _MSGRET.ASM \
+_msgret.obj: _msgret.asm \
   $(inc)/msgserv.asm    \
   $(inc)/sysmsg.inc     \
+  $(inc)/versiona.inc   \
+  $(inc)/copyrigh.inc   \
+  $(inc)/msgdcl.inc     \
   join.ctl              \
   join.cla              \
   join.cl1              \
-  join.cl2              \
-  JOIN.SKL
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\join $(subst /,\,$<) $(subst /,\,$@)"
+  join.cl2
 
-_parse.obj: _PARSE.ASM  \
+_parse.obj: _parse.asm  \
   $(inc)/parse.asm      \
   $(inc)/psdata.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\join $(subst /,\,$<) $(subst /,\,$@)"
 
 join.obj: JOIN.C        \
   JOINPARS.H            \
@@ -70,6 +78,8 @@ join.exe: $(OBJS) $(map)/mapper.lib $(inc)/COMSUBS.LIB JOIN.LNK
 
 clean:
 	rm -f *.obj
+	rm -f *.err
+	rm -f *.lst
 	rm -f join.cl[12a]
 	rm -f join.ctl
 	rm -f join.exe

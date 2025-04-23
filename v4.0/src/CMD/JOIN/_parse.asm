@@ -47,7 +47,7 @@ PGROUP	GROUP	_TEXT
 _DATA	segment byte public 'DATA'	;AN000;
 BASESW	=	1			;SPECIFY, PSDATA POINTED TO BY "DS"
 INCSW	=	0			;PSDATA.INC IS ALREADY INCLUDED
-	INCLUDE PSDATA.INC		;PARSER'S WORK SPACE
+	INCLUDE psdata.inc		;PARSER'S WORK SPACE
 _DATA	ends				;AN000;
 
 _TEXT	segment byte public 'CODE'	;AN000;
@@ -117,5 +117,3 @@ _parse	endp									;AN000;
 
 _TEXT	ends				; end code segment			;AN000;
 	end									;AN000;
-
-
