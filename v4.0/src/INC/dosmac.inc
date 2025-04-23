@@ -4,7 +4,12 @@
 ; Macro file for MSDOS.
 ;
 
+ifndef __JWASM__
 TRUE    EQU 0FFFFh
+endif
+ifndef TRUE
+TRUE    EQU 0FFFFh
+endif
 FALSE   EQU 0
 
 SUBTTL BREAK a listing into pages and give new subtitles

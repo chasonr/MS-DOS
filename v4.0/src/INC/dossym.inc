@@ -1,7 +1,9 @@
 ;	SCCSID = @(#)dossym.asm 1.1 85/04/10
 ;	SCCSID = @(#)dossym.asm 1.1 85/04/10
 	PAGE 80,132
+ifndef TRUE
 TRUE	    EQU 0FFFFh
+endif
 FALSE	    EQU 0
 
 Installed   = TRUE

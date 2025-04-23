@@ -23,8 +23,8 @@ Title	E2BINIT(EXE2BIN)
 ;*****************************************************************************
 
 
-INCLUDE SYSMSG.INC
-MSG_UTILNAME <EXE2BIN>							;AN000;
+INCLUDE sysmsg.inc
+MSG_UTILNAME <exe2bin>							;AN000;
 
 	subttl	Main Code Area						;AN000;
 	page
@@ -136,13 +136,13 @@ LOAD	EQU	ZLOAD
 ;*****************************************************************************
 ;
 
-.xlist
-INCLUDE DOSSYM.INC			; also versiona.inc		;AN000;
-INCLUDE SYSCALL.INC							;AN000;
-INCLUDE E2BMACRO.INC							;AN000;
-INCLUDE E2BEQU.INC							;AN000;
-INCLUDE E2BTABLE.INC							;AN000;
-INCLUDE E2BPARSE.INC							;AN000;
+;.xlist
+INCLUDE dossym.inc			; also versiona.inc		;AN000;
+INCLUDE syscall.inc							;AN000;
+INCLUDE e2bmacro.inc							;AN000;
+INCLUDE e2bequ.inc							;AN000;
+INCLUDE e2btable.inc							;AN000;
+INCLUDE e2bparse.inc							;AN000;
 include version.inc
 .list
 
@@ -157,12 +157,12 @@ psp_ptr dw	1 dup(?)						;AN000;
 ; SysDisplayMsg Declarations
 ;*****************************************************************************
 ;
-.xlist
+;.xlist
 MSG_SERVICES <LOADmsg>							;AN000;
 MSG_SERVICES <DISPLAYmsg,CHARmsg>					;AN000;
-MSG_SERVICES <EXE2BIN.CLA,EXE2BIN.CLB>					;AN000;
-MSG_SERVICES <EXE2BIN.CL1,EXE2BIN.CL2>					;AN000;
-MSG_SERVICES <EXE2BIN.CTL>						;AN000;
+MSG_SERVICES <exe2bin.cla,exe2bin.clb>					;AN000;
+MSG_SERVICES <exe2bin.cl1,exe2bin.cl2>					;AN000;
+MSG_SERVICES <exe2bin.ctl>						;AN000;
 
 
 .list
@@ -197,7 +197,7 @@ MSG_SERVICES <EXE2BIN.CTL>						;AN000;
 ;
 ;*****************************************************************************
 
-procedure Main_Init near		;				;AN000;
+procedure Main_Init,near		;				;AN000;
 
 	ASSUME	DS:NOTHING		; THIS IS WHAT dos GIVES YOU	;AN000;
 	ASSUME	ES:NOTHING						;AN000;
@@ -247,7 +247,7 @@ Main_Init endp								;AN000;
 ;
 ;*****************************************************************************
 
-procedure Init_Input_Output near					;AN000;
+procedure Init_Input_Output,near					;AN000;
 
 	call	Preload_Messages	;Load up message retriever	;AN000;
 	cmp	Fatal_Error,YES 	;Quit?				;AN000;
@@ -277,7 +277,7 @@ Init_Input_Output endp							;AN000;
 ;
 ;*****************************************************************************
 
-procedure Preload_Messages near 					;AN000;
+procedure Preload_Messages,near 					;AN000;
 
 	call	SYSLOADMSG		;Preload the messages		;AN000;
 ;	$IF	C			;Error? 			;AN000;
@@ -430,12 +430,12 @@ Parse_Command_Line endp 						;AN000;
 
 ;*****************************************************************************
 
-INCLUDE PARSE.ASM
+INCLUDE parse.asm
 
 ;*****************************************************************************
 
 
-procedure LOCATE near
+procedure LOCATE,near
 
 	push	ds							;AN000;
 	ASSUME	ES:NOTHING		; THIS IS THE WAY IT GETS HERE! ;AN000;
@@ -1017,27 +1017,30 @@ kill_bl endp
 
 IsBlank proc	near
 	cmp	al,00							;AN000;
-	retz								;AN000;
+	jnz	@F							;AN000;
+ret_l_1:
+	    ret
+	@@:
 	cmp	al,13
-	retz
+	jz	short ret_l_1
 	cmp	al,' '			; space
-	retz
+	jz	short ret_l_1
 	cmp	al,9			; tab
-	retz
+	jz	short ret_l_1
 	cmp	al,','			; comma
-	retz
+	jz	short ret_l_1
 	cmp	al,';'			; semicolon
-	retz
+	jz	short ret_l_1
 	cmp	al,'+'			; plus
-	retz
+	jz	short ret_l_1
 	cmp	al,10			; line feed
-	retz
+	jz	short ret_l_1
 	cmp	al,'='			; equal sign
 	return
 IsBlank Endp
 
 
-procedure copyfs near
+procedure copyfs,near
 
 	push	ax							;AN000;
 
@@ -1060,7 +1063,7 @@ $$EN16:
 copyfs	endp								;AN000;
 
 
-procedure dbcs_check near
+procedure dbcs_check,near
 
 	push	ds				;Save registers 	;AC000;
 	push	si				; "  "	  "  "		;AC000;
@@ -1119,5 +1122,3 @@ CODE	ends
 
 
 	end	main_init						;AC000;
-
-
