@@ -30,34 +30,33 @@ OBJ	= fc.obj \
 
 #       Rules and Dependencies follow
 
-all:	fc.exe
+.SUFFIXES: .asm .obj
 
-$(inc)/printf.obj: $(inc)/PRINTF.ASM
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\fc $(subst /,\,$<) $(subst /,\,$@)"
+AS = jwasm
+AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.asm.obj:
+#	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\fc $(subst /,\,$<) $(subst /,\,$@) -l"
+	$(AS) $(AFLAGS) -Fo$@ $<
+
+all:	fc.exe
 
 $(inc)/kstring.obj: $(inc)/KSTRING.C $(hinc)/INTERNAT.H
 	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\fc $(subst /,\,$<) $(subst /,\,$@)"
 
-getl.obj: GETL.ASM $(inc)/CMACROS.INC $(inc)/version.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\fc $(subst /,\,$<) $(subst /,\,$@)"
+getl.obj: getl.asm $(inc)/cmacros.inc $(inc)/version.inc
 
-itoupper.obj: ITOUPPER.ASM  $(inc)/CMACROS.INC $(inc)/version.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\fc $(subst /,\,$<) $(subst /,\,$@)"
+itoupper.obj: itoupper.asm  $(inc)/cmacros.inc $(inc)/version.inc
 
-maxmin.obj: MAXMIN.ASM $(inc)/CMACROS.INC $(inc)/version.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\fc $(subst /,\,$<) $(subst /,\,$@)"
+maxmin.obj: maxmin.asm $(inc)/cmacros.inc $(inc)/version.inc
 
-messages.obj: MESSAGES.ASM
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\fc $(subst /,\,$<) $(subst /,\,$@)"
+messages.obj: messages.asm
 
-move.obj: MOVE.ASM $(inc)/CMACROS.INC $(inc)/version.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\fc $(subst /,\,$<) $(subst /,\,$@)"
+move.obj: move.asm $(inc)/cmacros.inc $(inc)/version.inc
 
-string.obj: STRING.ASM $(inc)/CMACROS.INC $(inc)/version.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\fc $(subst /,\,$<) $(subst /,\,$@)"
+string.obj: string.asm $(inc)/cmacros.inc $(inc)/version.inc
 
-xtab.obj: XTAB.ASM $(inc)/CMACROS.INC $(inc)/version.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\fc $(subst /,\,$<) $(subst /,\,$@)"
+xtab.obj: xtab.asm $(inc)/cmacros.inc $(inc)/version.inc
 
 error.obj: ERROR.C TOOLS.H TTYPES.H
 	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\fc $(subst /,\,$<) $(subst /,\,$@)"
@@ -75,7 +74,7 @@ update.obj: UPDATE.C TOOLS.H TTYPES.H
 	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\fc $(subst /,\,$<) $(subst /,\,$@)"
 
 fc.exe: $(OBJ) FC.LNK
-	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\fc @fc.lnk,"
+	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\fc /map @fc.lnk,"
 #	echo 'system dos' >resp.txt
 #	echo 'option map=fc.map' >>resp.txt
 #	echo 'option nocaseexact' >>resp.txt
@@ -85,6 +84,8 @@ fc.exe: $(OBJ) FC.LNK
 
 clean:
 	rm -f *.obj
+	rm -f *.err
+	rm -f *.lst
 	rm -f fc.exe
 	rm -f fc.map
 	rm -f resp.txt

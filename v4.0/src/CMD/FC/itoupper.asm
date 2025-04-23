@@ -7,17 +7,17 @@ sBegin  code
 assumes cs,code
 
 ;
-; c = IToupper (c, routine);
+; chr = IToupper (chr, routine);
 ;
-;       c is char to be converted
+;       chr is char to be converted
 ;       routine is case map call in international table
 ;
 
 cProc   IToupper,<PUBLIC>
-parmW   c
+parmW   chr
 parmD   routine
 cBegin
-        mov     ax,c
+        mov     ax,chr
         or      ah,ah
         jnz     donothing
         cmp     al,'a'

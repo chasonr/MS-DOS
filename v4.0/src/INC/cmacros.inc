@@ -103,14 +103,14 @@ n1&n2 o1&o2 p1&p2
 endm
 mpush macro rV
 irp x,<ax,bx,cx,dx,si,di,es,ds,bp,sp,ss,cs>
-if rV AND ?&&x
+if rV AND ?&x
 push x
 endif
 endm
 endm
 mpop macro rV
 irp x,<cs,ss,sp,bp,ds,es,di,si,dx,cx,bx,ax>
-if rV AND ?&&x
+if rV AND ?&x
 pop x
 endif
 endm
@@ -128,8 +128,8 @@ smashes macro n,rL
 endm
 ?RI macro n,rL
 irp x,<rL>
-ifdef ?&&x
-n = n or ?&&x
+ifdef ?&x
+n = n or ?&x
 endif
 endm
 endm
@@ -142,15 +142,15 @@ endm
 parmD macro nl
 ife ?PLM
 irp x,<nL>
-?pp <&&x>,<DWORD>,0,4
-?pp <Off_&&x>,<WORD>,2,2
-?pp <Seg_&&x>,<WORD>,2,2
+?pp <&x>,<DWORD>,0,4
+?pp <Off_&x>,<WORD>,2,2
+?pp <Seg_&x>,<WORD>,2,2
 endm
 else
 irp x,<nL>
-?pp <Seg_&&x>,<WORD>,2,2
-?pp <Off_&&x>,<WORD>,2,2
-?pp <&&x>,<DWORD>,0,4
+?pp <Seg_&x>,<WORD>,2,2
+?pp <Off_&x>,<WORD>,2,2
+?pp <&x>,<DWORD>,0,4
 endm
 endif
 endm
@@ -185,15 +185,15 @@ ife ?PLM
 irp x,<nL>
 ?pp1 x,<t>,%?PO,%?adj,%(?PO+?adj)
 ?PO = ?PO + l
- .xcref ?T&&x
-?T&&x = s
+ .xcref ?T&x
+?T&x = s
 endm
 else
 irp x,<nL>
 ?PO = ?PO + l
 ?pp1 x,<t>,%?PO,%?adj,%(?PO+?adj)
- .xcref ?T&&x
-?T&&x = s
+ .xcref ?T&x
+?T&x = s
 endm
 endif
  .cref
@@ -216,9 +216,9 @@ localW macro nL
 endm
 localD macro nL
 irp x,<nL>
-?aLoc <Seg_&&x>,<WORD PTR>,2,2,1
-?aLoc <Off_&&x>,<WORD PTR>,2,2,1
-?aLoc <&&x>,<DWORD PTR>,0,4,1
+?aLoc <Seg_&x>,<WORD PTR>,2,2,1
+?aLoc <Off_&x>,<WORD PTR>,2,2,1
+?aLoc <&x>,<DWORD PTR>,0,4,1
 endm
 endm
 localQ macro nL
@@ -257,8 +257,8 @@ if a
 endif
 irp x,<nL>
 ?aL1 x,<t>,%???
- .xcref ?T&&x
-?T&&x = s
+ .xcref ?T&x
+?T&x = s
 endm
  .cref
 else
@@ -421,12 +421,12 @@ endif
 ?ex1 macro nL,s,d
 irp x,<nL>
  .xcref
- .xcref ?T&&x
+ .xcref ?T&x
  .cref
-?T&&x = s
+?T&x = s
 ife ?PLM
-extrn _&&x:&d
-x equ _&&x
+extrn _&x:&d
+x equ _&x
 else
 extrn x:&d
 endif
@@ -487,15 +487,15 @@ ifidn <x>,<PUBLIC>
 ?lblpu = 1
 else
  .xcref
- .xcref ?T&&x
+ .xcref ?T&x
  .cref
-?T&&x = s
+?T&x = s
 ife ?PLM
 if ?lblpu
-public _&&x
+public _&x
 endif
-_&&x label &d
-x equ _&&x
+_&x label &d
+x equ _&x
 else
 if ?lblpu
 public x
@@ -541,9 +541,9 @@ endif
 ?aD macro nL,s
 irp x,<nL>
  .xcref
- .xcref ?T&&x
+ .xcref ?T&x
  .cref
-?T&&x = s
+?T&x = s
 endm
 endm
 regPtr macro n,S,O
@@ -566,9 +566,9 @@ endm
  .xcref
  .xcref ?ALI&i
  .cref
-?ALI&i &macro
+?ALI&i macro
 ?AP n
-&endm
+endm
 endm
 ?AP macro n
 ?argl = ?argl + 2
@@ -596,8 +596,8 @@ push word ptr (n)
 exitm
 endif
 ife ?T&n-0FFFFH
-mpush %(?SR&n),1
-mpush %(?OR&n),1
+mpush %(?SR&n)
+mpush %(?OR&n)
 ?argl = ?argl + 2
 exitm
 endif
@@ -718,7 +718,7 @@ endif
 endm
 ?pg macro n,p,c,a
     .xcref
-    cBegin &macro g
+    cBegin macro g
 	.xcref
 	?pg1 <n>,c,a,%?PO
 	?CPD = 0
@@ -753,19 +753,19 @@ endm
 	    if ???
 		sub sp,???
 	    endif
-	    mPush a,1
+	    mPush a
 	endif
 	.cref
 	purge cBegin
-    &endm
-    ?UTPE &macro
+    endm
+    ?UTPE macro
 	%out Unterminated Procedure Definition: "&n"
-    &endm
+    endm
 endm
 
 ?pg1 macro n,c,a,o
     .xcref
-    cEnd &macro g
+    cEnd macro g
 	.xcref
 	?BA = 0
 	ifidn <g>,<nogen>
@@ -773,7 +773,7 @@ endm
 		%out <cEnd - possible invalid use of nogen>
 	    endif
 	else
-	    mPop a,1
+	    mPop a
 	    if ?IA
 		sub bp,2
 		mov sp,bp
@@ -793,7 +793,7 @@ endm
 	n endp
 	.cref
 	purge cEnd
-    &endm
+    endm
     .cref
 endm
 
@@ -857,18 +857,18 @@ ifndef def_&grp
 def_&grp= 0
 endif
 if def_&grp ne ASMpass
-add_&grp &macro s
+add_&grp macro s
 in_&grp <seg>,s
-&endm
-in_&grp &macro sl,s
+endm
+in_&grp macro sl,s
 ifb <s>
 grp group sl
 else
-add_&grp &macro ns
+add_&grp macro ns
 in_&grp <sl,s>,ns
-&endm
+endm
 endif
-&endm
+endm
 def_&grp=ASMpass
 else
 add_&grp seg
@@ -878,16 +878,16 @@ defGrp macro nam
 addSeg nam
 endm
 ?cs1 macro n,ln
-begin&ln &macro
+begin&ln macro
 ?cs2 <n>
 n segment
-&endm
+endm
 endm
 
 ?cs2 macro n
-    sEnd &macro
+    sEnd macro
 	n ends
-    &endm
+    endm
 endm
 
 sBegin macro ln
