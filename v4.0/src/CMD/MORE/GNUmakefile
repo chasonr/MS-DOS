@@ -13,36 +13,50 @@ COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
 #######################	dependencies begin here. #########################
 #
 
+.SUFFIXES: .asm .obj
+
+AS = jwasm
+AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.asm.obj:
+	$(AS) $(AFLAGS) -Fo$@ $<
+
 all: more.com
 
 more.ctl more.cl1 more.cl2 more.cla:       MORE.SKL \
                 $(msg)/$(COUNTRY).MSG
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\more $(subst /,\,$<) $(country)"
 
-more.obj: MORE.ASM             \
-          MORE.INC             \
+more.obj: more.asm             \
+          more.inc             \
           more.ctl             \
           more.cla             \
           more.cl1             \
           more.cl2             \
           $(inc)/syscall.inc   \
-          $(inc)/STRUC.INC     \
           $(inc)/msgserv.asm   \
           $(inc)/sysmsg.inc    \
           $(inc)/versiona.inc  \
           $(inc)/copyrigh.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\more $(subst /,\,$<) $(subst /,\,$@)"
 
 OBJS = more.obj
 
 more.com: $(OBJS) MORE.LNK
 	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\more @more.lnk"
+	echo 'system dos' >resp.txt
+	echo 'option map=command.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name command.exe' >>resp.txt
+	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
+	wlink @resp.txt
 	exe2bin -q more.exe more.com
-	rm more.exe
 
 clean:
 	rm -f *.obj
+	rm -f *.err
+	rm -f *.lst
 	rm -f more.com
+	rm -f more.exe
 	rm -f more.cl[12a]
 	rm -f more.ctl
 	rm -f resp.txt

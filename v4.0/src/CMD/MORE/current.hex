@@ -1,0 +1,178 @@
+Open Watcom Executable Image Dump Utility
+Version 2.0 beta Mar 31 2025 03:32:54 (64-bit)
+Copyright (c) 2002-2025 The Open Watcom Contributors. All Rights Reserved.
+Portions Copyright (c) 1984-2002 Sybase, Inc. All Rights Reserved.
+Source code is available under the Sybase Open Watcom Public License.
+See https://github.com/open-watcom/open-watcom-v2#readme for details.
+
+                                DOS EXE Header                                
+==============================================================================
+length of load module mod 200H                       =     0156H
+number of 200H pages in load module                  =     0006H
+number of relocation items                           =     0000H
+size of header in paragraphs                         =     0020H
+minimum number of paragraphs required above load mod =     0000H
+maximum number of paragraphs required above load mod =     FFFFH
+offset of stack segment in load module               =     0000H
+initial value of SP                                  =     0000H
+checksum                                             =     D5FAH
+initial value of IP                                  =     0100H
+offset of code segment within load module (segment)  =     0000H
+file offset of first relocation item                 =     001EH
+overlay number                                       =     0000H
+load module length                                   = 00000B56H
+
+load module =
+0000:  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00                    
+0010:  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00                    
+0020:  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00                    
+0030:  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00                    
+0040:  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00                    
+0050:  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00                    
+0060:  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00                    
+0070:  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00                    
+0080:  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00                    
+0090:  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00                    
+00A0:  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00                    
+00B0:  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00                    
+00C0:  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00                    
+00D0:  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00                    
+00E0:  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00                    
+00F0:  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00                    
+0100:  EB 1C 90 01 00 02 00 80  02 43 50 20 20 20 20 20             CP     
+0110:  20 01 00 02 00 80 00 02  02 00 43 50 00 00 E8 3D              CP   =
+0120:  02 73 07 E8 1C 03 B4 4C  CD 21 B8 0C 44 BB 02 00     s     L !  D   
+0130:  B9 7F 03 8D 16 68 02 CD  21 72 10 8D 3E 68 02 80         h  !r  >h  
+0140:  7D 06 01 75 06 8B 45 10  A2 64 02 B4 0F CD 10 88    }  u  E  d      
+0150:  26 65 02 33 DB B4 45 CD  21 8B E8 B4 3E CD 21 BB    &e 3  E !   > ! 
+0160:  02 00 B4 45 CD 21 B8 03  33 CD 21 72 22 80 FA 00       E !  3 !r"   
+0170:  74 1D B8 02 57 8B DD BE  03 01 B9 0D 00 BF 11 01    t   W           
+0180:  CD 21 72 0B B8 04 57 BB  01 00 BF 11 01 CD 21 8B     !r   W       ! 
+0190:  0E 4E 09 BA 4C 09 BB 01  00 B4 40 CD 21 FC BA 56     N  L     @ !  V
+01A0:  09 B9 00 10 8B DD B4 3F  CD 21 0B C0 75 02 CD 20           ? !  u   
+01B0:  8B C8 8B F2 AC 3C 1A 74  F5 3C 0D 75 07 C6 06 67         < t < u   g
+01C0:  02 01 EB 4C 3C 0A 75 06  FE 06 66 02 EB 42 3C 08       L< u   f  B< 
+01D0:  75 0D 80 3E 67 02 01 74  37 FE 0E 67 02 EB 31 3C    u  >g  t7  g  1<
+01E0:  09 75 12 8A 26 67 02 80  C4 07 80 E4 F8 FE C4 88     u  &g          
+01F0:  26 67 02 EB 1B 3C 07 74  17 FE 06 67 02 8A 26 67    &g   < t   g  &g
+0200:  02 3A 26 65 02 76 09 FE  06 66 02 C6 06 67 02 01     :&e v   f   g  
+0210:  8A D0 B4 02 CD 21 8A 26  66 02 3A 26 64 02 72 3B         ! &f :&d r;
+0220:  55 56 51 B8 02 00 BB 02  00 33 C9 B2 00 B6 FF E8    UVQ      3      
+0230:  10 02 B4 0C B0 08 CD 21  3C 00 75 04 B4 08 CD 21           !< u    !
+0240:  8B 0E 54 09 BA 50 09 BB  02 00 B4 40 CD 21 59 5E      T  P     @ !Y^
+0250:  5D C6 06 67 02 01 C6 06  66 02 01 49 74 03 E9 53    ]  g    f  It  S
+0260:  FF E9 39 FF 19 50 01 01  00 00 0E 00 00 00 00 00      9  P          
+0270:  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00                    
+0280:  00 00 00 00 00 00 FF FF  FF FF 00 00 00 00 00 00                    
+0290:  00 00 FF FF FF FF 00 00  00 00 00 00 00 00 FF FF                    
+02A0:  FF FF FF FF FF FF 00 00  00 00 FF FF FF FF 00 00                    
+02B0:  00 00 00 00 00 0D 0A 00  00 00 00 00 0A 00 24 24                  $$
+02C0:  24 24 24 24 24 24 24 24  24 24 24 24 24 24 24 24    $$$$$$$$$$$$$$$$
+02D0:  24 24 24 24 24 24 24 24  24 24 24 24 24 24 24 24    $$$$$$$$$$$$$$$$
+02E0:  24 24 24 24 24 24 24 24  24 24 24 24 24 24 24 24    $$$$$$$$$$$$$$$$
+02F0:  24 24 24 24 24 24 24 24  24 24 24 24 24 24 24 4D    $$$$$$$$$$$$$$$M
+0300:  53 20 44 4F 53 20 56 65  72 73 69 6F 6E 20 34 2E    S DOS Version 4.
+0310:  30 30 20 28 43 29 43 6F  70 79 72 69 67 68 74 20    00 (C)Copyright 
+0320:  31 39 38 38 20 4D 69 63  72 6F 73 6F 66 74 20 43    1988 Microsoft C
+0330:  6F 72 70 4C 69 63 65 6E  73 65 64 20 4D 61 74 65    orpLicensed Mate
+0340:  72 69 61 6C 20 2D 20 50  72 6F 70 65 72 74 79 20    rial - Property 
+0350:  6F 66 20 4D 69 63 72 6F  73 6F 66 74 20 20 50 53    of Microsoft  PS
+0360:  52 06 57 33 C9 8E C1 33  FF B8 2E 12 B2 00 CD 2F    R W3   3  .    /
+0370:  8C 06 84 02 89 3E 82 02  B8 2E 12 B2 02 CD 2F 8C         >   .    / 
+0380:  06 8C 02 89 3E 8A 02 B8  2E 12 B2 04 CD 2F 8C 06        >   .    /  
+0390:  9C 02 89 3E 9A 02 B8 2E  12 B2 06 CD 2F 8C 06 80       >   .    /   
+03A0:  02 89 3E 7E 02 E8 40 05  8C 06 7C 02 89 3E 7A 02      >~  @   |  >z 
+03B0:  8C 06 98 02 89 3E 96 02  E8 4E 05 8C 06 90 02 89         >   N      
+03C0:  3E 8E 02 B8 2E 12 B2 08  CD 2F 8C 06 A4 02 89 3E    >   .    /     >
+03D0:  A2 02 E8 6D 05 89 3E A6  02 E8 16 00 E8 2B 00 51       m  >      + Q
+03E0:  E8 3A 00 72 08 59 5F 07  5A 5B 58 EB 04 83 C4 0C     : r Y_ Z[X     
+03F0:  F9 C3 50 56 1E B8 00 63  CD 21 1E 07 1F 72 08 89      PV   c !   r  
+0400:  36 AE 02 8C 06 B0 02 5E  58 C3 B8 00 44 BB 01 00    6      ^X   D   
+0410:  33 D2 CD 21 80 CE 01 B8  01 44 CD 21 C3 B4 30 CD    3  !     D !  0 
+0420:  21 83 F8 04 75 03 F8 EB  18 83 F8 02 73 05 BB FF    !   u       s   
+0430:  FF EB 03 BB 02 00 B8 01  00 B9 00 00 B2 00 B6 FF                    
+0440:  F9 C3 50 53 51 55 57 06  52 8B E9 89 1E B2 02 88      PSQUW R       
+0450:  36 B7 02 E8 75 02 0B C9  74 1C 0B ED 75 05 E8 26    6   u   t   u  &
+0460:  00 EB 03 E8 6D 01 72 08  5A E8 C2 00 07 5F EB 04        m r Z    _  
+0470:  83 C4 06 F9 EB 04 07 5F  5A F9 72 06 5D 59 5B 58           _Z r ]Y[X
+0480:  EB 04 83 C4 08 F9 C3 50  53 52 8B 1E B2 02 83 FB           PSR      
+0490:  FF 75 05 E8 2C 00 EB 03  E8 5C 00 73 0F B4 59 BB     u  ,    \ s  Y 
+04A0:  00 00 CD 21 32 E4 83 C4  06 F9 EB 10 83 FB FF 74       !2          t
+04B0:  0B 3B C1 74 07 E8 6D 00  83 C4 06 F9 72 03 5A 5B     ; t  m     r Z[
+04C0:  58 C3 1E 06 1F 83 F9 01  75 1B B4 02 26 8A 15 CD    X       u   &   
+04D0:  21 1F 8A C2 E8 6E 00 1E  06 1F 73 07 26 8A 55 01    !    n    s & U 
+04E0:  CD 21 F8 EB 0F B4 02 0B  C9 74 09 26 8A 15 CD 21     !       t &   !
+04F0:  47 49 75 F3 F8 1F C3 33  C0 0B C9 74 27 1E 06 1F    GIu    3   t'   
+0500:  B4 40 8B D7 83 F9 01 75  18 CD 21 1F 50 26 8A 05     @     u  ! P&  
+0510:  E8 32 00 58 1E 06 1F 73  06 F8 B4 40 42 CD 21 EB     2 X   s   @B ! 
+0520:  02 CD 21 1F C3 B8 27 00  BB 04 00 B5 01 C3 80 FE      !   '         
+0530:  FF 74 11 F6 C6 80 75 0C  1E 07 8D 3E B5 02 B9 02     t    u    >    
+0540:  00 E8 43 FF C3 06 57 C4  3E AE 02 0B FF 74 17 26      C   W >    t &
+0550:  83 3D 00 F8 74 10 26 3A  05 72 07 26 3A 45 01 77     =  t &: r &:E w
+0560:  01 F9 47 47 EB E9 5F 07  C3 8F 06 B8 02 33 DB 93      GG  _      3  
+0570:  92 F7 36 BC 02 93 F7 36  BC 02 83 FA 09 76 05 80      6    6     v  
+0580:  C2 37 EB 03 80 C2 30 52  41 0B C0 75 04 0B DB 74     7    0RA  u   t
+0590:  39 83 F9 03 75 0D 80 7C  0A 2C 75 05 FF 36 C5 02    9   u  | ,u  6  
+05A0:  41 EB 22 83 F9 06 75 0D  80 7C 0A 2C 75 05 FF 36    A "   u  | ,u  6
+05B0:  C5 02 41 EB 10 83 F9 09  75 0B 80 7C 0A 2C 75 05      A     u  | ,u 
+05C0:  FF 36 C5 02 41 93 33 D2  EB A7 33 D2 33 C0 FF 36     6  A 3   3 3  6
+05D0:  B8 02 C3 33 D2 0B C9 74  21 B4 25 B0 00 26 38 25       3   t! %  &8%
+05E0:  75 0A 26 38 65 01 74 04  3A C4 75 0E 26 8A 05 E8    u &8e t : u &   
+05F0:  53 FF 73 01 47 47 42 49  75 E3 56 87 CA 0B ED 74    S s GGBIu V    t
+0600:  33 4D 83 3E BA 02 00 75  2B 8A 44 06 04 30 26 3A    3M >   u+ D  0&:
+0610:  45 01 75 02 EB 1E 3C 30  75 04 0B D2 74 04 03 34    E u   <0u   t  4
+0620:  EB E7 80 3E B7 02 FF 75  08 42 42 49 49 4F 4F EB       >   u BBIIOO 
+0630:  03 BA FF FF 57 2B F9 E8  4D FE 5F 59 73 03 EB 57        W+  M _Ys  W
+0640:  90 51 8B CA 80 7C 06 00  74 0D 0B C9 74 06 49 49     Q   |  t   t II
+0650:  47 47 EB 01 5E EB 10 0B  C9 75 03 5E EB 09 83 F9    GG  ^    u ^    
+0660:  FF 75 02 33 C9 0B FF 74  2E 55 57 06 51 33 C9 83     u 3   t.UW Q3  
+0670:  3E BA 02 00 75 05 E8 7A  01 EB 03 E8 20 00 72 07    >   u  z      r 
+0680:  59 07 5F 5D 5E EB 04 83  C4 0A F9 83 3E BA 02 00    Y _]^       >   
+0690:  75 05 72 03 E9 3C FF C7  06 BA 02 00 00 C3 33 D2    u r  <        3 
+06A0:  A1 BA 02 C7 06 BC 02 0A  00 E8 BD FE 58 88 87 BE                X   
+06B0:  02 43 83 FB 40 75 03 E8  F8 01 FE C9 75 EE B8 0D     C  @u      u   
+06C0:  0A 89 87 BE 02 43 43 E8  E8 01 C3 56 53 33 F6 33         CC    VS3 3
+06D0:  C9 80 FE FF 75 08 8B BC  A6 02 8B DF EB 25 F6 C6        u        %  
+06E0:  02 74 08 C4 BC 8A 02 8C  C3 EB 18 83 F8 13 72 0D     t            r 
+06F0:  83 F8 27 77 08 C4 BC 96  02 8C C3 EB 06 C4 BC 7A      'w           z
+0700:  02 8C C3 83 FB FF 75 16  80 FE FF 75 03 F9 EB 0C          u    u    
+0710:  A3 BA 02 B8 FF FF BD 01  00 33 F6 F8 EB 0C 83 FB             3      
+0720:  00 74 03 E8 54 00 83 C6  04 F8 72 06 0B C9 75 02     t  T     r   u 
+0730:  EB 9F 9C 80 FE 01 75 29  52 55 51 06 57 50 B8 00          u)RUQ WP  
+0740:  05 CD 2F 3C FF 58 75 09  8B D8 B8 02 05 CD 2F EB      /< Xu       / 
+0750:  01 F9 73 05 5F 07 59 EB  06 83 C4 06 E8 0C 00 5D      s _ Y        ]
+0760:  5A EB 01 CF 0E E8 FB FF  5B 5E C3 57 50 B9 FF FF    Z       [^ WP   
+0770:  32 C0 F2 AE F7 D1 49 58  5F C3 83 FB 01 75 1D 83    2     IX_    u  
+0780:  3E A2 02 FF 74 16 83 F8  FF 75 0B 50 A1 BA 02 FF    >   t    u P    
+0790:  1E A2 02 58 EB 04 FF 1E  A2 02 EB 1A 33 C9 80 FE       X        3   
+07A0:  FF 74 06 26 8A 4D 03 EB  09 2E 38 35 75 04 2E 8A     t & M   .85u . 
+07B0:  4D 03 83 C7 04 F9 73 2D  F8 0B C9 74 19 80 FE FF    M     s-   t    
+07C0:  74 05 26 3B 05 EB 03 2E  3B 05 75 02 EB 09 49 74    t &;   .; u   It
+07D0:  05 83 C7 04 EB E3 F9 72  0C 80 FE FF F8 75 02 0E           r     u  
+07E0:  07 26 03 7D 02 72 06 32  ED 26 8A 0D 47 C6 06 B4     & } r 2 &  G   
+07F0:  02 00 C3 33 DB 80 7C 06  00 75 11 C7 87 BE 02 20       3  |  u      
+0800:  2D 43 43 C6 87 BE 02 20  43 E8 A6 00 5D 33 DB 33    -CC     C   ]3 3
+0810:  D2 88 0E B4 02 8A 44 09  3A C1 76 1E 2A C1 8A F0          D : v *   
+0820:  F6 44 07 80 74 14 8A 44  0A 88 87 BE 02 43 83 FB     D  t  D     C  
+0830:  40 75 03 E8 7C 00 FE CE  75 EC 80 7C 08 00 74 0D    @u  |   u  |  t 
+0840:  38 4C 08 73 08 2A 4C 08  8A D1 8A 4C 08 0B C9 74    8L s *L    L   t
+0850:  24 F6 44 07 0F 75 0C F6  44 07 10 74 06 26 8A 05    $ D  u  D  t &  
+0860:  47 EB 01 58 88 87 BE 02  43 83 FB 40 75 03 E8 41    G  X    C  @u  A
+0870:  00 FE C9 75 DC F6 44 07  80 75 18 0A F6 74 14 8A       u  D  u   t  
+0880:  44 0A 88 87 BE 02 43 83  FB 40 75 03 E8 23 00 FE    D     C  @u  #  
+0890:  CE 75 EC F6 44 07 0F 75  08 F6 44 07 10 74 02 EB     u  D  u  D  t  
+08A0:  0C 0A D2 74 08 8F 06 B8  02 FE CA 75 F8 E8 02 00       t       u    
+08B0:  55 C3 51 06 57 1E 07 8B  CB 33 DB 8D 3E BE 02 E8    U Q W    3  >   
+08C0:  C5 FB 72 05 5F 07 59 EB  04 83 C4 06 F9 C3 01 04      r _ Y         
+08D0:  00 01 FF FF 04 00 11 45  78 74 65 6E 64 65 64 20           Extended 
+08E0:  45 72 72 6F 72 20 25 31  0E 07 8D 3E CE 08 83 C1    Error %1   >    
+08F0:  20 C3 02 04 00 01 FF FF  04 00 0E 50 61 72 73 65               Parse
+0900:  20 45 72 72 6F 72 20 25  31 0E 07 8D 3E F2 08 83     Error %1   >   
+0910:  C1 1D C3 FF 04 00 02 01  00 08 00 02 00 1C 00 17                    
+0920:  49 6E 63 6F 72 72 65 63  74 20 44 4F 53 20 76 65    Incorrect DOS ve
+0930:  72 73 69 6F 6E 0D 0A 0A  2D 2D 20 4D 6F 72 65 20    rsion   -- More 
+0940:  2D 2D 0E 07 8D 3E 13 09  83 C1 35 C3 0D 0A 02 00    --   >    5     
+0950:  0D 0A 0D 0A 04 00                                         
+
+
+No New Executable header.

@@ -36,15 +36,14 @@ BREAK	MACRO	subtitle
 	PAGE
 ENDM
 
-	INCLUDE SYSCALL.INC
+	INCLUDE syscall.inc
 
-	INCLUDE MORE.INC		 ;AN000; ;MORE strucs and equates
+	INCLUDE more.inc		 ;AN000; ;MORE strucs and equates
 	.XLIST				 ;AN000;
-	INCLUDE STRUC.INC		 ;AN000; ;Structured macros
-	INCLUDE SYSMSG.INC		 ;AN000; ;Message retriever code
+	INCLUDE sysmsg.inc		 ;AN000; ;Message retriever code
 	.LIST				 ;AN000;
 
-MSG_UTILNAME <MORE>			 ;AN000;
+MSG_UTILNAME <more>			 ;AN000;
 
 CODE	SEGMENT PUBLIC
 	ORG	100H
@@ -82,24 +81,24 @@ cp_len	    equ     ($ - cp_list)	 ;AN001;
 
 START1:
 	CALL	SYSLOADMSG		 ;AN000;
-	.IF C				 ;AN000;
+	JNC	@F				 ;AN000;
 	  CALL	  SYSDISPMSG		 ;AN000;
 	  MOV	  AH,EXIT		 ;AN000;
 	  INT	  21H			 ;AN000;
-	.ENDIF				 ;AN000;
+	@@:				 ;AN000;
 
 	MOV	AX,ANSI_GET		 ;AN000; ;prepare for device characteristics..
 	MOV	BX,STDERR		 ;AN000; ;request.
 	MOV	CX,GET_SUBFUNC		 ;AN000; ;get subfucntion..
 	LEA	DX,ANSI_BUF		 ;AN000; ;point to buffer.
 	INT	21H			 ;AN000;
-	.IF NC				 ;AN000; ;if ANSI returns a no carry then..
+	JC	@F			 ;AN000; ;if ANSI returns a no carry then..
 	  LEA	DI,ANSI_BUF		 ;AN000;
-	  .IF <[DI].D_MODE EQ TEXT_MODE> ;AN000; ;if we are in a text mode then..
+	  CMP	[DI].D_MODE,TEXT_MODE
+	  JNE	@F			 ;AN000; ;if we are in a text mode then..
 	    MOV    AX,[DI].SCR_ROWS	 ;AN000; ;store the screen length...else..
 	    MOV    MAXROW,AL		 ;AN000; ;default (25) is assumed.
-	  .ENDIF			 ;AN000;
-	.ENDIF				 ;AN000;
+	@@:				 ;AN000;
 	MOV	AH,0FH
 	INT	10H
 	MOV	MAXCOL,AH
@@ -259,9 +258,9 @@ ANSI_BUF ANSI_STR <>			;AN000; ;buffer for IOCTL call
 .XLIST					;AN000;
 MSG_SERVICES <MSGDATA>			;AN000; ;message retriever code
 MSG_SERVICES <LOADmsg,DISPLAYmsg,NOCHECKSTDIN>	;AN002;
-MSG_SERVICES <MORE.CL1> 		;AN000;
-MSG_SERVICES <MORE.CL2> 		;AN000;
-MSG_SERVICES <MORE.CLA> 		;AN000;
+MSG_SERVICES <more.cl1> 		;AN000;
+MSG_SERVICES <more.cl2> 		;AN000;
+MSG_SERVICES <more.cla> 		;AN000;
 .LIST					;AN000;
 
 CRLF	    DB	   13,10		   ;AC000;
