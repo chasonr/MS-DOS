@@ -173,10 +173,12 @@
                         subttl PRINT - Data Space
                         page
 
-INCLUDE SYSVAR.INC
+INCLUDE sysvar.inc
 
 FALSE                   EQU  0
+ifndef TRUE
 TRUE                    EQU  NOT FALSE
+endif
 
 IBM                      EQU  IBMVER
 ;IBMVER                  EQU  IBM
@@ -488,21 +490,21 @@ ENDM
 ENDM
 ;                       $SALUT (4,25,30,41)
 
-                        INCLUDE DEVSYM.INC
-                        INCLUDE SYSCALL.INC
-                        INCLUDE ERROR.INC
-                        INCLUDE FIND.INC
+                        INCLUDE devsym.inc
+                        INCLUDE syscall.inc
+                        INCLUDE error.inc
+                        INCLUDE find.inc
                         include dpl.asm
-                        INCLUDE PDB.INC
-                        INCLUDE SYSCALL.INC
-                        INCLUDE MI.INC
-                        INCLUDE SYSMSG.INC
+                        INCLUDE pdb.inc
+                        INCLUDE syscall.inc
+                        INCLUDE mi.inc
+                        INCLUDE sysmsg.inc
                         include versiona.inc
 .list
 .cref
 
 
-                        MSG_UTILNAME <PRINT>
+                        MSG_UTILNAME <print>
 
 
 error_busy              EQU  9

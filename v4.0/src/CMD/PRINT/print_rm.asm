@@ -1,6 +1,6 @@
 	page	60,132
 ;			$SALUT (4,25,30,41)
-			INCLUDE pridefs.INC
+			INCLUDE pridefs.inc
 
 BREAK			<Resident Portion Messages>
 
@@ -46,4 +46,3 @@ R_MES_BUFF		LABEL WORD	; Room is generated for:
 CodeR			EndS
 
 			End
-

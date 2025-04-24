@@ -17,18 +17,6 @@ BREAK			<Transient Messages>
 ;
 
 
-addr			macro sym,name
-			public name
-			ifidn <name>,<>
-
-			    dw	 offset dg:sym
-			else
-
-name			    dw	 offset dg:sym
-			endif
-			endm
-
-
 			Code Segment public para
 
 			PUBLIC SYSGETMSG, SYSLOADMSG, SYSDISPMSG
@@ -48,8 +36,8 @@ name			    dw	 offset dg:sym
 
 			.xlist
 			.xcref
-			MSG_SERVICES <NEARmsg,PRINT.CL1,PRINT.CL2>
-			MSG_SERVICES <NEARmsg,PRINT.CLA,PRINT.CLB,PRINT.CLC,PRINT.CLD>
+			MSG_SERVICES <NEARmsg,print.cl1,print.cl2>
+			MSG_SERVICES <NEARmsg,print.cla,print.clb,print.clc,print.cld>
 			.cref
 			.list
 ;  $SALUT (4,4,9,41)
@@ -81,4 +69,3 @@ Val3SW			equ  false
    CODE ENDS
 
    end
-
