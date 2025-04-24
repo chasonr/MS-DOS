@@ -57,6 +57,7 @@ clean:
 	rm -f *.lst
 	rm -f more.com
 	rm -f more.exe
+	rm -f more.map
 	rm -f more.cl[12a]
 	rm -f more.ctl
 	rm -f resp.txt
