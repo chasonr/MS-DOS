@@ -165,7 +165,7 @@ INCLUDE sysmsg.inc    ;                 ;AN000; Include message equates and MACR
 .list                 ;
 ;---------------------;
 
-MSG_UTILNAME <SORT>                     ;AN000;
+MSG_UTILNAME <sort>                     ;AN000;
 
 SUBTTL  Segments used in load order
 
@@ -356,7 +356,7 @@ sb_value_extra  dw      ?               ;AN000; UNUSED SPACE FOR VALUE
 ;-------------------------
 ; Preload messages
 ;-------------------------
-        MSG_SERVICES <SORT.ctl,SORT.cla,SORT.cl1,SORT.cl2>      ;AN000;
+        MSG_SERVICES <sort.ctl,sort.cla,sort.cl1,sort.cl2>      ;AN000;
         MSG_SERVICES <DISPLAYmsg,LOADmsg,CHARmsg,NOCHECKSTDIN>          ;AN002; Make retriever services available
 
         mov     ax,cs                   ;AN003; ;load ES to the right area,
