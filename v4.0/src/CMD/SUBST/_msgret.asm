@@ -17,9 +17,9 @@ title	C	to Message Retriever
 ;
 ;-------------------------------------------------------------------
 
-	INCLUDE SYSMSG.INC		;PERMIT SYSTEM MESSAGE HANDLER DEFINITION;AN000;
+	INCLUDE sysmsg.inc		;PERMIT SYSTEM MESSAGE HANDLER DEFINITION;AN000;
 
-	MSG_UTILNAME <SUBST>		;IDENTIFY THE COMPONENT 		;AN000;
+	MSG_UTILNAME <subst>		;IDENTIFY THE COMPONENT 		;AN000;
 
 	.8087									;AN000;
 _TEXT	SEGMENT BYTE PUBLIC 'CODE'						;AN000;
@@ -63,12 +63,12 @@ _TEXT	segment 								;AN000;
 					;DEFAULT=NO TIMEmsg			;AN000;
 					;DEFAULT=NO DATEmsg			;AN000;
 ;	MSG_SERVICES <LOADmsg,GETmsg,DISPLAYmsg,CHARmsg,NUMmsg,TIMEmsg,DATEmsg,INPUTmsg,FARmsg>;AN000;
-;	MSG_SERVICES <SUBST.CLA,SUBST.CL1,SUBST.CL2> ;MSG TEXT			;AN000;
+;	MSG_SERVICES <subst.cla,subst.cl1,subst.cl2> ;MSG TEXT			;AN000;
 .XLIST										;AN000;
 .XCREF										;AN000;
 ;	MSG_SERVICES <MSGDATA>		;DATA AREA FOR THE MESSAGE HANDLER	;AN000;
 	MSG_SERVICES <LOADmsg,GETmsg,DISPLAYmsg,CHARmsg,NUMmsg,TIMEmsg,DATEmsg,INPUTmsg,FARmsg>;AN000;
-	MSG_SERVICES <SUBST.CLA,SUBST.CL1,SUBST.CL2> ;MSG TEXT			;AN000;
+	MSG_SERVICES <subst.cla,subst.cl1,subst.cl2> ;MSG TEXT			;AN000;
 .LIST										;AN000;
 .CREF										;AN000;
 ;-------------------------------------------------------------------

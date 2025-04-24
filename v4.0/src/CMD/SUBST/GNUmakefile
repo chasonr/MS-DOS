@@ -15,6 +15,14 @@ COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
 #######################	dependencies begin here. #########################
 #
 
+.SUFFIXES: .asm .obj
+
+AS = jwasm
+AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.asm.obj:
+	$(AS) $(AFLAGS) -Fo$@ $<
+
 all: subst.exe
 
 $(inc)/errtst.obj:
@@ -36,20 +44,21 @@ subst.ctl subst.cl1 subst.cl2 subst.cla: SUBST.SKL    \
   $(msg)/$(COUNTRY).MSG
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\subst $(subst /,\,$<) $(country)"
 
-_msgret.obj: _MSGRET.ASM \
+_msgret.obj: _msgret.asm \
   $(inc)/msgserv.asm    \
   $(inc)/sysmsg.inc     \
+  $(inc)/copyrigh.inc   \
+  $(inc)/versiona.inc   \
+  $(inc)/msgdcl.inc     \
   subst.ctl             \
   subst.cla             \
   subst.cl1             \
   subst.cl2             \
   SUBST.SKL
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\subst $(subst /,\,$<) $(subst /,\,$@)"
 
-_parse.obj: _PARSE.ASM  \
+_parse.obj: _parse.asm  \
   $(inc)/parse.asm      \
   $(inc)/psdata.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\subst $(subst /,\,$<) $(subst /,\,$@)"
 
 subst.obj: SUBST.C      \
   SUBSTPAR.H            \
@@ -66,6 +75,8 @@ subst.exe: $(OBJS) $(map)/mapper.lib $(inc)/COMSUBS.LIB SUBST.LNK
 
 clean:
 	rm -f *.obj
+	rm -f *.err
+	rm -f *.lst
 	rm -f subst.cl[12a]
 	rm -f subst.ctl
 	rm -f subst.exe
