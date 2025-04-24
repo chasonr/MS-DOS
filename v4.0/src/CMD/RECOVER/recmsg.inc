@@ -3,7 +3,7 @@ data	segment PUBLIC para 'DATA'              ; AN000;bgb
 ;*****************************************************************************
 ; Macro's
 ;*****************************************************************************
-Define_Msg macro Message_Name			;				;AN000;
+Define_Msg macro Message_Name,Sublist		;				;AN000;
 						;
 Create_Msg Message_Name,Message_Number,Handle,Sublist,Count,Class,Function,Input;AN000;
 						;
@@ -170,7 +170,7 @@ Count		= N_A				; AN000;SM
 Class		= EXT_ERR_CLASS 		; AN000;SM
 Function	= NO_INPUT			; AN000;SM
 Input		= N_A				; AN000;SM
-	Define_Msg   opnerr			; AN000;SM File not found - xxxxxx
+	Define_Msg   opnerr,Sublist_Opnerr	; AN000;SM File not found - xxxxxx
 ;---------------------- 			;
 Message_Number	= 3				; AN000;SM
 Handle		= STDERR			; AN000;SM
@@ -179,7 +179,7 @@ Count		= N_A				; AN000;SM
 Class		= Utility_Msg_Class		; AN000;SM
 Function	= NO_INPUT			; AN000;SM
 Input		= N_A				; AN000;SM
-	Define_Msg   Substerr			; AN000;SM Can not recover SUBST or ASSIGNED drive
+	Define_Msg   Substerr,None		; AN000;SM Can not recover SUBST or ASSIGNED drive
 ;---------------------- 			;
 Message_Number	= 4				; AN000;SM
 Handle		= STDERR			; AN000;SM
@@ -188,7 +188,7 @@ Count		= N_A				; AN000;SM
 Class		= UTILITY_MSG_CLASS		; AN000;SM
 Function	= NO_INPUT			; AN000;SM
 Input		= N_A				; AN000;SM
-	Define_Msg   baddrv			; AN000;SM Invalid drive or file name	  ;AN000;
+	Define_Msg   baddrv,sublist_baddrv	; AN000;SM Invalid drive or file name	  ;AN000;
 ;---------------------- 			;
 Message_Number	= 5				; AN000;SM
 Handle		= STDERR			; AN000;SM
@@ -197,7 +197,7 @@ Count		= N_A				; AN000;SM
 Class		= UTILITY_MSG_CLASS		; AN000;SM
 Function	= NO_INPUT			; AN000;SM
 Input		= N_A				; AN000;SM
-	Define_Msg   dirmsg			; AN000;SM Warning - directory full	  ;AN000;
+	Define_Msg   dirmsg,None		; AN000;SM Warning - directory full	  ;AN000;
 ;---------------------- 			;
 Message_Number	= 6				; AN000;SM
 Handle		= STDERR			; AN000;SM
@@ -206,7 +206,7 @@ Count		= N_A				; AN000;SM
 Class		= UTILITY_MSG_CLASS		; AN000;SM
 Function	= NO_INPUT			; AN000;SM
 Input		= N_A				; AN000;SM
-	Define_Msg   NotNetM			; AN000;SM Cannot recover a Network drive      ;AN000;
+	Define_Msg   NotNetM,None		; AN000;SM Cannot recover a Network drive      ;AN000;
 ;---------------------- 			;
 ifdef fsexec									;an022;bgb
  Message_Number  = 7				 ;			;an022;bgb
@@ -216,7 +216,7 @@ ifdef fsexec									;an022;bgb
  Class		 = UTILITY_MSG_CLASS		 ;			;an022;bgb
  Function	 = NO_INPUT			 ;			;an022;bgb
  Input		 = N_A				 ;			;an022;bgb
-	 Define_Msg   MsgEXECFailure		 ;RECOVER not avail. on drive %1 ;AN022;bgb
+	 Define_Msg   MsgEXECFailure,Sublist_msg_EXECFailure ;RECOVER not avail. on drive %1 ;AN022;bgb
 endif								       ;an022;bgb
 ;---------------------- 			;
 Message_Number	= 8				; AN000;SM
@@ -226,7 +226,7 @@ Count		= 1				; AN000;SM
 Class		= UTILITY_MSG_CLASS		; AN000;SM
 Function	= NO_INPUT			; AN000;SM
 Input		= N_A				; AN000;SM
-	Define_Msg   recmsg			; AN000;SM %1 file(s) recovered 	  ;AN000;
+	Define_Msg   recmsg,Sublist_msg_recmsg	; AN000;SM %1 file(s) recovered 	  ;AN000;
 ;---------------------- 			;
 Message_Number	= 9				; AN000;SM
 Handle		= STDout			; AN007;bgb
@@ -235,7 +235,7 @@ Count		= 2				; AN000;SM
 Class		= UTILITY_MSG_CLASS		; AN000;SM
 Function	= NO_INPUT			; AN000;SM
 Input		= N_A				; AN000;SM
-	Define_Msg   ofmsg_ptr			; AN000;SM %1 of %2 bytes recovered	  ;AN000;
+	Define_Msg   ofmsg_ptr,Sublist_msg_ofmsg ; AN000;SM %1 of %2 bytes recovered	  ;AN000;
 ;---------------------- 			;
 Message_Number	=  10				; AN000;bgb
 Handle		= STDout			; AN007;bgb
@@ -244,7 +244,7 @@ Count		= 1				; AN000;SM
 Class		= UTILITY_MSG_CLASS		; AN000;SM
 Function	= NO_INPUT			; AN000;SM
 Input		= N_A				; AN000;SM
-	Define_Msg   askmsg			; AN000;SM Press any key...		  ;AN000;
+	Define_Msg   askmsg,drive_sublist	; AN000;SM Press any key...		  ;AN000;
 ;---------------------- 			;
 Message_Number	= 11				; AN000;SM
 Handle		= STDERR			; AN000;SM
@@ -253,7 +253,7 @@ Count		= N_A				; AN000;SM
 Class		= Utility_Msg_Class		; AN000;SM
 Function	= NO_INPUT			; AN000;SM
 Input		= N_A				; AN000;SM
-	Define_Msg   FATerrRead 		; AN000;SM Can not read File allocation table(s)
+	Define_Msg   FATerrRead,None 		; AN000;SM Can not read File allocation table(s)
 ;---------------------- 			;
 Message_Number	= 12				; AN000;SM
 Handle		= STDERR			; AN000;SM
@@ -262,7 +262,7 @@ Count		= N_A				; AN000;SM
 Class		= Utility_Msg_Class		; AN000;SM
 Function	= NO_INPUT			; AN000;SM
 Input		= N_A				; AN000;SM
-	Define_Msg   FATerrWrite		; AN000;SM Can not write file allocation table(s)
+	Define_Msg   FATerrWrite,None		; AN000;SM Can not write file allocation table(s)
 ;---------------------- 			;
 Message_Number	= 13				; AN000;MT
 Handle		= STDout			; AN000;MT
@@ -271,7 +271,7 @@ Count		= N_A				; AN000;MT
 Class		= Utility_Msg_Class		; AN000;MT
 Function	= NO_INPUT			; AN000;MT
 Input		= N_A				; AN000;MT
-	Define_Msg   CRLF_Ptr			; AN000;MT CR,LF
+	Define_Msg   CRLF_Ptr,None		; AN000;MT CR,LF
 ;---------------------------			;
 Message_Number	= 0				;				;AN000;
 Handle		= STDERR			;				;AN000;
@@ -280,7 +280,7 @@ Count		= N_A				;				;AN000;
 Class		= Ext_Err_Class 		;				;AN000;
 Function	= No_Input			;				;AN000;
 Input		=N_A				;				;AN000;
-	Define_Msg  Extended_Error_Msg		;				;AN000;
+	Define_Msg  Extended_Error_Msg,None	;				;AN000;
 ;---------------------------			;
 ;-----------------------							;an000;bgb
 Message_Number	= 0				;				;an000;bgb
@@ -290,7 +290,7 @@ Count		= 1				;				;an031;bgb;AN000;
 Class		= Parse_Err_Class		;				;an000;bgb;AN000;
 Function	= No_Function			;				;an000;bgb;AN000;
 Input		= N_A				;				;an000;bgb;AN000;
-	Define_Msg	Parse_Error_Msg 	;				;an000;bgb;AN000;
+	Define_Msg	Parse_Error_Msg,dg:sublist_msg_parserr 	;				;an000;bgb;AN000;
 ;---------------------- 			;
 Message_Number	= 14				; AN013;bgb
 Handle		= STDERR			; AN013;bgb
@@ -299,7 +299,7 @@ Count		= None				; AN013;bgb
 Class		= utility_msg_class		; AN013;bgb
 Function	= NO_INPUT			; AN013;bgb
 Input		= N_A				; AN013;bgb
-	Define_Msg   no_mem_arg 		; AN013;bgb insufficient memory
+	Define_Msg   no_mem_arg,None 		; AN013;bgb insufficient memory
 
 
 Data ends

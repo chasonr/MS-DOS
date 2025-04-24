@@ -8,9 +8,9 @@ page	,132				; ;AN000;bgb
 	include pathmac.inc							;an028;bgb
 	include recseg.inc		;AN000;bgb
 	include dossym.inc
-	INCLUDE SYSMSG.INC
-	INCLUDE RECEQU.INC
-	INCLUDE RECMSG.INC
+	INCLUDE sysmsg.inc
+	INCLUDE recequ.inc
+	INCLUDE recmsg.inc
 .list
 ;
 ;*****************************************************************************
@@ -33,7 +33,7 @@ data	segment public para 'DATA'      ;AC000;bgb
 ; Message Services
 ;*****************************************************************************
 .xlist
-MSG_UTILNAME  <RECOVER>
+MSG_UTILNAME  <recover>
 Msg_Services	<MSGDATA>
 data	ends
 
@@ -60,7 +60,7 @@ Msg_Services	<NEARmsg>
 Msg_Services	<LOADmsg>
 Msg_Services	<DISPLAYmsg,CHARmsg,NUMmsg>					;an029;bgb
 pathlabl	msgret								;an028;bgb
-Msg_Services	<RECOVER.CLA,RECOVER.CL1,RECOVER.CL2,RECOVER.CTL>
+Msg_Services	<recover.cla,recover.cl1,recover.cl2,recover.ctl>
 .list
 ;
 ;*****************************************************************************

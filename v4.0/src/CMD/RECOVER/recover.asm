@@ -10,11 +10,11 @@ TITLE	RECOVER.SAL - MS-DOS File/Disk Recovery Utility
 .xlist
 	include recchng.inc		;an000;bgb
 	include recseg.inc		;AN000;bgb
-	INCLUDE DOSSYM.INC		;AN000;bgb
-	INCLUDE RECEQU.INC		;AN000;bgb
-	INCLUDE RECdata.INC		;AN000;bgb
+	INCLUDE dossym.inc		;AN000;bgb
+	INCLUDE recequ.inc		;AN000;bgb
+	INCLUDE recdata.inc		;AN000;bgb
 	INCLUDE recmacro.inc		;AN000;bgb
-	INCLUDE sysmsg.INC		;AN000;bgb
+	INCLUDE sysmsg.inc		;AN000;bgb
 	include pathmac.inc
 	msg_utilname<recover>
 ;										;AN000;bgb
@@ -228,6 +228,7 @@ Procedure GetKeystroke,NEAR
 	INT	21H
 	MOV	AX,(Std_CON_Input_Flush SHL 8) + 0
 	INT	21H
+ret_l_1:
 	return
 EndProc GetKeystroke
 
@@ -237,7 +238,7 @@ EndProc GetKeystroke
 ;*****************************************************************************
 Procedure Prompt,NEAR
 	Cmp	Prompted,0
-	retnz
+	jnz	short ret_l_1
 	MOV	Prompted,1
 	push	ds
 	push	cs
@@ -829,6 +830,7 @@ $$DO41:
 		mov lastbs,di							;an024;bgb
 		mov di,lastchar 						;an024;bgb
 		jmp sja 	    ;zero = not a leading byte			;an024;bgb
+        nop ; RLCTEMP
 ;	    $ENDIF								;an024;bgb
 $$IF44:
 ;	$ENDIF									;an024;bgb
@@ -842,6 +844,7 @@ $$EN41:
 	int	21h								;an008;bgb
 	mov	old_drive,al							;an008;bgb
 	jmp	same_dir		; no dir separator char. found, the
+        nop ; RLCTEMP
 					; file is in the current directory
 					; of the corresponding drive. Ergo,
 					; the FCB contains the data already.
@@ -941,6 +944,7 @@ noname: 				;AC000;bgb
 	pop	ax		 ;reset stack					;an024;bgb
 	pop	ax		 ;reset stack					;an024;bgb
 	jmp	int_23
+        nop ; RLCTEMP
 ;****************************************************************************
 ; we're finished with parsing here, do the main function of recover.
 drvok:
@@ -952,6 +956,7 @@ drvok:
 	    lea     dx,no_mem_arg	;					;an013;bgb
 	    call    printerr							;an013;bgb
 	    jmp     rabort							;an013;bgb
+        nop ; RLCTEMP
 ;	$ENDIF				;fat could be read from disk		;an013;bgb
 $$IF48:
 
@@ -961,6 +966,7 @@ $$IF48:
 	    lea     dx,FATErrRead	;					       ;AC000;bgb
 	    call    printerr
 	    jmp     rabort
+        nop ; RLCTEMP
 ;	$ENDIF				;fat could be read from disk	   ;AN000;bgb
 $$IF50:
 See_If_File:				;					;AN000;
@@ -1611,5 +1617,3 @@ include msgdcl.inc
 
 code	ends
 	end				;recover ;AC000;bgb
-
-

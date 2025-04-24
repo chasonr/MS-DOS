@@ -13,61 +13,63 @@ COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
 #######################	dependencies begin here. #########################
 #
 
+.SUFFIXES: .asm .obj
+
+AS = jwasm
+AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.asm.obj:
+	$(AS) $(AFLAGS) -Fo$@ $<
+
 all: recover.com
+
+DOSSYM_INC = $(inc)/dossym.inc $(inc)/arena.inc $(inc)/bpb.inc \
+             $(inc)/buffer.inc $(inc)/cpmfcb.inc $(inc)/curdir.inc \
+             $(inc)/dbcs.sw $(inc)/dirent.inc $(inc)/dosmac.inc \
+             $(inc)/dpb.inc $(inc)/error.inc $(inc)/exe.inc \
+             $(inc)/filemode.inc $(inc)/find.inc $(inc)/intnat.inc \
+             $(inc)/mi.inc $(inc)/mult.inc $(inc)/pdb.inc $(inc)/sf.inc \
+             $(inc)/syscall.inc $(inc)/sysvar.inc $(inc)/vector.inc \
+             $(inc)/versiona.inc $(inc)/version.inc
 
 recover.ctl : RECOVER.SKL    \
 	     $(msg)/$(COUNTRY).MSG
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\recover $(subst /,\,$<) $(country)"
 
-recover.obj: RECOVER.ASM			  \
-	     RECEQU.INC RECMACRO.INC   \
-	     RECSEG.INC RECDATA.INC RECPARSE.INC  \
-	     RECMSG.INC 			  \
-	     recover.ctl recover.cl1		  \
-	     recover.cl2 recover.cla		  \
-	     $(inc)/dossym.inc $(inc)/syscall.inc \
-	     $(inc)/sysmsg.inc $(inc)/parse.asm
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\recover $(subst /,\,$<) $(subst /,\,$@)"
+recover.obj: recover.asm recchng.inc recseg.inc $(DOSSYM_INC) recequ.inc \
+             recdata.inc recmacro.inc $(inc)/sysmsg.inc $(inc)/versiona.inc \
+             $(inc)/msgserv.asm $(inc)/copyrigh.inc pathmac.inc \
+             $(inc)/msgdcl.inc recover.ctl
 
-recinit.obj: RECINIT.ASM			 \
-	     RECEQU.INC RECMACRO.INC  \
-	     RECSEG.INC RECDATA.INC RECPARSE.INC \
-	     RECMSG.INC 			 \
-	     recover.ctl recover.cl1		  \
-	     recover.cl2 recover.cla		  \
-	     $(inc)/dossym.inc $(inc)/syscall.inc \
-	     $(inc)/sysmsg.inc $(inc)/parse.asm
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\recover $(subst /,\,$<) $(subst /,\,$@)"
+recinit.obj: recinit.asm pathmac.inc recseg.inc $(DOSSYM_INC) \
+             recequ.inc recmacro.inc recparse.inc $(inc)/psdata.inc \
+             $(inc)/parse.asm
 
+recproc.obj: recproc.asm recseg.inc $(DOSSYM_INC) \
+             recequ.inc pathmac.inc
 
-recproc.obj: RECPROC.ASM			 \
-	     RECEQU.INC RECMACRO.INC  \
-	     RECSEG.INC RECDATA.INC RECPARSE.INC \
-	     RECMSG.INC 			 \
-	     recover.ctl recover.cl1		  \
-	     recover.cl2 recover.cla		  \
-	     $(inc)/dossym.inc $(inc)/syscall.inc \
-	     $(inc)/sysmsg.inc $(inc)/parse.asm
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\recover $(subst /,\,$<) $(subst /,\,$@)"
-
-recdisp.obj: RECDISP.ASM			 \
-	     RECEQU.INC RECMACRO.INC  \
-	     RECSEG.INC RECDATA.INC RECPARSE.INC \
-	     RECMSG.INC 			 \
-	     recover.ctl recover.cl1		  \
-	     recover.cl2 recover.cla		  \
-	     $(inc)/dossym.inc $(inc)/syscall.inc \
-	     $(inc)/sysmsg.inc $(inc)/parse.asm
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\recover $(subst /,\,$<) $(subst /,\,$@)"
+recdisp.obj: recdisp.asm pathmac.inc recseg.inc $(DOSSYM_INC)\
+             $(inc)/sysmsg.inc  $(inc)/versiona.inc $(inc)/msgserv.asm \
+             $(inc)/copyrigh.inc recequ.inc recmsg.inc $(inc)/msgdcl.inc \
+             recover.ctl recover.cl1 recover.cl2 recover.cla
 
 OBJS = recdisp.obj recinit.obj recproc.obj recover.obj
 
 recover.com: $(OBJS) RECOVER.LNK
-	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\recover @recover.lnk"
+	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
+	echo 'option map=recover.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name recover.exe' >>resp.txt
+	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
+	wlink @resp.txt
 	dosemu -t --Fdrive_c ../../.. -E "src\tools\convert src\cmd\recover\recover.exe"
 
 clean:
 	rm -f *.obj
+	rm -f *.err
+	rm -f *.lst
 	rm -f recover.com
 	rm -f recover.cl[12a]
 	rm -f recover.ctl

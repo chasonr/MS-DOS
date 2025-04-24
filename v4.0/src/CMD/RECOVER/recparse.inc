@@ -85,7 +85,7 @@ data	segment public para 'DATA'  ;AC000;bgb
 ;***************************************************************************** ;AN000;bgb
 ;;;;db 'PARSE TABLE AREA'                                                      ;AN000;bgb
  public parms_input_block, parms_ext_block, control_block, value_list_block
- public results_block, parse_type, parse_code, parse_addr,
+ public results_block, parse_type, parse_code, parse_addr
 									       ;AN000;bgb
 ;***************************************************************************** ;AN000;bgb
 ; This is the parms input block pointed to by es:di before calling sysparse.   ;AN000;bgb
@@ -172,6 +172,6 @@ data	ends									;an040;bgb
 										;an040;bgb
 code	segment PUBLIC para 'CODE'                                              ;an040;bgb
 pathlabl parser 								;an040;bgb
-INCLUDE PARSE.ASM				;AN000; 			;an040;bgb
+INCLUDE parse.asm				;AN000; 			;an040;bgb
 pathlabl parser 								;an040;bgb
 code	ends									;an040;bgb

@@ -148,12 +148,12 @@ data	segment public para 'DATA'      ;AC000;bgb
 ;******************************************************************************
  public header, prompted, hardch, the_root, fudge, user_drive, drive, dirchar	;AN000;bgb
  public userdir, fname_buffer, found, done, driveletter, psp_segment, exitstatus ;AN000;bgb
- public drvlet, bpb_buffer, transrc, data_start_low, data_start_high,		;AN000;bgb
+ public drvlet, bpb_buffer, transrc, data_start_low, data_start_high		;AN000;bgb
  public int_23_old_off, int_23_old_seg, int_24_old_off, int_24_old_seg, append	;AN000;bgb
- public command_line_buffer, command_line_length, fatal_error, command_line,	;AN000;bgb
+ public command_line_buffer, command_line_length, fatal_error, command_line	;AN000;bgb
 ifdef fsexec									;an022;bgb
- public fs_string_buffer, fs_string_end, len_fs_string_end, fs_not_fat, 	;an022;bgb;AN000;bgb
- public fat12_string, fat16_string, len_fs_id_string, media_id_buffer,		;an022;bgb;AN000;bgb
+ public fs_string_buffer, fs_string_end, len_fs_string_end, fs_not_fat	 	;an022;bgb;AN000;bgb
+ public fat12_string, fat16_string, len_fs_id_string, media_id_buffer		;an022;bgb;AN000;bgb
  public exec_block, exec_path, path_string ;AN000;bgb				;an022;bgb
  public len_path_string 							;an022;bgb;AN011;bgb
  endif										;an022;bgb
@@ -165,4 +165,3 @@ ifdef fsexec									;an022;bgb
  public bytes_per_sector, exit_sw, exit_sw2, paras_per_fat, secs_per_64k
  public sec_count, paras_per_64k
 data	ends ;put this 1st so that the recmsg works
-

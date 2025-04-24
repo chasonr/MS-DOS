@@ -6,8 +6,8 @@ TITLE	RECPROC.SAL
 .xlist
 	include recseg.inc		;AN000;bgb
  include dossym.inc	;AN000;bgb
- INCLUDE SYSCALL.INC	;AN000;bgb
- INCLUDE RECMACRO.INC	;AN000;bgb
+ INCLUDE syscall.inc	;AN000;bgb
+ INCLUDE recmacro.inc	;AN000;bgb
  include recequ.inc	;AN000;bgb
 	include pathmac.inc
 .xcref
@@ -528,4 +528,3 @@ Check_DBCS_CharACter endp			;				;AN000;
 	pathlabl recproc
 code	ends
 	end
-

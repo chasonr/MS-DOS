@@ -8,12 +8,12 @@ TITLE	RECINIT.SAL - MS-DOS File/Disk Recovery Utility
 ;
  .xlist
 	include pathmac.inc
- INCLUDE RECSEG.INC			;AN000;bgb
-	INCLUDE DOSSYM.INC		;AN000;BGB
-INCLUDE SYSCALL.INC			;AN000;BGB
-INCLUDE RECEQU.INC			;AN000;BGB
-INCLUDE RECMACRO.INC			;AN000;BGB
-INCLUDE RECPARSE.INC			;AN000;BGB
+ INCLUDE recseg.inc			;AN000;bgb
+	INCLUDE dossym.inc		;AN000;BGB
+INCLUDE syscall.inc			;AN000;BGB
+INCLUDE recequ.inc			;AN000;BGB
+INCLUDE recmacro.inc			;AN000;BGB
+INCLUDE recparse.inc			;AN000;BGB
  .list
 
 ;
@@ -1024,5 +1024,3 @@ Reset_Append_X endp			;				;AN000;
 	pathlabl recinit
 code	ends
 	end main_init ;AC000;bgb
-
-
