@@ -1,6 +1,6 @@
 	Title	Share_1 -  IBM CONFIDENTIAL
 ;				   $SALUT (0,36,41,44)
-				   include SHAREHDR.INC
+				   include sharehdr.inc
 ;
 ;     Label: "The DOS SHARE Utility"
 ;	     "Version 4.00 (C) Copyright 1988 Microsoft"
@@ -14,7 +14,7 @@ extrn				   fnm:near, rsc:near, rmn:near, cps:near, ofl:near, sle:near, interr:n
 
 				   .xlist
 				   .xcref
-				   INCLUDE DOSSYM.INC
+				   INCLUDE dossym.inc
 				   include dpl.asm
 				   .cref
 				   .list
@@ -88,7 +88,7 @@ DATA	ENDS
 ;   MSDOS code segment otherwise, define our own code segment
 
 	.sall
-	IF	NOT INSTALLED
+	IFE	INSTALLED
 CODE	    SEGMENT BYTE PUBLIC 'CODE'
 	    ASSUME  SS:DOSGROUP,CS:DOSGROUP
 	ELSE
@@ -98,6 +98,7 @@ Share	    SEGMENT PARA PUBLIC 'SHARE'
 
 	extrn	MFT:BYTE
 	extrn	skip_check:BYTE
+	extrn   EcritShare:NEAR, LcritShare:NEAR
 
 	include mft.inc
 
@@ -186,7 +187,7 @@ FRAME	ends
 
    EnterCrit critShare
 
-   DOSAssume SS <DS>,"MFT_Enter entry"
+   DOSAssume SS,<DS>,"MFT_Enter entry"
    ASSUME ES:NOTHING,SS:DOSGROUP
    push ds
 
@@ -345,7 +346,7 @@ mcl10:
 
    sub	bx,bx				; insensitive to PID
    sub	dx,dx
-   invoke BCS				; bulk close the SFTs
+   call	BCS				; bulk close the SFTs
    LeaveCrit critShare
    return
    EndProc MFTclU
@@ -2364,9 +2365,12 @@ gom1:
 gom2:
    mov	ah,al
    and	ah,sharing_mask
-   retnz				; not compatability, return.
+   jz	@F				; not compatability, return.
+ret_l_1:
+      ret
+   @@:
    test [si].sf_attr,attr_read_only
-   retz 				; not read-only
+   jz	short ret_l_1			; not read-only
    mov	al,sharing_deny_write + open_for_read
 
    ret

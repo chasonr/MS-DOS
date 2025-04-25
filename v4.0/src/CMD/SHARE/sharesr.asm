@@ -1,6 +1,6 @@
 	Title	Sharesr -  IBM CONFIDENTIAL
 ;				   $SALUT (0,36,41,44)
-				   include SHAREHDR.INC
+				   include sharehdr.inc
 ;
 ;     Label: "The DOS SHARE Utility"
 ;	     "Version 4.00 (C) Copyright 1988 Microsoft"
@@ -13,12 +13,12 @@
 				   .xlist
 				   .xcref
 
-				   include SYSMSG.INC
+				   include sysmsg.inc
 
 				   .cref
 				   .list
 
-				   MSG_UTILNAME <SHARE>
+				   MSG_UTILNAME <share>
 
 Share				   SEGMENT BYTE PUBLIC 'SHARE'
 
@@ -39,7 +39,7 @@ Share				   SEGMENT BYTE PUBLIC 'SHARE'
 
 				   MSG_SERVICES <DISPLAYmsg,CHARmsg>
 
-				   MSG_SERVICES <SHARE.CLA,SHARE.CL1,SHARE.CL2>
+				   MSG_SERVICES <share.cla,share.cl1,share.cl2>
 
 				   .cref
 				   .list

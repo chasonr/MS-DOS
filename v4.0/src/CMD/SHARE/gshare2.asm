@@ -1,6 +1,6 @@
 	Title	Share_2
 ;				   $SALUT (0,36,41,44)
-				   include SHAREHDR.INC
+				   include sharehdr.inc
 ;
 ;     Label: "The DOS SHARE Utility"
 ;	     "Version 4.00 (C) Copyright 1988 Microsoft"
@@ -14,13 +14,13 @@
 					   ;  INCLUDE SYSMSG.INC
 				   .xlist
 				   .xcref
-				   INCLUDE DOSSYM.INC
-				   INCLUDE SYSMSG.INC
+				   INCLUDE dossym.inc
+				   INCLUDE sysmsg.inc
 				   .cref
 				   .list
 				   page 80,132
 
-				   MSG_UTILNAME <SHARE>
+				   MSG_UTILNAME <share>
 
 ShareDataVersion		   =	1
 
@@ -104,7 +104,7 @@ ERRNZ				   Macro x
 				   ;---------------------------------------
 
 	.sall
-	IF	NOT	INSTALLED
+	IFE	INSTALLED
 
 	    CODE    SEGMENT BYTE PUBLIC 'CODE'
 
@@ -262,7 +262,7 @@ fnm10$5:
 
 fnm11: cmp [si].mft_flag,MFLG_FRE
 
-   IF	NOT  DEBUG
+   IFE	DEBUG
        jl   fnm20			; at END, am out of space
    ELSE
        jl   fnm20j
@@ -301,7 +301,7 @@ fnm13: sub ax,dx			; (ax) = total size of proposed fragment
    jc	fnm14				; not big enough to split
    push bx				; save sum byte
    mov	bx,dx				; (bx) = offset to start of new name record
-   mov	[bx][si].mft_flag,MFLG_FRE
+   mov	byte ptr [bx][si].mft_flag,MFLG_FRE
    mov	[bx][si].mft_len,ax		; setup tail as free record
    sub	ax,ax				; don't extend this record
    pop	bx				; restore sum byte
@@ -603,7 +603,7 @@ mrg15: add si,bx			; advance to next
 					; (si) points to free record.
 					;  - See if next is free
 					;---------------------------------------
-mrg2: cmp [bx][si].mft_flag,MFLG_FRE
+mrg2: cmp byte ptr [bx][si].mft_flag,MFLG_FRE
    jnz	mrg15				; not free, go scan again
    mov	bx,[bx][si].mft_len		; get length of next guy
    add	[si].mft_len,bx 		; increase our length
@@ -950,7 +950,7 @@ cps3:
 
 cps31:
 
-   RestoreReg <
+;RLC   RestoreReg <
 
    RestoreReg <CX,BX,AX,DI,ES,SI,DS>
 
@@ -1237,7 +1237,7 @@ UseJFN:
 
    SaveReg <AX,BX,CX,DX,SI,DI,BP,DS,ES>
 
-   EnterCrit critShare
+   call EcritShare ; EnterCrit critShare
 
 ShCl:
    MOV	SI,WFP_Start
@@ -1302,7 +1302,7 @@ ShClNext:
 					;---------------------------------------
 ShCloseDone:
 
-   LeaveCrit critShare
+   call LcritShare ; LeaveCrit critShare
 
    STC
 
@@ -1370,7 +1370,7 @@ ShCloseDone:
 ;			endif
 ;		leave if no more SFT's
 ;		exitif cx = 3
-;			invoke New_Sft
+;			call New_Sft
 ;		orelse
 ;			if cx = 0
 ;				update time
@@ -1429,7 +1429,7 @@ $$XL1:
    JMP $$IF4
 $$XL2:
 
-       EnterCrit critShare
+       call EcritShare ; EnterCrit critShare
 					;---------------------------------------
 					; Walk the sft chain for this file and
 					;  skip the current SFT (ES:DI)
@@ -1529,7 +1529,7 @@ $$IF13:
 ;	       $if  nz			; if non-FAT			       ;AC003;
 	       JZ $$IF17
 
-		   invoke Call_IFS	; tell IFS of SFT change	       ;AN000;
+		   call	Call_IFS	; tell IFS of SFT change	       ;AN000;
 
 ;	       $else			; else - its FAT		       ;AN000;
 	       JMP SHORT $$EN17
@@ -1578,7 +1578,7 @@ $$SR5:
 					;---------------------------------------
        RestoreReg <SI,DS>
 
-       LeaveCrit critShare
+       call LcritShare ; LeaveCrit critShare
 
 ;  $endif				; endif - device and network	       ;AC000;
 $$IF4:
@@ -1988,7 +1988,7 @@ PoolSize = 2048
 MFT DB	0				; free
    DW	PoolSize			; PoolSize bytes long
 
-   IF	not  Installed
+   IFE	Installed
 
        DB   (PoolSize-3) DUP(0) 	; leave rest of record
 MEND   DB   -1				; END record
@@ -2608,7 +2608,7 @@ msg_offset		  dw	 offset SHARE_Name ; insert 'SHARE'
 
 msg_segment		  LABEL  WORD
 
-IF			  NOT	 INSTALLED
+IFE			  INSTALLED
 
 			  dw	 CODE
 
