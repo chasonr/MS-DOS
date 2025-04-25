@@ -30,12 +30,12 @@ NAME	IFSERROR									 ;AN000;
 											 ;AN000;
 .xlist											 ;AN000;
 .xcref											 ;AN000;
-INCLUDE IFSSYM.INC									 ;AN000;
-INCLUDE IFSFSYM.INC									 ;AN000;
-INCLUDE DOSSYM.INC									 ;AN000;
-INCLUDE DEVSYM.INC									 ;AN000;
-INCLUDE SYSMSG.INC
-msg_utilname <IFSFUNC>
+INCLUDE ifssym.inc									 ;AN000;
+INCLUDE ifsfsym.inc									 ;AN000;
+INCLUDE dossym.inc									 ;AN000;
+INCLUDE devsym.inc									 ;AN000;
+INCLUDE sysmsg.inc
+msg_utilname <ifsfunc>
 .cref											 ;AN000;
 .list											 ;AN000;
 											 ;AN000;
@@ -127,7 +127,7 @@ MAXERR	EQU	89		; Don't know errors above 79                             ;AN000;
 RODS_LABEL	LABEL	BYTE
 .xcref											 ;AN000;
 .xlist
-MSG_SERVICES <IFSFUNC.CL1>
+MSG_SERVICES <ifsfunc.cl1>
 .cref											 ;AN000;
 .list
 
@@ -333,13 +333,13 @@ I2F5_90:										 ;AN005;
 	RestoreReg <DS> 			; set ds-ifsseg 			 ;AN002;
 	MOV	AX,BX				; whole ax now ext error		 ;AN003;;AC005;
 	SaveReg <AX>				; save ext err #			 ;AN000;
-	invoke	PREP_IFSR			; zero out ifsr, sets es:bx -> ifsr	 ;AN000;
+	InvokeFn PREP_IFSR			; zero out ifsr, sets es:bx -> ifsr	 ;AN000;
 	MOV	ES:[BX.IFSR_LENGTH],LENGTH_CRITMSG					 ;AN000;
 	MOV	ES:[BX.IFSR_FUNCTION],IFSCRITMSG					 ;AN000;
 	MOV	ES:[BX.IFSR_RETCODE],AX 						 ;AN003;
 
 ;***********************************************************************************************
-	invoke	CALL_IFS			; call ifs with chance to set errmsg	 ;AN000;
+	InvokeFn CALL_IFS			; call ifs with chance to set errmsg	 ;AN000;
 ;***********************************************************************************************
 
 	JNC	I2F5_200								 ;AN000;
