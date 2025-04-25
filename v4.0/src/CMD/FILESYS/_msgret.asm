@@ -15,9 +15,9 @@ title	       C to Message Retriever
 ;
 ;-------------------------------------------------------------------
 
-	INCLUDE SYSMSG.INC		;PERMIT SYSTEM MESSAGE HANDLER DEFINITION ;AN000;
+	INCLUDE sysmsg.inc		;PERMIT SYSTEM MESSAGE HANDLER DEFINITION ;AN000;
 
-	MSG_UTILNAME <FILESYS>		;IDENTIFY THE COMPONENT 		;AN000;
+	MSG_UTILNAME <filesys>		;IDENTIFY THE COMPONENT 		;AN000;
 
 ;-------------------------------------------------------------------
 ;-------------------------------------------------------------------
@@ -43,7 +43,7 @@ _DATA	SEGMENT
 	MSG_SERVICES <MSGDATA>
 	MSG_SERVICES <LOADmsg,FARmsg>
 	MSG_SERVICES <DISPLAYmsg,CHARmsg,NUMmsg>
-	MSG_SERVICES <FILESYS.CLA,FILESYS.CL1,FILESYS.CL2,FILESYS.CTL>		    ;AN000;
+	MSG_SERVICES <filesys.cla,filesys.cl1,filesys.cl2,filesys.ctl>		    ;AN000;
 
 
 data_sysloadmsg proc far
