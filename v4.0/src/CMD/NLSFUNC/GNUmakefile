@@ -65,6 +65,8 @@ nlsfunc.exe: $(OBJS)
 
 clean:
 	rm -f *.obj
+	rm -f *.err
+	rm -f *.lst
 	rm -f nlsfunc.cl[12a]
 	rm -f nlsfunc.ctl
 	rm -f nlsfunc.exe
