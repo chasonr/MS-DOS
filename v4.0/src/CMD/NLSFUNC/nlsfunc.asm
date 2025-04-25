@@ -307,19 +307,22 @@ UTILITY 	db	"NLSFUNC",0           ;AC000;
 ;***************************** MSG DATA ************************************
 
 .xlist
+ifndef DEBUG
+    DEBUG = 0
+endif
+include dosmac.inc
 include copyrigh.inc			;AN000;
-include struc.inc
-include DOESMAC.INC
-include MULT.INC
+include doesmac.inc
+include mult.inc
 include sf.inc				;AN001;
-include DOSCNTRY.INC
-include DEVSYM.INC
-include SYSMSG.INC			;AN000;
-include FUNCDBCS.INC			;AN000;
-include MSG2NLS.INC
-include FUNCPARM.INC			;AN000;
+include doscntry.inc
+include devsym.inc
+include sysmsg.inc			;AN000;
+include funcdbcs.inc			;AN000;
+include msg2nls.inc
+include funcparm.inc			;AN000;
 
-MSG_UTILNAME <NLSFUNC>			;AN000;
+MSG_UTILNAME <nlsfunc>			;AN000;
 
 .list
 MULT_NLSFUNC	equ	14h
@@ -736,7 +739,7 @@ NUM_ENTRY:
 		inc	si			;SI -> first entry
 
 SETDOSCTY_DATA:
-.REPEAT
+		rep_l_1:
 		 push	 di			 ;ES:DI -> DOS_COUNTRY_CDPG_INFO
 		 push	 si			 ;si -> current entry in Control buffer
 		 push	 cx			 ;save # of entry left
@@ -848,7 +851,10 @@ SETDOSCTY_NEXT:
 		inc	si
 		inc	si
 		dec	cx
-		.UNTIL <cx eq 0>    NEAR		     ;loop    SETDOSCTY_DATA
+		cmp	cx,0
+		je	@F
+		    jmp rep_l_1
+		@@: 				;loop    SETDOSCTY_DATA
 
 		;Check for an invalid id
 		cmp	GET_EXT,1		;Check to see if a get_ext func 2 was issued
@@ -1237,7 +1243,7 @@ DB_EVECS:
 	       je      NO_LOAD			     ;An002;initialized to zero
 
 
-	 .REPEAT				      ;;AN000;DBCS transmission
+	 rep_l_2:				      ;;AN000;DBCS transmission
 						     ;AN000;
 	       mov     al,es:[bx]		     ;;AN000;get the the contents
 ;***CNS 						;AN000;
@@ -1250,7 +1256,8 @@ DB_EVECS:
 						     ;AN000;
 		dec	cx			     ;AN000;
 
-	  .UNTIL <CX EQ 0 >			     ;AN000;
+	  cmp	cx, 0				     ;AN000;
+	  jne	rep_l_2
 						      ;invocation of 1 codepage
 						     ;standard codepage selection
 
@@ -1389,7 +1396,7 @@ MAIN		PROC	FAR
 
 		 call	 SYSLOADMSG		 ;does DOS version check
 
-	      .IF <NC>
+	      jc else_l_1
 		mov	dx,NLSRES_LENG		;calculate paragraph
 		add	dx,15			;add 15
 		shr	dx,1			;divide by 16 to get conversion from
@@ -1400,19 +1407,23 @@ MAIN		PROC	FAR
 		mov	RES_PARASIZE,dx 	;the resident procedure
 		call	PROCESS_PATH
 
-	      .ELSE
+	      jmp endif_l_1
+	      else_l_1:
 
 		call	SYSDISPMSG
 
-	      .ENDIF
+	      endif_l_1:
 
-	  .IF <NO_PARMS eq 1>  or
-	  .IF <GOOD_PATH eq 1>
+	  cmp NO_PARMS,1
+	  je if_l_1
+	  cmp GOOD_PATH,1
+	  jne endif_l_2
+	  if_l_1:
 		call INSTALL_NLS			    ;let's install NLSFUNC
-	      .IF <NC>
+	      jc @F
 		   mov	EXIT_STAY,1			       ;if nothing wrong occured
-	      .ENDIF
-	  .ENDIF
+	      @@:
+	  endif_l_2:
 								;determine path of exit
 								;error or residency
 ;****************************** EXIT PROG *********************************************
@@ -1430,20 +1441,23 @@ NO_FREEDOM:
 		  pop	  es			  ;AN004;restore existing values
 		  pop	  ax			  ;
 
-       .IF <EXIT_STAY eq 1>			       ;Terminate and stay resident
+	cmp EXIT_STAY,1
+	jne else_l_3			       ;Terminate and stay resident
 	     mov     bx,4		     ;1st close file handles
-	 .REPEAT
+	 rep_l_3:
 	     mov  ah,3eh
 	     int  21h
 	     dec  bx
-	.UNTIL <BX eq 0>
+	 cmp bx,0
+	 jne rep_l_3
 
 	     mov     ah,031h		     ;
 	     mov     dx,RES_PARASIZE	     ;paragraphs allocated
-      .ELSE
+	jmp endif_l_3
+	else_l_3:
 	     clc
 	     mov     ah,04ch		     ;value passed to ERRORLEVEL
-      .ENDIF
+	endif_l_3:
 
 	     mov     al,ERROR_CODE	     ;check for an error
 	     int     21H
@@ -1565,7 +1579,9 @@ RE_START:
 		xor	dx,dx		;AN000;ut dx for input into the PARSER
 					;AN000;
 
-	 .WHILE <PAR_RETC eq 0> 	;AN000;
+	while_l_1:
+	cmp PAR_RETC,0
+	jne endwhile_l_1
 		call	SYSPARSE	;AN000;empt to parse
 ;***CNS
 
@@ -1577,20 +1593,23 @@ RE_START:
 
 ;***CNS
 					;AN000;
-	       .IF <Res_type eq 5>	;AN000;ound
+		cmp Res_type,5		;AN000;ound
+		jne @F
 						;AN000;
 		    mov USER_PATH,1		;AN000;;path specified
 						;AC000;
-	       .ENDIF				;AN000;
+		@@:				;AN000;
 
 		mov	PAR_RETC,AX		;AN000;;keep parsing until eoln
 						;AN000;
-	 .ENDWHILE				;AN000;
+	 jmp while_l_1
+	 endwhile_l_1:
 
 
-	       .IF <PAR_RETC gt 0>		     ;AN000;;parse error
+		cmp PAR_RETC,0			     ;AN000;;parse error
+		jle elseif_l_4
 ;***CNS
-;		.IF <PAR_RETC eq 3>		     ;AN003;IF invalid switch return command line
+;		_IF <PAR_RETC eq 3>		     ;AN003;IF invalid switch return command line
 ;
 ;		   mov	   ax,10
 
@@ -1636,17 +1655,22 @@ RE_START:
 ;***CNS
  ;	       .ENDIF
 ;***CNS
-	       .ELSEIF <CX eq 1>		      ;AN000;ordinal check
+		jmp endif_l_4
+		elseif_l_4:				;AN000;ordinal check
+		cmp cx,1
+		jne else_l_4
 						      ;AN000;
 		      mov  GOOD_PAR,1		      ;AN000;you are at the end of the line
 						      ;AN000;
-		   .ELSE
+		jmp endif_l_4
+		else_l_4:
 		      mov NO_PARMS,1		      ;AN000;there is no argument go install
-	       .ENDIF				      ;AN000;NLSFUNC
+		endif_l_4:			      ;AN000;NLSFUNC
 
-       .IF <PARSE_ERR eq 0> NEAR		      ;AN000;if not true you encountered a parse error
-	 .IF <GOOD_PAR eq 1> NEAR		      ;AN000;there is a parameter line available
-						      ;to parse
+	cmp  PARSE_ERR,0			      ;AN000;if not true you encountered a parse error
+	jne  endif_l_5
+	cmp  GOOD_PAR,1				      ;AN000;there is a parameter line available
+	jne  endif_l_5				      ;to parse
 						      ;AN000;
 						      ;Check the flags to see what
 						      ;was returned in the return block
@@ -1654,7 +1678,8 @@ RE_START:
 	       lea     di,path_spec		      ;AC000;es:di > final path_spec
 						      ;that will be used after fixup
 
-	   .IF <USER_PATH gt 0> 			  ;AC000;drive has been solved need
+	   cmp	USER_PATH,0	 			  ;AC000;drive has been solved need
+	   jle	@F
 							  ;to check the filespec
 							  ;now
 		xor in_dex,in_dex			  ;AN000;clear ctr
@@ -1662,17 +1687,20 @@ RE_START:
 		push	ds				  ;AN000;prepare for entry
 		mov ds,Res_PSEG 			  ;AN000;
 		mov in_dex,bx			 ;AN000;string seg value if filename
-	  .ENDIF	      ;user path	     ;AN000;
+	   @@:	      ;user path	     ;AN000;
 
 
-	  .WHILE <Filespec_PTR ne NULL> 		 ;load chars until no more
+	  while_l_2:
+	  cmp Filespec_PTR,NULL				 ;load chars until no more
+	  je endwhile_l_2
 						     ;AN000;
 						     ;AN000;
 		mov	al,FILESPEC_PTR 		;AN000;
 		mov	byte ptr es:[di],al	     ;move value into pathspec and
 		inc	in_dex			     ;increment to next char position
 		inc	di			     ;AN000;
-	  .ENDWHILE
+	  jmp while_l_2
+	  endwhile_l_2:
 
 ;************************** CNS **********************************************
 ;The new method of checking for a "bogus" file will be to attempt an
@@ -1692,10 +1720,11 @@ RE_START:
 		mov	ah,4eh
 		int	21h
 					;set up addressability
-	    .IF <NC>
+	    jc else_l_6
 		clc				       ;ok-clear carry/exit
 		mov GOOD_PATH,1
-	    .ELSE
+	    jmp endif_l_6
+	    else_l_6:
 		   mov	   ax,FNF		       ;AN000;
 		   mov	   cx,1 		     ; ;AN000;
 		   mov	   bx,STDERR		       ;AN000;
@@ -1706,7 +1735,7 @@ RE_START:
 		call	SYSDISPMSG		       ;AN000;
 		mov	ERROR_CODE,02		       ;
 		stc
-	    .ENDIF
+	    endif_l_6:
 
 
 
@@ -1714,8 +1743,8 @@ RE_START:
 
 
 
-	 .ENDIF 					 ;EXIT on bad parse
-      .ENDIF						     ;END OF PROCESS PATH
+	 endif_l_5: 					;EXIT on bad parse
+							;END OF PROCESS PATH
 
 
 		pop	ds		;AN000;;restore original ds (NLS_DATA)
@@ -1748,7 +1777,7 @@ INSTALL_NLS	PROC	NEAR
 ;		jz	DO_INSTALL		  ;hooked in the chain
 ; *********************** CNS *************************************************
 
-	   .IF <Z>				  ;AN000
+	   jnz	else_l_7			  ;AN000
 
 						  ;Install NLSFUNC
 		mov	al,2fh			  ;Get interrupt
@@ -1776,7 +1805,8 @@ INSTALL_NLS	PROC	NEAR
 ;		  pop	  es			  ;AN004;restore existing values
 ;		  pop	  ax			  ;
 
-	   .ELSE				   ;AN000;
+	    jmp	endif_l_7
+	    else_l_7:				   ;AN000;
 ;TBR Message retriever				  ;otherwise
 		   mov	   ax,ALLINS		     ;
 		   mov	   cx,1 		     ;
@@ -1789,7 +1819,7 @@ INSTALL_NLS	PROC	NEAR
 		   mov	   ERROR_CODE,80	      ;UTILITY ERROR CODE
 		   stc
 
-.ENDIF
+	    endif_l_7:
 
 		ret
 

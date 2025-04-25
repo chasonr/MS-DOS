@@ -13,39 +13,55 @@ COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
 #######################	dependencies begin here. #########################
 #
 
+.SUFFIXES: .asm .obj
+
+AS = jwasm
+AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.asm.obj:
+	$(AS) $(AFLAGS) -Fo$@ $<
+
 all: nlsfunc.exe
 
 nlsfunc.ctl nlsfunc.cl1 nlsfunc.cl2 nlsfunc.cla: NLSFUNC.SKL	\
 	     $(msg)/$(COUNTRY).MSG
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\nlsfunc $(subst /,\,$<) $(country)"
 
-
-nlsfunc.obj: NLSFUNC.ASM	  \
-	     FUNCDBCS.INC	  \
-	     MSG2NLS.INC	  \
-	     FUNCPARM.INC	  \
+nlsfunc.obj: nlsfunc.asm	  \
+	     funcdbcs.inc	  \
+	     msg2nls.inc	  \
+	     funcparm.inc	  \
 	     nlsfunc.ctl	  \
 	     nlsfunc.cla	  \
 	     nlsfunc.cl1	  \
 	     nlsfunc.cl2	  \
-	     DOESMAC.INC       \
+	     doesmac.inc       \
 	     $(inc)/mult.inc     \
 	     $(inc)/msgserv.asm   \
 	     $(inc)/doscntry.inc \
 	     $(inc)/devsym.inc   \
-	     $(inc)/STRUC.INC    \
+	     $(inc)/dosmac.inc    \
+	     $(inc)/sf.inc     \
+	     $(inc)/sysmsg.inc     \
+	     $(inc)/versiona.inc     \
 	     $(inc)/copyrigh.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\nlsfunc $(subst /,\,$<) $(subst /,\,$@)"
 
-nlsparm.obj:  NLSPARM.ASM	  \
+nlsparm.obj:  nlsparm.asm	  \
 	      $(inc)/parse.asm \
 	      $(inc)/psdata.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\nlsfunc $(subst /,\,$<) $(subst /,\,$@)"
 
 OBJS = nlsfunc.obj nlsparm.obj
 
 nlsfunc.exe: $(OBJS)
-	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\nlsfunc nlsfunc+nlsparm,nlsfunc,,,"
+#	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\nlsfunc nlsfunc+nlsparm,nlsfunc,,,"
+	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
+	echo 'option map=nlsfunc.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name nlsfunc.exe' >>resp.txt
+	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
+	wlink @resp.txt
 
 clean:
 	rm -f *.obj
