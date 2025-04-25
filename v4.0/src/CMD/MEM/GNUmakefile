@@ -14,6 +14,14 @@ COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
 #######################	dependencies begin here. #########################
 #
 
+.SUFFIXES: .asm .obj
+
+AS = jwasm
+AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.asm.obj:
+	$(AS) $(AFLAGS) -Fo$@ $<
+
 all: mem.exe
 
 
@@ -21,16 +29,17 @@ mem.ctl mem.cl1 mem.cl2 mem.cla mem.clb:        MEM.SKL                         
                 $(msg)/$(COUNTRY).MSG
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\mem $(subst /,\,$<) $(country)"
 
-_parse.obj:     _PARSE.ASM                      \
+_parse.obj:     _parse.asm                      \
                 $(inc)/parse.asm                \
                 $(inc)/psdata.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\mem $(subst /,\,$<) $(subst /,\,$@)"
 
-_msgret.obj:    _MSGRET.ASM                     \
-                mem.ctl                         \
+_msgret.obj:    _msgret.asm                     \
+                mem.ctl mem.cl1 mem.cl2 mem.cla mem.clb \
                 $(inc)/msgserv.asm              \
-                $(inc)/sysmsg.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\mem $(subst /,\,$<) $(subst /,\,$@)"
+                $(inc)/sysmsg.inc               \
+                $(inc)/copyrigh.inc             \
+                $(inc)/versiona.inc             \
+                $(inc)/msgdcl.inc
 
 mem.obj:        MEM.C                           \
                 MSGDEF.H                        \
@@ -44,6 +53,8 @@ mem.exe: $(OBJS)
 
 clean:
 	rm -f *.obj
+	rm -f *.err
+	rm -f *.lst
 	rm -f mem.cl[12ab]
 	rm -f mem.ctl
 	rm -f mem.exe
