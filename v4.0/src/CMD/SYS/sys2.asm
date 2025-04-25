@@ -1,6 +1,6 @@
 	TITLE	SYS-2-	Program
 	include version.inc
-	INCLUDE SYSHDR.INC
+	INCLUDE syshdr.inc
 
 	page	80,132
 	BREAK	<SYS2 - Program Organization>
@@ -2619,4 +2619,3 @@ $$EN221:
    CODE ENDS
 
    END
-

@@ -127,7 +127,7 @@
 ;            "Licenced Material - Program Property of Microsoft"
 ;
 ;******************* END OF SPECIFICATIONS *************************************
-        BREAK   <SYS1 - Program Organization>
+;RLC        BREAK   <SYS1 - Program Organization>
 ;******************+ START OF PSEUDOCODE +**************************************
 ;
 ;здддддд©   зддддддддддддддддд©     здддддддддд©
@@ -192,7 +192,7 @@
 ;           юдддддддддды            юддддддддддддды
 ;
 ;******************-  END  OF PSEUDOCODE -**************************************
-        BREAK   <SYS - Segment Definition>
+;RLC        BREAK   <SYS - Segment Definition>
                                         ;---------------------------------------
                                         ;  NOTE: Structures used by SYS include:
                                         ;
@@ -204,33 +204,33 @@
                                         ;---------------------------------------
 
 
-;       INCLUDE DOSSYM.INC              ;also defines version of dos
+;       INCLUDE dossym.inc              ;also defines version of dos
 .xlist
 .xcref
-        INCLUDE DOSSYM.INC
+        INCLUDE dossym.inc
 .cref
 .list
 
 
-;       INCLUDE IOCTL.INC               ; Get / Set Device Parameters IOCTL
+;       INCLUDE ioctl.inc               ; Get / Set Device Parameters IOCTL
 .xlist
 .xcref
-        INCLUDE IOCTL.INC
+        INCLUDE ioctl.inc
 .cref
 .list
 
 
-;       INCLUDE BOOTFORM.INC            ; Boot Record Structure
+;       INCLUDE bootform.inc            ; Boot Record Structure
 .xlist
 .xcref
-        INCLUDE BOOTFORM.INC
+        INCLUDE bootform.inc
 .cref
 
 
-;       INCLUDE PATHMAC.INC            ; PATH macro for PATHGEN
+;       INCLUDE pathmac.inc            ; PATH macro for PATHGEN
 .xlist
 .xcref
-        INCLUDE PATHMAC.INC
+        INCLUDE pathmac.inc
 .cref
 .list
 
