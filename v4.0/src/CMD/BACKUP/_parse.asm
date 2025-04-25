@@ -56,7 +56,7 @@ _TEXT	segment byte public 'CODE'
 	ASSUME	DS: DGROUP
 
 ;-------------------------------------------------------------------
-.xlist
+;.xlist
 include parse.asm			; include the parser
 .list
 ;-------------------------------------------------------------------
