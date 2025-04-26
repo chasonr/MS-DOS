@@ -44,7 +44,6 @@ sortmes.obj: sortmes.asm
 OBJS = sort.obj sortmes.obj
 
 sort.exe: $(OBJS)
-#	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\sort sort+sortmes,sort.exe,,,"
 	echo 'system dos' >resp.txt
 	echo 'option stack=458' >>resp.txt
 	echo 'option map=sort.map' >>resp.txt

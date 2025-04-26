@@ -57,6 +57,8 @@ backup.com: $(OBJS) $(map)/mapper.lib $(inc)/COMSUBS.LIB
 
 clean:
 	rm -f *.obj
+	rm -f *.err
+	rm -f *.lst
 	rm -f backup.com
 	rm -f backup.exe
 	rm -f backup.cl[12a]

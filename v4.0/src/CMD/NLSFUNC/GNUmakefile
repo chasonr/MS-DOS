@@ -53,7 +53,6 @@ nlsparm.obj:  nlsparm.asm	  \
 OBJS = nlsfunc.obj nlsparm.obj
 
 nlsfunc.exe: $(OBJS)
-#	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\nlsfunc nlsfunc+nlsparm,nlsfunc,,,"
 	echo 'system dos' >resp.txt
 	echo 'option packcode=0' >>resp.txt
 	echo 'option packdata=0' >>resp.txt

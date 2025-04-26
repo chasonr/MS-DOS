@@ -123,7 +123,6 @@ OBJS = debug.obj debcom1.obj debcom2.obj debcom3.obj debasm.obj debuasm.obj \
        deberr.obj debconst.obj debmes.obj debems.obj debdata.obj
 
 debug.com: $(OBJS) DEBUG.LNK
-#	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\debug /map @debug.lnk"
 	echo 'system dos' >resp.txt
 	echo 'option stack=362' >>resp.txt
 	echo 'option map=debug.map' >>resp.txt

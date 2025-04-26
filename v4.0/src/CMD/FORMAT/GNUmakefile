@@ -69,7 +69,6 @@ OBJS = display.obj forinit.obj forlabel.obj format.obj forproc.obj msfor.obj \
        forexec.obj
 
 format.com: $(OBJS)
-#	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\format @format.lnk"
 	echo 'system dos' >resp.txt
 	echo 'option stack=496' >>resp.txt
 	echo 'option packdata=0' >>resp.txt
