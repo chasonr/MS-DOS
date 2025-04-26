@@ -124,7 +124,7 @@
 ;*	       "Licensed Material - Program Property of Microsoft"		     *
 ;*									     *
 ;*****************************************************************************
-	HEADER	<DEFINITIONS - LOCAL MACROS AND LOCAL EQUATES>
+;RLC	HEADER	<DEFINITIONS - LOCAL MACROS AND LOCAL EQUATES>
 IF1
 	%OUT	COMPONENT=LABEL, MODULE=LABEL.SAL
 ENDIF
@@ -1348,4 +1348,3 @@ End_Of_Program label byte
 
 CSEG ends
    end	Start
-

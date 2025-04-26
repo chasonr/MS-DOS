@@ -67,7 +67,7 @@ IF1
 	%OUT	INCLUDING SYSMSG.INC
 ENDIF
 	INCLUDE sysmsg.inc
-	MSG_UTILNAME <LABL>
+	MSG_UTILNAME <labl>
 
 CSEG	segment public
 	assume	cs:CSEG,ds:CSEG
@@ -76,7 +76,7 @@ CSEG	segment public
 	PUBLIC	SYSDISPMSG,SYSLOADMSG
 
 	MSG_SERVICES <MSGDATA>
-	MSG_SERVICES <LABL.CLA,LABL.CL1,LABL.CL2> ;AN000;M Support Utility msgs
+	MSG_SERVICES <labl.cla,labl.cl1,labl.cl2> ;AN000;M Support Utility msgs
 						  ;DEFAULT=CHECK DOS VERSION
 						  ;DEFAULT=NEARmsg
 						  ;DEFAULT=INPUTmsg
@@ -89,4 +89,3 @@ CSEG	ENDS					  ;AN000;M Access to svcs macro
 	include msgdcl.inc
 
 	END
-
