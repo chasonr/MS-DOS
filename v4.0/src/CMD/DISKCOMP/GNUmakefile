@@ -79,6 +79,7 @@ clean:
 	rm -f *.lst
 	rm -f diskcomp.com
 	rm -f diskcomp.exe
+	rm -f diskcomp.map
 	rm -f diskcomp.cl[12a]
 	rm -f diskcomp.ctl
 	rm -f resp.txt
