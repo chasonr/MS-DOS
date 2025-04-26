@@ -36,7 +36,7 @@ grtabsm.obj: GRTABSM.ASM \
     graftabl.cl1 \
     graftabl.cl2 \
     graftabl.cla \
-    $(inc)/MSGHAN.INC \
+    $(inc)/msghan.inc \
     GRTABMS.INC
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\graftabl $(subst /,\,$<) $(subst /,\,$@)"
 

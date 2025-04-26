@@ -131,7 +131,7 @@ HEADER	MACRO	TEXT			;;AN000;
 ; =  =	=  =  =  =  =  =  =  =	=  =						;AN000;
 ;		      $SALUT (4,23,28,36) ;AN000;
 
-		      INCLUDE COMPEQ.INC ;AN000;
+		      INCLUDE compeq.inc ;AN000;
 ;		      LOCAL EQUATES						      ;AN000;
 MAX_PATH_LEN	      EQU  64	   ;MAX CHAR IN A PATH				;AN000;
 EXPAR		      EQU  1	   ;RETURN TO DOS, INVALID DOS COMMAND LINE PARMS  ;AN000;

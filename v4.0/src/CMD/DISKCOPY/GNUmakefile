@@ -36,7 +36,7 @@ dcopyp.obj: DCOPYP.ASM \
 
 dcopysm.obj: DCOPYSM.ASM \
    $(inc)/sysmsg.inc \
-   $(inc)/MSGHAN.INC \
+   $(inc)/msghan.inc \
    $(inc)/versiona.inc \
    diskcopy.ctl \
    diskcopy.cla \

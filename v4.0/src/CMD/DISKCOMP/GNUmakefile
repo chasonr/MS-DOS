@@ -37,7 +37,7 @@ dcompp.obj: DCOMPP.ASM \
 
 dcompsm.obj: DCOMPSM.ASM \
    $(inc)/sysmsg.inc \
-   $(inc)/MSGHAN.INC \
+   $(inc)/msghan.inc \
    $(inc)/versiona.inc \
    diskcomp.ctl \
    diskcomp.cla \

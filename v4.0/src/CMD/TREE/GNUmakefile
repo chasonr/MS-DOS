@@ -37,7 +37,7 @@ treesysm.obj: TREESYSM.ASM \
     tree.cl1 \
     tree.cl2 \
     tree.cla \
-    $(inc)/MSGHAN.INC \
+    $(inc)/msghan.inc \
     TREEMS.INC
 	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\tree $(subst /,\,$<) $(subst /,\,$@)"
 

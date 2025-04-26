@@ -42,7 +42,8 @@
 ; = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =       ;AN000;
 ;                                                                               ;AN000;
 ; THIS IS SUBLIST FOR  MSGNUM_EXTERR (A CLASS 1 MESSAGE)                        ;AN000;
-SUBLIST_EXTERR SUBLIST <,,FILL_OFF,FILL_SEG,PC_ID_0,SF_BITS<SF_LEFT,,SF_ASCIIZ,SF_CHAR>,MAX_0,MIN_1> ;AN000;
+flags = (SF_LEFT shl F_ALIGN) or (SF_ASCIIZ shl F_SIZE) or (SF_CHAR shl F_TYPE)
+SUBLIST_EXTERR SUBLIST <,,FILL_OFF,FILL_SEG,PC_ID_0,flags,MAX_0,MIN_1> ;AN000;
             PUBLIC SUBLIST_EXTERR                                               ;AN000;
 ;                                                                               ;AN000;
 ;           "Insufficient memory"                                               ;AN000;
@@ -63,18 +64,21 @@ MSGNUM_BADDRV MSG_DESC <5,STDOUT>                                               
 ;                                                                               ;AN000;
 ;           "Compare error at OFFSET %1",CR,LF                                  ;AN000;
 MSGNUM_BAD  MSG_DESC <6,,SUBLIST_6,ONE_SUBS>                                    ;AN000;
-SUBLIST_6   SUBLIST <,,FILL_OFF,FILL_SEG,PC_ID_1,SF_BITS<SF_LEFT,,SF_DWORD,SF_UN_BH>,MAX_0,MIN_1> ;AN000;
+flags = (SF_LEFT shl F_ALIGN) or (SF_DWORD shl F_SIZE) or (SF_UN_BH shl F_TYPE)
+SUBLIST_6   SUBLIST <,,FILL_OFF,FILL_SEG,PC_ID_1,flags,MAX_0,MIN_1> ;AN000;
 ;           NOTE: ERROR NUMBER IS DWORD                                         ;AN000;
             PUBLIC MSGNUM_BAD,SUBLIST_6                                         ;AN000;
 ;                                                                               ;AN000;
 ;           "File 1 = %1",CR,LF                                                 ;AN000;
 MSGNUM_ADR  MSG_DESC <7,,SUBLIST_7,ONE_SUBS>                                    ;AN000;
-SUBLIST_7   SUBLIST <,,FILL_OFF,FILL_SEG,PC_ID_1,SF_BITS<SF_LEFT,,SF_BYTE,SF_UN_BH>,MAX_0,MIN_1> ;AN000;
+flags = (SF_LEFT shl F_ALIGN) or (SF_BYTE shl F_SIZE) or (SF_UN_BH shl F_TYPE)
+SUBLIST_7   SUBLIST <,,FILL_OFF,FILL_SEG,PC_ID_1,flags,MAX_0,MIN_1> ;AN000;
             PUBLIC MSGNUM_ADR,SUBLIST_7                                         ;AN000;
 ;                                                                               ;AN000;
 ;           "File 2 = %1",CR,LF                                                 ;AN000;
 MSGNUM_BDR  MSG_DESC <8,,SUBLIST_8,ONE_SUBS>                                    ;AN000;
-SUBLIST_8   SUBLIST <,,FILL_OFF,FILL_SEG,PC_ID_1,SF_BITS<SF_LEFT,,SF_BYTE,SF_UN_BH>,MAX_0,MIN_1> ;AN000;
+flags = (SF_LEFT shl F_ALIGN) or (SF_BYTE shl F_SIZE) or (SF_UN_BH shl F_TYPE)
+SUBLIST_8   SUBLIST <,,FILL_OFF,FILL_SEG,PC_ID_1,flags,MAX_0,MIN_1> ;AN000;
             PUBLIC MSGNUM_BDR,SUBLIST_8                                         ;AN000;
 ;                                                                               ;AN000;
 ;           "Eof mark not found",CR,LF                                          ;AN000;
@@ -87,17 +91,20 @@ MSGNUM_DONE MSG_DESC <10>                                                       
 ;                                                                               ;AN000;
 ;           "%1 - File not found",CR,LF                                         ;AN000;
 MSGNUM_FNF  MSG_DESC <11,,SUBLIST_11,ONE_SUBS>                                  ;AN000;
-SUBLIST_11  SUBLIST <,,FILL_OFF,FILL_SEG,PC_ID_0,SF_BITS<SF_LEFT,,SF_ASCIIZ,SF_CHAR>,MAX_0,MIN_1> ;AN000;
+flags = (SF_LEFT shl F_ALIGN) or (SF_ASCIIZ shl F_SIZE) or (SF_CHAR shl F_TYPE)
+SUBLIST_11  SUBLIST <,,FILL_OFF,FILL_SEG,PC_ID_0,flags,MAX_0,MIN_1> ;AN000;
             PUBLIC MSGNUM_FNF,SUBLIST_11                                        ;AN000;
 ;                                                                               ;AN000;
 ;           "%1 - Invalid path",CR,LF                                           ;AN000;
 MSGNUM_BAD_PATH MSG_DESC <12,,SUBLIST_12,ONE_SUBS>                              ;AN000;
-SUBLIST_12  SUBLIST <,,FILL_OFF,FILL_SEG,PC_ID_0,SF_BITS<SF_LEFT,,SF_ASCIIZ,SF_CHAR>,MAX_0,MIN_1> ;AN000;
+flags = (SF_LEFT shl F_ALIGN) or (SF_ASCIIZ shl F_SIZE) or (SF_CHAR shl F_TYPE)
+SUBLIST_12  SUBLIST <,,FILL_OFF,FILL_SEG,PC_ID_0,flags,MAX_0,MIN_1> ;AN000;
             PUBLIC MSGNUM_BAD_PATH,SUBLIST_12                                   ;AN000;
 ;                                                                               ;AN000;
 ;           "%1 - File sharing conflict",CR,LF                                  ;AN000;
 MSGNUM_SHARE MSG_DESC <13,,SUBLIST_13,ONE_SUBS>                                 ;AN000;
-SUBLIST_13  SUBLIST <,,FILL_OFF,FILL_SEG,PC_ID_0,SF_BITS<SF_LEFT,,SF_ASCIIZ,SF_CHAR>,MAX_0,MIN_1> ;AN000;
+flags = (SF_LEFT shl F_ALIGN) or (SF_ASCIIZ shl F_SIZE) or (SF_CHAR shl F_TYPE)
+SUBLIST_13  SUBLIST <,,FILL_OFF,FILL_SEG,PC_ID_0,flags,MAX_0,MIN_1> ;AN000;
             PUBLIC MSGNUM_SHARE,SUBLIST_13                                      ;AN000;
 ;                                                                               ;AN000;
 ;           "Too many files open",CR,LF                                         ;AN000;
@@ -126,8 +133,10 @@ MSGNUM_NOTHER MSG_DESC <18,STDOUT,,,(CLASS_A SHL 8) OR 0C1H>                    
 ;                                                                               ;AN000;
 ;           "%1 and %2",CR,LF                                                   ;AN000;
 MSGNUM_AND_MSG MSG_DESC <19,,SUBLIST_19A,TWO_SUBS>                              ;AN000;
-SUBLIST_19A SUBLIST <,,FILL_OFF,FILL_SEG,PC_ID_1,SF_BITS<SF_LEFT,,SF_ASCIIZ,SF_CHAR>,MAX_0,MIN_1> ;AN000;
-SUBLIST_19B SUBLIST <,,FILL_OFF,FILL_SEG,PC_ID_2,SF_BITS<SF_LEFT,,SF_ASCIIZ,SF_CHAR>,MAX_0,MIN_1> ;AN000;
+flags = (SF_LEFT shl F_ALIGN) or (SF_ASCIIZ shl F_SIZE) or (SF_CHAR shl F_TYPE)
+SUBLIST_19A SUBLIST <,,FILL_OFF,FILL_SEG,PC_ID_1,flags,MAX_0,MIN_1> ;AN000;
+flags = (SF_LEFT shl F_ALIGN) or (SF_ASCIIZ shl F_SIZE) or (SF_CHAR shl F_TYPE)
+SUBLIST_19B SUBLIST <,,FILL_OFF,FILL_SEG,PC_ID_2,flags,MAX_0,MIN_1> ;AN000;
             PUBLIC MSGNUM_AND_MSG,SUBLIST_19A,SUBLIST_19B                       ;AN000;
 ;                                                                               ;AN000;
 ;           CR,LF                                                               ;AN000;
@@ -136,7 +145,8 @@ MSGNUM_CRLF MSG_DESC <20>                                                       
 ;                                                                               ;AN000;
 ;           "%1 - Access Denied",CR,LF                                          ;AN000;
 MSGNUM_ACCESSDENIED MSG_DESC <21,,SUBLIST_21,ONE_SUBS>                          ;AN000;
-SUBLIST_21  SUBLIST <,,FILL_OFF,FILL_SEG,PC_ID_0,SF_BITS<SF_LEFT,,SF_ASCIIZ,SF_CHAR>,MAX_0,MIN_1> ;AN000;
+flags = (SF_LEFT shl F_ALIGN) or (SF_ASCIIZ shl F_SIZE) or (SF_CHAR shl F_TYPE)
+SUBLIST_21  SUBLIST <,,FILL_OFF,FILL_SEG,PC_ID_0,flags,MAX_0,MIN_1> ;AN000;
             PUBLIC MSGNUM_ACCESSDENIED,SUBLIST_21                               ;AN000;
 ;                                                                               ;AN000;
 ;           "Code page mismatch"                                                ;AN000;
@@ -149,7 +159,8 @@ MSGNUM_OK   MSG_DESC <23>                                                       
 ;
 ;
 MSGNUM_PPARSE MSG_DESC <,STDERR,SUBLIST_24,ONE_SUBS,(CLASS_2 SHL 8)>            ;AN000;
-SUBLIST_24  SUBLIST <,,FILL_OFF,FILL_SEG,PC_ID_0,SF_BITS<SF_LEFT,,SF_ASCIIZ,SF_CHAR>,MAX_0,MIN_1> ;AN000;
+flags = (SF_LEFT shl F_ALIGN) or (SF_ASCIIZ shl F_SIZE) or (SF_CHAR shl F_TYPE)
+SUBLIST_24  SUBLIST <,,FILL_OFF,FILL_SEG,PC_ID_0,flags,MAX_0,MIN_1> ;AN000;
             PUBLIC MSGNUM_PPARSE,SUBLIST_24                                      ;AN000;
 
 ;                                                                               ;AN000;
