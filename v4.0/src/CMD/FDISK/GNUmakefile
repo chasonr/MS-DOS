@@ -13,6 +13,14 @@ COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
 #######################	dependencies begin here. #########################
 #
 
+.SUFFIXES: .asm .obj
+
+AS = jwasm
+AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.asm.obj:
+	$(AS) $(AFLAGS) -Fo$@ $<
+
 map	=../../MAPPER
 
 all: fdisk.exe
@@ -96,29 +104,31 @@ messages.obj : MESSAGES.C MSGRET.H EXTERN.H SUBTYPE.H FDISK.H
 # Handle the FDISK MASM source
 
 
-fdboot.obj : FDBOOT.ASM fdisk5.cl1
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\fdisk $(subst /,\,$<) $(subst /,\,$@)"
+fdboot.obj : fdboot.asm fdisk5.cl1
 
 BOOT_OBJS = fdboot.obj
 
 fdboot.inc: $(BOOT_OBJS)
-	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\fdisk fdboot.obj,fdboot.exe,,,"
+	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
+	echo 'option map=fdboot.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name fdboot.exe' >>resp.txt
+	for x in $(BOOT_OBJS); do echo "file $$x" >>resp.txt; done
+	wlink @resp.txt
 	exe2bin -q fdboot.exe fdboot.bin
-	rm fdboot.exe
 	dosemu -t --Fdrive_c ../../.. -E "src\tools\dbof src\cmd\fdisk\fdboot.bin src\cmd\fdisk\fdboot.inc 600 200"
 
-_parse.obj : _PARSE.ASM $(inc)/psdata.inc $(inc)/parse.asm
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\fdisk $(subst /,\,$<) $(subst /,\,$@)"
+_parse.obj : _parse.asm $(inc)/psdata.inc $(inc)/parse.asm
 
-_msgret.obj : _MSGRET.ASM $(inc)/psdata.inc \
+_msgret.obj : _msgret.asm $(inc)/sysmsg.inc $(inc)/msgserv.asm \
+              $(inc)/copyrigh.inc $(inc)/versiona.inc \
              fdisk.ctl fdisk.cla fdisk.clb fdisk.cl1 fdisk.cl2
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\fdisk $(subst /,\,$<) $(subst /,\,$@)"
 
-bootrec.obj : BOOTREC.ASM fdboot.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\fdisk $(subst /,\,$<) $(subst /,\,$@)"
+bootrec.obj : bootrec.asm fdboot.inc
 
-reboot.obj : REBOOT.ASM
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\fdisk $(subst /,\,$<) $(subst /,\,$@)"
+reboot.obj : reboot.asm
 
 $(map)/mapper.lib:
 	$(MAKE) -C $(map) mapper.lib
@@ -137,9 +147,12 @@ fdisk.exe : $(FDISK_OBJS) $(map)/mapper.lib FDISK.LNK fdisk.ctl \
 
 clean:
 	rm -f *.obj
+	rm -f *.err
+	rm -f *.lst
 	rm -f fdboot.bin
 	rm -f fdboot.map
 	rm -f fdboot.inc
+	rm -f fdboot.exe
 	rm -f fdisk5.cl1
 	rm -f fdiskm.c
 	rm -f fdisk.cl[12ab]

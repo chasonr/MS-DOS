@@ -15,9 +15,9 @@ title	       C to Message Retriever
 ;
 ;-------------------------------------------------------------------
 
-	INCLUDE SYSMSG.INC		;PERMIT SYSTEM MESSAGE HANDLER DEFINITION ;AC010;
+	INCLUDE sysmsg.inc		;PERMIT SYSTEM MESSAGE HANDLER DEFINITION ;AC010;
 
-	MSG_UTILNAME <FDISK>		;IDENTIFY THE COMPONENT 		;AC010;
+	MSG_UTILNAME <fdisk>		;IDENTIFY THE COMPONENT 		;AC010;
 
 ;-------------------------------------------------------------------
 ;-------------------------------------------------------------------
@@ -44,7 +44,7 @@ _DATA	SEGMENT 							;AC010;
 	MSG_SERVICES <MSGDATA>						;AC010;
 	MSG_SERVICES <LOADmsg,FARmsg>					;AC010;
 	MSG_SERVICES <DISPLAYmsg,GETmsg,CHARmsg,NUMmsg> 		;AC010;
-	MSG_SERVICES <FDISK.CLA,FDISK.CLB,FDISK.CL1,FDISK.CL2,FDISK.CTL> ;AC010;		       ;AC010;
+	MSG_SERVICES <fdisk.cla,fdisk.clb,fdisk.cl1,fdisk.cl2,fdisk.ctl> ;AC010;		       ;AC010;
 
 
 data_sysloadmsg proc far
@@ -260,4 +260,3 @@ _sysgetmsg	endp							;AC010;
 _TEXT	ENDS								;AC010;
 	end								;AC010;
 
-

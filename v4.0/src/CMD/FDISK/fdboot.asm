@@ -27,7 +27,7 @@ _data   segment public
         cld
         mov di,0600h    ;where to relocate this boot record to
         mov cx,100h
-        repnz movsw     ;relocate to 0:0600
+        rep movsw       ;relocate to 0:0600
 ;       jmp entry2
         db   0eah
         dw   $+4,0
@@ -116,4 +116,3 @@ signa   db 55h,0aah     ;signature
 
 _data   ends
         end
-
