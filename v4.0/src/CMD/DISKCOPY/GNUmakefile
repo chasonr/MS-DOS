@@ -13,52 +13,70 @@ COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
 #######################	dependencies begin here. #########################
 #
 
+.SUFFIXES: .asm .obj
+
+AS = jwasm
+AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.asm.obj:
+	$(AS) $(AFLAGS) -Fo$@ $<
+
 all: diskcopy.com
 
 diskcopy.ctl diskcopy.cl1 diskcopy.cl2 diskcopy.cla: DISKCOPY.SKL \
    $(msg)/$(COUNTRY).MSG
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\diskcopy $(subst /,\,$<) $(country)"
 
-diskcopy.obj: DISKCOPY.ASM \
-   DCPYMACR.INC \
-   DISKCOPY.EQU \
+diskcopy.obj: diskcopy.asm \
+   dcpymacr.inc \
+   diskcopy.equ \
+   $(inc)/pathmac.inc \
    $(inc)/bootform.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\diskcopy $(subst /,\,$<) $(subst /,\,$@)"
 
-copyinit.obj: COPYINIT.ASM \
-   DCPYMACR.INC \
-   DISKCOPY.EQU
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\diskcopy $(subst /,\,$<) $(subst /,\,$@)"
+copyinit.obj: copyinit.asm \
+   dcpymacr.inc \
+   $(inc)/pathmac.inc \
+   diskcopy.equ
 
-dcopyp.obj: DCOPYP.ASM \
-   $(inc)/parse.asm
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\diskcopy $(subst /,\,$<) $(subst /,\,$@)"
+dcopyp.obj: dcopyp.asm \
+   $(inc)/psdata.inc \
+   $(inc)/parse.asm $(inc)/psdata.inc
 
-dcopysm.obj: DCOPYSM.ASM \
+dcopysm.obj: dcopysm.asm \
+   $(inc)/pathmac.inc \
    $(inc)/sysmsg.inc \
+   $(inc)/msgserv.asm \
    $(inc)/msghan.inc \
    $(inc)/versiona.inc \
    diskcopy.ctl \
    diskcopy.cla \
    diskcopy.cl1 \
    diskcopy.cl2 \
-   DCOPYMS.INC \
+   dcopyms.inc \
    $(inc)/copyrigh.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\diskcopy $(subst /,\,$<) $(subst /,\,$@)"
 
-dcopypar.obj: DCOPYPAR.ASM
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\diskcopy $(subst /,\,$<) $(subst /,\,$@)"
+dcopypar.obj: dcopypar.asm $(inc)/pathmac.inc
 
 OBJS = diskcopy.obj dcopysm.obj dcopyp.obj dcopypar.obj copyinit.obj
 
 diskcopy.com: $(OBJS) DISKCOPY.LNK
-	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\diskcopy @diskcopy.lnk"
+	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
+	echo 'option map=diskcopy.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name diskcopy.exe' >>resp.txt
+	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
+	wlink @resp.txt
 	exe2bin -q diskcopy.exe diskcopy.com
-	rm diskcopy.exe
 
 clean:
 	rm -f *.obj
+	rm -f *.err
+	rm -f *.lst
 	rm -f diskcopy.com
+	rm -f diskcopy.exe
+	rm -f diskcopy.map
 	rm -f diskcopy.cl[12a]
 	rm -f diskcopy.ctl
 	rm -f resp.txt
