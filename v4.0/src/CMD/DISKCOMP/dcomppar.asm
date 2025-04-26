@@ -86,7 +86,7 @@
 	IF1				;AN000;
 	    %OUT    COMPONENT=DISKCOMP, MODULE=DCOMPPAR.SAL... ;AN000;
 	ENDIF				;AN000;
-	INCLUDE PATHMAC.INC		;AN013;
+	INCLUDE pathmac.inc		;AN013;
 ; =  =	=  =  =  =  =  =  =  =	=  =
 HEADER	MACRO	TEXT			;;AN000;
 .XLIST					;AN000;
@@ -424,4 +424,3 @@ PARSE_ERROR ENDP		   ;AN000;
    PATHLABL DCOMPPAR		   ;AN013;
 CSEG ENDS			   ;AN000;
    END				   ;AN000;
-

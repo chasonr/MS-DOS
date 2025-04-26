@@ -13,53 +13,72 @@ COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
 #######################	dependencies begin here. #########################
 #
 
+.SUFFIXES: .asm .obj
+
+AS = jwasm
+AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.asm.obj:
+	$(AS) $(AFLAGS) -Fo$@ $<
+
 all: diskcomp.com
 
 diskcomp.ctl diskcomp.cl1 diskcomp.cl2 diskcomp.cla: DISKCOMP.SKL \
    $(msg)/$(COUNTRY).MSG
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\diskcomp $(subst /,\,$<) $(country)"
 
-diskcomp.obj: DISKCOMP.ASM \
-   DCMPMACR.INC \
+diskcomp.obj: diskcomp.asm \
+   dcmpmacr.inc \
+   $(inc)/pathmac.inc \
    $(inc)/bootform.inc \
-   DISKCOMP.EQU
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\diskcomp $(subst /,\,$<) $(subst /,\,$@)"
+   diskcomp.equ
 
-compinit.obj: COMPINIT.ASM \
-   DCMPMACR.INC \
+compinit.obj: compinit.asm \
+   dcmpmacr.inc \
+   $(inc)/pathmac.inc \
    $(inc)/bootform.inc \
-   DISKCOMP.EQU
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\diskcomp $(subst /,\,$<) $(subst /,\,$@)"
+   diskcomp.equ
 
-dcompp.obj: DCOMPP.ASM \
+dcompp.obj: dcompp.asm \
+   $(inc)/pathmac.inc \
+   $(inc)/psdata.inc \
    $(inc)/parse.asm
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\diskcomp $(subst /,\,$<) $(subst /,\,$@)"
 
-dcompsm.obj: DCOMPSM.ASM \
+dcompsm.obj: dcompsm.asm \
    $(inc)/sysmsg.inc \
    $(inc)/msghan.inc \
    $(inc)/versiona.inc \
+   $(inc)/pathmac.inc \
+   $(inc)/msgserv.asm \
+   $(inc)/msgdcl.inc\
    diskcomp.ctl \
    diskcomp.cla \
    diskcomp.cl1 \
    diskcomp.cl2 \
-   DCOMPMS.INC \
+   dcompms.inc \
    $(inc)/copyrigh.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\diskcomp $(subst /,\,$<) $(subst /,\,$@)"
 
-dcomppar.obj: DCOMPPAR.ASM
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\diskcomp $(subst /,\,$<) $(subst /,\,$@)"
+dcomppar.obj: dcomppar.asm $(inc)/pathmac.inc
 
 OBJS = diskcomp.obj dcompsm.obj dcompp.obj dcomppar.obj compinit.obj
 
 diskcomp.com: $(OBJS) DISKCOMP.LNK
-	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\diskcomp @diskcomp.lnk"
+	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
+	echo 'option map=diskcomp.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name diskcomp.exe' >>resp.txt
+	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
+	wlink @resp.txt
 	exe2bin -q diskcomp.exe diskcomp.com
-	rm diskcomp.exe
 
 clean:
 	rm -f *.obj
+	rm -f *.err
+	rm -f *.lst
 	rm -f diskcomp.com
+	rm -f diskcomp.exe
 	rm -f diskcomp.cl[12a]
 	rm -f diskcomp.ctl
 	rm -f resp.txt
