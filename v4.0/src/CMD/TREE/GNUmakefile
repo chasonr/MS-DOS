@@ -71,6 +71,7 @@ clean:
 	rm -f *.lst
 	rm -f tree.com
 	rm -f tree.exe
+	rm -f tree.map
 	rm -f tree.cl[12a]
 	rm -f tree.ctl
 	rm -f resp.txt
