@@ -48,8 +48,9 @@ OBJS = e2binit.obj display.obj
 
 exe2bin.exe : $(OBJS) exe2bin.ctl EXE2BIN.LNK
 	echo 'system dos' >resp.txt
-	echo 'option stack=362' >>resp.txt
+	echo 'option packcode=0' >>resp.txt
 	echo 'option packdata=0' >>resp.txt
+	echo 'option stack=362' >>resp.txt
 	echo 'option map=exe2bin.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
 	echo 'name exe2bin.exe' >>resp.txt

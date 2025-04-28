@@ -70,8 +70,9 @@ OBJS = display.obj forinit.obj forlabel.obj format.obj forproc.obj msfor.obj \
 
 format.com: $(OBJS)
 	echo 'system dos' >resp.txt
-	echo 'option stack=496' >>resp.txt
+	echo 'option packcode=0' >>resp.txt
 	echo 'option packdata=0' >>resp.txt
+	echo 'option stack=496' >>resp.txt
 	echo 'option map=format.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
 	echo 'name format.exe' >>resp.txt

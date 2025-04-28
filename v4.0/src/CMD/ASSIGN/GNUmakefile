@@ -50,6 +50,8 @@ assgmain.obj: assgmain.asm \
 OBJS = assgmain.obj assgparm.obj
 assign.com: $(OBJS)
 	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
 	echo 'option map=assign.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
 	echo 'name assign.exe' >>resp.txt

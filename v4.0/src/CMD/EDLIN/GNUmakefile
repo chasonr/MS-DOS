@@ -57,6 +57,8 @@ OBJS = edlin.obj edlcmd1.obj edlcmd2.obj edlmes.obj edlparse.obj
 
 edlin.com: $(OBJS) EDLIN.LNK
 	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
 	echo 'option map=edlin.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
 	echo 'name edlin.exe' >>resp.txt

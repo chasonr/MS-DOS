@@ -96,6 +96,8 @@ OBJS = chkdisk.obj chkdisp.obj chkdsk1.obj chkdsk2.obj chkfat.obj \
 
 chkdsk.com: $(OBJS) CHKDSK.LNK
 	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
 	echo 'option map=chkdsk.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
 	echo 'name chkdsk.exe' >>resp.txt

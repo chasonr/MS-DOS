@@ -147,6 +147,8 @@ OBJS = command1.obj command2.obj rucode.obj rdata.obj init.obj iparse.obj \
 
 command.com:  $(OBJS)
 	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
 	echo 'option map=command.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
 	echo 'name command.exe' >>resp.txt

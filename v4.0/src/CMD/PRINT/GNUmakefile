@@ -47,6 +47,8 @@ OBJS = print_rm.obj print_r.obj print_t.obj print_tm.obj
 
 print.com: $(OBJS) print.cla
 	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
 	echo 'option stack=200' >>resp.txt
 	echo 'option map=print.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt

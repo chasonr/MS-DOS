@@ -44,6 +44,8 @@ OBJS = find.obj findmes.obj
 
 find.exe: $(OBJS)
 	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
 	echo 'option map=find.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
 	echo 'name find.exe' >>resp.txt

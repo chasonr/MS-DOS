@@ -45,6 +45,8 @@ OBJS = sort.obj sortmes.obj
 
 sort.exe: $(OBJS)
 	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
 	echo 'option stack=458' >>resp.txt
 	echo 'option map=sort.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
