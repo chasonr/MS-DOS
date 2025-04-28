@@ -13,6 +13,14 @@ COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
 #######################	dependencies begin here. #########################
 #
 
+.SUFFIXES: .asm .obj
+
+AS = jwasm
+AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.asm.obj:
+	$(AS) $(AFLAGS) -Fo$@ $<
+
 map	=../../MAPPER
 
 all: restore.com
@@ -21,22 +29,22 @@ all: restore.com
 $(map)/mapper.lib:
 	$(MAKE) -C $(map) mapper.lib
 
-_parse.obj :	_PARSE.ASM			\
-		$(inc)/parse.asm		\
-		$(inc)/psdata.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\restore $(subst /,\,$<) $(subst /,\,$@)"
-
 restore.ctl restore.cl1 restore.cl2 restore.cla:	RESTORE.SKL			\
 		$(msg)/$(COUNTRY).MSG
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\restore $(subst /,\,$<) $(country)"
 
+_parse.obj :	_parse.asm			\
+		$(inc)/parse.asm		\
+		$(inc)/psdata.inc
 
-_msgret.obj:	_MSGRET.ASM			\
+_msgret.obj:	_msgret.asm			\
 		restore.ctl			\
-		restore.cl1			\
+		restore.cl1 restore.cl2 restore.cla \
 		$(inc)/msgserv.asm		\
-		$(inc)/sysmsg.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\restore $(subst /,\,$<) $(subst /,\,$@)"
+		$(inc)/sysmsg.inc		\
+		$(inc)/copyrigh.inc		\
+		$(inc)/versiona.inc		\
+		$(inc)/msgdcl.inc
 
 
 restore.obj :	RESTORE.C RT.H RT1.H RT2.H RESTPARS.H \
@@ -106,11 +114,13 @@ OBJS = restore.obj restpars.obj rtt1.obj rtt3.obj rtdo.obj rtdo1.obj \
 restore.com: $(OBJS) RESTORE.LNK $(map)/mapper.lib
 	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\restore /map @restore.lnk"
 	dosemu -t --Fdrive_c ../../.. -E "src\tools\convert src\cmd\restore\restore.exe"
-	rm restore.exe
 
 clean:
 	rm -f *.obj
+	rm -f *.err
+	rm -f *.lst
 	rm -f restore.com
+	rm -f restore.exe
 	rm -f restore.cl[12a]
 	rm -f restore.ctl
 	rm -f restore.map

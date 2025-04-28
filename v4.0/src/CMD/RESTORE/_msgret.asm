@@ -16,9 +16,9 @@ title	C	to Message Retriever
 ;
 ;-------------------------------------------------------------------
 
-	INCLUDE SYSMSG.INC		;PERMIT SYSTEM MESSAGE HANDLER DEFINITION ;AN000;
+	INCLUDE sysmsg.inc		;PERMIT SYSTEM MESSAGE HANDLER DEFINITION ;AN000;
 
-	MSG_UTILNAME <RESTORE>		;IDENTIFY THE COMPONENT 		;AN000;
+	MSG_UTILNAME <restore>		;IDENTIFY THE COMPONENT 		;AN000;
 
 	.8087
 _TEXT	SEGMENT BYTE PUBLIC 'CODE'
@@ -60,7 +60,7 @@ _TEXT	segment
 .XLIST
 .XCREF
 	MSG_SERVICES <LOADmsg,INPUTmsg,DISPLAYmsg,CHARmsg,NUMmsg,DATEmsg,FARmsg> ;AN000;6
-	MSG_SERVICES <RESTORE.CTL,RESTORE.CLA,RESTORE.CL1,RESTORE.CL2> ;AN000;6
+	MSG_SERVICES <restore.ctl,restore.cla,restore.cl1,restore.cl2> ;AN000;6
 .LIST
 .CREF
 ;-------------------------------------------------------------------
@@ -238,5 +238,3 @@ include msgdcl.inc
 
 _TEXT	ends				; end code segment
 	end
-
-
