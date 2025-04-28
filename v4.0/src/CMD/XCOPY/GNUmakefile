@@ -13,46 +13,63 @@ COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
 #######################	dependencies begin here. #########################
 #
 
+.SUFFIXES: .asm .obj
+
+AS = jwasm
+AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.asm.obj:
+	$(AS) $(AFLAGS) -Fo$@ $<
+
 all: xcopy.exe
 
 xcopy.ctl xcopy.cl1 xcopy.cl2 xcopy.cla: XCOPY.SKL \
    $(msg)/$(COUNTRY).MSG
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\xcopy $(subst /,\,$<) $(country)"
 
-xcopy.obj: XCOPY.ASM \
+xcopy.obj: xcopy.asm \
    $(inc)/versiona.inc \
    $(inc)/copyrigh.inc \
    $(inc)/sysmsg.inc \
    $(inc)/msgserv.asm \
-   DOS.EQU \
-   XCOPY.EQU \
+   $(inc)/msgdcl.inc \
+   dos.equ \
+   xcopy.equ \
    xcopy.ctl \
    xcopy.cl1 \
    xcopy.cl2 \
    xcopy.cla \
-   XMAINMSG.EQU
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\xcopy $(subst /,\,$<) $(subst /,\,$@)"
+   xmainmsg.equ
 
-xcpyinit.obj: XCPYINIT.ASM \
+xcpyinit.obj: xcpyinit.asm \
    $(inc)/versiona.inc \
-   XCOPY.EQU \
-   DOS.EQU \
-   XINITMSG.EQU
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\xcopy $(subst /,\,$<) $(subst /,\,$@)"
+   $(inc)/copyrigh.inc \
+   xcopy.equ \
+   dos.equ \
+   xinitmsg.equ
 
-xcopypar.obj: XCOPYPAR.ASM \
+xcopypar.obj: xcopypar.asm \
    $(inc)/psdata.inc \
    $(inc)/parse.asm
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\xcopy $(subst /,\,$<) $(subst /,\,$@)"
 
 OBJS = xcopy.obj xcpyinit.obj xcopypar.obj
 
 xcopy.exe: $(OBJS) XCOPY.LNK
-	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\xcopy @xcopy.lnk"
+	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
+	echo 'option map=xcopy.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name xcopy.exe' >>resp.txt
+	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
+	wlink @resp.txt
 
 clean:
 	rm -f *.obj
+	rm -f *.err
+	rm -f *.lst
 	rm -f xcopy.cl[12a]
 	rm -f xcopy.ctl
 	rm -f xcopy.exe
+	rm -f xcopy.map
 	rm -f resp.txt

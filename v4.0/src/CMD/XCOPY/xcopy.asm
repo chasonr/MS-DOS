@@ -226,13 +226,13 @@ TITLE	XCOPY	WITH FULL MEMORY USE - Ver. 4.00
 ;--------------------------------
 ;   Include Files
 ;--------------------------------
-INCLUDE XMAINMSG.EQU			;AN000;message file
-INCLUDE DOS.EQU 			;AN000;
-INCLUDE XCOPY.EQU			;AN000;
+INCLUDE xmainmsg.equ			;AN000;message file
+INCLUDE dos.equ 			;AN000;
+INCLUDE xcopy.equ			;AN000;
 
-INCLUDE SYSMSG.INC			;AN000;
+INCLUDE sysmsg.inc			;AN000;
 
-MSG_UTILNAME <XCOPY>			;AN000;
+MSG_UTILNAME <xcopy>			;AN000;
 
 ;-------------------------------
 ;    Structures
@@ -618,7 +618,7 @@ CSEG	SEGMENT PUBLIC
 	ASSUME	CS:CSEG, DS:DGROUP, SS:SSEG
 
 	MSG_SERVICES <LOADmsg,GETmsg,DISPLAYmsg,INPUTmsg,CHARmsg,NUMmsg> ;AN000;
-	MSG_SERVICES <XCOPY.CLA,XCOPY.CL1,XCOPY.CL2> ;AN000;
+	MSG_SERVICES <xcopy.cla,xcopy.cl1,xcopy.cl2> ;AN000;
 
 
 
@@ -3862,5 +3862,3 @@ CSEG	ENDS
 DSEG_INIT SEGMENT PARA PUBLIC		;AN000;
 DSEG_INIT ENDS				;AN000;
 	END	MAIN
-
-
