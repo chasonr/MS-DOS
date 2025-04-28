@@ -1,9 +1,6 @@
 PAGE ,132 ;														   ;AN000;
 TITLE MODECOM.ASM - RS232 SUPPORT FOR THE MODE COMMAND									   ;AN000;
 															   ;AN000;
-.XLIST															   ;AN000;
-INCLUDE STRUC.INC													   ;AN000;
-.LIST															   ;AN000;
 
 ;ษออออออออออออออออออออออออออออออออ  P R O L O G  อออออออออออออออออออออออออออออออออออออออออป				   ;AN000;
 ;บ											  บ				   ;AN000;
@@ -139,7 +136,7 @@ EXTRN  R_item_tag:ABS													   ;AN000;
 EXTRN  RATEMSG:WORD	  ;CR,LF,"Invalid baud rate specified",BEEP,CR,LF,"$"                                              ;AN000;
 EXTRN  ready_retry_active:ABS	 ;see invoke.asm									   ;AN000;
 ;EXTRN	RES_MODEFLAG:ABS	;RETRY FLAG IN RESIDENT CODE, (OFFSET FROM						   ;AN000;
-EXTRN  res_com_retry_type:ABS	 ;retry type flag, displacement from address pointed to by 50:30 when code is resident, see rescode
+EXTRN  res_com_retry_type:BYTE	 ;retry type flag, displacement from address pointed to by 50:30 when code is resident, see rescode
 EXTRN  seven_item_tag:ABS	  ;see modepars 									   ;AN000;
 EXTRN  sixhundred_item_tag:ABS	   ;see modepars.asm									   ;AN000;
 EXTRN  sixhundred_str:BYTE												   ;AN000;
@@ -291,30 +288,41 @@ SETTO	 PROC	 NEAR													   ;AN663;
       MOV  DH,11111100B 	;set bit mask to clear old flag setting 						   ;AN663;
       ROL  DH,CL													   ;AN663;
 															   ;AN663;
-      .IF <retry_index NE 0> THEN			;retry specified, set						   ;AN663;
+      cmp retry_index,0					;retry specified, set						   ;AN663;
+      je elseif_l_2
 							;  byte in resident code					   ;AN663;
 	 MOV  DI,retry_index				;  to proper setting.						   ;AN663;
 							;  if code is not loaded,					   ;AN663;
-	 .SELECT					;  loaded it.							   ;AN663;
-	 .WHEN <parm_list[DI].item_tag EQ P_item_tag>									   ;AN663;
+	 cmp byte ptr parm_list[DI].item_tag,P_item_tag
+	 jne select_l_1_1
 	    MOV  AL,busy_retry_active											  ;AN663;
 	    MOV  pparm,'p'                                                                                                 ;AN663;
-	 .WHEN <parm_list[DI].item_tag EQ E_item_tag>									   ;AN663;
+	 jmp endselect_l_1
+	 select_l_1_1:
+	 cmp byte ptr parm_list[DI].item_tag,E_item_tag
+	 jne select_l_1_2
 	    MOV  AL,error_retry_active											   ;AN663;
 	    MOV  pparm,'e'                                                                                                 ;AN663;
-	 .WHEN <parm_list[DI].item_tag EQ B_item_tag>									   ;AN663;
+	 jmp endselect_l_1
+	 select_l_1_2:
+	 cmp byte ptr parm_list[DI].item_tag,B_item_tag
+	 jne select_l_1_3
 	    MOV  AL,busy_retry_active											   ;AN663;
 	    MOV  pparm,'b'                                                                                                 ;AN663;
-	 .WHEN <parm_list[DI].item_tag EQ R_item_tag>									   ;AN663;
+	 jmp endselect_l_1
+	 select_l_1_3:
+	 cmp byte ptr parm_list[DI].item_tag,R_item_tag
+	 jne endselect_l_1
 	    MOV  AL,ready_retry_active											   ;AN663;
 	    MOV  pparm,'r'                                                                                                 ;AN663;
-	 .ENDSELECT													   ;AN663;
+	 endselect_l_1:
 															   ;AN663;
-	 .IF <<WORD PTR ES:resseg> EQ 0000H> THEN									   ;AN663;
+	 cmp WORD PTR ES:resseg,0000H											   ;AN663;
+	 jne @F
 	    PUSH  CX					;save shift count
 	    CALL modeload				;load the resident code 					   ;AN663;
 	    POP   CX					;restore shift count
-	 .ENDIF 													   ;AN663;
+	 @@: 													   ;AN663;
 															   ;AN663;
 	 MOV  ES,ES:WORD PTR resseg[2]											   ;AN663;
 	 MOV  DL,BYTE PTR ES:res_com_retry_type 									   ;AN663;
@@ -324,40 +332,56 @@ SETTO	 PROC	 NEAR													   ;AN663;
 	 OR   DL,AL													   ;AN663;
 	 MOV  BYTE PTR ES:res_com_retry_type,DL 	;store the new setting						   ;AN663;
 															   ;AN663;
-      .ELSEIF <<WORD PTR ES:resseg> NE 0000H> THEN	;if code is loaded but no					   ;AN663;
+      jmp endif_l_2
+      elseif_l_2:
+      cmp WORD PTR ES:resseg,0000H			;if code is loaded but no					   ;AN663;
+      je else_l_2
 							;  retry is specified then					   ;AN663;
 	 MOV  ES,ES:WORD PTR resseg[2]											   ;AN663;
 	 MOV  DL,BYTE PTR ES:res_com_retry_type 									   ;AN663;
 															   ;AN663;
-	 .IF <parms_form NE keyword>			;if 'NONE' was specified                                           ;AN663;
+	 cmp parms_form,keyword				;if 'NONE' was specified                                           ;AN663;
+	 je else_l_1
 							;  with positional parameter					   ;AN663;
 	    AND  DL,DH					;  set bits to zero						   ;AN663;
 	    MOV  BYTE PTR ES:res_com_retry_type,DL									   ;AN663;
 															   ;AN663;
-	 .ELSE						;else update pparm with 					   ;AN663;
+	 jmp endif_l_2
+	 else_l_1:					;else update pparm with 					   ;AN663;
 							;  current retry type						   ;AN663;
 	    NOT  DH													   ;AN663;
 	    AND  DL,DH													   ;AN663;
 	    SHR  DL,CL													   ;AN663;
 															   ;AN663;
-	    .SELECT					;set pparm to proper letter					   ;AN663;
-	    .WHEN <DL EQ no_retry_active>										   ;AN663;
+							;set pparm to proper letter					   ;AN663;
+	    cmp DL,no_retry_active
+	    jne select_l_2_1
 	       MOV  pparm,'-'                                                                                              ;AN663;
-	    .WHEN <DL EQ error_retry_active>										   ;AN663;
+	    jmp endif_l_2
+	    select_l_2_1:
+	    cmp DL,error_retry_active
+	    jne select_l_2_2
 	       MOV  pparm,'e'                                                                                              ;AN663;
-	    .WHEN <DL EQ busy_retry_active>										   ;AN663;
+	    jmp endif_l_2
+	    select_l_2_2:
+	    cmp DL,busy_retry_active
+	    jne select_l_2_3
 	       MOV  pparm,'b'                                                                                              ;AN663;
-	    .WHEN <DL EQ ready_retry_active>										   ;AN663;
+	    jmp endif_l_2
+	    select_l_2_3:
+	    cmp DL,ready_retry_active
+	    jne endif_l_2
 	       MOV  pparm,'r'                                                                                              ;AN663;
-	    .ENDSELECT													   ;AN663;
+	    endselect_l_2:												   ;AN663;
 															   ;AN663;
-	 .ENDIF 													   ;AN663;
+	 endif_l_1: 													   ;AN663;
 															   ;AN663;
-      .ELSE						;no retry, no code resident					   ;AN663;
+      jmp endif_l_2
+      else_l_2:						;no retry, no code resident					   ;AN663;
 															   ;AN663;
 	 MOV  pparm,'-'                                                                                                    ;AN663;
 															   ;AN663;
-      .ENDIF														   ;AN663;
+      endif_l_2:													   ;AN663;
 															   ;AN663;
       POP  DX														   ;AN663;
       POP  AX			;restore registers									   ;AN663;
@@ -414,113 +438,166 @@ SETCOM PROC    NEAR													   ;AN000;
 MOV   BP,OFFSET parm_lst   ;address the parm list via parm_list which is [BP]						;AN000;
 MOV    DI,baud_index	    ;DI=index into parm list of the baud rate entry						;AN000;
 
-.SELECT 		   ;prepare AL for old init and CL for new init 						;AC001;
+	 		   ;prepare AL for old init and CL for new init 						;AC001;
 
-   .WHEN <parm_list[DI].item_tag EQ oneten_item_tag>									;AC001;
+   cmp byte ptr parm_list[DI].item_tag,oneten_item_tag
+   jne select_l_3_1
       MOV   AL,0													;AN000;
       MOV   CL,0
       MOV   pbaud_ptr,OFFSET oneten_str 										;AN000;
-   .WHEN <parm_list[DI].item_tag EQ onefifty_item_tag> THEN							      ;AN000;
+   jmp endselect_l_3
+   select_l_3_1:
+   cmp byte ptr parm_list[DI].item_tag,onefifty_item_tag
+   jne select_l_3_2
       MOV   AL,00100000B												;AN000;
       MOV   CL,1
       MOV   pbaud_ptr,OFFSET onefifty_str										;AN000;
-   .WHEN <parm_list[DI].item_tag EQ threehundred_item_tag> THEN 						      ;AN000;
+   jmp endselect_l_3
+   select_l_3_2:
+   cmp byte ptr parm_list[DI].item_tag,threehundred_item_tag
+   jne select_l_3_3
       MOV   AL,01000000B												;AN000;
       MOV   CL,2
       MOV   pbaud_ptr,OFFSET threehundred_str										;AN000;
-   .WHEN <parm_list[DI].item_tag EQ sixhundred_item_tag> THEN							      ;AN000;
+   jmp endselect_l_3
+   select_l_3_3:
+   cmp byte ptr parm_list[DI].item_tag,sixhundred_item_tag
+   jne select_l_3_4
       MOV   AL,01100000B												;AN000;
       MOV   CL,3
       MOV   pbaud_ptr,OFFSET sixhundred_str										;AN000;
-   .WHEN <parm_list[DI].item_tag EQ twelvehundred_item_tag> THEN						      ;AN000;
+   jmp endselect_l_3
+   select_l_3_4:
+   cmp byte ptr parm_list[DI].item_tag,twelvehundred_item_tag
+   jne select_l_3_5
       MOV   AL,10000000B												;AN000;
       MOV   CL,4
       MOV   pbaud_ptr,OFFSET twelvehundred_str										;AN000;
-   .WHEN <parm_list[DI].item_tag EQ twentyfourhundred_item_tag> THEN						      ;AN000;
+   jmp endselect_l_3
+   select_l_3_5:
+   cmp byte ptr parm_list[DI].item_tag,twentyfourhundred_item_tag
+   jne select_l_3_6
       MOV   AL,10100000B												;AN000;
       MOV   CL,5
       MOV   pbaud_ptr,OFFSET twentyfourhundred_str									;AN000;
-   .WHEN <parm_list[DI].item_tag EQ fourtyeighthundred_item_tag> THEN						      ;AN000;
+   jmp endselect_l_3
+   select_l_3_6:
+   cmp byte ptr parm_list[DI].item_tag,fourtyeighthundred_item_tag
+   jne select_l_3_7
       MOV   AL,11000000B												;AN000;
       MOV   CL,6
       MOV   pbaud_ptr,OFFSET fourtyeighthundred_str									;AN000;
-   .WHEN <parm_list[DI].item_tag EQ ninetysixhundred_item_tag> THEN							;AN000;
+   jmp endselect_l_3
+   select_l_3_7:
+   cmp byte ptr parm_list[DI].item_tag,ninetysixhundred_item_tag
+   jne select_l_3_8
       MOV   AL,11100000B												;AN000;
       MOV   CL,7
       MOV   pbaud_ptr,OFFSET ninetysixhundred_str									;AN000;
-   .WHEN <parm_list[DI].item_tag EQ nineteentwohundred_item_tag> NEAR THEN   ;handle 19200 case if 19, 19200, 19.2 or 19.2K specified
+   jmp endselect_l_3
+   select_l_3_8:
+   cmp byte ptr parm_list[DI].item_tag,nineteentwohundred_item_tag   ;handle 19200 case if 19, 19200, 19.2 or 19.2K specified
+   jne endselect_l_3
       MOV   CL,8	      ;value for 19200 baud, no old equivalent							;AC001;
       MOV   pbaud_ptr,OFFSET nineteentwohundred_str									;AC001;
 
-.ENDSELECT													     ;AC001;
+endselect_l_3:
 ;	   AL IS:  XXX00000 for the baud rate, CL has appropriate value for baud
 
 MOV   DI,parity_index												  ;AN000;
-.IF <parm_list[DI].item_tag EQ none_item_tag> THEN								  ;AN000;
+cmp byte ptr parm_list[DI].item_tag,none_item_tag									  ;AN000;
+jne elseif_l_3_1
    MOV PPARITY,"n"          ;set up message for no PARITY                                                       ;AN000;
    MOV	 BH,0		    ;AL already set properly for old init						  ;AN000;
-.ELSEIF <parm_list[DI].item_tag EQ odd_item_tag> THEN								  ;AN000;
+jmp endif_l_3
+elseif_l_3_1:
+cmp byte ptr parm_list[DI].item_tag,odd_item_tag										  ;AN000;
+jne elseif_l_3_2
    MOV PPARITY,"o"          ;set up message for odd PARITY                                                       ;AN000;
    OR	 AL,08H 	    ;PUT THE 000XX000 BITS TO AL PARM WHERE XX=01 FOR PARITY=ODD			 ;AN000
    MOV	 BH,1		    ;new initialize									 ;AN000;
-.ELSEIF <parm_list[DI].item_tag EQ space_item_tag> THEN 							   ;AN000;
+jmp endif_l_3
+elseif_l_3_2:
+cmp byte ptr parm_list[DI].item_tag,space_item_tag									  ;AN000;
+jne elseif_l_3_3
    MOV PPARITY,"s"          ;set up message for space PARITY                                                       ;AN000;
    MOV	 BH,4		    ;SPACE not supported in old init							  ;AN000;
-.ELSEIF <parm_list[DI].item_tag EQ mark_item_tag> THEN								  ;AN000;
+jmp endif_l_3
+elseif_l_3_3:
+cmp byte ptr parm_list[DI].item_tag,mark_item_tag									  ;AN000;
+jne else_l_3
    MOV PPARITY,"m"          ;set up message for mark PARITY                                                       ;AN000;
    MOV	 BH,3		    ;MARK parity not supported in old init						  ;AN000;
-.ELSE			   ;not specified or asked for even							  ;AN000;
+jmp endif_l_3
+else_l_3:		   ;not specified or asked for even							  ;AN000;
    MOV PPARITY,"e"          ;set up message for even PARITY, the default if not specified                        ;AN000;
    OR	 AL,18H 	    ;PUT THE 000XX000 BITS TO AL PARM WHERE XX=11 FOR PARITY=EVEN			 ;AN000
    MOV	 BH,2			 ;even parity for new initialize						 ;AN000;
-.ENDIF														  ;AN000;
+endif_l_3:														  ;AN000;
 
 MOV   DI,data_bits_index											  ;AN000;
-.IF <parm_list[DI].item_tag EQ five_item_tag> THEN								  ;AN000;
+cmp byte ptr parm_list[DI].item_tag,five_item_tag									  ;AN000;
+jne elseif_l_4_1
    MOV	 pdata,"5"            ;set up message for 5 bits                                                         ;AN000;
    MOV	 CH,0		      ;not old init for 5 data bits							  ;AN000;
-.ELSEIF <parm_list[DI].item_tag EQ six_item_tag> THEN								  ;AN000;
+jmp endif_l_4
+elseif_l_4_1:
+cmp byte ptr parm_list[DI].item_tag,six_item_tag										  ;AN000;
+jne elseif_l_4_2
    MOV	 pdata,"6"            ;set up message for 6 bits                                                         ;AN000;
    MOV	 CH,1		      ;no old init for 6 data bits							  ;AN000;
-.ELSEIF <parm_list[DI].item_tag EQ eight_item_tag> THEN 							  ;AN000;
+jmp endif_l_4
+elseif_l_4_2:
+cmp byte ptr parm_list[DI].item_tag,eight_item_tag									  ;AN000;
+jne else_l_4
    MOV	 pdata,"8"            ;set up message for 8 bits                                                         ;AN000;
    OR	 AL,03H 	    ;IN THE 000000XX POSITION, SET XX=11 TO MEAN 8 DATA BITS				     ;AN000;
    MOV	 CH,3													  ;AN000;
-.ELSE			      ;asked for 7 or skipped the parm and will get 7 as default			  ;AN000;
+jmp endif_l_4
+else_l_4:		      ;asked for 7 or skipped the parm and will get 7 as default			  ;AN000;
    OR	 AL,02H 	    ;IN THE 000000XX POSITION, SET XX=10 TO MEAN 7 DATA BITS				     ;AN000;
    MOV	 CH,2		      ;message already set up for 7 bits						  ;AN000;
-.ENDIF														  ;AN000;
+endif_l_4:													  ;AN000;
 
 ;PUT THE NO. STOP BITS TO AL PARM IN THE 00000X00 POSITION and BL for new init						     ;AN000
 MOV   DI,stop_bits_index											  ;AN000;
 MOV   BL,0		      ;assume stop bits was 1, message already set up				      ;AN000;
-.SELECT
 														  ;AN000;
-   .WHEN <parm_list[DI].item_tag EQ two_item_tag>							;AN000;
+   cmp byte ptr parm_list[DI].item_tag,two_item_tag
+   jne select_l_4_1
       MOV   pstop,"2"         ;set up message for 2 stop bits                                         ;AN000;
       MOV   BL,1	      ;value for two or 1.5								    ;AN000;
 
-   .WHEN <parm_list[DI].item_tag EQ one_point_five_item_tag>		     ;AN000;				  ;AN000;
+   jmp endselect_l_4
+   select_l_4_1:
+   cmp byte ptr parm_list[DI].item_tag,one_point_five_item_tag
+   jne select_l_4_2
       MOV   pstop_ptr,OFFSET one_point_five_str 	       ;set up message for 1.5 stop bits		  ;AN000;
       MOV   BL,1	      ;new init for 1.5 								;AN000;
 
-   .WHEN <stop_bits_index EQ not_specified>		 ;if stop bits not specified			   ;AN000;
+   jmp endselect_l_4
+   select_l_4_2:
+   cmp stop_bits_index,not_specified		 ;if stop bits not specified			   ;AN000;
+   jne endselect_l_4
       MOV   DI,baud_index												;AC000;
-      .IF <parm_list[DI].item_tag EQ oneten_item_tag>	  ;BAUD=110 SPECIFIED THEN SET DEFAULT STOP BITS TO TWO 	;AC000;
+      cmp byte ptr parm_list[DI].item_tag,oneten_item_tag	  ;BAUD=110 SPECIFIED THEN SET DEFAULT STOP BITS TO TWO 	;AC000;
+      jne @F
 	 OR    AL,04H		  ;TURN ON BIT IN 00000X00 POSITION TO REQUEST 2 STOP BITS		 ;AN000;
 	 MOV   pstop,"2"         ;set up message for 2 stop bits                                         ;AN000;
-      .ENDIF			 ;FOR STOPBITS=1, LEAVE THAT BIT OFF, message already set by modecom	;AN000;
+      @@:			 ;FOR STOPBITS=1, LEAVE THAT BIT OFF, message already set by modecom	;AN000;
 
 ;  .OTHERWISE specified 1, everything set up
 
-.ENDSELECT		   ;IF not 1.5 or two, already set up for 1						;AN000;
+endselect_l_4:		   ;IF not 1.5 or two, already set up for 1						;AN000;
 														  ;AN000;
-.IF <new_com_initialize EQ true> THEN										     ;AC001;
+cmp new_com_initialize,true											     ;AC001;
+jne else_l_5
    XOR	 AL,AL		   ;ask for no break									     ;AN000;
    MOV	 AH,4		   ;new set baud BIOS call								     ;AN001;
-.ELSE			   ;old style com initialization						    ;AN000;	 ;AC001;
+jmp endif_l_5
+else_l_5:		   ;old style com initialization						    ;AN000;	 ;AC001;
    XOR	 AH,AH		   ;AH=0 requests initialization								 ;AC001;
-.ENDIF															 ;AC001;
+endif_l_5:														 ;AC001;
 
 														      ;AN000;
 ;SET DX PARM TO REQUEST WHICH COM DEVICE									   ;AN000;
@@ -531,14 +608,15 @@ MOV   BL,0		      ;assume stop bits was 1, message already set up				      ;AN00
 ;	    AH ALREADY IS 0 or 4, WHICH REQUESTS								      ;AN000;
 ;	    INITIALIZATION OF THE RS232 									      ;AN000;
 ;	    ACCORDING TO PARMS IN AL and/or BX and CX.								      ;AN000;
- .IF <noerror EQ true> THEN											      ;AN000;
+ cmp noerror,true
+ jne @F
     INT 14H		       ;INIT THE RS232									      ;AN000;
 ;														      ;AN000;
 ;	    NOW THAT THE RS232 IS INITIALIZED,									      ;AN000;
     CALL    SETTO	 ;LOOK AT P PARM, MAYBE TIMEOUT TO BE RETRIED						      ;AN000;
 ;														      ;AN000;
     DISPLAY INITMSG	       ;TELL USER RS232 IS INITIALIZED							      ;AN000;
- .ENDIF 													      ;AN000;
+ @@: 													      ;AN000;
 
      RET														   ;AN000;
 SETCOM ENDP														   ;AN000;

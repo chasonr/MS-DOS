@@ -1,9 +1,6 @@
 
 	PAGE	,132			;
 	TITLE	MODE COMMAND - COMMAND PARSING
-.XLIST							;AN000;
-   INCLUDE STRUC.INC					;AN000;
-.LIST							;AN000;
 ;.SALL							;AN000;
 
 
@@ -511,7 +508,7 @@ des_strt_packet   STRUC
 des_strt_packet   ENDS
 
 
-INCLUDE  COMMON.STC	;contains the following strucs, needed in invoke also
+INCLUDE  common.stc	;contains the following strucs, needed in invoke also
 
 
 ;parm_list_entry   STRUC
@@ -2140,13 +2137,15 @@ search_item_tags  PROC	NEAR			      ;AN000;
 
 
 MOV   match_found,false 			      ;AN000;
-.REPEAT
-   .IF <parm_list[current_parm_DI].item_tag EQ i_CL> THEN   ;AN000;
+repeat_l_1:
+   cmp parm_list[current_parm_DI].item_tag,i_CL   ;AN000;
+   jne @F
       MOV   match_found,true		      ;AN000;
       MOV   i_CL,last_databit_item_tag		 ;AN000;set end of loop trigger
-   .ENDIF				      ;AN000;
+   @@:					      ;AN000;
    INC	 i_CL				      ;AN000;
-.UNTIL <i_CL GT search_stop>	  ;AN000;
+cmp i_CL,search_stop
+jle repeat_l_1
 
 RET
 
@@ -2207,16 +2206,21 @@ check_for_keyword   PROC  NEAR			      ;AN000;
 MOV   match_found,false 			   ;AN000;
 MOV   SI,0					      ;AN000;
 MOV   DL,0			    ;AN000;;index for the loop
-.WHILE <DL LT number_of_keywords> AND	 ;AN000;;check each pointer in the list
-.WHILE <match_found EQ false> DO     ;AN000;
+while_l_1:
+cmp DL,number_of_keywords	 ;AN000;;check each pointer in the list
+jge endwhile_l_1
+cmp match_found,false
+jne endwhile_l_1
    MOV	 CX,start_of_keyword_ptrs[SI]	 ;AN000;
-   .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ CX> THEN ;AN000;IF synonym ptr=CON keyword ptr THEN
+   cmp parm_list[current_parm_DI].keyword_switch_ptr,CX ;AN000;IF synonym ptr=CON keyword ptr THEN
+   jne @F
        MOV   match_found,true			       ;AN000;
-   .ENDIF		      ;AN000;
+   @@:		      ;AN000;
    INC	 SI	     ;AN000;					 ;AN000;
    INC	 SI		    ;AN000;				 ;AN000;
    INC	 DL			   ;AN000;;increment loop counter
-.ENDWHILE	     ;AN000;
+jmp while_l_1
+endwhile_l_1:
 
 RET				   ;AN000;
 
@@ -2235,10 +2239,12 @@ POP   parser_return_code_AX
 
 
 MOV   BP,command_line		;AN000;BP points to end of current (invalid) parm
-.IF <<BYTE PTR [BP]> NE end_of_line_char_0D> AND    ;AN000;IF a whitespace char or comma in the string
-.IF <<BYTE PTR [BP]> NE end_of_line_char_00> THEN   ;AN000;THEN
+cmp BYTE PTR [BP],end_of_line_char_0D    ;AN000;IF a whitespace char or comma in the string
+je @F
+cmp BYTE PTR [BP],end_of_line_char_00    ;AN000;THEN
+je @F
    DEC	 BP				     ;AN000;don't include the delimeter in the display of the invalid parm
-.ENDIF
+@@:
 MOV   BYTE PTR [BP],0		;AN000;make the string an ASCIIZ
 
 ;offending_parameter is where the text of the bad parm is,
@@ -2248,21 +2254,31 @@ MOV   BYTE PTR [BP],0		;AN000;make the string an ASCIIZ
 
 
 MOV   BP,offending_parameter_ptr       ;AC006;BP=>first char in the text string
-.WHILE <<BYTE PTR [BP]> EQ tab> OR	 ;AC006;WHILE the char in the text string
-.WHILE <<BYTE PTR [BP]> EQ " "> DO       ;AC006;      is white space DO
+while_l_2:
+cmp BYTE PTR [BP],tab		;AC006;WHILE the char in the text string
+je @F
+cmp BYTE PTR [BP]," "		;AC006;      is white space DO
+jne endwhile_l_2
+@@:
    INC	 offending_parameter_ptr       ;AC006;point past the whitespace char
    INC	 BP			       ;AC006;index next char in the string
-.ENDWHILE			       ;AC006;
+jmp while_l_2
+endwhile_l_2:
 
-.IF <parser_return_code_AX EQ syntax_error_rc> THEN   ;AN000;syntax error, like "RETRY= E"
+cmp parser_return_code_AX,syntax_error_rc		;AN000;syntax error, like "RETRY= E"
+jne elseif_l_1
    MOV	 message,OFFSET syntax_error			;AN000;
    PUSH  offending_parameter_ptr			  ;AN000;
    POP	 syntax_error_ptr				;AN000;point to the offending parameter
-.ELSEIF <parser_return_code_AX EQ not_in_switch_list> THEN ;AN000;
+jmp endif_l_1
+elseif_l_1:
+cmp parser_return_code_AX,not_in_switch_list
+jne else_l_1
    MOV	 message,OFFSET Invalid_switch
-.ELSE
+jmp endif_l_1
+else_l_1:
    MOV	 message,OFFSET Invalid_parameter ;AN000;user mispelled, misordered etc.
-.ENDIF								;AN000;
+endif_l_1:							;AN000;
 MOV   noerror,false					 ;AN000;
 
 RET
@@ -2276,10 +2292,12 @@ setup_for_not_supported    PROC  NEAR	  ;AC002;prepare replacable parm for "Func
 MOV   CX,offending_parameter_ptr;AN000;
 MOV   not_supported_ptr,CX	;AN000;point to string describing what is not supported for message
 MOV   BP,command_line		;AN000;BP points to end of current (invalid) parm
-.IF <<BYTE PTR [BP]> NE end_of_line_char_0D> AND    ;AN000;IF a whitespace char or comma in the string
-.IF <<BYTE PTR [BP]> NE end_of_line_char_00> THEN   ;AN000;THEN
+cmp BYTE PTR [BP],end_of_line_char_0D    ;AN000;IF a whitespace char or comma in the string
+je @F
+cmp BYTE PTR [BP],end_of_line_char_00    ;AN000;THEN
+je @F
    DEC	 BP				     ;AN000;don't include the delimeter in the display of the invalid parm
-.ENDIF
+@@:
 MOV   BYTE PTR [BP],0		;AN000;make the string an ASCIIZ
 MOV   message,OFFSET function_not_supported ;AN000;"Function not supported on the computer - mark"
 MOV   noerror,false		;AN000;
@@ -2376,18 +2394,26 @@ parse_parameters PROC		   ;AN000;
 
 ;determine if on a PS/2 for checking COMx parameters
 
-.IF <machine_type EQ PS2Model30> OR		       ;AC002;
-.IF <machine_type EQ PS2Model50> OR		       ;AC002;
-.IF <machine_type EQ PS2Model60> OR		       ;AC002;
-.IF <machine_type EQ PS2Model80> THEN  ;AC002;IF the machine is a PS/2 THEN
+cmp machine_type,PS2Model30
+je @F
+cmp machine_type,PS2Model50
+je @F
+cmp machine_type,PS2Model60
+je @F
+cmp machine_type,PS2Model80  ;AC002;IF the machine is a PS/2 THEN
+jne endif_l_2
+@@:
    MOV	 type_of_machine,PS2			       ;AC002;set flag
-.ENDIF
+endif_l_2:
 
 
 MOV   looking_for,first_parm	 ;AN000;looking_for:=first_parm
 
-.WHILE <eol_found NE true> AND NEAR    ;AN000;
-.WHILE <noerror EQ true> NEAR DO ;AN000;WHILE (NOT EOL) AND noerror=true DO
+while_l_6:
+cmp eol_found,true
+je endwhile_l_6
+cmp noerror,true	;AN000;WHILE (NOT EOL) AND noerror=true DO
+jne endwhile_l_6
 
 ;  CASE looking_for=
 
@@ -2438,10 +2464,15 @@ PUBLIC	    com_keyword_or_baud_case
 
 ;	    /status:
 
-		  .IF <parser_return_code_AX EQ no_error> AND					      ;AN000;
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET slash_sta>> OR	   ;AN000;
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET slash_stat>> OR   ;AC004;
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET slash_status>> THEN   ;AN000;
+		  cmp parser_return_code_AX,no_error
+		  jne endif_l_3
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET slash_sta
+		  je @F
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET slash_stat
+		  je @F
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET slash_status
+		  jne endif_l_3
+		  @@:
 
 ;	       MOV   slash_status,deleted	;AN000;make it so /status again is an error,also deletes /STA
 ;	       MOV   slash_stat,deleted 	;AN000;
@@ -2451,55 +2482,63 @@ PUBLIC	    com_keyword_or_baud_case
 
 	       BREAK  1 		  ;AN000;
 
-		  .ENDIF		  ;AN000;
+		  endif_l_3:		  ;AN000;
 
 
 ;	    eol:
 
-		  .IF <parser_return_code_AX EQ end_of_command_line> THEN   ;AN000;
+		  cmp parser_return_code_AX,end_of_command_line   ;AN000;
+		  jne @F
 
 	       MOV   request_type,com_status			     ;AN000;
 	       MOV   eol_found,true				      ;AN000;
 	       BREAK 1						;AN000;
 
-		  .ENDIF					;AN000;
+		  @@:						;AN000;
 
 
 ;	    com_keyword:
 
-		  .IF <parser_return_code_AX EQ no_error> AND					      ;AN000;
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr NE 0> THEN  ;AN000;wasn't /STATUS so must be a keyword
+		  cmp parser_return_code_AX,no_error
+		  jne endif_l_4
+		  cmp word ptr parm_list[current_parm_DI].keyword_switch_ptr,0  ;AN000;wasn't /STATUS so must be a keyword
+		  je endif_l_4
 
-	       .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET baud_equal>> THEN	 ;AN000;IF synonym ptr=> BAUD= THEN
+	       cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET baud_equal	 ;AN000;IF synonym ptr=> BAUD= THEN
+	       jne @F
 		  MOV	baud_specified,true			   ;AN000;
-	       .ENDIF							;AN000;
+	       @@:							;AN000;
 	       delete_parser_value_list_entry keywords,current_parm ;AN000;
 	       MOV   looking_for,com_keyword				;AN000;
 	       MOV   parms_form,keyword 				;AN000;tell analyze_and_invoke how to look at the parms
 	       BREAK 1							;AN000;
 
-		  .ENDIF						;AN000;
+		  endif_l_4:						;AN000;
 
 
 ;	    baud:    ;found a number that is a valid baud, know that have old com style com request
 
 
 
-		  .IF <parser_return_code_AX EQ no_error> THEN	 ;AN000;IF have a baud rate THEN (none of above, must be baud rate)
+		  cmp parser_return_code_AX,no_error	 ;AN000;IF have a baud rate THEN (none of above, must be baud rate)
+		  jne else_l_6
 
-	       .IF <parm_list[current_parm_DI].item_tag EQ nineteentwohundred_item_tag> THEN	;AC002;IF PS2 only baud rate AND
+	       cmp byte ptr parm_list[current_parm_DI].item_tag,nineteentwohundred_item_tag	;AC002;IF PS2 only baud rate AND
+	       jne endif_l_5
 		  MOV	new_com_initialize,true
-		  .IF <type_of_machine NE PS2> THEN						;AC002;not on PS/2
+		  cmp type_of_machine,PS2							;AC002;not on PS/2
+		  je @F
 		     CALL  setup_for_not_supported  ;AC002;set up for "Function not supported on this computer" message
-		  .ENDIF					;AN000;
-	       .ENDIF						;AN008;
-;AD008;        .ELSE
+		  @@:						;AN000;
+	       endif_l_5:
+;AD008;        _ELSE
 	       MOV   looking_for,parity_or_null 		;AN000;
 	       MOV   request_type,initialize_com_port		  ;AN000;
-;AD008;        .ENDIF
+;AD008;        _ENDIF
 	       BREAK 1						;AN000;
 
-		  .ELSE 		  ;AN000;
+		  jmp endif_l_6
+		  else_l_6:
 
 
 ;	    otherwise:
@@ -2507,7 +2546,7 @@ PUBLIC	    com_keyword_or_baud_case
 	       CALL  setup_invalid_parameter		     ;AN000;
 ;	       BREAK 1
 
-		  .ENDIF
+		  endif_l_6:
 
 	 ENDCASE_1:
 
@@ -2525,73 +2564,106 @@ PUBLIC com_keyword_case
 
 	 MOV   parms.parmsx_ptr,OFFSET com_keywords_parmsx ;AN000;only com keywords are in the control blocks
 	 MOV   i_CL,1					   ;AN000;
-	 .WHILE <i_CL LE number_of_com_keywords> AND NEAR  ;AN000;one iteration more than number of parms left so will find eol
-	 .WHILE <eol_found EQ false> AND NEAR			      ;AN000;
-	 .WHILE <noerror EQ true> DO NEAR			;AN000;
+	 while_l_3:
+	 cmp i_CL,number_of_com_keywords		;AN000;one iteration more than number of parms left so will find eol
+	 jg endwhile_l_3
+	 cmp eol_found,false
+	 jne endwhile_l_3
+	 cmp noerror,true
+	 jne endwhile_l_3
 
-	    .SELECT		       ;AC002;check for PS/2 specific parms
-	    .WHEN <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET baud_equal>> THEN	;AC002;IF synonym ptr=> BAUD= THEN
-	       .IF <parm_list[current_parm_DI].item_tag EQ nineteentwohundred_item_tag> THEN	;AC002;IF PS2 only baud rate AND
+	    			       ;AC002;check for PS/2 specific parms
+	    cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET baud_equal			;AC002;IF synonym ptr=> BAUD= THEN
+	    jne select_l_1_1
+	       cmp byte ptr parm_list[current_parm_DI].item_tag,nineteentwohundred_item_tag		;AC002;IF PS2 only baud rate AND
+	       jne endselect_l_1
 		  MOV	new_com_initialize,true
-		  .IF <type_of_machine NE PS2> THEN						;AC002;not on PS/2
+		  cmp type_of_machine,PS2							;AC002;not on PS/2
+		  je endselect_l_1
 		     CALL  setup_for_not_supported  ;AC002;set up for "Function not supported on this computer" message
-		  .ENDIF
-	       .ENDIF
-	    .WHEN <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET parity_equal>> THEN   ;AC002;IF parity= THEN
-	       .IF <parm_list[current_parm_DI].item_tag EQ mark_item_tag> OR	  ;AC002;IF PS2 only parity
-	       .IF <parm_list[current_parm_DI].item_tag EQ space_item_tag> THEN    ;AC002;IF PS2 only parity AND
+	       endif_l_7:
+	    jmp endselect_l_1
+	    select_l_1_1:
+	    cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET parity_equal		;AC002;IF parity= THEN
+	    jne select_l_1_2
+	       cmp byte ptr parm_list[current_parm_DI].item_tag,mark_item_tag		;AC002;IF PS2 only parity
+	       je @F
+	       cmp byte ptr parm_list[current_parm_DI].item_tag,space_item_tag		;AC002;IF PS2 only parity AND
+	       jne endselect_l_1
+	       @@:
 		  MOV	new_com_initialize,true
-		  .IF <type_of_machine NE PS2> THEN						;AC002;not on PS/2
+		  cmp type_of_machine,PS2							;AC002;not on PS/2
+		  je endselect_l_1
 		     CALL  setup_for_not_supported  ;AC002;set up for "Function not supported on this computer" message
-		  .ENDIF
-	       .ENDIF
-	    .WHEN <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET data_equal>> THEN	;AC002;IF data= THEN
-	       .IF <parm_list[current_parm_DI].item_tag EQ five_item_tag> OR	  ;AC002;IF PS2 only data bits
-	       .IF <parm_list[current_parm_DI].item_tag EQ six_item_tag> THEN	 ;AC002;IF PS2 only data bits AND
+	       endif_l_8:
+	    jmp endselect_l_1
+	    select_l_1_2:
+	    cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET data_equal			;AC002;IF data= THEN
+	    jne select_l_1_3
+	       cmp byte ptr parm_list[current_parm_DI].item_tag,five_item_tag		;AC002;IF PS2 only data bits
+	       je @F
+	       cmp byte ptr parm_list[current_parm_DI].item_tag,six_item_tag		;AC002;IF PS2 only data bits AND
+	       jne endselect_l_1
+	       @@:
 		  MOV	new_com_initialize,true
-		  .IF <type_of_machine NE PS2> THEN						;AC002;not on PS/2
+		  cmp type_of_machine,PS2							;AC002;not on PS/2
+		  je endselect_l_1
 		     CALL  setup_for_not_supported  ;AC002;set up for "Function not supported on this computer" message
-		  .ENDIF
-	       .ENDIF
-	    .WHEN <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET stop_equal>> THEN	;AC002;IF stop= THEN
-	       .IF <parm_list[current_parm_DI].item_tag EQ one_point_five_item_tag> THEN    ;AC002;IF PS2 only stop bits AND
+	       endif_l_9:
+	    jmp endselect_l_1
+	    select_l_1_3:
+	    cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET stop_equal			;AC002;IF stop= THEN
+	    jne endselect_l_1
+	       cmp byte ptr parm_list[current_parm_DI].item_tag,one_point_five_item_tag		;AC002;IF PS2 only stop bits AND
+	       jne endif_l_10
 		  MOV	new_com_initialize,true
-		  .IF <type_of_machine NE PS2> THEN						;AC002;not on PS/2
+		  cmp type_of_machine,PS2							;AC002;not on PS/2
+		  je @F
 		     CALL  setup_for_not_supported  ;AC002;set up for "Function not supported on this computer" message
-		  .ENDIF
-	       .ENDIF
-	    .ENDSELECT
+		  @@:
+	       endif_l_10:
+	    endselect_l_1:
 
 	    PUSH  CX			     ;save the loop index
 	    CALL  parse_parm					;AN000;
 	    POP   CX
 
-	    .IF <noerror EQ true> AND
-	    .IF <parser_return_code_AX EQ no_error> THEN	;AN000;
+	    cmp noerror,true
+	    jne elseif_l_12
+	    cmp parser_return_code_AX,no_error
+	    jne elseif_l_12
 
-	       .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET baud_equal>> THEN	 ;AN000;IF synonym ptr=> BAUD= THEN
+	       cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET baud_equal		 ;AN000;IF synonym ptr=> BAUD= THEN
+	       jne @F
 		  MOV	baud_specified,true			   ;AN000;
-	       .ENDIF							;AN000;
+	       @@:							;AN000;
 	       delete_parser_value_list_entry keywords,current_parm ;AN000;
 	       INC   i_CL						;AN000;
 
-	    .ELSEIF <parser_return_code_AX EQ end_of_command_line> THEN ;AN000;
+	    jmp while_l_3
+	    elseif_l_12:
+	    cmp parser_return_code_AX,end_of_command_line
+	    jne else_l_12
 
-	       .IF <baud_specified EQ true> THEN		;AN000;
+	       cmp baud_specified,true
+	       jne else_l_11
 		  MOV	request_type,initialize_com_port	     ;AN000;
-	       .ELSE						     ;AN000;
+	       jmp endif_l_11
+	       else_l_11:
 		  MOV	message,OFFSET baud_rate_required		    ;AN000;
 		  MOV	noerror,false
-	       .ENDIF						     ;AN000;
+	       endif_l_11:
 	       MOV   eol_found,true			   ;AN000;
 
-	    .ELSE NEAR			      ;AN000;
+	    jmp while_l_3
+	    else_l_12:
 
 	       CALL  setup_invalid_parameter		     ;AN000;
 
-	    .ENDIF					;AN000;
+	    endif_l_12:
 
-	 .ENDWHILE							;AN000;
+	 jmp while_l_3
+	 endwhile_l_3:
 
 	 MOV   looking_for,eol		 ;AN000;if haven't already encountered an error then check for extraneous parms
 
@@ -2606,21 +2678,29 @@ PUBLIC com_keyword_case
 
 	 CALL  parse_parm		  ;AN000;
 
-	 .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET slash_sta>> OR		 ;AN000;
-	 .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET slash_stat>> OR	 ;AC004;
-	 .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET slash_status>> THEN   ;AN000;found /status
+	 cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET slash_sta
+	 je @F
+	 cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET slash_stat
+	 je @F
+	 cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET slash_status
+	 jne elseif_l_13
+	 @@:
 
 	    MOV   looking_for,eol			     ;AN000;
 
-	 .ELSEIF <parser_return_code_AX EQ end_of_command_line> THEN ;AN000;encountered EOL
+	 jmp endif_l_13
+	 elseif_l_13:
+	 cmp parser_return_code_AX,end_of_command_line
+	 jne else_l_13
 
 	    MOV   eol_found,true		;AN000;
 
-	 .ELSE			;AN000;
+	 jmp endif_l_13
+	 else_l_13:
 
 	    CALL  setup_invalid_parameter      ;AN000;
 
-	 .ENDIF
+	 endif_l_13:
 
 	 BREAK 0   ;status_or_eol			;AN000;
 
@@ -2636,47 +2716,55 @@ PUBLIC	 parity_or_null_case
 
 
 	 CALL  parse_parm				;AN000;
-	 .IF <parser_return_code_AX EQ operand_missing> THEN   ;AN000;valid null
+	 cmp parser_return_code_AX,operand_missing   ;AN000;valid null
+	 jne else_l_16
 	    MOV   looking_for,databits_or_null	    ;AN000;can't have baud,,eol
-	 .ELSE						;AN000;
+	 jmp endif_l_16
+	 else_l_16:
 ;	    CASE current_parm=
 
 
 ;	       eol:
 
-		     .IF <parser_return_code_AX EQ end_of_command_line> THEN   ;AN000;valid
+		     cmp parser_return_code_AX,end_of_command_line   ;AN000;valid
+		     jne @F
 
 		  MOV	request_type,initialize_com_port
 		  MOV	eol_found,true		   ;AN000;
 		  BREAK 5		     ;AN000;
 
-		     .ENDIF
+		     @@:
 
 ;	       parity:
 
-		     .IF <parser_return_code_AX EQ no_error> THEN    ;AN000;IF have a parity THEN (none of above, must be parity)
+		     cmp parser_return_code_AX,no_error    ;AN000;IF have a parity THEN (none of above, must be parity)
+		     jne else_l_15
 
 		  MOV	looking_for,databits_or_null			;AN000;
-		  .IF <parm_list[current_parm_DI].item_tag EQ mark_item_tag> OR     ;AN000;
-		  .IF <parm_list[current_parm_DI].item_tag EQ space_item_tag> THEN   ;AN000;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,mark_item_tag
+		  je @F
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,space_item_tag
+		  jne endif_l_15
+		  @@:
 		     MOV   new_com_initialize,true
-		     .IF <type_of_machine NE PS2> THEN	;AN000;IF not Roundup or later
+		     cmp type_of_machine,PS2		;AN000;IF not Roundup or later
+		     je endif_l_15
 			CALL  setup_for_not_supported  ;AC002;set up for "Function not supported on this computer" message
-		     .ENDIF				;AN000; 		    ;AN000;
-		  .ENDIF				;AN000;
+		  endif_l_14:
 
-		     .ELSE
+		     jmp endif_l_15
+		     else_l_15:
 
 ;	       otherwise:
 
 		  CALL	setup_invalid_parameter       ;AN000;
 ;		  BREAK
 
-		     .ENDIF						 ;AN000;
+		     endif_l_15:
 
 	    ENDCASE_5:		 ;current_parm
 
-	 .ENDIF 							;AN000;
+	 endif_l_16:
 	 BREAK 0  ;AN000;parity_or_null
 
 
@@ -2691,45 +2779,53 @@ PUBLIC	    databits_or_null_case
 	 ;modify parser control blocks to handle list of valid databits
 	 ;based on the machine type.
 
-;AC002;  .IF <type_of_machine NE PS2> THEN  ;AN000;IF not Roundup or later
+;AC002;  _IF <type_of_machine NE PS2> THEN  ;AN000;IF not Roundup or later
 ;AC002;     MOV   five_str,deleted     ;delete parser value list entry ;AN000;
 ;AC002;     MOV   six_str,deleted	   ;delete_parser_value_list_entry ;AN000;
-;AC002;  .ENDIF 							;AN000;
+;AC002;  _ENDIF 							;AN000;
 
 	 ;the parser control blocks have data bits valid for this machine
 	 CALL  parse_parm					;AN000;
-	 .IF <parser_return_code_AX EQ operand_missing> THEN   ;AN000;valid null
+	 cmp parser_return_code_AX,operand_missing        ;AN000;valid null
+	 jne else_l_19
 	    MOV   looking_for,stopbits_or_null		  ;can't have databits,,eol
-	 .ELSE								;AN000;
+	 jmp endif_l_19
+	 else_l_19:
 ;	    CASE current_parm=
 
 
 ;	       eol:
 
-		     .IF <parser_return_code_AX EQ end_of_command_line> THEN   ;AN000;valid
+		     cmp parser_return_code_AX,end_of_command_line      ;AN000;valid
+		     jne @F
 
 		  MOV	request_type,initialize_com_port		;AN000;
 		  MOV	eol_found,true			      ;AN000;
 		  BREAK 6						;AN000;
 
-		     .ENDIF						;AN000;
+		     @@:						;AN000;
 
 
 ;	       databits:
 
-		     .IF <parser_return_code_AX EQ no_error> THEN    ;AN000;IF have a parity THEN (none of above, must be parity)
+		     cmp parser_return_code_AX,no_error    ;AN000;IF have a parity THEN (none of above, must be parity)
+		     jne else_l_17
 
 		  MOV	looking_for,stopbits_or_null			;AN000;
-		  .IF <parm_list[current_parm_DI].item_tag EQ five_item_tag> OR      ;AC002;
-		  .IF <parm_list[current_parm_DI].item_tag EQ six_item_tag> THEN    ;AC002;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,five_item_tag
+		  je @F
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,six_item_tag
+		  jne endif_l_18
+		  @@:
 		     MOV   new_com_initialize,true
-		     .IF <type_of_machine NE PS2> THEN	;AC002;IF not Roundup or later
+		     cmp type_of_machine,PS2		;AC002;IF not Roundup or later
+		     je endif_l_18
 			CALL  setup_for_not_supported  ;AC002;set up for "Function not supported on this computer" message
-		     .ENDIF				;AC002; 		    ;AN000;
-		  .ENDIF				;AC002;
+		  endif_l_17:
 ;		  BREAK 6						;AN000;
 
-		     .ELSE					       ;AN000;
+		     jmp endif_l_18
+		     else_l_17:
 
 
 ;	       otherwise:
@@ -2737,11 +2833,11 @@ PUBLIC	    databits_or_null_case
 		  CALL	setup_invalid_parameter       ;AN000;
 ;		  BREAK
 
-		     .ENDIF
+		     endif_l_18:
 
 	    ENDCASE_6: ;current_parm
 
-	 .ENDIF 							;AN000;
+	 endif_l_19:
 	 BREAK 0  ;AN000;databits_or_null
 
 
@@ -2755,43 +2851,49 @@ PUBLIC	    stopbits_or_null_case
 	 ;modify parser control blocks to handle list of valid stopbits
 	 ;based on the machine type.
 
-;AC002;  .IF <type_of_machine NE PS2> THEN  ;AN000;IF not Roundup or later
+;AC002;  _IF <type_of_machine NE PS2> THEN  ;AN000;IF not Roundup or later
 ;AC002;     MOV   one_point_five_str,deleted   ;delete_parser_value_list_entry	;AN000;
-;AC002;  .ENDIF 							;AN000;
+;AC002;  _ENDIF 							;AN000;
 
 
 	 CALL  parse_parm						;AN000;
-	 .IF <parser_return_code_AX EQ operand_missing> THEN   ;AN000;valid null
+	 cmp parser_return_code_AX,operand_missing   ;AN000;valid null
+	 jne else_l_22
 	    MOV   looking_for,P 		;AN000;no null just before eol
-	 .ELSE					;AN000;
+	 jmp endif_l_22
+	 else_l_22:
 ;	    CASE current_parm=
 
 
 ;	       eol:
 
-		     .IF <parser_return_code_AX EQ end_of_command_line> THEN   ;AN000;valid
+		     cmp parser_return_code_AX,end_of_command_line       ;AN000;valid
+		     jne @F
 
 		  MOV	BYTE PTR request_type,initialize_com_port	 ;AN000;
 		  MOV	eol_found,true			      ;AN000;
 		  BREAK 7				;AN000;
 
-		     .ENDIF
+		     @@:
 
 
 ;	       stopbits:
 
 
-		     .IF <parser_return_code_AX EQ no_error> THEN    ;AN000;IF have a parity THEN (none of above, must be parity)
+		     cmp parser_return_code_AX,no_error    ;AN000;IF have a parity THEN (none of above, must be parity)
+		     jne else_l_21
 
 		  MOV	looking_for,P		  ;AN000;P or eol valid next
-		  .IF <parm_list[current_parm_DI].item_tag EQ one_point_five_item_tag> THEN    ;AC002;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,one_point_five_item_tag
+		  jne endif_l_21
 		     MOV   new_com_initialize,true
-		     .IF <type_of_machine NE PS2> THEN	;AC002;IF not Roundup or later
+		     cmp type_of_machine,PS2		;AC002;IF not Roundup or later
+		     je endif_l_21
 			CALL  setup_for_not_supported  ;AC002;set up for "Function not supported on this computer" message
-		     .ENDIF				;AC002; 		    ;AN000;
-		  .ENDIF				;AC002;
+		  endif_l_20:
 
-		     .ELSE
+		     jmp endif_l_21
+		     else_l_21:
 
 
 ;	       otherwise:
@@ -2799,11 +2901,11 @@ PUBLIC	    stopbits_or_null_case
 		  CALL	setup_invalid_parameter       ;AN000;
 ;		  BREAK
 
-		     .ENDIF
+		     endif_l_21:
 
 	    ENDCASE_7: ;current_parm
 
-	 .ENDIF 					;AN000;
+	 endif_l_22:
 	 BREAK 0 ;AN000;stopbits_or_null
 
 
@@ -2825,30 +2927,33 @@ PUBLIC P_case
 
 ;	    eol:
 
-		  .IF <parser_return_code_AX EQ end_of_command_line> THEN   ;AN000;valid
+		  cmp parser_return_code_AX,end_of_command_line         ;AN000;valid
+		  jne @F
 
 	       MOV   eol_found,true		   ;AN000;
 	       BREAK 8			     ;AN000;
 
-		  .ENDIF
+		  @@:
 
 
 
 ;	    P:
 
-		  .IF <parser_return_code_AX EQ no_error> THEN	 ;AN000;found one of: p,e,b,r,n,none,off
+		  cmp parser_return_code_AX,no_error	 ;AN000;found one of: p,e,b,r,n,none,off
+		  jne else_l_23
 
 	       MOV   looking_for,eol	  ;AN000;found last positional
 	       MOV   retry_requested,true
 
-		  .ELSE
+		  jmp endif_l_23
+		  else_l_23:
 
 
 ;	    otherwise:
 
 	       CALL  setup_invalid_parameter	   ;AN000;
 
-		  .ENDIF
+		  endif_l_23:
 
 
 	 ENDCASE_8: ;current_parm
@@ -2873,55 +2978,62 @@ PUBLIC P_case
 ;	    LPT_mode_keyword:		   ;nothing but printer keywords allowed
 
 
-		  .IF <parser_return_code_AX EQ no_error> AND NEAR				      ;AN000;
-;		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET COLUMNS_equal>> OR   ;AN000;
-;		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET COLS_equal>> OR   ;AN000;
-;		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET lines_equal>> OR  ;AN000;
-;		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET retry_equal_str>> THEN ;AN000;found a printer keyword
+		  cmp parser_return_code_AX,no_error
+		  jne endif_l_25
+;		  _IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET COLUMNS_equal>> OR   ;AN000;
+;		  _IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET COLS_equal>> OR   ;AN000;
+;		  _IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET lines_equal>> OR  ;AN000;
+;		  _IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET retry_equal_str>> THEN ;AN000;found a printer keyword
 
 
 		  check_for_lpt_keyword      ;check for COLS= or LINES= or RETRY=, return results in match_found
-		  .IF <match_found EQ true> THEN NEAR
+		  cmp match_found,true
+		  jne endif_l_25
 
 	       delete_parser_value_list_entry keywords,current_parm  ;AN000;
 	       MOV   parms_form,keyword 		;AN000;indicate to modeprin how to deal with retry
 	       CALL  parse_parm 			     ;AN000;
 	       MOV   DL,1			;AN000;one keyword found so far
 
-	       .REPEAT
+	       repeat_l_2:
 
 ;		  CASE return_code=
 
 ;		     LPT_keyword:
 
 
-			   .IF <parser_return_code_AX EQ no_error> AND					       ;AN000;
+			   cmp parser_return_code_AX,no_error
+			   jne endif_l_24
 			   PUSH  DX			;save loop index
 			   check_for_lpt_keyword      ;return results in match_found
 			   POP	 DX
-			   .IF <match_found EQ true> THEN
+			   cmp match_found,true
+			   jne endif_l_24
 
-			.IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET retry_equal_str>> AND
-			.IF <parm_list[current_parm_DI].item_tag NE NONE_item_tag> THEN
+			cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET retry_equal_str
+			jne @F
+			cmp byte ptr parm_list[current_parm_DI].item_tag,NONE_item_tag
+			je @F
 			   MOV	 retry_requested,true	;set up for rescode
-			.ENDIF
+			@@:
 			delete_parser_value_list_entry keywords,current_parm  ;AN000;
 			INC   DL		;AN000;found another keyword
 			BREAK 9 		;AN000;
 
-			   .ENDIF
+			   endif_l_24:
 
 
 ;		     eol:
 
-			   .IF <parser_return_code_AX EQ end_of_command_line> THEN   ;AN000;valid
+			   cmp parser_return_code_AX,end_of_command_line   ;AN000;valid
+			   jne @F
 
 			;had at least one keyword
 			MOV   request_type,initialize_printer_port     ;AN000;
 			MOV   eol_found,true			      ;AN000;
 			BREAK 9 				;AN000;
 
-			   .ENDIF
+			   @@:
 
 
 ;		     otherwise:     ;wrong type of keywords, /STATUS etc.
@@ -2935,27 +3047,39 @@ PUBLIC P_case
 		  CALL	parse_parm				;AN000;
 		  POP	DX
 
-	       .UNTIL <DL EQ number_of_LPT_keywords> OR 	     ;AN000;
-	       .UNTIL <eol_found EQ true> OR				      ;AN000;
-	       .UNTIL <noerror EQ false>				;AN000;
+	       cmp DL,number_of_LPT_keywords
+	       je end_repeat_l_2
+	       cmp eol_found,true
+	       je end_repeat_l_2
+	       cmp noerror,false
+	       jne repeat_l_2
+	       end_repeat_l_2:
 
-;	       .IF <eol_found NE true> AND
-	       .IF <noerror EQ true> AND				;AN000;
-	       .IF <DL EQ number_of_LPT_keywords> THEN		    ;AN000;
+;	       cmp eol_found,true
+;	       jne @F
+	       cmp noerror,true
+	       jne @F
+	       cmp DL,number_of_LPT_keywords
+	       jne @F
 		  MOV	looking_for,eol 	  ;AN000;check for extraneous parms
-	       .ENDIF						;AN000;
+	       @@:						;AN000;
 
 	       BREAK 10
 
-		  .ENDIF   ;AN000;LPT_keyword
+		  endif_l_25:   ;AN000;LPT_keyword
 
 
 ;	    /STATUS:
 
-		  .IF <parser_return_code_AX EQ no_error> AND		;make sure don't have /STA:value  ;AN000;
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET slash_sta>> OR	 ;AN000;
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET slash_stat>> OR   ;AC004;
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET slash_status>> THEN  ;AN000;found /STATUS
+		  cmp parser_return_code_AX,no_error		;make sure don't have /STA:value  ;AN000;
+		  jne endif_l_26
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET slash_sta
+		  je @F
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET slash_stat
+		  je @F
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET slash_status  ;AN000;found /STATUS
+		  jne endif_l_26
+		  @@:
 
 	       MOV   looking_for,eol  ;AN000;look for RETRY or codepage
 	       MOV   slash_status,deleted				;AN000;
@@ -2964,14 +3088,16 @@ PUBLIC P_case
 	       MOV   request_type,printer_status			;AN000;
 	       BREAK 10 ;AN000;keyword
 
-		  .ENDIF   ;/STATUS found				;AN000;
+		  endif_l_26:   ;/STATUS found				;AN000;
 
 
 ;	    codepage:
 
 
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ 0> AND		  ;AC007;wasn't SEL=cpnum or PREP=cpnum
-		  .IF <parm_list[current_parm_DI].item_tag EQ codepage_item_tag> THEN	  ;AN000;IF found "codepage" or "cp" THEN
+		  cmp word ptr parm_list[current_parm_DI].keyword_switch_ptr,0		  ;AC007;wasn't SEL=cpnum or PREP=cpnum
+		  jne @F
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,codepage_item_tag	  ;AN000;IF found "codepage" or "cp" THEN
+		  jne @F
 
 	       MOV   looking_for,codepage_prms				;AN000;
 	       MOV   codepage_str,deleted				;AN000;
@@ -2979,14 +3105,17 @@ PUBLIC P_case
 	       MOV   cp_str,deleted					;AC007;
 	       BREAK 10 ;AN000;
 
-		  .ENDIF						;AN000;
+		  @@:
 
 
 
 ;	    cl:
 
-		  .IF <parm_list[current_parm_DI].item_tag EQ onethirtytwo_item_tag> OR ;AN000;
-		  .IF <parm_list[current_parm_DI].item_tag EQ eighty_item_tag> THEN ;AN000;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,onethirtytwo_item_tag
+		  je @F
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,eighty_item_tag
+		  jne endif_l_27
+		  @@:
 
 	       MOV   REFRESH_str,deleted			;AC007;no codepage stuff legal
 	       MOV   REF_str,deleted				;AC007;
@@ -3001,56 +3130,65 @@ PUBLIC P_case
 	       MOV   request_type,old_initialize_printer_port		;AN000;found enough to know that it isn't status or keyword
 	       BREAK 10 						;AN000;
 
-		  .ENDIF						;AN000;
+		  endif_l_27:
 
 
 
 ;	    eol:
 
 
-		  .IF <parser_return_code_AX EQ end_of_command_line> THEN   ;AN000;valid
+		  cmp parser_return_code_AX,end_of_command_line		;AN000;valid
+		  jne @F
 
 	       MOV   request_type,turn_off_reroute ;compatible with previous MODE     ;AN000;
 	       MOV   eol_found,true		   ;AN000;
 	       BREAK 10 						;AN000;
 
-		  .ENDIF						;AN000;
+		  @@:
 
 
 
 ;	    codepage_keyword_out_of_order:
 
 
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET PREPARE_equal>> OR  ;AC007;if got here and have
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET PREP_equal>> OR 	;AC007;one of the codepage
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET SEL_equal>> OR		;AC007;keywords then user
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET SELECT_equal>> THEN	;AC007;forgot "CP"
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET PREPARE_equal  ;AC007;if got here and have
+		  je @F
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET PREP_equal 	  ;AC007;one of the codepage
+		  je @F
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET SEL_equal	  ;AC007;keywords then user
+		  je @F
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET SELECT_equal	  ;AC007;forgot "CP"
+		  jne endif_l_28
+		  @@:
 
 	       MOV   message,OFFSET Invalid_number_of_parameters				  ;AC007;
 	       MOV   noerror,false								  ;AC007;
 	       BREAK 10  ;AN000;CON_keyword
 
-		  .ENDIF
+		  endif_l_28:
 
 
 
 ;	    REFRESH_out_of_order:   ;AC007;forgot to include "CP"
 
 
-		  .IF <parm_list[current_parm_DI].item_tag EQ REFRESH_item_tag> THEN  ;AC007;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,REFRESH_item_tag
+		  jne @F
 
 	       MOV   message,OFFSET Invalid_number_of_parameters				  ;AC007;
 	       MOV   noerror,false								  ;AC007;
 	       BREAK 10
 
-		  .ENDIF						;AC007;
+		  @@:
 
 
 
 ;	    null:
 
-		  .IF <parser_return_code_AX EQ no_error> AND	 ;AN000;
-		  .IF <parm_list[current_parm_DI].item_tag EQ unspecified> THEN   ;AN007;valid null
+		  cmp parser_return_code_AX,no_error
+		  jne else_l_29
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,unspecified   ;AN007;valid null
+		  jne else_l_29
 
 	       MOV   REFRESH_str,deleted			;AC007;no codepage stuff legal
 	       MOV   REF_str,deleted				;AC007;
@@ -3068,12 +3206,13 @@ PUBLIC P_case
 
 ;	    otherwise:
 
-		  .ELSE 						;AN000;
+		  jmp endif_l_29
+		  else_l_29:
 
 	       CALL  setup_invalid_parameter	   ;AN000;
 ;	       BREAK							;AN000;
 
-		  .ENDIF						;AN000;
+		  endif_l_29:
 
 
 	 ENDCASE_10: ;current_parm=					;AN000;
@@ -3092,35 +3231,41 @@ PUBLIC li_or_null_case
 
 ;	    li:
 
-		  .IF <parm_list[current_parm_DI].item_tag EQ six_item_tag> OR	       ;AN000;
-		  .IF <parm_list[current_parm_DI].item_tag EQ eight_item_tag> THEN     ;AN000;IF found 6 or 8 THEN
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,six_item_tag
+		  je @F
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,eight_item_tag     ;AN000;IF found 6 or 8 THEN
+		  jne endif_l_30
+		  @@:
 
 	       MOV   looking_for,P					;AN000;
 	       BREAK 11
 
-		  .ENDIF
+		  endif_l_30:
 
 
 ;	    eol:
 
-		  .IF <parser_return_code_AX EQ end_of_command_line> THEN   ;AN000;valid
+		  cmp parser_return_code_AX,end_of_command_line		;AN000;valid
+		  jne @F
 
 	       MOV   request_type,old_initialize_printer_port		    ;AN000;
 	       MOV   eol_found,true			      ;AN000;
 	       BREAK 11 						;AN000;
 
-		  .ENDIF
+		  @@:
 
 
 ;	    null:
 
-		  .IF <parser_return_code_AX EQ no_error> AND	 ;AN000;
-		  .IF <parm_list[current_parm_DI].item_tag EQ unspecified> THEN   ;AN007;valid null
+		  cmp parser_return_code_AX,no_error
+		  jne @F
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,unspecified   ;AN007;valid null
+		  jne @F
 
 	       MOV   looking_for,P				     ;AN000;
 	       BREAK 11 						;AN000;
 
-		  .ENDIF
+		  @@:
 
 
 ;	    otherwise:
@@ -3145,13 +3290,14 @@ PUBLIC li_or_null_case
 
 ;	    REFRESH:
 
-		  .IF <parm_list[current_parm_DI].item_tag EQ REFRESH_item_tag> THEN  ;AN000;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,REFRESH_item_tag
+		  jne @F
 
 	       MOV   request_type,codepage_refresh		       ;AN000;
 	       MOV   looking_for,eol
 	       BREAK 12
 
-		  .ENDIF
+		  @@:
 
 
 ;	    PREPARE=:
@@ -3159,10 +3305,14 @@ PUBLIC li_or_null_case
 
 	       ;Have to parse ((cplist) [filename])
 
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET PREPARE_equal>> OR  ;AN000;
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET PREP_equal>> THEN NEAR	;AN000;IF PREPARE= THEN
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET PREPARE_equal
+		  je @F
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET PREP_equal	;AN000;IF PREPARE= THEN
+		  jne endif_l_36
+		  @@:
 
-	       .IF <parm_list[current_parm_DI].parm_type EQ complx> THEN NEAR  ;AN000;should have found ((cplist) filename)
+	       cmp byte ptr parm_list[current_parm_DI].parm_type,complx  ;AN000;should have found ((cplist) filename)
+	       jne else_l_35
 		  PUSH	SI  ;AN000;save pointer to first char past the closing right paren
 		  MOV	AX,parm_list[current_parm_DI].value1	;AN000;
 		  MOV	command_line,AX 			;AN000;point at first char past the left paren
@@ -3170,66 +3320,85 @@ PUBLIC li_or_null_case
 		  MOV	parms.parmsx_ptr,OFFSET prepare_equal_parmsx
 		  MOV	prepare_equal_match_flags,complex     ;AN000;only thing valid next
 		  CALL	parse_parm		;AN000;
-		  .IF <parser_return_code_AX EQ no_error> AND		;AN000;
-		  .IF <parm_list[current_parm_DI].parm_type EQ complx> THEN	  ;AN000;assume have ((cplist) filename)
+		  cmp parser_return_code_AX,no_error
+		  jne else_l_32
+		  cmp byte ptr parm_list[current_parm_DI].parm_type,complx	  ;AN000;assume have ((cplist) filename)
+		  jne else_l_32
 		     PUSH  SI  ;AN000;save pointer to first char past the closing right paren
 		     MOV   AX,parm_list[current_parm_DI].value1    ;AN000;
 		     MOV   command_line,AX			   ;AN000;point at first char past the left paren
 		     SUB   DI,TYPE parm_list_entry		;AN000;not parm, just indication of complex, delete from parm list
 		     MOV   prepare_equal_match_flags,numeric+optional ;AN000;number or delimeter only things valid next
 		     MOV   ordinal,0		     ;AN000;zap parms count,make parser count codepage numbers
-		     .REPEAT			   ;AN000;
+		     repeat_l_3:		   ;AN000;
 			CALL  parse_parm	   ;AN000;
-			.IF <parser_return_code_AX EQ no_error> THEN	;AN000;  ;AN000;
+			cmp parser_return_code_AX,no_error
+			jne elseif_l_31
 			   ADD	 des_start_packet.des_strt_pklen,2     ;increment size of parm block for another cp number
 			   INC	 des_start_packet.des_strt_pknum       ;increment number of cp numbers
 			   ADD	 current_packet_cp_number,2	       ;address next code page number slot
 			   MOV	 SI,current_packet_cp_number
 			   MOV	 BP,OFFSET des_start_packet
-			   .IF <parm_list[current_parm_DI].item_tag EQ codepage_item_tag> THEN	;AN000;IF not skipped slot THEN
+			   cmp byte ptr parm_list[current_parm_DI].item_tag,codepage_item_tag	;AN000;IF not skipped slot THEN
+			   jne endif_l_31
 			      MOV   DX,parm_list[current_parm_DI].value1  ;AN000;store the number if one specified for this slot
 			      MOV   [SI][BP].des_strt_pkcp1,DX		  ;put the number in the slot for the cp number
-			   .ENDIF   ;AN000;not valid skipped codepage number, i.e. not (,850,,865) for example
-			.ELSEIF <parser_return_code_AX EQ end_of_complex> THEN ;AN000;
+			   ;endif   ;AN000;not valid skipped codepage number, i.e. not (,850,,865) for example
+			jmp endif_l_31
+			elseif_l_31:
+			cmp parser_return_code_AX,end_of_complex
+			jne else_l_31
 			   SUB	 DI,TYPE parm_list_entry	;don't want an entry in the parm list for the zeroed out ")"
-			.ELSE
+			jmp endif_l_31
+			else_l_31:
 			   CALL  setup_invalid_parameter       ;AN000;
-			.ENDIF				;AN000;
-		     .UNTIL <parser_return_code_AX EQ end_of_complex> OR ;AN000;came to end of the cplist
-		     .UNTIL <noerror EQ false>
+			endif_l_31:
+		     cmp parser_return_code_AX,end_of_complex
+		     je end_repeat_l_3
+		     cmp noerror,false
+		     jne repeat_l_3
+		     end_repeat_l_3:
 		     POP   command_line      ;AN000;resume just after the closing paren of (cplist), should be at ) or filename
-		  .ELSE    ;AN000;must be an error
+		  jmp endif_l_32
+		  else_l_32:    ;AN000;must be an error
 		     MOV   message,OFFSET invalid_number_of_parameters	       ;AN000;
 		     MOV   noerror,false				;AN000;
-		  .ENDIF
-		  .IF <noerror EQ true> THEN	;AN000;IF successfully broke down cplist and file name THEN
+		  endif_l_32:
+		  cmp noerror,true	;AN000;IF successfully broke down cplist and file name THEN
+		  jne endif_l_34
 		     MOV   prepare_equal_match_flags,filespec+optional ;AN000;only thing valid is filespec
 		     MOV   ordinal,0					;AN000;don't need parser to count the parms anymore
 		     MOV   prepare_min_parms,0			;AN000;filename is optional
 ;		     A filespec may be next so colon cannot be a delimeter.
 		     modify_parser_control_block seperator_list,delete,colon  ;AN000;want to find a keyword so don't stop on colons
 		     CALL  parse_parm					   ;AN000;
-		     .IF <parser_return_code_AX EQ no_error> THEN	   ;AN000;
+		     cmp parser_return_code_AX,no_error
+		     jne elseif_l_33
 			MOV   AX,parm_list[current_parm_DI].value1	   ;AN000;AX=OFFSET of filespec just encountered
 			MOV   cp_cb.font_filespec,AX		   ;AN000;set up pointer to filespec for modecp
-		     .ELSEIF <parser_return_code_AX EQ end_of_complex> THEN  ;AN000;cartridge prepare, no filename
+		     jmp endif_l_33
+		     elseif_l_33:
+		     cmp parser_return_code_AX,end_of_complex  ;AN000;cartridge prepare, no filename
+		     jne else_l_33
 			MOV   des_start_packet.des_strt_pkfl,DES_STRT_FL_CART	  ; 0001H=CARTRIDGE PREPARE,
-		     .ELSE						   ;AN000;
+		     jmp endif_l_33
+		     else_l_33:
 			CALL  setup_invalid_parameter	    ;AN000;
-		     .ENDIF					;AN000;
+		     endif_l_33:
 		     MOV   request_type,codepage_prepare		;AN000;if encountered an error won't continue anyways
-		  .ENDIF						;AN000;
+		  endif_l_34:
 		  POP	command_line	     ;AN000;continue parsing after the origional complex, should be eol
-	       .ELSE							;AN000;
+	       jmp endif_l_35
+	       else_l_35:
 		  MOV	message,OFFSET invalid_number_of_parameters ;AN000;should have found a complex
 		  MOV	noerror,false					;AN000;
-	       .ENDIF
+	       endif_l_35:
 
 	       MOV   looking_for,eol	  ;AN000;
 
 	       BREAK 12 						;AN000;
 
-		  .ENDIF
+		  endif_l_36:
 
 
 ;	    SELECT=:
@@ -3237,51 +3406,62 @@ PUBLIC li_or_null_case
 
 dummy1:
 PUBLIC DUMMY1
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET SEL_equal>> OR	;AN000;
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET SELECT_equal>> THEN ;AN000;
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET SEL_equal
+		  je @F
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET SELECT_equal
+		  jne endif_l_38
+		  @@:
 
-	       .IF <parser_return_code_AX EQ no_error> THEN		;AN000;
+	       cmp parser_return_code_AX,no_error
+	       jne else_l_37
 		  MOV	codepage_index_holder,current_parm_DI		;AN000;save index of the codepage parm list entry for invoke
 		  MOV	request_type,codepage_select			;AN000;
 		  MOV	looking_for,eol 				;AN000;
-	       .ELSE							;AN000;
+	       jmp endif_l_37
+	       else_l_37:
 		  CALL	setup_invalid_parameter       ;AN000;
-	       .ENDIF
+	       endif_l_37:
 
 	       BREAK 12 						;AN000;
 
-		  .ENDIF
+		  endif_l_38:
 
 
 
 ;	    /STATUS:
 
 
-		  .IF <parser_return_code_AX EQ no_error> AND		;make sure don't have /STA:value  ;AN000;
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET slash_STA>> OR	;AN000;
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET slash_stat>> OR   ;AC002;
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET slash_STATUS>> THEN ;AN000;
+		  cmp parser_return_code_AX,no_error		;make sure don't have /STA:value  ;AN000;
+		  jne endif_l_39
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET slash_STA
+		  je @F
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET slash_stat
+		  je @F
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET slash_STATUS
+		  jne endif_l_39
+		  @@:
 
 	       MOV   request_type,codepage_status		;AN000;
-;AX322;        .IF   <device_name EQ <OFFSET CON_str>> THEN
+;AX322;        _IF   <device_name EQ <OFFSET CON_str>> THEN
 		  MOV	looking_for,eol 			;AC322;
-;AX322;        .ELSE
+;AX322;        _ELSE
 ;AX322; 	  MOV	looking_for,eol 			;AN000;
-;AX322;        .ENDIF
+;AX322;        _ENDIF
 	       BREAK 12 					;AN000;
 
-		  .ENDIF
+		  endif_l_39:
 
 
 ;	    eol:
 
-		  .IF <parser_return_code_AX EQ end_of_command_line> THEN ;AN000;
+		  cmp parser_return_code_AX,end_of_command_line
+		  jne @F
 
 	       MOV   request_type,codepage_status			;AN000;
 	       MOV   eol_found,true		   ;AN000;
 	       BREAK 12 						;AN000;
 
-		  .ENDIF
+		  @@:
 
 
 ;	    otherwise:
@@ -3306,79 +3486,99 @@ PUBLIC DUMMY1
 
 ;	    CODEPAGE:
 
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ 0> AND		  ;AC007;wasn't SEL=cpnum or PREP=cpnum
-		  .IF <parm_list[current_parm_DI].item_tag EQ codepage_item_tag> THEN	  ;AN000;IF found "codepage" or "cp" THEN
+		  cmp word ptr parm_list[current_parm_DI].keyword_switch_ptr,0			  ;AC007;wasn't SEL=cpnum or PREP=cpnum
+		  jne @F
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,codepage_item_tag		  ;AN000;IF found "codepage" or "cp" THEN
+		  jne @F
 
 	       ;set up for codepage_prms_case
 ;	       modify_parser_control_block keywords,addd,codepage_keywords  ;AN000;codepage parms handler assumes keywords setup
 	       MOV   looking_for,codepage_prms			       ;AN000;
 	       BREAK 13 						;AN000;
 
-		  .ENDIF
+		  @@:
 
 
 ;	    /STATUS:	   ;only CODEPAGE or end of line valid next
 
-		  .IF <parser_return_code_AX EQ no_error> AND		;make sure don't have /STA:value  ;AN000;
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET slash_STA>> OR	;AN000;
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET slash_stat>> OR   ;AC004;
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET slash_STATUS>> THEN ;AN000;
+		  cmp parser_return_code_AX,no_error		;make sure don't have /STA:value  ;AN000;
+		  jne endif_41
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET slash_STA
+		  je @F
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET slash_stat
+		  je @F
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET slash_STATUS
+		  jne endif_41
+		  @@:
 
 	       CALL  parse_parm 					;AN000;
-	       .IF <parm_list[current_parm_DI].item_tag EQ codepage_item_tag> THEN  ;AN000;
+	       cmp byte ptr parm_list[current_parm_DI].item_tag,codepage_item_tag
+	       jne elseif_l_40
 		  MOV	looking_for,eol ;AN000;
 		  MOV	status_request,true
 		  MOV	request_type,codepage_status	;AN000;
-	       .ELSEIF <parser_return_code_AX EQ end_of_command_line> THEN   ;AN000;
+	       jmp endif_l_40
+	       elseif_l_40:
+	       cmp parser_return_code_AX,end_of_command_line
+	       jne else_l_40
 		  MOV	eol_found,true					;AC005;
 		  MOV	status_request,true				;AC005;
 		  MOV	request_type,codepage_status	;AC005;
-	       .ELSE						;AN000;
+	       jmp endif_l_40
+	       else_l_40:
 		  CALL	setup_invalid_parameter       ;AN000;
-	       .ENDIF
+	       endif_l_40:
 	       BREAK 13 						;AN000;
 
-		  .ENDIF
+		  endif_41:
 
 
 ;	    eol:
 
-		  .IF <parser_return_code_AX EQ end_of_command_line> THEN ;AN000;
+		  cmp parser_return_code_AX,end_of_command_line
+		  jne @F
 
 	       MOV   request_type,codepage_status			;AN000;
 	       MOV   eol_found,true		   ;AN000;
 	       BREAK 13 					;AN000;
 
-		  .ENDIF
+		  @@:
 
 
 
 ;	    codepage_keyword_out_of_order:
 
 
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET PREPARE_equal>> OR  ;AC007;if got here and have
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET PREP_equal>> OR 	;AC007;one of the codepage
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET SEL_equal>> OR		;AC007;keywords then user
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET SELECT_equal>> THEN	;AC007;forgot "CP"
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET PREPARE_equal  ;AC007;if got here and have
+		  je @F
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET PREP_equal 	  ;AC007;one of the codepage
+		  je @F
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET SEL_equal	  ;AC007;keywords then user
+		  je @F
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET SELECT_equal	  ;AC007;forgot "CP"
+		  jne endif_l_41
+		  @@:
 
 	       MOV   message,OFFSET Invalid_number_of_parameters				  ;AC007;
 	       MOV   noerror,false								  ;AC007;
 	       BREAK 13  ;AN000;CON_keyword
 
-		  .ENDIF
+		  endif_l_41:
 
 
 
 ;	    REFRESH_out_of_order:   ;AC007;forgot to include "CP"
 
 
-		  .IF <parm_list[current_parm_DI].item_tag EQ REFRESH_item_tag> THEN  ;AC007;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,REFRESH_item_tag
+		  jne else_l_42
 
 	       MOV   message,OFFSET Invalid_number_of_parameters				  ;AC007;
 	       MOV   noerror,false								  ;AC007;
 ;	       BREAK 13
 
-		  .ELSE 					;AC007;
+		  jmp endif_l_42
+		  else_l_42:
 
 
 
@@ -3387,7 +3587,7 @@ PUBLIC DUMMY1
 	       CALL  setup_invalid_parameter	   ;AN000;
 ;	       BREAK
 
-		  .ENDIF						;AC007;
+		  endif_l_42:
 
 	 ENDCASE_13:
 
@@ -3408,32 +3608,39 @@ PUBLIC DUMMY1
 
 ;	    codepage:
 
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ 0> AND		  ;AC007;wasn't SEL=cpnum or PREP=cpnum
-		  .IF <parm_list[current_parm_DI].item_tag EQ codepage_item_tag> THEN	  ;AN000;IF found "codepage" or "cp" THEN
+		  cmp word ptr parm_list[current_parm_DI].keyword_switch_ptr,0		  ;AC007;wasn't SEL=cpnum or PREP=cpnum
+		  jne @F
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,codepage_item_tag	  ;AN000;IF found "codepage" or "cp" THEN
+		  jne @F
 
 	       MOV   looking_for,codepage_prms			       ;AN000;
 	       BREAK 14 					;AN000;
 
-		  .ENDIF
+		  @@:
 
 
 ;	    eol:
 
-		  .IF <parser_return_code_AX EQ end_of_command_line> THEN   ;AN000;
+		  cmp parser_return_code_AX,end_of_command_line
+		  jne @F
 
 	       MOV   request_type,all_con_status	;AN000;found only CON on the command line
 	       MOV   eol_found,true		;AN000;
 	       BREAK 14 				;AN000;
 
-		  .ENDIF
+		  @@:
 
 
 
 ;	    /STATUS:
 
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET slash_STA>> OR	;AN000;
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET slash_stat>> OR   ;AC004;
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET slash_STATUS>> THEN ;AN000;
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET slash_STA
+		  je @F
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET slash_stat
+		  je @F
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET slash_STATUS
+		  jne endif_l_43
+		  @@:
 
 	       MOV   slash_status,deleted  ;AN000;
 	       MOV   slash_stat,deleted 	;AN000;
@@ -3442,51 +3649,70 @@ PUBLIC DUMMY1
 	       MOV   looking_for,eol			;AC665;have MODE CON /STATUS, must find eol now
 	       BREAK 14 					;AN000;
 
-		  .ENDIF
+		  endif_l_43:
 
 
 
 ;	    con_keyword:
 
 
-		  .IF <parser_return_code_AX EQ no_error> AND		;make sure invalid value not specified ;AN000;
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr NE 0> THEN  ;not pointing to /sta, not 0, must be a keyword
+		  cmp parser_return_code_AX,no_error		;make sure invalid value not specified ;AN000;
+		  jne endif_l_45
+		  cmp word ptr parm_list[current_parm_DI].keyword_switch_ptr,0  ;not pointing to /sta, not 0, must be a keyword
+		  je endif_l_45
 
-	       .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET rate_equal>> OR				   ;AN000;
-	       .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET del_equal>> OR				   ;AN000;
-	       .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET delay_equal>> THEN 			   ;AN000;
+	       cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET rate_equal
+	       je @F
+	       cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET del_equal
+	       je @F
+	       cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET delay_equal
+	       jne elseif_l_44
+	       @@:
 		  INC	rate_and_delay_found		;found one, needs to be 2 before valid;AN000;
-	       .ELSEIF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET PREPARE_equal>> OR  ;AC007;if got here and have
-	       .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET PREP_equal>> OR	     ;AC007;one of the codepage
-	       .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET SEL_equal>> OR	     ;AC007;keywords then user
-	       .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET SELECT_equal>> THEN     ;AC007;forgot "CP"
+	       jmp endif_l_44
+	       elseif_l_44:
+	       cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET PREPARE_equal
+	       je @F
+	       cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET PREP_equal
+	       je @F
+	       cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET SEL_equal
+	       je @F
+	       cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET SELECT_equal
+	       jne else_l_44
+	       @@:
 		  MOV	message,OFFSET Invalid_number_of_parameters				     ;AC007;
 		  MOV	noerror,false								     ;AC007;
-	       .ELSE
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr NE <OFFSET COLUMNS_equal>> AND  ;AC007;
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr NE <OFFSET COLS_equal>> AND  ;AC007;
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr NE <OFFSET lines_equal>> THEN ;AC007;
+	       jmp endif_l_44
+	       else_l_44:
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET COLUMNS_equal
+		  je @F
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET COLS_equal
+		  je @F
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET lines_equal
+		  je @F
 		     CALL  setup_invalid_parameter	 ;AC007;keyword other than LINES=, COLS=, RATE= or DELAY= would require CP
-		  .ENDIF				 ;AC007;and be handled above
-	       .ENDIF													   ;AN000;
+		  @@:					 ;AC007;and be handled above
+	       endif_l_44:
 	       delete_parser_value_list_entry keywords,current_parm ;AN000;doesn't affect anything if invalid parm
 	       MOV   looking_for,CON_keyword				;AN000;doesn't affect anything if invalid parm
 	       BREAK 14  ;AN000;CON_keyword
 
-		  .ENDIF
+		  endif_l_45:
 
 
 
 ;	    REFRESH:		    ;AC007;forgot to include "CP"
 
 
-		  .IF <parm_list[current_parm_DI].item_tag EQ REFRESH_item_tag> THEN  ;AC007;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,REFRESH_item_tag
+		  jne else_l_46
 
 	       MOV   message,OFFSET Invalid_number_of_parameters				  ;AC007;
 	       MOV   noerror,false								  ;AC007;
 ;	       BREAK
 
-		  .ELSE 				;AC007;
+		  jmp endif_l_46
+		  else_l_46:
 
 
 
@@ -3495,7 +3721,7 @@ PUBLIC DUMMY1
 	       CALL  setup_invalid_parameter	   ;AN000;
 ;	       BREAK
 
-		  .ENDIF				;AC007;
+		  endif_l_46:
 
 
 
@@ -3513,9 +3739,13 @@ PUBLIC DUMMY1
 	 MOV   slash_sta,deleted  ;AN000;
 
 	 MOV   i_CL,1					   ;AN000;
-	 .WHILE <i_CL LT number_of_con_keywords> AND	   ;AN000;
-	 .WHILE <eol_found EQ false> AND			      ;AN000;
-	 .WHILE <noerror EQ true> DO				;AN000;
+	 while_l_4:
+	 cmp i_CL,number_of_con_keywords
+	 jge endwhile_l_4
+	 cmp eol_found,false
+	 jne endwhile_l_4
+	 cmp noerror,true
+	 jne endwhile_l_4
 	    PUSH  CX
 
 	    CALL  parse_parm					;AN000;
@@ -3524,36 +3754,47 @@ PUBLIC DUMMY1
 
 ;	       con_keyword:
 
-		     .IF <parser_return_code_AX EQ no_error> AND	   ;make sure don't have /STA:value  ;AN000;
-		     .IF <parm_list[current_parm_DI].keyword_switch_ptr NE 0> THEN  ;not 0, must be a keyword		   ;AN000;
+		     cmp parser_return_code_AX,no_error	   ;make sure don't have /STA:value  ;AN000;
+		     jne endif_l_48
+		     cmp word ptr parm_list[current_parm_DI].keyword_switch_ptr,0  ;not 0, must be a keyword		   ;AN000;
+		     je endif_l_48
 
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET rate_equal>> OR 			   ;AN000;
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET del_equal>> OR				   ;AN000;
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET delay_equal>> THEN			   ;AN000;
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET rate_equal
+		  je @F
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET del_equal
+		  je @F
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET delay_equal
+		  jne endif_l_47
+		  @@:
 		     INC   rate_and_delay_found 	   ;found one, needs to be 2 before valid;AN000;
-		  .ENDIF
+		  endif_l_47:
 		  delete_parser_value_list_entry keywords,current_parm ;AN000;
 		  INC	i_CL						   ;AN000;
 		  BREAK 15						;AN000;
 
-		     .ENDIF						   ;AN000;
+		     endif_l_48:
 
 
 ;	       eol:
 
-		     .IF <parser_return_code_AX EQ end_of_command_line> THEN ;AN000;
+		     cmp parser_return_code_AX,end_of_command_line
+		     jne endif_l_50
 
-		  .IF <rate_and_delay_found EQ both> OR 		;IF both OR neither found THEN
-		  .IF <rate_and_delay_found EQ false> THEN
+		  cmp rate_and_delay_found,both 		;IF both OR neither found THEN
+		  je @F
+		  cmp rate_and_delay_found,false
+		  jne else_l_49
+		  @@:
 		     MOV   request_type,set_con_features		   ;AN000;
 		     MOV   eol_found,true		     ;AN000;
-		  .ELSE
+		  jmp endif_l_49
+		  else_l_49:
 		     MOV   message,OFFSET rate_and_delay_together	;RATE and DELAY must be specified together
 		     MOV   noerror,false
-		  .ENDIF
+		  endif_l_49:
 		  BREAK 15						;AN000;
 
-		     .ENDIF
+		     endif_l_50:
 
 
 ;	       otherwise:
@@ -3565,7 +3806,8 @@ PUBLIC DUMMY1
 
 	    POP   CX
 
-	 .ENDWHILE			  ;AN000;
+	 jmp while_l_4
+	 endwhile_l_4:
 
 	 MOV   looking_for,eol		 ;AN000;check for extraneous parms
 
@@ -3585,45 +3827,55 @@ PUBLIC sd_or_dl_or_eol_case
 
 ;	    sd: 		       ;found R or L
 
-		  .IF <parm_list[current_parm_DI].item_tag EQ L_item_tag> OR   ;AN000;
-		  .IF <parm_list[current_parm_DI].item_tag EQ R_item_tag> THEN ;AN000;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,L_item_tag
+		  je @F
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,R_item_tag
+		  jne endif_l_51
+		  @@:
 
 	       MOV   looking_for,T_or_EOL			;AN000;request_type already set
 	       BREAK 17 					;AN000;
 
-		  .ENDIF
+		  endif_l_51:
 
 ;	    dl:
 
-		  .IF <parm_list[current_parm_DI].item_tag EQ fourtythree_item_tag> OR ;AN000;
-		  .IF <parm_list[current_parm_DI].item_tag EQ fifty_item_tag> OR   ;AN000;
-		  .IF <parm_list[current_parm_DI].item_tag EQ twentyfive_item_tag> THEN ;AN000;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,fourtythree_item_tag
+		  je @F
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,fifty_item_tag
+		  je @F
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,twentyfive_item_tag
+		  jne endif_l_52
+		  @@:
 
 	       MOV   looking_for,eol		;AN000;request_type already set
 	       BREAK 17 					;AN000;
 
-		  .ENDIF
+		  endif_l_52:
 
 
 
 ;	    eol:
 
-		  .IF <parser_return_code_AX EQ end_of_command_line> THEN ;AN000;
+		  cmp parser_return_code_AX,end_of_command_line
+		  jne @F
 
 	       MOV   eol_found,true		      ;AN000;request_type already set
 	       BREAK 17 						;AN000;
 
-		  .ENDIF
+		  @@:
 
 
 ;	    otherwise:	   regardless of what follows must have a parm here, didn't so yell
 
-	       .IF <parser_return_code_AX EQ operand_missing> THEN	;AN000;two commas with nothing in between
+	       cmp parser_return_code_AX,operand_missing	;AN000;two commas with nothing in between
+	       jne else_l_53
 		  MOV	message,OFFSET Invalid_number_of_parameters   ;AN000;
 		  MOV	noerror,false					;AN000;
-	       .ELSE							;AN000;
+	       jmp endif_l_53
+	       else_l_53:
 		  CALL	setup_invalid_parameter 		      ;AN000;some bogus value or string
-	       .ENDIF							;AN000;
+	       endif_l_53:
 
 ;	       BREAK
 
@@ -3645,50 +3897,60 @@ PUBLIC sd_or_dl_case
 
 ;	    sd:
 
-		  .IF <parm_list[current_parm_DI].item_tag EQ L_item_tag> OR   ;AN000;
-		  .IF <parm_list[current_parm_DI].item_tag EQ R_item_tag> THEN ;AN000;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,L_item_tag
+		  je @F
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,R_item_tag
+		  jne endif_l_54
+		  @@:
 
 	       MOV   looking_for,T_or_EOL				;AN000;
 	       MOV   request_type,old_video_mode_set		       ;AN000;
 	       BREAK 18 						;AN000;
 
-		  .ENDIF
+		  endif_l_54:
 
 
 ;	    dl:
 
-		  .IF <parm_list[current_parm_DI].item_tag EQ fourtythree_item_tag> OR ;AN000;
-		  .IF <parm_list[current_parm_DI].item_tag EQ fifty_item_tag> OR   ;AN000;
-		  .IF <parm_list[current_parm_DI].item_tag EQ twentyfive_item_tag> THEN ;AN000;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,fourtythree_item_tag
+		  je @F
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,fifty_item_tag
+		  je @F
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,twentyfive_item_tag
+		  jne endif_l_55
+		  @@:
 
 	       MOV   request_type,old_video_mode_set	 ;AN000;
 	       MOV   looking_for,eol		      ;AN000;
 	       BREAK 18 						;AN000;
 
-		  .ENDIF
+		  endif_l_55:
 
 
 
 ;	    eol:
 
-		  .IF <parser_return_code_AX EQ end_of_command_line> THEN ;AN000;
+		  cmp parser_return_code_AX,end_of_command_line
+		  jne @F
 
 	       MOV   message,OFFSET invalid_number_of_parameters	       ;AN000;
 	       MOV   noerror,false					;AN000;
 	       MOV   eol_found,true			      ;AN000;
 	       BREAK 18 						;AN000;
 
-		  .ENDIF
+		  @@:
 
 
 ;	    otherwise:
 
-	       .IF <parser_return_code_AX EQ operand_missing> THEN	;AN000;two commas with nothing in between
+	       cmp parser_return_code_AX,operand_missing		;AN000;two commas with nothing in between
+	       jne else_l_56
 		  MOV	message,OFFSET Invalid_number_of_parameters   ;AN000;
 		  MOV	noerror,false					;AN000;
-	       .ELSE							;AN000;
+	       jmp endif_l_56
+	       else_l_56:
 		  CALL	setup_invalid_parameter 		      ;AN000;some bogus value or string
-	       .ENDIF							;AN000;
+	       endif_l_56:
 ;	       BREAK
 
 	 ENDCASE_18:
@@ -3705,21 +3967,23 @@ PUBLIC sd_or_dl_case
 
 ;	    T:
 
-		  .IF <parm_list[current_parm_DI].item_tag EQ T_item_tag> THEN ;AN000;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,T_item_tag
+		  jne @F
 
 	       MOV   looking_for,eol	  ;AN000;request_type already set
 	       BREAK 19 					;AN000;
 
-		  .ENDIF
+		  @@:
 
 ;	    eol:
 
-		  .IF <parser_return_code_AX EQ end_of_command_line> THEN ;AN000;
+		  cmp parser_return_code_AX,end_of_command_line
+		  jne @F
 
 	       MOV   eol_found,true		;AN000;request_type already set
 	       BREAK 19 					;AN000;
 
-		  .ENDIF
+		  @@:
 
 
 ;	    otherwise:
@@ -3742,61 +4006,73 @@ PUBLIC sd_or_dl_case
 ;	    COM?:
 
 		  MOV  device_name,OFFSET COM1_str				  ;AC001;
-		  .IF <parm_list[current_parm_DI].item_tag EQ COM1_item_tag> OR   ;AN000;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,COM1_item_tag
+		  je @F
 		  MOV  device_name,OFFSET COM2_str				  ;AC001;
-		  .IF <parm_list[current_parm_DI].item_tag EQ COM2_item_tag> OR   ;AN000;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,COM2_item_tag
+		  je @F
 		  MOV  device_name,OFFSET COM3_str				  ;AC001;
-		  .IF <parm_list[current_parm_DI].item_tag EQ COM3_item_tag> OR   ;AN000;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,COM3_item_tag
+		  je @F
 		  MOV  device_name,OFFSET COM4_str				  ;AC001;
-		  .IF <parm_list[current_parm_DI].item_tag EQ COM4_item_tag> THEN ;AN000;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,COM4_item_tag
+		  jne endif_l_57
+		  @@:
 
 	       MOV   looking_for,eol				     ;AN000;
 	       MOV   request_type,com_status			     ;AN000;
 
 	       BREAK 20 					      ;AN000;
 
-		  .ENDIF
+		  endif_l_57:
 
 
 ;	    LPT?,
 	    PRN:
 
 		  MOV  device_name,OFFSET LPT1_str				  ;AC001;
-		  .IF <parm_list[current_parm_DI].item_tag EQ PRN_item_tag> OR	  ;AN000;
-		  .IF <parm_list[current_parm_DI].item_tag EQ LPT1_item_tag> OR   ;AN000;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,PRN_item_tag
+		  je @F
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,LPT1_item_tag
+		  je @F
 		  MOV  device_name,OFFSET LPT2_str				  ;AC001;
-		  .IF <parm_list[current_parm_DI].item_tag EQ LPT2_item_tag> OR   ;AN000;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,LPT2_item_tag
+		  je @F
 		  MOV  device_name,OFFSET LPT3_str				  ;AC001;
-		  .IF <parm_list[current_parm_DI].item_tag EQ LPT3_item_tag> THEN ;AN000;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,LPT3_item_tag
+		  jne endif_l_58
+		  @@:
 
 	       MOV   looking_for,eol	    ;AN000;
 	       MOV   request_type,printer_status			;AN000;
 	       BREAK 20 						;AN000;
 
-		  .ENDIF
+		  endif_l_58:
 
 
 
 ;	    CON:
 
-		  .IF <parm_list[current_parm_DI].item_tag EQ CON_item_tag> THEN ;AN000;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,CON_item_tag
+		  jne @F
 
 	       MOV   looking_for,eol				  ;AN000;
 	       MOV   request_type,all_con_status			   ;AN000;
 	       BREAK 20 						;AN000;
 
-		  .ENDIF
+		  @@:
 
 
 ;	    eol:
 
-		  .IF <parser_return_code_AX EQ end_of_command_line> THEN ;AN000;
+		  cmp parser_return_code_AX,end_of_command_line
+		  jne @F
 
 	       MOV   request_type,status_for_everything 	       ;AN000;
 	       MOV   eol_found,true			      ;AN000;
 	       BREAK 20 						;AN000;
 
-		  .ENDIF
+		  @@:
 
 
 ;	    otherwise:
@@ -3831,9 +4107,13 @@ PUBLIC	 dummy5
 
 ;	    /status:
 
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET slash_STA>> OR	;AN000;
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET slash_stat>> OR   ;AC004;
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET slash_STATUS>> THEN ;AN000;
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET slash_STA
+		  je @F
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET slash_stat
+		  je @F
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET slash_STATUS
+		  jne endif_l_59
+		  @@:
 
 	       MOV   slash_status,deleted				;AN000;make it so /status again is an error
 	       MOV   slash_stat,deleted 	;AN000;
@@ -3841,13 +4121,15 @@ PUBLIC	 dummy5
 	       MOV   looking_for,device_name_or_eol			;AN000;
 	       BREAK 21 						;AN000;
 
-		  .ENDIF
+		  endif_l_59:
 
 
 ;	    null:		 ;no first parm
 
-		  .IF <parser_return_code_AX EQ no_error> AND	 ;AN000;
-		  .IF <parm_list[current_parm_DI].item_tag EQ unspecified> THEN   ;AN000;valid null
+		  cmp parser_return_code_AX,no_error
+		  jne @F
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,unspecified   ;AN000;valid null
+		  jne @F
 
 	       MOV   looking_for,sd_or_dl			;AN000;
 	       MOV   parms.parmsx_ptr,OFFSET old_con_parmsx
@@ -3856,15 +4138,17 @@ PUBLIC	 dummy5
 	       MOV   request_type,old_video_mode_set		;AN000;
 	       BREAK 21 					;AN000;
 
-		  .ENDIF
+		  @@:
 
 
 	    screen_modes:	  ;first parm is 80, BW80, MONO etc.
 
 	    PUBLIC   screen_modes
 
-		  .IF <parm_list[current_parm_DI].item_tag GE first_screen_mode_item_tag> AND ;AN000;
-		  .IF <parm_list[current_parm_DI].item_tag LE last_screen_mode_item_tag> THEN ;AN000;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,first_screen_mode_item_tag
+		  jl @F
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,last_screen_mode_item_tag
+		  jg @F
 
 	       MOV   parms.parmsx_ptr,OFFSET old_con_parmsx
 	       MOV   ordinal,0					;AN000;start over with new parmsx block
@@ -3873,7 +4157,7 @@ PUBLIC	 dummy5
 	       MOV   request_type,old_video_mode_set		;AN000;
 	       BREAK 21 					;AN000;
 
-		  .ENDIF
+		  @@:
 
 
 
@@ -3883,29 +4167,36 @@ PUBLIC	 dummy5
 		  MOV	device_name,OFFSET LPT1_str			  ;AN000;assume LPT1
 		  MOV	device,"1"                              ;AC664;set up message
 		  MOV	LPTNO,"1"                  ;see modeprin
-		  MOV	parm_list[current_parm_DI+TYPE parm_list_entry].item_tag,onethirtytwo_item_tag   ;AN000;save chars/line
-		  .IF <parm_list[current_parm_DI].item_tag EQ LPT1132_item_tag> OR ;AN000;
+		  MOV	BYTE PTR [current_parm_DI+TYPE parm_list_entry].item_tag,onethirtytwo_item_tag   ;AN000;save chars/line
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,LPT1132_item_tag
+		  je @F
 		  MOV	device_name,OFFSET LPT2_str			  ;AN000;assume LPT2
 		  MOV	LPTNO,"2"                  ;see modeprin
 		  MOV	device,"2"                              ;AC664;set up message
-		  .IF <parm_list[current_parm_DI].item_tag EQ LPT2132_item_tag> OR ;AN000;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,LPT2132_item_tag
+		  je @F
 		  MOV	device_name,OFFSET LPT3_str			  ;AN000;assume LPT3
 		  MOV	LPTNO,"3"                  ;see modeprin
 		  MOV	device,"3"                              ;AC664;set up message
-		  .IF <parm_list[current_parm_DI].item_tag EQ LPT3132_item_tag> OR ;AN000;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,LPT3132_item_tag
+		  je @F
 		  MOV	device_name,OFFSET LPT1_str			  ;AN000;assume LPT1
 		  MOV	device,"1"                              ;AC664;set up message
 		  MOV	LPTNO,"1"                  ;see modeprin
-		  MOV	parm_list[current_parm_DI+TYPE parm_list_entry].item_tag,eighty_item_tag	  ;AN000;save chars/line
-		  .IF <parm_list[current_parm_DI].item_tag EQ LPT180_item_tag > OR ;AN000;
+		  MOV	BYTE PTR [current_parm_DI+TYPE parm_list_entry].item_tag,eighty_item_tag	  ;AN000;save chars/line
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,LPT180_item_tag
+		  je @F
 		  MOV	device_name,OFFSET LPT2_str			  ;AN000;assume LPT2
 		  MOV	LPTNO,"2"                  ;see modeprin
 		  MOV	device,"2"                              ;AC664;set up message
-		  .IF <parm_list[current_parm_DI].item_tag EQ LPT280_item_tag > OR ;AN000;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,LPT280_item_tag
+		  je @F
 		  MOV	device_name,OFFSET LPT3_str			  ;AN000;assume LPT3
 		  MOV	LPTNO,"3"                  ;see modeprin
 		  MOV	device,"3"                              ;AC664;set up message
-		  .IF <parm_list[current_parm_DI].item_tag EQ LPT380_item_tag > THEN ;AN000;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,LPT380_item_tag
+		  jne else_l_60
+		  @@:
 
 
 	       ADD   DI,TYPE parm_list_entry			;AN000;already have chars per line so skip to next element in list
@@ -3922,10 +4213,11 @@ PUBLIC	 dummy5
 	       MOV   request_type,old_initialize_printer_port	;AN000;
 	       BREAK 21 					;AN000;
 
-		  .ELSE 		  ;AN000;clean up after dorking the next parameter
+		  jmp endif_l_60
+		  else_l_60: 		  ;AN000;clean up after dorking the next parameter
 		     ADD   DI,TYPE parm_list_entry	;AN000;point to next entry, the one that needs to be reinitialized
 		     CALL  reset_parm_pointer		;AN000;reinitialize the second parm entry, DEC DI
-		  .ENDIF
+		  endif_l_60:
 
 
 
@@ -3940,22 +4232,34 @@ PUBLIC	 dummy5
 		  ;have control blocks set up to find COM strings as value of keyword
 
 		  MOV  lptno,0				   ;lptno=BIOS digestable printer number for LPT1 set up for modeecho
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET LPT1_colon_equal>> OR  ;AN000;
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET LPT1_equal>> OR  ;AN000;
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET LPT1_colon_equal
+		  je @F
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET LPT1_equal
+		  je @F
 		  MOV	lptno,1 									  ;set up for modeecho
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET LPT2_colon_equal>> OR  ;AN000;
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET LPT2_equal>> OR  ;AN000;
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET LPT2_colon_equal
+		  je @F
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET LPT2_equal
+		  je @F
 		  MOV	lptno,2 									  ;set up for modeecho
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET LPT3_colon_equal>> OR  ;AN000;
-		  .IF <parm_list[current_parm_DI].keyword_switch_ptr EQ <OFFSET LPT3_equal>> THEN      ;AN000;
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET LPT3_colon_equal
+		  je @F
+		  cmp parm_list[current_parm_DI].keyword_switch_ptr,OFFSET LPT3_equal
+		  jne endif_l_62
+		  @@:
 		     MOV   device,"1"                                                    ;set up for call to modeecho
-		     .IF <parm_list[current_parm_DI].item_tag EQ COM1_item_tag> OR   ;AN000;
+		     cmp byte ptr parm_list[current_parm_DI].item_tag,COM1_item_tag
+		     je @F
 		     MOV   device,"2"                                                    ;set up for call to modeecho
-		     .IF <parm_list[current_parm_DI].item_tag EQ COM2_item_tag> OR   ;AN000;
+		     cmp byte ptr parm_list[current_parm_DI].item_tag,COM2_item_tag
+		     je @F
 		     MOV   device,"3"                                                    ;set up for call to modeecho
-		     .IF <parm_list[current_parm_DI].item_tag EQ COM3_item_tag> OR   ;AN000;
+		     cmp byte ptr parm_list[current_parm_DI].item_tag,COM3_item_tag
+		     je @F
 		     MOV   device,"4"                                                    ;set up for call to modeecho
-		     .IF <parm_list[current_parm_DI].item_tag EQ COM4_item_tag> THEN ;AN000;
+		     cmp byte ptr parm_list[current_parm_DI].item_tag,COM4_item_tag
+		     jne else_l_61
+		     @@:
 
 	       MOV   looking_for,eol			     ;AN000;
 	       MOV   request_type,printer_reroute		    ;AN000;
@@ -3963,28 +4267,34 @@ PUBLIC	 dummy5
 	       MOV   device_type,LPTX
 	       BREAK 21 						;AN000;
 
-		     .ELSE						      ;AN000;
+		     jmp endif_l_61
+		     else_l_61:
 			MOV   message,OFFSET com1_or_com2      ;AN000;"Must specify COM1, COM2, COM3 or COM4"
-		     .ENDIF
-		  .ENDIF
+		     endif_l_61:
+		  endif_l_62:
 
 
 
 ;	    LPTX,:		       found "LPTX," so chars per line has been skipped
 
-		  .IF <terminating_delimeter EQ comma> AND NEAR ;AC007;handle other cases later, looking only for "LPTX," now
+		  cmp terminating_delimeter,comma ;AC007;handle other cases later, looking only for "LPTX," now
+		  jne endif_l_68
 		  MOV	device_name,OFFSET LPT1_str			  ;AN000;assume LPT1
 		  MOV	device,"1"                              ;AC664;set up message
 		  MOV	LPTNO,"1"                  ;see modeprin
-		  .IF <parm_list[current_parm_DI].item_tag EQ LPT1_item_tag> OR   ;AN000;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,LPT1_item_tag
+		  je @F
 		  MOV	device_name,OFFSET LPT2_str			  ;AN000;assume LPT2
 		  MOV	LPTNO,"2"                  ;see modeprin
 		  MOV	device,"2"                              ;AC664;set up message
-		  .IF <parm_list[current_parm_DI].item_tag EQ LPT2_item_tag> OR   ;AN000;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,LPT2_item_tag
+		  je @F
 		  MOV	device_name,OFFSET LPT3_str			  ;AN000;assume LPT3
 		  MOV	LPTNO,"3"                  ;see modeprin
 		  MOV	device,"3"                              ;AC664;set up message
-		  .IF <parm_list[current_parm_DI].item_tag EQ LPT3_item_tag> THEN ;AN000;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,LPT3_item_tag
+		  jne endif_l_68
+		  @@:
 
 	       MOV   parms.parmsx_ptr,OFFSET lpt_parmsx 	;AN000;
 	       MOV   lines_value_ptr,OFFSET LPT_lines_values		;AN000;
@@ -4002,7 +4312,7 @@ PUBLIC	 dummy5
 	       MOV   request_type,old_initialize_printer_port	;AN000;
 	       BREAK 21 						;AN000;
 
-		  .ENDIF
+		  endif_l_68:
 
 
 
@@ -4022,16 +4332,21 @@ PUBLIC	 dummy5
 
 		  MOV	device_name,OFFSET COM1_str			  ;AN000;assume COM1
 		  MOV	device,"1"                              ;AN000;set up message
-		  .IF <parm_list[current_parm_DI].item_tag EQ COM1_item_tag> OR   ;AN000;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,COM1_item_tag
+		  je @F
 		  MOV	device_name,OFFSET COM2_str			  ;AN000;assume COM2
 		  MOV	device,"2"                              ;AN000;set up message
-		  .IF <parm_list[current_parm_DI].item_tag EQ COM2_item_tag> OR   ;AN000;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,COM2_item_tag
+		  je @F
 		  MOV	device_name,OFFSET COM3_str			  ;AN000;assume COM3
 		  MOV	device,"3"                              ;AN000;;set up message
-		  .IF <parm_list[current_parm_DI].item_tag EQ COM3_item_tag> OR   ;AN000;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,COM3_item_tag
+		  je @F
 		  MOV	device_name,OFFSET COM4_str			  ;AN000;assume COM4
 		  MOV	device,"4"                              ;AN000;;set up message
-		  .IF <parm_list[current_parm_DI].item_tag EQ COM4_item_tag> THEN ;AN000;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,COM4_item_tag
+		  jne endif_l_63
+		  @@:
 
 	       MOV   parms.parmsx_ptr,OFFSET com_parmsx 	;AN000;
 	       MOV   ordinal,0				;AN000;new parmsx, start with new number of positionals, start at first one
@@ -4039,7 +4354,7 @@ PUBLIC	 dummy5
 	       MOV   device_type,COMX			 ;AN000;;set up for rescode
 	       BREAK 21 					;AN000;
 
-		  .ENDIF
+		  endif_l_63:
 
 
 
@@ -4048,15 +4363,19 @@ PUBLIC	 dummy5
 		  MOV	device_name,OFFSET LPT1_str			  ;AN000;assume LPT1
 		  MOV	device,"1"                              ;AC664;set up message
 		  MOV	LPTNO,"1"                  ;see modeprin
-		  .IF <parm_list[current_parm_DI].item_tag EQ LPT1_item_tag> OR   ;AN000;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,LPT1_item_tag
+		  je @F
 		  MOV	device_name,OFFSET LPT2_str			  ;AN000;assume LPT2
 		  MOV	LPTNO,"2"                  ;see modeprin
 		  MOV	device,"2"                              ;AC664;set up message
-		  .IF <parm_list[current_parm_DI].item_tag EQ LPT2_item_tag> OR   ;AN000;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,LPT2_item_tag
+		  je @F
 		  MOV	device_name,OFFSET LPT3_str			  ;AN000;assume LPT3
 		  MOV	LPTNO,"3"                  ;see modeprin
 		  MOV	device,"3"                              ;AC664;set up message
-		  .IF <parm_list[current_parm_DI].item_tag EQ LPT3_item_tag> THEN ;AN000;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,LPT3_item_tag
+		  jne endif_l_64
+		  @@:
 
 	       MOV   parms.parmsx_ptr,OFFSET lpt_parmsx 	;AN000;
 	       MOV   columns_value_ptr,OFFSET LPT_columns_values	;AN000;
@@ -4068,23 +4387,25 @@ PUBLIC	 dummy5
 	       MOV   device_type,LPTX				;for rescode
 	       BREAK 21 						;AN000;
 
-		  .ENDIF
+		  endif_l_64:
 
 
 ;	    PRN:
 
-		  .IF <parm_list[current_parm_DI].item_tag EQ PRN_item_tag> THEN  ;AN000;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,PRN_item_tag
+		  jne @F
 
 	       MOV   looking_for,codepage		;AN000;
 	       MOV   device_name,OFFSET LPT1_str	;AN000;
 	       BREAK 21 				;AN000;
 
-		  .ENDIF
+		  @@:
 
 
 ;	    CON:
 
-		  .IF <parm_list[current_parm_DI].item_tag EQ CON_item_tag> THEN ;AN000;
+		  cmp byte ptr parm_list[current_parm_DI].item_tag,CON_item_tag
+		  jne @F
 
 	       MOV   parms.parmsx_ptr,OFFSET con_parmsx 	;AN000;set up for con parms
 	       MOV   ordinal,0					;AN000;start over with new parmsx block
@@ -4092,19 +4413,20 @@ PUBLIC	 dummy5
 	       MOV   device_name,OFFSET CON_str
 	       BREAK 21
 
-		  .ENDIF
+		  @@:
 
 
 
 ;	    eol:		 ;no parms specified
 
-		  .IF <parser_return_code_AX EQ end_of_command_line> THEN ;AN000;
+		  cmp parser_return_code_AX,end_of_command_line
+		  jne @F
 
 	       MOV   request_type,status_for_everything 	       ;AN000;
 	       MOV   eol_found,true			      ;AN000;
 	       BREAK 21 						;AN000;
 
-		  .ENDIF
+		  @@:
 
 
 
@@ -4115,8 +4437,11 @@ PUBLIC	 dummy5
 		  ;for i in 1 through 4 see if the parm is COMi
 		  MOV	match_found,false		       ;AN000;
 		  MOV	i_CL,0				   ;AN000;CL:="1"
-		  .WHILE <i_CL LT 4> AND		;AN000;
-		  .WHILE <match_found EQ false> DO		 ;AN000;
+		  while_l_5:
+		  cmp i_CL,4
+		  jge endwhile_l_5
+		  cmp match_found,false
+		  jne endwhile_l_5
 		     CALL  reset_parm_pointer		   ;AN000;prepare to reparse the parm
 		     INC   i_CL        ;AN000;use next number as a delimeter
 		     MOV   parm_list[current_parm_DI].item_tag,i_CL	   ;AN000;depends on COM1 thru 4 item tags being 1 thru 4
@@ -4127,32 +4452,43 @@ PUBLIC	 dummy5
 		     MOV   command_line,OFFSET first_char_in_command_line   ;set parser up at start of the command line each time
 		     PUSH  CX				   ;AN000;save the delimeter (ASCII form)
 		     CALL   parse_parm				      ;AN000;
-;		     .IF <parm_list[current_parm_DI].item_tag EQ COM_item_tag> THEN ;AN000;isloated "COM" so found "COM?"
-		     .IF <parser_return_code_AX EQ no_error> THEN ;AN000;isloated "COM" so found "COMx"
+;		     cmp parm_list[current_parm_DI].item_tag,COM_item_tag ;AN000;isloated "COM" so found "COM?"
+		     cmp parser_return_code_AX,no_error ;AN000;isloated "COM" so found "COMx"
+		     jne @F
 			MOV   match_found,true				   ;AN000;
-		     .ENDIF
+		     @@:
 		     POP   CX				      ;AN000;restore the ASCII delimeter
 		     modify_parser_control_block seperator_list,delete,i_CL  ;AN000;fix parser control blocks
 		     POP   CX				      ;restore the loop counter
-		  .ENDWHILE						   ;AN000;
-		  .IF <match_found EQ true> THEN   ;AN000;IF have COMX THEN look for valid baud
-		     .IF <i_CL EQ 1> THEN			;AN000;
+		  jmp while_l_5
+		  endwhile_l_5:
+		  cmp match_found,true		   ;AN000;IF have COMX THEN look for valid baud
+		  jne else_l_66
+		     cmp i_CL,1
+		     jne elseif_l_65_1
 			MOV   device_name,OFFSET COM1_str	;AN000;
 			MOV   parm_list[current_parm_DI].value1,OFFSET COM1_str ;AN000;setup for modecom existence check
 			MOV   device,"1"                              ;AN000;set up message
-		     .ELSEIF <i_CL EQ 2> THEN			;AN000;
+		     jmp endif_l_65
+		     elseif_l_65_1:
+		     cmp i_CL,2
+		     jne elseif_l_65_2
 			MOV   device_name,OFFSET COM2_str	;AN000;
 			MOV   parm_list[current_parm_DI].value1,OFFSET COM2_str ;AN000;setup for modecom existence check
 			MOV   device,"2"                              ;AN000;set up message
-		     .ELSEIF <i_CL EQ 3> THEN			;AN000;
+		     jmp endif_l_65
+		     elseif_l_65_2:
+		     cmp i_CL,3
+		     jne else_l_65
 			MOV   device_name,OFFSET COM3_str	;AN000;
 			MOV   parm_list[current_parm_DI].value1,OFFSET COM3_str ;AN000;setup for modecom existence check
 			MOV   device,"3"                              ;AN000;set up message
-		     .ELSE;IF <i_CL EQ 4> THEN			;AN000;
+		     jmp endif_l_65
+		     else_l_65:;IF <i_CL EQ 4> THEN			;AN000;
 			MOV   device_name,OFFSET COM4_str	;AN000;
 			MOV   parm_list[current_parm_DI].value1,OFFSET COM4_str ;AN000;setup for modecom existence check
 			MOV   device,"4"                              ;AN000;set up message
-		     .ENDIF					;AN000;
+		     endif_l_65:
 
 	       MOV   parms.parmsx_ptr,OFFSET com_parmsx 	;AN000;
 	       MOV   ordinal,0				;AN000;start with baud in new parmsx
@@ -4163,7 +4499,8 @@ PUBLIC	 dummy5
 
 ;	    otherwise:		  ;first parm was nothing recognizable
 
-		  .ELSE
+		  jmp endif_l_66
+		  else_l_66:
 
 dummy4:
 PUBLIC	 dummy4
@@ -4182,7 +4519,7 @@ PUBLIC	 dummy4
 	       CALL  setup_invalid_parameter	      ;AN000;
 ;	       BREAK
 
-		  .ENDIF
+		  endif_l_66:
 
 	 ENDCASE_21:
 
@@ -4193,23 +4530,27 @@ PUBLIC	 dummy4
       eol_case:
 
 	 CALL	parse_parm						;AN000;
-	 .IF <parser_return_code_AX NE end_of_command_line> THEN	;AN000;
+	 cmp parser_return_code_AX,end_of_command_line
+	 je else_l_67
 	    MOV   message,OFFSET invalid_number_of_parameters		       ;AN000;
 	    MOV   noerror,false 					;AN000;
-	 .ELSE NEAR						;AN000;
+	 jmp while_l_6
+	 else_l_67:
 	    MOV   eol_found,true				;AN000;
-	 .ENDIF
+	 endif_l_67:
 ;	 BREAK
 
 
 
    ENDCASE_0: ;AN000;looking_for=
 
-.ENDWHILE		      ;AN000;
+jmp while_l_6
+endwhile_l_6:
 
-.IF <message NE no_message> THEN
+cmp message,no_message
+je @F
    display  message
-.ENDIF
+@@:
 
 RET
 
@@ -4508,9 +4849,10 @@ PUBLIC	 PARSE_PARM
    MOV	 CX,command_line	    ;AN000;CX=>first char of the bad parm
    MOV	 offending_parameter_ptr,CX ;AN000;set pointer in message
 
-;  .IF <parser_return_code_AX EQ no_error> THEN
+;  _IF <parser_return_code_AX EQ no_error> THEN
       MOV   command_line,SI	       ;save pointer to remainder of the command line
-      .IF <parser_return_code_AX NE end_of_command_line> THEN
+      cmp parser_return_code_AX,end_of_command_line
+      je @F
 	 MOV   DL,result.ret_type
 	 MOV   parm_list[current_parm_DI].parm_type,DL
 	 MOV   DL,result.item_tag
@@ -4521,12 +4863,12 @@ PUBLIC	 PARSE_PARM
 	 MOV   parm_list[current_parm_DI].value2,DX
 	 MOV   DX,result.synonym
 	 MOV   parm_list[current_parm_DI].keyword_switch_ptr,DX
-      .ENDIF
-;  .ELSE			       ;AN000;encountered an error
+      @@:
+;  _ELSE			       ;AN000;encountered an error
 ;     MOV   CX,command_line	       ;AN000;CX=>first char of the bad parm
 ;     MOV   offending_parameter_ptr,CX ;AN000;set pointer in message
 ;     MOV   BYTE PTR [SI],0	       ;AN000;make the offending parm an ASCIIZ string
-;  .ENDIF			       ;AN000;leave the call to msg services to the calling routine
+;  _ENDIF			       ;AN000;leave the call to msg services to the calling routine
 
    RET
 
@@ -4605,12 +4947,12 @@ reset_parm_pointer  PROC
 
 
 
-   MOV	 parm_list[current_parm_DI].parm_type,bogus			;AN000;
-   MOV	 parm_list[current_parm_DI].item_tag,0FFH			;AN000;
-   MOV	 parm_list[current_parm_DI].synonym,bogus			;AN000;
-   MOV	 parm_list[current_parm_DI].value1,bogus			;AN000;
-   MOV	 parm_list[current_parm_DI].value2,bogus			;AN000;
-   MOV	 parm_list[current_parm_DI].keyword_switch_ptr,0		;AN000;
+   MOV	 BYTE PTR parm_list[current_parm_DI].parm_type,bogus			;AN000;
+   MOV	 BYTE PTR parm_list[current_parm_DI].item_tag,0FFH			;AN000;
+   MOV	 WORD PTR parm_list[current_parm_DI].synonym,bogus			;AN000;
+   MOV	 WORD PTR parm_list[current_parm_DI].value1,bogus			;AN000;
+   MOV	 WORD PTR parm_list[current_parm_DI].value2,bogus			;AN000;
+   MOV	 WORD PTR parm_list[current_parm_DI].keyword_switch_ptr,0		;AN000;
    SUB	 current_parm_DI,TYPE parm_list_entry				;AN000;
    DEC	 ordinal							;AN000;
 
@@ -4622,4 +4964,3 @@ reset_parm_pointer ENDP 						;AN000;
 
 PRINTF_CODE ENDS							;AN000;
 	END								;AN000;
-

@@ -1,8 +1,3 @@
-.XLIST
-INCLUDE STRUC.INC
-.LIST
-
-
 ;ษออออออออออออออออออออออออออออออออ  M A C R O S  อออออออออออออออออออออออออออออออออออออออออป
 ;บ											  บ
 
@@ -20,7 +15,7 @@ ENDM												  ;AN001;
 
       PAGE    ,132		      ;
 	TITLE	MODECP.SAL - CODEPAGE SUPPORT
-	INCLUDE MODECPRO.INC		;MODULE PROLOGUE
+	INCLUDE modecpro.inc		;MODULE PROLOGUE
 ;THE FOLLOWING "INCLUDE MODECPEQ.INC" CONTAINS THE FOLLOWING DEFINITIONS:
 ; MACROS: HEADER, DOSCALL
 ; DOS FUNCTION CALLS EQUATES
@@ -32,10 +27,10 @@ ENDM												  ;AN001;
 ;      "CODEPAGE_PARMS" - INPUT PARM LIST FROM CALLER
 ;      "PACKET" AND "DES_STRT_PACKET" - BUFFERS USED
 ;	  BY THE SEVERAL CODEPAGE DOS IOCTL CALLS
-	INCLUDE MODECPEQ.INC		;MACROS,DOS EQUATES,STRUCS,OTHER EQUATES
+	INCLUDE modecpeq.inc		;MACROS,DOS EQUATES,STRUCS,OTHER EQUATES
 ; = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 	HEADER	<DESCRIPTIONS OF ALL MESSAGES USED BY MODECP.SAL>
-	INCLUDE MODECPMS.INC		;DESCRIPTIONS OF MESSAGES
+	INCLUDE modecpms.inc		;DESCRIPTIONS OF MESSAGES
 ; = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 	HEADER	<EXTRNS, LOCAL DATA AND OTHER WORKAREAS>
 ;	       $SALUT CP(4,16,22,38) ;(set preprocessor columns for indenting)
@@ -1040,7 +1035,8 @@ QUERY_ERROR PROC NEAR
 			       ;CH=LOCUS
  CMP	AX,QS_ERR7+MAPERR      ;CODE PAGE NOT SELECTD?
 
- .IF <AX EQ <QS_ERR7+MAPERR>> THEN  ;CODE PAGE NOT SELECTD?	;AC665;
+ cmp AX,QS_ERR7+MAPERR 		 ;CODE PAGE NOT SELECTD?	;AC665;
+ jne elseif_l_1
     MOV   DX,OFFSET CPMSG16	;PASS OFFSET TO MSG PARM LIST
 			       ;"NO CODEPAGE HAS BEEN SELECTED"
     CALL  SEND_MSG	       ;DISPLAY INDICATED ERROR MESSAGE
@@ -1048,17 +1044,23 @@ QUERY_ERROR PROC NEAR
     MOV   NOERROR,TRUE	       ;FORGET THE ABOVE WAS FLAGGED AS "ERROR"
     CALL  QUERY_LISTER	       ;LIST PREPPED CODEPAGES ANYWAY
 
- .ELSEIF <AX EQ DS_ERR16> OR   ;016H UNKNOWN COMMAND, i.e. device driver not loaded ;AN665;
- .IF <AX EQ DS_ERR1> THEN      ;;AN665;16=unknown command, 1=Invalid function number
+ jmp endif_l_1
+ elseif_l_1:
+ cmp AX,DS_ERR16	       ;016H UNKNOWN COMMAND, i.e. device driver not loaded ;AN665;
+ je @F
+ cmp AX,DS_ERR1		       ;;AN665;16=unknown command, 1=Invalid function number
+ jne else_l_1
+ @@:
     MOV   DX,OFFSET CPMSG15    ;AN665;PASS OFFSET TO MSG PARM LIST, "Codepage operation not supported on this device"
     CALL  SEND_MSG		;DISPLAY INDICATED ERROR MESSAGE
 
- .ELSE			       ;NOT ERR7 or 16, MUST BE DEVICE ERROR ;AC665;
+ jmp endif_l_1
+ else_l_1:		       ;NOT ERR7 or 16, MUST BE DEVICE ERROR ;AC665;
 ;AC002;    MOV	 CPMSGLST17FUN,OFFSET CPMSG17_QUERY
     set_submessage_ptr	CPMSGxx_QUERY,cpmsg17
     MOV   DX,OFFSET CPMSG17	;"DEVICE ERROR DURING QUERY"
 
- .ENDIF 		       ;CP NOT PREPARED?
+ endif_l_1: 		       ;CP NOT PREPARED?
 
  RET
 QUERY_ERROR ENDP
@@ -1258,14 +1260,15 @@ MOV   DI,OFFSET DBCS_headr		  ;DI=>buffer to fill with info ID and pointer to ta
 INT   21H
 
 LDS   SI,DBCS_header.table_ptr		  ;DS:SI=>DBCS table,"DBCS_table" EQU DS:[SI]
-.IF <DBCS_table.table_len NE 0> THEN	  ;IF there are some vectors THEN
+cmp DBCS_table.table_len,0		  ;IF there are some vectors THEN
+je @F
    MOV	 CX,DBCS_table.table_len	  ;set length of the list of vectors
    ADD	 CS:pk.packlen,CX
    ADD	 SI,vector1			  ;DS:SI=>first DBCS vector
    MOV	 DI,OFFSET pk			  ;ES:DI=>the query or invoke packet
    ADD	 DI,packvector1 		  ;ES:DI=>holder for first DBCS vector in the query/invoke packet
    REP	 MOVSB				  ;mov all the vectors and the two bytes of zeros into the packet
-.ENDIF
+@@:
 
 POP   DS				  ;restore to address stuff in MODE's segment
 
@@ -1276,4 +1279,3 @@ setup_packet_for_DBCS	ENDP
 
 PRINTF_CODE ENDS	       ;END OF MODECP.SAL MODULE
 END
-

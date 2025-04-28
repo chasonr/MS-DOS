@@ -2,9 +2,6 @@
 
 	TITLE	CODE TO BE MADE RESIDENT BY MODE
 
-.XLIST
-   INCLUDE STRUC.INC
-.LIST
 ;.SALL
 
 ;ษออออออออออออออออออออออออออออออออ  P R O L O G  อออออออออออออออออออออออออออออออออออออออออป				   ;AN000;
@@ -253,17 +250,23 @@ VEC	EQU	(VECTOR14 +1)  ;OFFSET TO IMMEDIATE FIELD OF PREVIOUSLY SET
 ;				FAR JMP INSTRUCTION, FILLED WITH THE
 ;				ORIGINAL CONTENTS OF THE INTERRUPT VECTOR
 	CALL	DWORD PTR CS:VEC       ;CALL PREVIOUS RS232 HANDLER
-	.IF <CS:request EQ COM_status> THEN		;IF a status request THEN			      ;AN001;
+	cmp CS:request,COM_status		;IF a status request THEN			      ;AN001;
+	jne else_l_1
 	   PUSH    CX			  ;need CX for shift count in CL				      ;AN001;
 	   MOV	   CX,CS:retry_type	  ;AC001; get back retry type for this port				     ;AN001;
 	   SHR	   CH,CL		  ;put back in first two bits for retry type check below	      ;AN001;
-	   .IF <CH EQ E> THEN										      ;AN001;
+	   cmp CH,E
+	   jne elseif_l_2
 	      MOV  AX,time_out+framing_error+parity_error+overrun_error     ;indicate the port is on fire     ;AN001;
-	   .ELSEIF <CH EQ R> THEN									      ;AN001;
+	   jmp endif_l_2
+	   elseif_l_2:
+	   cmp CH,R
+	   jne endif_l_2
 	      MOV  AX,shift_empty+holding_empty+clear_to_send+data_set_ready  ;indicate the port is ready     ;AN001;
-	   .ENDIF					;otherwise assume B retry and pass actual status      ;AN001;
+	   endif_l_2:					;otherwise assume B retry and pass actual status      ;AN001;
 	   POP	   CX			  ;restore reg							      ;AN001;
-	.ELSE				  ;continue as if a send request				      ;AN001;
+	jmp endif_l_1
+	else_l_1:			  ;continue as if a send request				      ;AN001;
 	   PUSH    AX			   ;SAVE REGS
 	   PUSH    DS			   ; REGS
 	   SUB	   AX,AX		   ;POINT TO
@@ -273,7 +276,7 @@ VEC	EQU	(VECTOR14 +1)  ;OFFSET TO IMMEDIATE FIELD OF PREVIOUSLY SET
 	   POP	   AX			   ; REGS
 	   JZ	   TESTER		   ;BRANCH IF NO BREAK
 	   OR	   AH,80H		   ;SIMULATE TIMEOUT ERROR ON BREAK
-	.ENDIF				   ;ENDIF status request					      ;AN001;
+	endif_l_1:			   ;ENDIF status request					      ;AN001;
 FLUSH:
 	INC	SP			;FLUSH THE
 	INC	SP			; STACK
@@ -567,7 +570,8 @@ MODELOAD PROC	NEAR
    MOV	   ES,AX		   ; TO THE EXTRA SEGMENT BASE
    LES	   DI,ES:RESSEG 	   ;GET POINTER TO RETRY CODE
 ;  IF THE CODE IS NOT ALREADY MOVED,
-   .IF <DI EQ 0> THEN NEAR	   ;AC000;IF nothing at 50:30 THEN code is not loaded
+   cmp DI,0			   ;AC000;IF nothing at 50:30 THEN code is not loaded
+   jne endif_l_3
 ;
 ;		    SINCE CODE HAS NOT YET BEEN MOVED,
 ;		    PATCH PROPER ADDRESSES INTO IT
@@ -655,7 +659,7 @@ MODELOAD PROC	NEAR
 ;				   HAS BEEN DISPLAYED
 ;				   MODESCRN MAY NEED TO REPEAT MESSAGE
       MOV     stay_resident,true
-   .ENDIF			   ;AC000;END IS CODE ALREADY LOADED? TEST
+   endif_l_3:			   ;AC000;END IS CODE ALREADY LOADED? TEST
 
 	POP	BX
 	POP	AX			;RESTORE FOR CALLING PROCEDURE
@@ -716,4 +720,3 @@ PUBLIC	stay_resident
 
 PRINTF_CODE ENDS
 	END	ENTPT
-

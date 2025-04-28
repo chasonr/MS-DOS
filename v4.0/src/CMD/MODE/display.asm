@@ -109,10 +109,10 @@ initialize_sublists  PROC  NEAR 										 ;AN000;
 
 MOV   CX,number_of_sublists											 ;AN000;
 MOV   SI,OFFSET first_sublist	       ;address first sublist							 ;AN000;
-REPEAT: 													 ;AN000;
+repeat_: 													 ;AN000;
    MOV	 [SI].sublist_seg,DS	       ;set up the segment part of the pointer field in the sublist block	 ;AN000;
    ADD	 SI,TYPE sublist_def	       ;point to next sublist block						 ;AN000;
-LOOPNZ	repeat													 ;AN000;
+LOOPNZ	repeat_													 ;AN000;
 														 ;AN000;
 RET
 														 ;AN000;

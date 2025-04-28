@@ -1,9 +1,6 @@
 ;m
 	PAGE	,132			;
 	TITLE	MODE COMMAND - MAIN PROCEDURE AND COMMAND PARSING
-.XLIST
-   INCLUDE STRUC.INC
-.LIST
 ;.SALL
 
 
@@ -23,9 +20,9 @@
 ;บ											  บ
 ;ศออออออออออออออออออออออออออออออออ  P R O L O G  อออออออออออออออออออออออออออออออออออออออออผ
 
-INCLUDE  SYSMSG.INC
+INCLUDE  sysmsg.inc
 
-MSG_UTILNAME <MODE>
+MSG_UTILNAME <mode>
 
 
 ;ษอออออออออออออออออออออออออออออออ  E Q U A T E S  ออออออออออออออออออออออออออออออออออออออออป
@@ -101,9 +98,14 @@ close_handles  PROC  NEAR		  ;AN002;close all standard device handles
 					  ;AN002;
 MOV   AH,3EH				  ;AN002;
 					  ;AN002;
-.FOR BX = STDIN TO STDPRN		  ;AN002;
+MOV   BX,STDIN
+for_l_1:
+cmp   BX,STDPRN
+jg    endfor_l_1
    INT	 21H				  ;AN002;
-.NEXT BX				  ;AN002;
+inc   BX
+jmp   for_l_1
+endfor_l_1:
 					  ;AN002;
 RET					  ;AN002;
 					  ;AN002;
@@ -126,19 +128,23 @@ MSG_SERVICES <mode.cla,mode.clb,mode.cl1,mode.cl2>    ;class B is for messages >
 main  PROC  NEAR
 
 CALL  SYSLOADMSG		    ;load the message text
-.IF NC THEN			    ;IF messages loaded successfully THEN
+jc else_l_1			    ;IF messages loaded successfully THEN
    CALL  get_machine_type
    CALL  initialize_sublists
    CALL  parse_parameters
-   .IF <noerror EQ truu> THEN	       ;no problems parsing so continue
+   cmp noerror,true		       ;no problems parsing so continue
+   jne @F
       CALL  analyze_and_invoke		  ;semantically analyze the parms and invoke appropriate routine
-   .ENDIF
+   @@:
 
    MOV	AH,TERMINATE		       ;assume won't stay resident
-   .IF <noerror EQ false> THEN
+   cmp noerror,false
+   jne else_l_2
       MOV  AL,1 		       ;had a problem somewhere
-   .ELSE
-      .IF   <stay_resident EQ truu> THEN
+   jmp endif_l_1
+   else_l_2:
+      cmp   stay_resident,truu
+      jne @F
 	 CALL  close_handles		  ;close all standard devices;AN002;
 	 MOV  DX,move_destination
 	 MOV  CL,4			  ;4 right shifts = divide by 16
@@ -147,14 +153,15 @@ CALL  SYSLOADMSG		    ;load the message text
 					  ;TO first usable
 	 ADD   DX,rescode_length	  ;BYTE OF PROGRAM segment PREFIX
 	 MOV  AH,terminate_and_stay_resident
-      .ENDIF
+      @@:
       MOV  AL,0 		       ;all went well
-   .ENDIF
-.ELSE				       ;ABORT
+   endif_l_2:
+jmp endif_l_1
+else_l_1:			       ;ABORT
 
    CALL  SYSDISPMSG			  ;display some "I'm crashing" message
 
-.ENDIF
+endif_l_1:
 
 
 INT	21H			 ;TERMINATE RETURNING ERRORLEVEL INDICATING success

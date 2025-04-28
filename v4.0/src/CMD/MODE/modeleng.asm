@@ -5,9 +5,6 @@ TITLE MODELENG.ASM - VARIOUS SERVICE ROUTINES
 ;MODELENG - convert 3 digit or less ASCII string to binary number
 ;GET_MACHINE_TYPE - determine the machine type based on model byte and sub model byte
 
-.XLIST
-   INCLUDE STRUC.INC
-.LIST
 ;.SALL
 
 ;ษออออออออออออออออออออออออออออออออ  P R O L O G  อออออออออออออออออออออออออออออออออออออออออป
@@ -220,26 +217,40 @@ PUSH  ES
 PUSH  BX			       ;will be used to point to 'system descriptor table'
 MOV   AH,return_system_configuration
 INT   15H
-.IF   NC	     ;IF the call was handled successfully
+jc else_l_1	     ;IF the call was handled successfully
    MOV	 AH,system_descriptor_table.secondary_model_byte
    MOV	 submodel_byte,AH				;save submodel byte
    MOV	 AH,system_descriptor_table.primary_model_byte
-.ELSE
+jmp endif_l_1
+else_l_1:
    MOV	 AX,ROM 		;get addressability to the model byte
    MOV	 ES,AX
    MOV	 AH,ES:model_byte
-.ENDIF
+endif_l_1:
 
-.IF <model_byte_AH EQ AT_or_XT286_or_PS2_50_or_PS2_60> THEN    ;AN000;may have a submodel byte, check it
+cmp model_byte_AH,AT_or_XT286_or_PS2_50_or_PS2_60    ;AN000;may have a submodel byte, check it
+jne elseif_l_2
 
-   .IF <submodel_byte EQ PS2Model60> THEN	;AN000;
+   cmp submodel_byte,PS2Model60
+   jne elseif_l_3_1
       MOV   AH,PS2Model60			;AN000;
-   .ELSEIF <submodel_byte EQ VAIL> OR		;AN000;
-   .IF <submodel_byte EQ PS2Model50> THEN	;AN000;
+   jmp endif_l_2
+   elseif_l_3_1:
+   cmp submodel_byte,VAIL
+   je @F
+   cmp submodel_byte,PS2Model50
+   jne elseif_l_3_2
+   @@:
       MOV   AH,PS2Model50			;AN000;
-   .ELSEIF <submodel_byte EQ XT286> THEN	;AN000;
+   jmp endif_l_2
+   elseif_l_3_2:
+   cmp submodel_byte,XT286
+   jne elseif_l_3_3
       MOV   AH,XT286				;AN000;
-   .ELSEIF <submodel_byte EQ AT3> THEN		;AN000;
+   jmp endif_l_2
+   elseif_l_3_3:
+   cmp submodel_byte,AT3
+   jne elseif_l_3_4
       MOV   DI,OFFSET date_location		       ;ES:DI=>BIOS date (BIOS_date EQU ES:[DI])	       ;AN001;
 
 ;     CASE BIOS_date=											;AN001;
@@ -248,23 +259,27 @@ INT   15H
 
 	       MOV   AX,BIOS_date.year			 ;AX=ASCII form of BIOS date year	       ;AN001;
 	       CALL  ascii_to_int			 ;BL=binary form of BIOS date year		;AN001;
-	       .IF <BL GT 85> THEN			 ;IF AT built in 86 or later		  ;AN001;
+	       cmp BL,85				 ;IF AT built in 86 or later		  ;AN001;
+	       jle endif_l_4
 
 	    MOV   AH,AT4										;AN001;
 	    BREAK 0											;AN001;
 
-	       .ENDIF											;AN001;
+	       endif_l_4:											;AN001;
 
 ;	 1985, on 11/15:	       ;BL already has year from above check				;AN001;
 
-	       .IF <BL EQ 85> AND									;AN001;
-	       .IF <BIOS_date.month EQ "11"> AND                                                        ;AN001;
-	       .IF <BIOS_date.day EQ "51"> THEN       ;"51" is the word form of "15"                    ;AN001;
+	       cmp BL,85
+	       jne endif_l_5
+	       cmp BIOS_date.month,"11"
+	       jne endif_l_5
+	       cmp BIOS_date.day,"51"       ;"51" is the word form of "15"                    ;AN001;
+	       jne endif_l_5
 
 	    MOV   AH,AT4										;AN001;
 	    BREAK 0											;AN001;
 
-	       .ENDIF											;AN001;
+	       endif_l_5:											;AN001;
 
 ;	 otherwise:		       ;internal release of third version of AT 				       ;AN001;
 
@@ -273,12 +288,18 @@ INT   15H
 
        ENDCASE_0:											;AN001;
 
-   .ELSEIF <submodel_byte EQ AT2> THEN		;AN000;
+   jmp endif_l_2
+   elseif_l_3_4:
+   cmp submodel_byte,AT2
+   jne endif_l_2
       MOV   AH,AT2				;AN000;
-   .ENDIF					;AN000;IF none of the above AH has correct value for AT1 (FC)
-.ELSEIF <model_byte_AH EQ XT2> THEN		;AN000;
+   endif_l_3:					;AN000;IF none of the above AH has correct value for AT1 (FC)
+jmp endif_l_2
+elseif_l_2:
+cmp model_byte_AH,XT2
+jne endif_l_2
    MOV	 AH,PCXT				;AN000;no difference from XT1
-.ENDIF						;AN000;
+endif_l_2:					;AN000;
 
 MOV   DS:machine_type,AH	 ;AH was set as result of getting the system configuration or during the IF.
 POP   BX

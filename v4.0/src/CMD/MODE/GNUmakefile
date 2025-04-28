@@ -13,17 +13,23 @@ COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
 #######################	dependencies begin here. #########################
 #
 
+.SUFFIXES: .asm .obj
+
+AS = jwasm
+AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.asm.obj:
+	$(AS) $(AFLAGS) -Fo$@ $<
+
 all: mode.com
 
 mode.ctl mode.cl1 mode.cl2 mode.cla mode.clb: MODE.SKL \
       $(msg)/$(COUNTRY).MSG
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\mode $(subst /,\,$<) $(country)"
 
-
-main.obj: MAIN.ASM \
+main.obj: main.asm \
   $(inc)/copyrigh.inc \
   $(inc)/versiona.inc \
-  $(inc)/STRUC.INC \
   $(inc)/sysmsg.inc \
   $(inc)/msgserv.asm \
   mode.ctl \
@@ -31,98 +37,84 @@ main.obj: MAIN.ASM \
   mode.cl2 \
   mode.cla \
   mode.clb
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\mode $(subst /,\,$<) $(subst /,\,$@)"
 
-scrntab.obj: SCRNTAB.ASM
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\mode $(subst /,\,$<) $(subst /,\,$@)"
+scrntab.obj: scrntab.asm
 
-modescrn.obj: MODESCRN.ASM \
-  $(inc)/STRUC.INC
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\mode $(subst /,\,$<) $(subst /,\,$@)"
+modescrn.obj: modescrn.asm \
+  common.stc
 
-rescode.obj: RESCODE.ASM \
-  $(inc)/STRUC.INC
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\mode $(subst /,\,$<) $(subst /,\,$@)"
+rescode.obj: rescode.asm
 
-modecom.obj: MODECOM.ASM \
-  $(inc)/STRUC.INC \
-	     MODEQUAT.INC \
-	     COMMON.STC
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\mode $(subst /,\,$<) $(subst /,\,$@)"
+modecom.obj: modecom.asm \
+	     modequat.inc \
+	     common.stc
 
-modeprin.obj: MODEPRIN.ASM \
-  $(inc)/STRUC.INC
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\mode $(subst /,\,$<) $(subst /,\,$@)"
+modeprin.obj: modeprin.asm \
+  common.stc
 
-modevid.obj: MODEVID.ASM \
-  $(inc)/STRUC.INC
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\mode $(subst /,\,$<) $(subst /,\,$@)"
+modevid.obj: modevid.asm \
+  common.stc
 
-modeecho.obj: MODEECHO.ASM \
-   COMMON.STC \
-  $(inc)/STRUC.INC
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\mode $(subst /,\,$<) $(subst /,\,$@)"
+modeecho.obj: modeecho.asm \
+   common.stc
 
-modeleng.obj: MODELENG.ASM \
-	      MODEQUAT.INC \
-  $(inc)/STRUC.INC
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\mode $(subst /,\,$<) $(subst /,\,$@)"
+modeleng.obj: modeleng.asm \
+	      modequat.inc
 
-modemes.obj: MODEMES.ASM \
-  $(inc)/msgserv.asm \
-	     MODESUBS.INC \
-	     MODEDEFS.INC \
-	     MODEQUAT.INC \
-	     COMMON.STC
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\mode $(subst /,\,$<) $(subst /,\,$@)"
+modemes.obj: modemes.asm \
+	     modesubs.inc \
+	     modedefs.inc \
+	     modequat.inc \
+	     common.stc
 
-display.obj: DISPLAY.ASM \
-	     COMMON.STC
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\mode $(subst /,\,$<) $(subst /,\,$@)"
+display.obj: display.asm \
+	     common.stc
 
-typamat.obj: TYPAMAT.ASM \
-  $(inc)/STRUC.INC \
-	     MODEQUAT.INC
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\mode $(subst /,\,$<) $(subst /,\,$@)"
+typamat.obj: typamat.asm \
+  $(inc)/version.inc \
+	     modequat.inc
 
-invoke.obj: INVOKE.ASM \
-  $(inc)/STRUC.INC \
-	    MODEQUAT.INC \
-	    COMMON.STC
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\mode $(subst /,\,$<) $(subst /,\,$@)"
+invoke.obj: invoke.asm \
+	    modequat.inc \
+	    common.stc
 
-modepars.obj: MODEPARS.ASM \
-  $(inc)/STRUC.INC \
-  $(inc)/psdata.inc \
-	      MODEQUAT.INC \
-	      COMMON.STC
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\mode $(subst /,\,$<) $(subst /,\,$@)"
+modepars.obj: modepars.asm \
+	      modequat.inc \
+	      common.stc
 
 
-parshell.obj: PARSHELL.ASM \
-  $(inc)/parse.asm
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\mode $(subst /,\,$<) $(subst /,\,$@)"
+parshell.obj: parshell.asm \
+  $(inc)/parse.asm \
+  $(inc)/psdata.inc
 
 
-modecp.obj: MODECP.ASM \
-   MODECPRO.INC \
-   MODECPEQ.INC \
-   MODECPMS.INC \
-  $(inc)/STRUC.INC
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\mode $(subst /,\,$<) $(subst /,\,$@)"
+modecp.obj: modecp.asm \
+   modecpro.inc \
+   modecpeq.inc \
+   modecpms.inc
 
 OBJS = rescode.obj modeecho.obj modeleng.obj modemes.obj modescrn.obj \
        main.obj modevid.obj modeprin.obj modecom.obj scrntab.obj modecp.obj \
        display.obj typamat.obj invoke.obj parshell.obj modepars.obj
 
-mode.com: $(OBJS) MODE.LNK
-	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\mode @mode.lnk"
+mode.com: $(OBJS)
+	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
+	echo 'option map=mode.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name mode.exe' >>resp.txt
+	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
+	wlink @resp.txt
 	exe2bin -q mode.exe mode.com
-	rm mode.exe
 
 clean:
 	rm -f *.obj
+	rm -f *.err
+	rm -f *.lst
 	rm -f mode.com
+	rm -f mode.exe
+	rm -f mode.map
 	rm -f mode.cl[12ab]
 	rm -f mode.ctl
 	rm -f mode.map

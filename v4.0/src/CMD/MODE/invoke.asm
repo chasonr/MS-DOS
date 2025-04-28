@@ -2,9 +2,6 @@
 ;m															   ;AN000;
 	PAGE	,132			;										   ;AN000;
 	TITLE	ANALYZE_AND_INVOKE - call appropriate routine based on request						   ;AN000;
-.XLIST															   ;AN000;
-   INCLUDE STRUC.INC													   ;AN000;
-.LIST															   ;AN000;
 ;.SALL															   ;AN000;
 
 
@@ -161,7 +158,7 @@ rows	    DW	  bogus ;number of text rows										   ;AN000;
 															   ;AN000;
 IOCTL0C_def ENDS													   ;AN000;
 															   ;AN000;
-INCLUDE COMMON.STC	;includes the following strucs									   ;AN000;
+INCLUDE common.stc	;includes the following strucs									   ;AN000;
 															   ;AN000;
 ;codepage_parms STRUC													   ;AN000;
 ;   cp_device	   DW	 ?												   ;AN000;
@@ -334,7 +331,7 @@ EXTRN	 row_type:WORD				;see modesubs.inc							   ;AN000;
 EXTRN	 R_item_tag:ABS 		     ;see MODEPARS.ASM								   ;AN000;
 EXTRN	 R_str:BYTE			     ;see MODEPARS.ASM								   ;AN000;
 EXTRN	 Required_font_not_loaded:BYTE	  ;see modedefs.asm								   ;AN000;
-EXTRN	 res_com_retry_type:ABS 	     ;see RESCODE.SAL								   ;AN000;
+EXTRN	 res_com_retry_type:BYTE 	     ;see RESCODE.SAL								   ;AN000;
 ;EXTRN	  res_lpt_retry_type:ABS	      ;see RESCODE.SAL								    ;AN000;
 EXTRN	 select:ABS			      ;request type for 'modecp'                                                   ;AN000;
 EXTRN	 select_item_tag:ABS		   ;see MODEPARS.ASM								   ;AN000;
@@ -384,7 +381,7 @@ com_ports_attached	DB    0 	  ;number of com ports in the machine
 current_packet_cp_number   DW	 -2	  ;adjustment for accessing current 'des_strt_pkcp?' in 'des_start_packet'         ;AN000;
 delay_holder		DB    1 	  ;holder for binary form of delay requested					   ;AN000;
 device_request		DB    ? 	  ;holds device request value							   ;AN000;
-max_pknum		EQU	 ($ - OFFSET des_start_packet.des_strt_pkcp1)/2        ;most cp numbers can send at once   ;AN000;
+;RLC max_pknum		EQU	 ($ - OFFSET des_start_packet.des_strt_pkcp1)/2        ;most cp numbers can send at once   ;AN000;
 ;IOCTL0C_functions_requested   DB 0	   ;for displaying messages, flag byte indicating IOCTL functions requested	    ;AN000;
 need_typamat_call	DB	 false	  ;boolean for saving up delay and rate settings				   ;AN000;
 need_IOCTL0C		DB	 false	  ;boolean for saving up parts of an IOCTL 0CH call				   ;AN000;
@@ -406,9 +403,10 @@ check_ANSI_installed PROC  NEAR 	  ;See if ANSI.SYS is installed 						;AC001;
    MOV	 AH,ANSIINT2F													;AC001;
    MOV	 AL,check_installed												;AC001;
    INT	 2FH														;AC001;
-   .IF <AL EQ installed> THEN												;AC001;
+   cmp   AL,installed													;AC001;
+   jne   @F
       MOV   ANSI_installed,true 	  ;initialized to false, so no ELSE needed					;AC001;
-   .ENDIF
+   @@:
 
 check_ANSI_installed ENDP												;AC001;
 
@@ -457,15 +455,19 @@ display_columns_status	PROC  NEAR											   ;AN000;
 															   ;AN000;
 MOV   CL,get_current_settings												   ;AN000;
 CALL  do_IOCTL0C		    ;get current settings of CON							   ;AN000;
-.IF <IOCTL0C_data_block.mode EQ text> THEN										   ;AN000;
-   .IF <IOCTL0C_data_block.cols EQ 80> THEN										   ;AN000;
+cmp IOCTL0C_data_block.mode,text											   ;AN000;
+jne else_l_2
+   cmp IOCTL0C_data_block.cols,80											   ;AN000;
+   jne else_l_1
       MOV columns_ptr,OFFSET eighty_str      ;set up message block with pointer to "80"                                    ;AN000;
-   .ELSE														   ;AN000;
+   jmp endif_l_2
+   else_l_1:														   ;AN000;
       MOV columns_ptr,OFFSET fourty_str 										   ;AN000;
-   .ENDIF														   ;AN000;
-.ELSE															   ;AN000;
+   endif_l_1:														   ;AN000;
+jmp endif_l_2
+else_l_2:														   ;AN000;
    MOV columns_ptr,OFFSET NONE_str											   ;AN000;
-.ENDIF															   ;AN000;
+endif_l_2:														   ;AN000;
 display  COLUMNS_equal_msg												   ;AN000;
 															   ;AN000;
 RET															   ;AN000;
@@ -478,14 +480,16 @@ display_lines_status PROC  NEAR 											   ;AN000;
 															   ;AN000;
 MOV   CL,get_current_settings												   ;AN000;
 CALL  do_IOCTL0C		    ;get current settings of CON							   ;AN000;
-.IF <IOCTL0C_data_block.mode EQ text> THEN										   ;AN000;
+cmp IOCTL0C_data_block.mode,text											   ;AN000;
+jne else_l_3
    MOV	 AX,IOCTL0C_data_block.rows											   ;AN000;
    MOV	 row_value,AL			 ;row_value=binary row value							   ;AN000;
    MOV	 row_type,right_align+unsgn_bin_byte  ;set up sublist so msg ret knows it is a binary byte			   ;AN000;
    MOV	 row_ptr,OFFSET row_value	 ;set up LINES_equal sublist							   ;AN000;
-.ELSE															   ;AN000;
+jmp endif_l_3
+else_l_3:														   ;AN000;
    MOV	 row_ptr,OFFSET  NONE_str											   ;AN000;
-.ENDIF															   ;AN000;
+endif_l_3:														   ;AN000;
 display  LINES_equal_msg												   ;AN000;
 															   ;AN000;
 RET															   ;AN000;
@@ -498,15 +502,19 @@ old_video_mode_set_IOCTL   PROC  NEAR				;AN004;
 
 MOV   CL,set_display_characteristics									    ;AN000;
 CALL do_IOCTL0C 											    ;AN000;
-.IF C THEN												    ;AN000;
+jnc endif_l_5
    get_extended_error											    ;AN000;
-   .IF <AX EQ not_supported_on_machine> THEN								    ;AN000;
+   cmp AX,not_supported_on_machine									    ;AN000;
+   jne elseif_l_4
       DISPLAY Function_not_supported									    ;AN000;
-   .ELSEIF <AX EQ font_not_loaded> THEN 								    ;AN000;
+   jmp endif_l_4
+   elseif_l_4:
+   cmp AX,font_not_loaded		 								    ;AN000;
+   jne endif_l_4
       DISPLAY Required_font_not_loaded									    ;AN000;
-   .ENDIF												    ;AN000;
+   endif_l_4:												    ;AN000;
    MOV	 noerror,false											    ;AN000;
-.ENDIF			   ;AN000;carry 								    ;AN000;
+endif_l_5:		   ;AN000;carry 								    ;AN000;
 
 RET
 								;AN004;
@@ -547,13 +555,19 @@ check_com_ports_attached   PROC  NEAR
 MOV   SI,0
 MOV   ES,SI	  ;now ES:SERIAL_BASE addresses 40:0=0:400
 
-.FOR SI = 0 TO 6 STEP 2
+mov SI,0
+for_l_1:
+cmp si,6
+jg end_for_l_1
 
-   .IF <<WORD PTR ES:SERIAL_BASE[SI]> NE 0> THEN       ;SEE IF THE COM PORT EXISTS
+   CMP WORD PTR ES:SERIAL_BASE[SI],0       ;SEE IF THE COM PORT EXISTS
+   JE @F
       INC   com_ports_attached
-   .ENDIF
+   @@:
 
-.NEXT SI
+add si,2
+jmp for_l_1
+end_for_l_1:
 
 RET
 
@@ -599,13 +613,19 @@ check_prn_ports_attached   PROC  NEAR
 MOV   SI,0
 MOV   ES,SI	  ;now ES:printr addresses 40:8=0:408
 
-.FOR SI = 0 TO 4 STEP 2       ;for each of 3 printer port address holder words
+mov si,0       ;for each of 3 printer port address holder words
+for_l_2:
+cmp si,4
+jg endfor_l_2
 
-   .IF <<WORD PTR ES:printr[SI]> GT redirected> THEN	   ;SEE IF THE PORT EXISTS
+   CMP WORD PTR ES:printr[SI],redirected	   ;SEE IF THE PORT EXISTS
+   JLE @F
       INC   prn_ports_attached
-   .ENDIF
+   @@:
 
-.NEXT SI
+add si,2
+jmp for_l_2
+endfor_l_2:
 
 RET
 
@@ -676,33 +696,51 @@ PUSH ES 								;AN665;
 XOR  BX,BX								;AN665;
 MOV  ES,BX			       ;set segment to zero		;AN665;
 
-.IF <<ES:WORD PTR resseg> NE 0000H> THEN    ;IF code resident THEN	;AN665;
+cmp ES:WORD PTR resseg,0000H		    ;IF code resident THEN	;AN665;
+je else_l_7
    MOV	ES,ES:WORD PTR resseg[2]	    ;ES=seg of resident code	;AN665;
-   .IF <device_type EQ COMx> THEN
+   cmp  device_type,COMx
+   jne else_l_6
       MOV   CL,device_request		     ;CL has 0, 2, 4 or 6 for COM 1, 2, 3 or 4 respectively		      ;AC003;
       MOV   returned_retry_type,BYTE PTR ES:res_com_retry_type		 ;AL=the status byte for all 4 com ports	    ;AN665;
       SHR   returned_retry_type,CL	 ;AL=XXXXXX??, where ?? is the retry bits for port in question		     ;AC003;
       AND   returned_retry_type,00000011B ;AL=000000??, where ?? is the retry bits for port in question 	      ;AC003;
-   .ELSE								;AN665;
+   jmp endif_l_7
+   else_l_6:								;AN665;
       MOV  BL,device_request		       ;BX=index into retry bytes in resident code  ;AN665;
       MOV  returned_retry_type,BYTE PTR ES:lpt1_retry_type[BX]		;AN665;
-   .ENDIF								;AN665;
-.ELSE									;AN665;
+   endif_l_6:								;AN665;
+jmp endif_l_7
+else_l_7:								;AN665;
    MOV	returned_retry_type,no_retry_flag				;AN665;
-.ENDIF									;AN665;
+endif_l_7:								;AN665;
 
-.IF <returned_retry_type EQ B> OR		;COM form of busy flag	;AN665;
-.IF <returned_retry_type EQ busy_status> THEN				;AN665;
+cmp returned_retry_type,B			;COM form of busy flag	;AN665;
+je @F
+cmp returned_retry_type,busy_status					;AN665;
+jne elseif_l_8_1
+@@:
    MOV	 retry_type_ptr,OFFSET B_str					;AN665;
-.ELSEIF <returned_retry_type EQ E> OR		;COM form of error flag     ;AN665;
-.IF <returned_retry_type EQ error_status> THEN			    ;AN665;
+jmp endif_l_8
+elseif_l_8_1:
+cmp returned_retry_type,E			;COM form of error flag     ;AN665;
+je @F
+cmp returned_retry_type,error_status					    ;AN665;
+jne elseif_l_8_2
+@@:
    MOV	 retry_type_ptr,OFFSET E_str					;AN665;
-.ELSEIF <returned_retry_type EQ R> OR		;COM form of ready flag     ;AN665;
-.IF <returned_retry_type EQ ready_status> THEN			    ;AN665;
+jmp endif_l_8
+elseif_l_8_2:
+cmp returned_retry_type,R			;COM form of ready flag     ;AN665;
+je @F
+cmp returned_retry_type,ready_status					    ;AN665;
+jne else_l_8
+@@:
    MOV	 retry_type_ptr,OFFSET R_str					;AN665;
-.ELSE									;AN665;
+jmp endif_l_8
+else_l_8:								;AN665;
    MOV	 retry_type_ptr,OFFSET NONE_str    ;not E, B or R.		;AN665;
-.ENDIF									;AN665;
+endif_l_8:								;AN665;
 
 POP  ES 								;AN665;
 POP  BX 								;AN665;
@@ -811,10 +849,11 @@ analyze_and_invoke  PROC  NEAR	    ;AX000;										   ;AN000;
       display  four_char_underline     ;----------------------								   ;AN000;
 															   ;AN000;
       CAll  check_ANSI_installed       ;see if ANSI.SYS is installed							   ;AC001;
-      .IF   <ANSI_installed EQ true> THEN    ;IF can get info on settings THEN display them ELSE don't display them
+      cmp ANSI_installed,true          ;IF can get info on settings THEN display them ELSE don't display them
+      jne @F
 	 CALL  display_columns_status										       ;AN000;
 	 CALL  display_lines_status										     ;AN000;
-      .ENDIF														   ;AC001;
+      @@:														   ;AC001;
       MOV   cp_cb.request_typ,status	     ;set up variables for modecp						   ;AN000;
       MOV   cp_cb.cp_device,OFFSET CON_str										   ;AN000;
 															   ;AN000;
@@ -880,40 +919,56 @@ analyze_and_invoke  PROC  NEAR	    ;AX000;										   ;AN000;
 
       CALL  check_com_ports_attached	     ;return number of com ports in com_ports_attached				   ;AN000;
 															   ;AN000;
-      .IF <device_name EQ <OFFSET COM1_str>> AND									   ;AN000;
-      .IF <com_ports_attached GE 1> THEN		;COM1 exists
+      cmp device_name,OFFSET COM1_str											   ;AN000;
+      jne elseif_l_9_1
+      cmp com_ports_attached,1				;COM1 exists
+      jl elseif_l_9_1
 	 MOV   BL,COM1													   ;AN000;
 	 MOV   stat_dev_ptr,OFFSET COM1_str	 ;set up msg ser input							;AN000;
 	 MOV   device_request,com1_retry_type_status									   ;AN000;
-      .ELSEIF <device_name EQ <OFFSET COM2_str>> AND									   ;AN000;
-      .IF <com_ports_attached GE 2> THEN		;COM2 exists
+      jmp endif_l_9
+      elseif_l_9_1:
+      cmp device_name,OFFSET COM2_str											   ;AN000;
+      jne elseif_l_9_2
+      cmp com_ports_attached,2				;COM2 exists
+      jl elseif_l_9_2
 	 MOV   BL,COM2													   ;AN000;
 	 MOV   stat_dev_ptr,OFFSET COM2_str	 ;set up msg ser input							;AN000;
 	 MOV   device_request,com2_retry_type_status									   ;AN000;
-      .ELSEIF <device_name EQ <OFFSET COM3_str>> AND									   ;AN000;
-      .IF <com_ports_attached GE 3> THEN		;COM3 exists
+      jmp endif_l_9
+      elseif_l_9_2:
+      cmp device_name,OFFSET COM3_str											   ;AN000;
+      jne elseif_l_9_3
+      cmp com_ports_attached,3				;COM3 exists
+      jl elseif_l_9_3
 	 MOV   BL,COM3													   ;AN000;
 	 MOV   stat_dev_ptr,OFFSET COM3_str	 ;set up msg ser input							;AN000;
 	 MOV   device_request,com3_retry_type_status									   ;AN000;
-      .ELSEIF <device_name EQ <OFFSET COM4_str>> AND									   ;AN000;
-      .IF <com_ports_attached EQ 4> THEN		;COM4 exists
+      jmp endif_l_9
+      elseif_l_9_3:
+      cmp device_name,OFFSET COM4_str											   ;AN000;
+      jne else_l_9
+      cmp com_ports_attached,4				;COM4 exists
+      jne else_l_9
 	 MOV   BL,COM4													   ;AN000;
 	 MOV   stat_dev_ptr,OFFSET COM4_str	 ;set up msg ser input							;AN000;
 	 MOV   device_request,com4_retry_type_status									   ;AN000;
-      .ELSE						;device does not exist						   ;AN000;
+      jmp endif_l_9
+      else_l_9:						;device does not exist						   ;AN000;
 	  MOV  CX,device_name								   ;AN000;			  ;AN000;
 	  MOV  illegal_device_ptr,CX	  ;put pointer to com port string in message					   ;AN000;
 	  DISPLAY err1			 ;AN000;"Illegal device name - COMX"                                               ;AN000;
 	  MOV  noerror,false			;set flag for displaying status to be skipped
-      .ENDIF														   ;AN000;
-      .IF <noerror EQ true> THEN
+      endif_l_9:													   ;AN000;
+      cmp noerror,true
+      jne @F
 	 MOV	  dev_name_size,len_COMX_str	   ;set up for msg service, see MODEPARS.ASM				      ;AN000;
 	 display  status_for_device		   ;"Status for device COM?:"                                                 ;AN000;
 	 display  long_underline		   ;"------------------"                                                      ;AN000;
 	 display  five_char_underline		;has CRLF on it       "-----"                                                 ;AN000;
 	 call  get_device_retry_type											      ;AN000;
 	 display  retry_equal												      ;AN000;
-      .ENDIF
+      @@:
 															   ;AN000;
       BREAK 0														   ;AN000;
 															   ;AN000;
@@ -931,7 +986,7 @@ analyze_and_invoke  PROC  NEAR	    ;AX000;										   ;AN000;
 ;															   ;AN000;
 ;     MOV   DI,0													   ;AN000;
 ;															   ;AN000;
-;     .WHILE <parm_list_BX[DI].parm_type NE bogus> DO	   ;the entry after the last has parm_type of bogus		   ;AN000;
+;     _WHILE <parm_list_BX[DI].parm_type NE bogus> DO	   ;the entry after the last has parm_type of bogus		   ;AN000;
 ;															   ;AN000;
 ;	 ;CASE parm_list_BX[DI].item_tag=										   ;AN000;
 ;															   ;AN000;
@@ -939,9 +994,9 @@ analyze_and_invoke  PROC  NEAR	    ;AX000;										   ;AN000;
 ;	    ;PREPARE,													   ;AN000;
 ;	    ;SELECT:													   ;AN000;
 ;															   ;AN000;
-;		  .IF <parm_list_BX[DI].item_tag EQ CODEPAGE_item_tag> OR						   ;AN000;
-;		  .IF <parm_list_BX[DI].item_tag EQ SELECT_item_tag> OR 						   ;AN000;
-;		  .IF <parm_list_BX[DI].item_tag EQ PREPARE_item_tag> THEN						   ;AN000;
+;		  _IF <parm_list_BX[DI].item_tag EQ CODEPAGE_item_tag> OR						   ;AN000;
+;		  _IF <parm_list_BX[DI].item_tag EQ SELECT_item_tag> OR 						   ;AN000;
+;		  _IF <parm_list_BX[DI].item_tag EQ PREPARE_item_tag> THEN						   ;AN000;
 ;															   ;AN000;
 ;	       MOV   cp_cb.request_typ,status										   ;AN000;
 ;	       MOV   cp_cb.cp_device,OFFSET CON_str									   ;AN000;
@@ -949,45 +1004,45 @@ analyze_and_invoke  PROC  NEAR	    ;AX000;										   ;AN000;
 ;															   ;AN000;
 ;	       BREAK 2													   ;AN000;
 ;															   ;AN000;
-;		  .ENDIF												   ;AN000;
+;		  _ENDIF												   ;AN000;
 ;															   ;AN000;
 ;	    ;BLINK:													   ;AN000;
 ;															   ;AN000;
-;		  .IF <parm_list_BX[DI].item_tag EQ BLINK_item_tag> THEN						   ;AN000;
+;		  _IF <parm_list_BX[DI].item_tag EQ BLINK_item_tag> THEN						   ;AN000;
 ;															   ;AN000;
 ;	       CALL  display_blink_status										   ;AN000;
 ;															   ;AN000;
 ;	       BREAK 2													   ;AN000;
 ;															   ;AN000;
-;		  .ENDIF												   ;AN000;
+;		  _ENDIF												   ;AN000;
 ;															   ;AN000;
 ;															   ;AN000;
 ;	    ;COLUMNS:													   ;AN000;
 ;															   ;AN000;
-;		  .IF <parm_list_BX[DI].item_tag EQ COLUMNS_item_tag> THEN						   ;AN000;
+;		  _IF <parm_list_BX[DI].item_tag EQ COLUMNS_item_tag> THEN						   ;AN000;
 ;															   ;AN000;
 ;	       CALL  display_COLUMNS_status										   ;AN000;
 ;															   ;AN000;
 ;	       BREAK 2													   ;AN000;
 ;															   ;AN000;
-;		  .ENDIF												   ;AN000;
+;		  _ENDIF												   ;AN000;
 ;															   ;AN000;
 ;															   ;AN000;
 ;	    ;LINES:													   ;AN000;
 ;															   ;AN000;
-;		  .IF <parm_list_BX[DI].item_tag EQ LINES_item_tag> THEN						   ;AN000;
+;		  _IF <parm_list_BX[DI].item_tag EQ LINES_item_tag> THEN						   ;AN000;
 ;															   ;AN000;
 ;	       CALL  display_lines_status										   ;AN000;
 ;															   ;AN000;
 ;	       BREAK 2													   ;AN000;
 ;															   ;AN000;
-;		  .ENDIF												   ;AN000;
+;		  _ENDIF												   ;AN000;
 ;															   ;AN000;
 ;	 ENDCASE_2:													   ;AN000;
 ;															   ;AN000;
 ;	 ADD   DI,TYPE parm_list_entry											   ;AN000;
 ;															   ;AN000;
-;     .ENDWHILE 													   ;AN000;
+;     _ENDWHILE 													   ;AN000;
 															   ;AN000;
 ;     BREAK 0														   ;AN000;
 															   ;AN000;
@@ -998,29 +1053,34 @@ analyze_and_invoke  PROC  NEAR	    ;AX000;										   ;AN000;
 
       MOV   BX,parm_list_holder 		;restore parm_list_BX							;AN000;
 
-      .IF <parms_form EQ keyword> THEN	      ;IF the parms were input as keywords THEN 				   ;AN000;
+      cmp parms_form,keyword		      ;IF the parms were input as keywords THEN 				   ;AN000;
+      jne else_l_10
 															   ;AN000;
 	 MOV   DI,TYPE parm_list_entry		;skip COMN parm 							   ;AN000;
 															   ;AN000;
-	 .WHILE <parm_list_BX[DI].parm_type NE bogus> DO NEAR ;the entry after the last has parm_type of bogus		   ;AN000;
+	 while_l_1:
+	 cmp byte ptr parm_list_BX[DI].parm_type,bogus   ;the entry after the last has parm_type of bogus
+	 je endif_l_10
 															   ;AN000;
 	    ;CASE parm_list_BX[DI].keyword_switch_ptr=									   ;AN000;
 															   ;AN000;
 	       ;BAUD_equal:												   ;AN000;
 															   ;AN000;
-		     .IF <parm_list_BX[DI].keyword_switch_ptr EQ <OFFSET BAUD_equal>> THEN				   ;AN000;
+		     cmp parm_list_BX[DI].keyword_switch_ptr,OFFSET BAUD_equal						   ;AN000;
+		     jne @F
 															   ;AN000;
 		  MOV	AX,parm_list_BX[DI].value1  ;AX= pointer to the baud rate string				   ;AN000;
 		  MOV	pbaud_ptr,AX		    ;set pointer to the baud rate string in the messge			   ;AN000;
 		  MOV	baud_index,DI			   ;set index into parm list for setcom 			   ;AN000;
 		  BREAK 3												   ;AN000;
 															   ;AN000;
-		     .ENDIF												   ;AN000;
+		     @@:												   ;AN000;
 															   ;AN000;
 															   ;AN000;
 	       ;PARITY_equal:												   ;AN000;
 															   ;AN000;
-		     .IF <parm_list_BX[DI].keyword_switch_ptr EQ <OFFSET PARITY_equal>> THEN				   ;AN000;
+		     cmp parm_list_BX[DI].keyword_switch_ptr,OFFSET PARITY_equal					   ;AN000;
+		     jne @F
 															   ;AN000;
 		  MOV	SI,parm_list_BX[DI].value1    ;AX= pointer to the parity string 				   ;AN000;
 		  MOV	pparity_ptr,SI		      ;set pointer to the parity string in the messge			   ;AN000;
@@ -1028,12 +1088,13 @@ analyze_and_invoke  PROC  NEAR	    ;AX000;										   ;AN000;
 		  MOV	parity_index,DI 	      ;set index into parm list for setcom				   ;AN000;
 		  BREAK 3												   ;AN000;
 															   ;AN000;
-		     .ENDIF												   ;AN000;
+		     @@:												   ;AN000;
 															   ;AN000;
 															   ;AN000;
 	       ;DATA_equal:												   ;AN000;
 															   ;AN000;
-		     .IF <parm_list_BX[DI].keyword_switch_ptr EQ <OFFSET DATA_equal>> THEN				   ;AN000;
+		     cmp parm_list_BX[DI].keyword_switch_ptr,OFFSET DATA_equal						   ;AN000;
+		     jne @F
 															   ;AN000;
 		  MOV	BP,parm_list_BX[DI].value1    ;BP= pointer to the data bits string				   ;AN000;
 		  MOV	AL,[BP] 		      ;AL= data bits character						   ;AN000;
@@ -1041,29 +1102,31 @@ analyze_and_invoke  PROC  NEAR	    ;AX000;										   ;AN000;
 		  MOV	data_bits_index,DI		 ;set index into parm list for setcom				   ;AN000;
 		  BREAK 3												   ;AN000;
 															   ;AN000;
-		     .ENDIF												   ;AN000;
+		     @@:												   ;AN000;
 															   ;AN000;
 															   ;AN000;
 	       ;STOP_equal:												   ;AN000;
 															   ;AN000;
-		     .IF <parm_list_BX[DI].keyword_switch_ptr EQ <OFFSET STOP_equal>> THEN				   ;AN000;
+		     cmp parm_list_BX[DI].keyword_switch_ptr,OFFSET STOP_equal						   ;AN000;
+		     jne @F
 															   ;AN000;
 		  MOV	AX,parm_list_BX[DI].value1    ;AX= pointer to the stop bit string				   ;AN000;
 		  MOV	pstop_ptr,AX		      ;set pointer to the parity string in the messge			   ;AN000;
 		  MOV	stop_bits_index,DI		 ;set index into parm list for setcom				   ;AN000;
 		  BREAK 3												   ;AN000;
 															   ;AN000;
-		     .ENDIF												   ;AN000;
+		     @@:												   ;AN000;
 															   ;AN000;
 															   ;AN000;
 	       ;RETRY_equal:												   ;AN000;
 															   ;AN000;
-		     .IF <parm_list_BX[DI].keyword_switch_ptr EQ <OFFSET RETRY_equal_str>> THEN 			   ;AN000;
+		     cmp parm_list_BX[DI].keyword_switch_ptr,OFFSET RETRY_equal_str		 			   ;AN000;
+		     jne @F
 															   ;AN000;
 		  MOV	retry_index,DI	     ;indicate to modecom which parm is retry					   ;AN000;
 ;		  BREAK 3												   ;AN000;
 															   ;AN000;
-		     .ENDIF												   ;AN000;
+		     @@:												   ;AN000;
 															   ;AN000;
 															   ;AN000;
 	    ENDCASE_3:													   ;AN000;
@@ -1071,29 +1134,34 @@ analyze_and_invoke  PROC  NEAR	    ;AX000;										   ;AN000;
 	    ADD   DI,TYPE parm_list_entry										   ;AN000;
 															   ;AN000;
 															   ;AN000;
-	 .ENDWHILE													   ;AN000;
+	 jmp while_l_1
+	 jmp endif_l_10
 															   ;AN000;
-      .ELSE			    ;the parms were entered as positionals (the old form)				   ;AN000;
+      else_l_10:		    ;the parms were entered as positionals (the old form)				   ;AN000;
 															   ;AN000;
 	 MOV   baud_index,TYPE parm_list_entry										   ;AN000;
 	 MOV   DI,2 * (TYPE parm_list_entry)									 ;AN000;
-	 .IF <parm_list_BX[DI].item_tag NE unspecified> THEN				   ;AN000;IF stopbits requested THEN
+	 cmp byte ptr parm_list_BX[DI].item_tag,unspecified				   ;AN000;IF stopbits requested THEN
+	 je @F
 	    MOV   parity_index,DI								      ;AN000;
-	 .ENDIF
+	 @@:
 	 MOV   DI,3 * (TYPE parm_list_entry)								      ;AN000;
-	 .IF <parm_list_BX[DI].item_tag NE unspecified> THEN				   ;AN000;IF stopbits requested THEN
+	 cmp byte ptr parm_list_BX[DI].item_tag,unspecified				   ;AN000;IF stopbits requested THEN
+	 je @F
 	    MOV   data_bits_index,DI											;AN000;
-	 .ENDIF
+	 @@:
 	 MOV   DI,4 * (TYPE parm_list_entry)						   ;DI=stopbits index  ;AN000;
-	 .IF <parm_list_BX[DI].item_tag NE unspecified> THEN				   ;AN000;IF stopbits requested THEN
+	 cmp byte ptr parm_list_BX[DI].item_tag,unspecified				   ;AN000;IF stopbits requested THEN
+	 je @F
 	    MOV   stop_bits_index,DI								    ;AN000;
-	 .ENDIF
+	 @@:
 	 MOV   DI,5 * (TYPE parm_list_entry)		      ;AN000;DI=index of retry parm
-	 .IF <parm_list_BX[DI].item_tag NE unspecified> THEN				   ;AN000;IF retry requested THEN
+	 cmp byte ptr parm_list_BX[DI].item_tag,unspecified				   ;AN000;IF stopbits requested THEN
+	 je @F
 	    MOV   retry_index,DI							   ;AN000;set up index for modecom
-	 .ENDIF 													   ;AN000;
+	 @@:	 													   ;AN000;
 															   ;AN000;
-      .ENDIF														   ;AN000;
+      endif_l_10:													   ;AN000;
 															   ;AN000;
       CALL  modecom													   ;AN000;
 															   ;AN000;
@@ -1114,23 +1182,29 @@ PUBLIC	 old_initialize_printer_port_case
       MOV   BX,parm_list_holder 	     ;restore parm_list_BX							;AN000;
       MOV   DI,TYPE parm_list_entry	     ;skip LPTN parm, point at chars per line				  ;AN000;
 
-      .IF <parm_list_BX[DI].item_tag EQ onethirtytwo_item_tag> THEN						  ;AN000;
+      cmp byte ptr parm_list_BX[DI].item_tag,onethirtytwo_item_tag							  ;AN000;
+      jne elseif_l_11
 	 MOV   columns_holder,132										  ;AN000;
-      .ELSEIF <parm_list_BX[DI].item_tag EQ eighty_item_tag> THEN						;AN000;
+      jmp endif_l_11
+      elseif_l_11:
+      cmp byte ptr parm_list_BX[DI].item_tag,eighty_item_tag								;AN000;
+      jne endif_l_11
 	 MOV   columns_holder,80										  ;AN000;
-      .ENDIF				     ;if not 80 or 132 modeprin assumes not specified, and makes no change;AN000;
+      endif_l_11:			     ;if not 80 or 132 modeprin assumes not specified, and makes no change;AN000;
       ADD   DI,TYPE parm_list_entry	     ;look at lines per inch							   ;AN000;
 
-      .IF <parm_list_BX[DI].item_tag NE unspecified> THEN	;IF chars per line specified THEN	      ;AN000;
+      cmp byte ptr parm_list_BX[DI].item_tag,unspecified	;IF chars per line specified THEN	      ;AN000;
+      je @F
 	 MOV   SI,parm_list_BX[DI].value1	  ;SI=>"6" or "8"                                         ;AN000;
 	 MOV   AL,BYTE PTR DS:[SI]										     ;AN000;
 	 MOV   parm2,AL 		      ;parm2="6" or "8"                                                 ;AN000;
-      .ENDIF   ;otherwise leave parm2=0FFH (unspecified)  ;AN000;
+      @@:   ;otherwise leave parm2=0FFH (unspecified)  ;AN000;
 
       ADD   DI,TYPE parm_list_entry	     ;look at retry request							  ;AN000;
-      .IF <parm_list_BX[DI].item_tag NE unspecified> THEN							  ;AN000;
+      cmp byte ptr parm_list_BX[DI].item_tag,unspecified							  ;AN000;
+      je @F
 	 MOV   retry_index,DI		     ;AN000;let modeprin know retry was requested and the index of it.
-      .ENDIF				     ;AN000;
+      @@:				     ;AN000;
 
       CALL  modeecno													   ;AN000;
       CALL  modeprin													   ;AN000;
@@ -1147,46 +1221,55 @@ PUBLIC	 old_initialize_printer_port_case
       MOV   BX,parm_list_holder 		;restore parm_list_BX							   ;AN000;
       MOV   DI,TYPE parm_list_entry	     ;skip LPTN parm								   ;AN000;
 
-      .WHILE <parm_list_BX[DI].parm_type NE bogus> DO	   ;the entry after the last has parm_type of bogus		   ;AN000;
+      while_l_2:
+      cmp byte ptr parm_list_BX[DI].parm_type,bogus	   ;the entry after the last has parm_type of bogus
+      je endwhile_l_2
 															   ;AN000;
 	 ;CASE parm_list_BX[DI].keyword_switch_ptr=									   ;AN000;
 															   ;AN000;
 															   ;AN000;
 	    ;LINES_equal:												   ;AN000;
 															   ;AN000;
-		  .IF <parm_list_BX[DI].keyword_switch_ptr EQ <OFFSET LINES_equal>> THEN				   ;AN000;
+		  cmp parm_list_BX[DI].keyword_switch_ptr,OFFSET LINES_equal						   ;AN000;
+		  jne @F
 															   ;AN000;
 	       MOV   SI,parm_list_BX[DI].value1 	;SI=>"6" or "8"                                                    ;AN000;
 	       MOV   AL,BYTE PTR DS:[SI]										   ;AN000;
 	       MOV   parm2,AL				;parm2="6" or "8"                                                  ;AN000;
 	       BREAK 4													   ;AN000;
 															   ;AN000;
-		  .ENDIF												   ;AN000;
+		  @@:													   ;AN000;
 															   ;AN000;
 															   ;AN000;
 	    ;COLUMNS_equal:												   ;AN000;
 															   ;AN000;
-		  .IF <parm_list_BX[DI].keyword_switch_ptr EQ <OFFSET COLUMNS_equal>> OR				   ;AN000;
-		  .IF <parm_list_BX[DI].keyword_switch_ptr EQ <OFFSET COLS_equal>> THEN 				   ;AN000;
+		  cmp parm_list_BX[DI].keyword_switch_ptr,OFFSET COLUMNS_equal						   ;AN000;
+		  je @F
+		  cmp parm_list_BX[DI].keyword_switch_ptr,OFFSET COLS_equal		 				   ;AN000;
+		  jne endif_l_13
+		  @@:
 															   ;AN000;
-	       .IF <parm_list_BX[DI].item_tag EQ onethirtytwo_item_tag> THEN						   ;AN000;
+	       cmp byte ptr parm_list_BX[DI].item_tag,onethirtytwo_item_tag
+	       jne else_l_12
 		  MOV	columns_holder,132										   ;AN000;
-	       .ELSE													   ;AN000;
+	       jmp endif_l_12
+	       else_l_12:												   ;AN000;
 		  MOV	columns_holder,80										   ;AN000;
-	       .ENDIF													   ;AN000;
+	       endif_l_12:												   ;AN000;
 	       BREAK 4													   ;AN000;
 															   ;AN000;
-		  .ENDIF												   ;AN000;
+		  endif_l_13:												   ;AN000;
 															   ;AN000;
 															   ;AN000;
 	    ;RETRY_equal:												   ;AN000;
 															   ;AN000;
-		  .IF <parm_list_BX[DI].keyword_switch_ptr EQ <OFFSET RETRY_equal_str>> THEN				   ;AN000;
+		  cmp parm_list_BX[DI].keyword_switch_ptr,OFFSET RETRY_equal_str					   ;AN000;
+		  jne @F
 
 	       MOV   retry_index,DI											   ;AN664;
 	       BREAK 4													   ;AN000;
 															   ;AN000;
-		  .ENDIF												   ;AN000;
+		  @@:													   ;AN000;
 															   ;AN000;
 															   ;AN000;
 	 ENDCASE_4:													   ;AN000;
@@ -1194,7 +1277,8 @@ PUBLIC	 old_initialize_printer_port_case
 	 ADD   DI,TYPE parm_list_entry											   ;AN000;
 															   ;AN000;
 															   ;AN000;
-      .ENDWHILE 													   ;AN000;
+      jmp while_l_2
+      endwhile_l_2:
 
       CALL  modeecno	   ;turn of rerouting										   ;AN000;
       CALL  modeprin													   ;AN000;
@@ -1211,75 +1295,105 @@ PUBLIC	 old_initialize_printer_port_case
 															   ;AN000;
       ;first see if ANSI.SYS is loaded										     ;AN000;
       CALL  check_ANSI_installed										     ;AC001;
-      .IF <ANSI_installed EQ true> THEN 										  ;AC001;
+      cmp ANSI_installed,true	 										  ;AC001;
+      jne @F
 	 MOV   CL,get_current_settings										     ;AN000;
 	 PUSH  BX			  ;save parm_list							     ;AN000;
 	 CALL  do_IOCTL0C		     ;get current settings of CON					     ;AN000;
 	 POP   BX				  ;restore parm_list						     ;AN000;
 	 MOV   IOCTL0C_data_block.mode,text									     ;AN000;
-      .ENDIF			    ;AN000;ANSI installed							     ;AN000;
+      @@:			    ;AN000;ANSI installed							     ;AN000;
       MOV   BX,parm_list_holder 		;restore parm_list_BX							   ;AN000;
       PUSH  DI					;save parm list index							   ;AN000;
-      .IF <parm_list_BX[DI].item_tag NE unspecified> THEN
-	 .IF <parm_list_BX[DI].item_tag EQ BW40_item_tag> THEN ;IF BW40 REQUESTED					      ;AN000;
+      cmp byte ptr parm_list_BX[DI].item_tag,unspecified
+      je endif_l_18
+	 cmp byte ptr parm_list_BX[DI].item_tag,BW40_item_tag ;IF BW40 REQUESTED					      ;AN000;
+	 jne elseif_l_17_1
 	    CALL BW40													      ;AN000;
-	 .ELSEIF <parm_list_BX[DI].item_tag EQ BW80_item_tag> THEN ;IF BW80 REQUESTED					      ;AN000;
+	 jmp endif_l_17
+	 elseif_l_17_1:
+	 cmp byte ptr parm_list_BX[DI].item_tag,BW80_item_tag ;IF BW80 REQUESTED					      ;AN000;
+	 jne elseif_l_17_2
 	    CALL  BW80													      ;AN000;
-	 .ELSEIF <parm_list_BX[DI].item_tag EQ CO40_item_tag> THEN ;IF CO40 REQUESTED					      ;AN000;
+	 jmp endif_l_17
+	 elseif_l_17_2:
+	 cmp byte ptr parm_list_BX[DI].item_tag,CO40_item_tag ;IF CO40 REQUESTED					      ;AN000;
+	 jne elseif_l_17_3
 	    CALL  CO40													      ;AN000;
-	 .ELSEIF <parm_list_BX[DI].item_tag EQ CO80_item_tag> THEN ;IF CO80 REQUESTED					      ;AN000;
+	 jmp endif_l_17
+	 elseif_l_17_3:
+	 cmp byte ptr parm_list_BX[DI].item_tag,CO80_item_tag ;IF CO80 REQUESTED					      ;AN000;
+	 jne elseif_l_17_4
 	    CALL  CO80													      ;AN000;
-	 .ELSEIF <parm_list_BX[DI].item_tag EQ MONO_item_tag> THEN ;IF MONO REQUESTED					      ;AN000;
+	 jmp endif_l_17
+	 elseif_l_17_4:
+	 cmp byte ptr parm_list_BX[DI].item_tag,MONO_item_tag ;IF MONO REQUESTED					      ;AN000;
+	 jne else_l_17
 	    CALL  MONO													      ;AN000;
-	 .ELSE														      ;AN000;
-	    .IF <ANSI_installed EQ true> THEN				   ;AN000;
+	 jmp endif_l_17
+	 else_l_17:													      ;AN000;
+	    cmp ANSI_installed,true					   ;AN000;
+	    jne else_l_16
 ;AC004;        MOV   need_IOCTL0C,true			     ;use IOCTL if possible to retain lines setting  ;AN000;
-	       .IF <parm_list_BX[DI].value1 EQ <OFFSET fourty_str>> THEN				       ;AN000;
+	       cmp parm_list_BX[DI].value1,OFFSET fourty_str							       ;AN000;
+	       jne else_l_14
 		  MOV	IOCTL0C_data_block.cols,40	;setup IOCTL input block with the columns requested	   ;AN000;
-	       .ELSE
+	       jmp endif_l_14
+	       else_l_14:
 		  MOV	IOCTL0C_data_block.cols,80	;setup IOCTL input block with the columns requested	      ;AN000;
-	       .ENDIF													   ;AN000;
+	       endif_l_14:												   ;AN000;
 	       CALL  old_video_mode_set_IOCTL			;AN004;use IOCTL if possible to retain lines setting  ;AN000;
-	    .ELSE
-	       .IF <parm_list_BX[DI].item_tag EQ fourty_item_tag> THEN ;IF 40 REQUESTED 				   ;AN000;
+	    jmp endif_l_16
+	    else_l_16:
+	       cmp byte ptr parm_list_BX[DI].item_tag,fourty_item_tag	 ;IF 40 REQUESTED 				   ;AN000;
+	       jne else_l_15
 		   MOV	BL,40					    ;set up for handle_40_or_80 			   ;AN000;
-	       .ELSE													   ;AN000;
+	       jmp endif_l_15
+	       else_l_15:												   ;AN000;
 		   MOV	BL,80					    ;set up for handle_40_or_80 			   ;AN000;
-	       .ENDIF													   ;AN000;
+	       endif_l_15:												   ;AN000;
 	       CALL HANDLE_40_OR_80											;AN000;
-	    .ENDIF
-	 .ENDIF 													      ;AN000;
-      .ENDIF
+	    endif_l_16:
+	 endif_l_17: 													      ;AN000;
+      endif_l_18:
 
 dummy9:
 PUBLIC dummy9
 															   ;AN000;
       POP   DI					;restore parm list index						   ;AN000;
 
-      .IF <NOERROR EQ TRUE> AND 	     ;process ,r ³ l,[T]							 ;AN000;
+      cmp NOERROR,TRUE		 	     ;process ,r ³ l,[T]							 ;AN000;
+      jne endif_l_20
       MOV   BX,parm_list_holder 		;restore parm_list_BX							   ;AN000;
       ADD   DI,TYPE parm_list_entry	  ;process second parm, shift direction 					   ;AN000;
-      .IF <parm_list_BX[DI].item_tag NE unspecified> THEN								   ;AN000;
-	 .IF <parm_list_BX[DI].item_tag EQ R_item_tag> OR								   ;AN000;
-	 .IF <parm_list_BX[DI].item_tag EQ L_item_tag> THEN								   ;AN000;
+      cmp byte ptr parm_list_BX[DI].item_tag,unspecified								   ;AN000;
+      je endif_l_20
+	 cmp byte ptr parm_list_BX[DI].item_tag,R_item_tag								   ;AN000;
+	 je @F
+	 cmp byte ptr parm_list_BX[DI].item_tag,L_item_tag								   ;AN000;
+	 jne else_l_20
+	 @@:
 	    MOV   CL,parm_list_BX[DI].item_tag										   ;AN000;
 	    MOV   PARM2,CL	    ;set up for SHIFT_SCREEN								   ;AN000;
 	    ADD   DI,TYPE parm_list_entry	;look at third parm							   ;AN000;
 	    MOV   CL,parm_list_BX[DI].item_tag	;CL=T_item_tag or bogus 						;AN000;
 	    MOV   PARM3,CL	    ;may be bogus, but shift_screen will handle it correctly				   ;AN000;
 	    CALL  SHIFT_SCREEN												   ;AN000;
-	 .ELSE			    ;AN000;must be a rows value
-	    .IF <ANSI_installed EQ true> THEN				   ;AN000;
+	 jmp endif_l_20
+	 else_l_20:		    ;AN000;must be a rows value
+	    cmp ANSI_installed,true				   ;AN000;
+	    jne else_l_19
 ;AC004;        MOV   need_IOCTL0C,true			     ;use IOCTL if possible to retain lines setting  ;AN000;
 	       MOV   DX,parm_list_BX[DI].value1 									   ;AN000;
 	       MOV   IOCTL0C_data_block.rows,DX 	;the IOCTL input block has the columns requested		   ;AN000;
 	       CALL  old_video_mode_set_IOCTL		     ;AN004;use IOCTL if possible to retain lines setting  ;AN000;
-	    .ELSE			  ;AN000;ANSI not installed							   ;AN000;
+	    jmp endif_l_19
+	    else_l_19:			  ;AN000;ANSI not installed							   ;AN000;
 	       DISPLAY ANSI_not_loaded											   ;AN000;
 	       MOV   noerror,false											   ;AN000;
-	    .ENDIF			  ;AN000;ANSI installed 							   ;AN000;
-	 .ENDIF 													   ;AN000;
-      .ENDIF														   ;AN000;
+	    endif_l_19:			  ;AN000;ANSI installed 							   ;AN000;
+	 endif_l_20: 													   ;AN000;
+      endif_l_21:													   ;AN000;
 															   ;AN000;
       BREAK 0														   ;AN000;
 
@@ -1324,28 +1438,35 @@ PUBLIC	 printer_status_case
       MOV   dev_name_size,len_LPTX_str	;AN000;set up for msg service, see MODEPARS.ASM 				   ;AN000;
       MOV   cp_cb.cp_device,AX	       ;AN665;set up for call to modecp 						   ;AN000;
 															   ;AN000;
-      .IF <device_name EQ <OFFSET LPT1_str>> THEN									   ;AN000;
+      cmp device_name,OFFSET LPT1_str											   ;AN000;
+      jne elseif_l_22_1
 	 MOV   device_request,lpt1_retry_type_status									   ;AN000;
 	 MOV   rerouted_printer_mask,LPT1
 	 MOV   redpt,"1"                                ;set up for reroute message
 	 MOV   notredpt,"1"                             ;set up for not rerouted message
-      .ELSEIF <device_name EQ <OFFSET LPT2_str>> THEN									   ;AN000;
+      jmp endif_l_22
+      elseif_l_22_1:
+      cmp device_name,OFFSET LPT2_str											   ;AN000;
+      jne elseif_l_22_2
 	 MOV   device_request,lpt2_retry_type_status									   ;AN000;
 	 MOV   rerouted_printer_mask,LPT2
 	 MOV   redpt,"2"                                ;set up for reroute message
 	 MOV   notredpt,"2"                             ;set up for not rerouted message
-      .ELSEIF <device_name EQ <OFFSET LPT3_str>> THEN									   ;AN000;
+      jmp endif_l_22
+      elseif_l_22_2:
+      cmp device_name,OFFSET LPT3_str											   ;AN000;
+      jne endif_l_22
 	 MOV   device_request,lpt3_retry_type_status									   ;AN000;
 	 MOV   rerouted_printer_mask,LPT3
 	 MOV   redpt,"3"                                ;set up for reroute message
 	 MOV   notredpt,"3"                             ;set up for not rerouted message
-      .ENDIF														   ;AN000;
+      endif_l_22:													   ;AN000;
 															   ;AN000;
       PUSH  ES				     ;save ES, used in MODECP							   ;AC002;
 ;AC002;PUSH  AX 	 ;AN000;save
 															   ;AN000;
       display  status_for_device											   ;AN000;
-      display  long_underline				      "Status for device LPTX?"                                    ;AN000;
+      display  long_underline;RLC				      "Status for device LPTX?"                                    ;AN000;
       display  five_char_underline	     ;has CRLF on it   -----------------------					   ;AN000;
       call  display_printer_reroute_status		 ;see modeecho.asm					       ;AN000;
 ;AC002;POP   AX 					 ;restore "device_request"                                          ;AN000;
@@ -1353,11 +1474,12 @@ PUBLIC	 printer_status_case
       CALL  check_prn_ports_attached   ;return number of printer cards in prn_ports_attached				   ;AN000;
       POP   ES				     ;restore ES								   ;AC002;
       ADD   prn_ports_attached,ASCII_0	      ;CX=ASCII form of last printer number					   ;AN000;
-      .IF <prn_ports_attached GE redpt> THEN	;IF the printer exists THEN						   ;AN000;
+      cmp prn_ports_attached,redpt		;IF the printer exists THEN						   ;AN000;
+      jl @F
 	 call  get_device_retry_type											   ;AN000;
 	 display  retry_equal												   ;AN000;
 	 CALL  modecp			     ;display codepage status							   ;AN000;
-      .ENDIF														  ;AN000;
+      @@:														  ;AN000;
 															   ;AN000;
       BREAK 0														   ;AN000;
 															   ;AN000;
@@ -1366,115 +1488,142 @@ PUBLIC	 printer_status_case
 															   ;AN000;
       ;first see if ANSI.SYS is loaded											   ;AN000;
       CALL  check_ANSI_installed											   ;AC001;
-      .IF <ANSI_installed EQ true> THEN 										   ;AC001;
+      cmp ANSI_installed,true		 										   ;AC001;
+      jne @F
 	 MOV   CL,get_current_settings											   ;AN000;
 	 CALL  do_IOCTL0C		     ;get current settings of CON						   ;AN000;
 	 ;MOV	SI,OFFSET IOCTL0C_data_block  ;set up IOCTL0C, addressablitiy to the IOCTL data block			   ;AN000;
 															   ;AN000;
 	 MOV   IOCTL0C_data_block.mode,text										   ;AN000;
 															   ;AN000;
-      .ENDIF   ;ANSI.SYS installed											   ;AN000;
+      @@:	   ;ANSI.SYS installed											   ;AN000;
 															   ;AN000;
       MOV   BX,parm_list_holder 		;restore parm_list_BX							   ;AN000;
       ADD   DI,TYPE parm_list_entry		;skip CON parm								   ;AN000;
-      .WHILE <parm_list_BX[DI].parm_type NE bogus> DO NEAR ;the entry after the last has parm_type of bogus		   ;AN000;
+      while_l_3:
+      cmp byte ptr parm_list_BX[DI].parm_type,bogus ;the entry after the last has parm_type of bogus
+      je endwhile_l_3
 															   ;AN000;
 	 ;CASE parm_list_BX[DI].keyword_switch_ptr=									   ;AN000;
 															   ;AN000;
 															   ;AN000;
 	    ;LINES_equal:												   ;AN000;
 															   ;AN000;
-		  .IF <parm_list_BX[DI].keyword_switch_ptr EQ <OFFSET LINES_equal>> THEN				   ;AN000;
+		  cmp parm_list_BX[DI].keyword_switch_ptr,OFFSET LINES_equal						   ;AN000;
+		  jne @F
 															   ;AN000;
 	       MOV   DX,parm_list_BX[DI].value1 									   ;AN000;
 	       MOV   IOCTL0C_data_block.rows,DX 	;the IOCTL input block has the columns requested		   ;AN000;
 	       MOV   need_IOCTL0C,true											   ;AN000;
 	       BREAK 1													   ;AN000;
 															   ;AN000;
-		  .ENDIF												   ;AN000;
+		  @@:													   ;AN000;
 															   ;AN000;
 															   ;AN000;
 	    ;COLUMNS_equal:	  ;the value is binary									   ;AN000;
 															   ;AN000;
-		  .IF <parm_list_BX[DI].keyword_switch_ptr EQ <OFFSET COLUMNS_equal>> OR				   ;AN000;
-		  .IF <parm_list_BX[DI].keyword_switch_ptr EQ <OFFSET COLS_equal>> THEN 				   ;AN000;
+		  cmp parm_list_BX[DI].keyword_switch_ptr,OFFSET COLUMNS_equal						   ;AN000;
+		  je @F
+		  cmp parm_list_BX[DI].keyword_switch_ptr,OFFSET COLS_equal 						   ;AN000;
+		  jne endif_l_25
+		  @@:
 															   ;AN000;
-	       .IF <ANSI_installed EQ true> THEN			      ;AN000;
+	       cmp ANSI_installed,true			      ;AN000;
+	       jne else_l_24
 		  MOV	need_IOCTL0C,true			;use IOCTL if possible to retain lines setting	;AN000;
 		  MOV	DX,parm_list_BX[DI].value1									      ;AN000;
 		  MOV	IOCTL0C_data_block.cols,DX	   ;the IOCTL input block has the columns requested		      ;AN000;
-	       .ELSE
-		  .IF <parm_list_BX[DI].item_tag EQ fourty_item_tag> THEN ;IF 40 REQUESTED				      ;AN000;
+	       jmp endif_l_24
+	       else_l_24:
+		  cmp byte ptr parm_list_BX[DI].item_tag,fourty_item_tag ;IF 40 REQUESTED				      ;AN000;
+		  jne else_l_23
 		      MOV  columns_specified,40 				      ;set up for handle_40_or_80	      ;AN000;
-		  .ELSE 												      ;AN000;
+		  jmp endif_l_23
+		  else_l_23: 												      ;AN000;
 		      MOV  columns_specified,80 				      ;set up for handle_40_or_80   ;AN000;
-		  .ENDIF											   ;AN000;
-	       .ENDIF
+		  endif_l_23:											   ;AN000;
+	       endif_l_24:
 	       BREAK 1												;AN000;
 															   ;AN000;
-		  .ENDIF												   ;AN000;
+		  endif_l_25:												   ;AN000;
 															   ;AN000;
 															   ;AN000;
 	    ;RATE_equal:												   ;AN000;
 															   ;AN000;
-		  .IF <parm_list_BX[DI].keyword_switch_ptr EQ <OFFSET RATE_equal>> THEN 				   ;AN000;
+		  cmp parm_list_BX[DI].keyword_switch_ptr,OFFSET RATE_equal		 				   ;AN000;
+		  jne @F
 															   ;AN000;
 	       MOV   AL,BYTE PTR parm_list_BX[DI].value1       ;save the rate requested in binary form, always <255	   ;AN000;
 	       MOV   rate_holder,AL											   ;AN000;
 	       MOV   need_typamat_call,true										   ;AN000;
 	       BREAK 1													   ;AN000;
 															   ;AN000;
-		  .ENDIF												   ;AN000;
+		  @@:													   ;AN000;
 															   ;AN000;
 															   ;AN000;
 	    ;DELAY_equal:												   ;AN000;
 															   ;AN000;
-		  .IF <parm_list_BX[DI].keyword_switch_ptr EQ <OFFSET DELAY_equal>> OR					   ;AN000;
-		  .IF <parm_list_BX[DI].keyword_switch_ptr EQ <OFFSET DEL_equal>> THEN					   ;AN000;
+		  cmp parm_list_BX[DI].keyword_switch_ptr,OFFSET DELAY_equal						   ;AN000;
+		  je @F
+		  cmp parm_list_BX[DI].keyword_switch_ptr,OFFSET DEL_equal						   ;AN000;
+		  jne endif_l_26
+		  @@:
 															   ;AN000;
 	       MOV   AL,BYTE PTR parm_list_BX[DI].value1      ;save delay requested (binary), always <255		   ;AN000;
 	       MOV   delay_holder,AL											   ;AN000;
 	       MOV   need_typamat_call,true										   ;AN000;
 	       BREAK 1													   ;AN000;
 															   ;AN000;
-		  .ENDIF												   ;AN000;
+		  endif_l_26:												   ;AN000;
 															   ;AN000;
 	 ENDCASE_1:													   ;AN000;
 															   ;AN000;
 	 ADD   DI,TYPE parm_list_entry	     ;address next parm 							   ;AN000;
 															   ;AN000;
-      .ENDWHILE 													   ;AN000;
+      jmp while_l_3
+      endwhile_l_3:
 															   ;AN000;
 DUMMY3: 														   ;AN000;
 PUBLIC DUMMY3														   ;AN000;
 															   ;AN000;
-      .IF <need_IOCTL0C EQ true> THEN											   ;AN000;
-	 .IF <ANSI_installed EQ true> THEN										   ;AN000;
+      cmp need_IOCTL0C,true												   ;AN000;
+      jne elseif_l_30
+	 cmp ANSI_installed,true											   ;AN000;
+	 jne else_l_29
 	    MOV   CL,set_display_characteristics									   ;AN000;
 	    CALL do_IOCTL0C												   ;AN000;
-	    .IF C THEN													   ;AN000;
+	    jnc endif_l_30												   ;AN000;
 	       get_extended_error											   ;AN000;
-	       .IF <AX EQ not_supported_on_machine> THEN								   ;AN000;
+	       cmp AX,not_supported_on_machine										   ;AN000;
+	       jne elseif_l_27
 		  DISPLAY Function_not_supported									   ;AN000;
-	       .ELSEIF <AX EQ font_not_loaded> THEN									   ;AN000;
+	       jmp endif_l_27
+	       elseif_l_27:
+	       cmp AX,font_not_loaded											   ;AN000;
+	       jne endif_l_27
 		  DISPLAY Required_font_not_loaded									   ;AN000;
-	       .ENDIF													   ;AN000;
+	       endif_l_27:												   ;AN000;
 	       MOV   noerror,false											   ;AN000;
-	    .ENDIF													   ;AN000;
-	 .ELSE														   ;AN000;
+	    endif_l_28:													   ;AN000;
+	 jmp endif_l_30
+	 else_l_29:													   ;AN000;
 	    DISPLAY ANSI_not_loaded											   ;AN000;
 	    MOV   noerror,false 											   ;AN000;
-	 .ENDIF 													   ;AN000;
-      .ELSEIF <columns_specified NE false> THEN 									   ;AN000;
+	 endif_l_29: 													   ;AN000;
+      jmp endif_l_30
+      elseif_l_30:
+      cmp columns_specified,false		 									   ;AN000;
+      je endif_l_30
 	 MOV   BL,columns_specified			;set up for call to handle_40_or_80				   ;AN000;
 	 CALL  HANDLE_40_OR_80												   ;AN000;
-      .ENDIF														   ;AN000;
+      endif_l_30:													   ;AN000;
 
-      .IF <need_typamat_call EQ true> THEN										   ;AN000;
+      cmp need_typamat_call,true											   ;AN000;
+      jne @F
 	 MOV   BL,rate_holder												   ;AN000;
 	 MOV   BH,delay_holder												   ;AN000;
 	 CALL  typamat													   ;AN000;
-      .ENDIF														   ;AN000;
+      @@:														   ;AN000;
 															   ;AN000;
       BREAK 0														   ;AN000;
 															   ;AN000;
@@ -1496,26 +1645,40 @@ PUBLIC DUMMY3														   ;AN000;
 
       MOV   request_type,com_status											   ;AN000;
       MOV   CL,com_ports_attached											   ;AN000;
-      .FOR  i = 1 TO CL 												   ;AN000;
+      MOV   i,1
+      for_l_3:
+      CMP   i,CL
+      jg endfor_l_3
 
-	 .SELECT													   ;AN000;
 
-	    .WHEN <i EQ 1>												   ;AN000;
+	    cmp i,1
+	    jne select_l_1_1
 	       MOV   device_name,OFFSET COM1_str							      ;AN000;	   ;AN000;
 
-	    .WHEN <i EQ 2>												   ;AN000;
+	    jmp endselect_l_1
+	    select_l_1_1:
+	    cmp i,2
+	    jne select_l_1_2
 	       MOV   device_name,OFFSET COM2_str									   ;AN000;
 
-	    .WHEN <i EQ 3>												   ;AN000;
+	    jmp endselect_l_1
+	    select_l_1_2:
+	    cmp i,3
+	    jne select_l_1_3
 	       MOV   device_name,OFFSET COM3_str									   ;AN000;
 
-	    .WHEN <i EQ 4>												   ;AN000;
+	    jmp endselect_l_1
+	    select_l_1_3:
+	    cmp i,4
+	    jne endselect_l_1
 	       MOV   device_name,OFFSET COM4_str								       ;AN0;AN000;
 
-	 .ENDSELECT													   ;AN000;
+	 endselect_l_1:
 
 	 CALL  analyze_and_invoke										 ;AN000;   ;AN000;
-      .NEXT i														   ;AN000;
+      inc i
+      jmp for_l_3
+      endfor_l_3:
 
       BREAK 0												      ;AN000;
 
@@ -1530,10 +1693,11 @@ PUBLIC DUMMY3														   ;AN000;
       XOR   CX,CX	      ;initialize prn_ports_attached
       CALL  check_prn_ports_attached   ;return number of printer cards in prn_ports_attached
       ADD   prn_ports_attached,ASCII_0	      ;CX=ASCII form of last printer number
-      .IF <prn_ports_attached GE LPTNO> THEN	;IF the printer exists THEN
+      cmp prn_ports_attached,LPTNO		;IF the printer exists THEN
+      jl @F
 	 CALL  set_retry_type			;turn off infinit retry 						   ;AN000;
 	 CALL  modify_resident_code		;modify resident code to reflect retry turned off			   ;AN000;
-      .ENDIF
+      @@:
 
       BREAK 0														   ;AN000;
 

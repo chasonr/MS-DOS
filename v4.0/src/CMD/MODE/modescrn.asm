@@ -1,11 +1,7 @@
 PAGE ,132 ;
 TITLE MODESCRN.ASM - SCREEN SUPPORT FOR THE MODE COMMAND
 
-.XLIST
-INCLUDE STRUC.INC
-.LIST
-
-INCLUDE  COMMON.STC	;definitions of message sublist blocks ;AC001;
+INCLUDE  common.stc	;definitions of message sublist blocks ;AC001;
 
 ;ษออออออออออออออออออออออออออออออออ  P R O L O G  อออออออออออออออออออออออออออออออออออออออออป				   ;AN000;
 ;บ											  บ				   ;AN000;
@@ -248,15 +244,22 @@ HANDLE_40_OR_80   PROC	NEAR	    ;AN000;
 ;	    7,
 ;	    11:
 
-			   .IF <DS:mode EQ 0> OR
-			   .IF <DS:mode EQ 2> OR
-			   .IF <DS:mode EQ 5> OR
-			   .IF <DS:mode EQ 6> OR
-			   .IF <DS:mode EQ 7> OR
-			   .IF <DS:mode EQ 011H> THEN
+			   cmp DS:mode,0
+			   je @F
+			   cmp DS:mode,2
+			   je @F
+			   cmp DS:mode,5
+			   je @F
+			   cmp DS:mode,6
+			   je @F
+			   cmp DS:mode,7
+			   je @F
+			   cmp DS:mode,011H
+			   jne endif_l_1
+			   @@:
 	       MOV   DS:MODE,0		 ;SWITCH TO 40 COL, BW
 	       BREAK 0
-			   .ENDIF
+			   endif_l_1:
 
 ;	    1,
 ;	    3,
@@ -264,14 +267,20 @@ HANDLE_40_OR_80   PROC	NEAR	    ;AN000;
 ;	    12,
 ;	    13:
 
-			   .IF <DS:mode EQ 1> OR
-			   .IF <DS:mode EQ 3> OR
-			   .IF <DS:mode EQ 4> OR
-			   .IF <DS:mode EQ 012H> OR
-			   .IF <DS:mode EQ 013H> THEN
+			    cmp DS:mode,1
+			    je @F
+			    cmp DS:mode,3
+			    je @F
+			    cmp DS:mode,4
+			    je @F
+			    cmp DS:mode,012H
+			    je @F
+			    cmp DS:mode,013H
+			    jne endif_l_2
+			   @@:
 	       MOV   DS:MODE,1		 ;SWITCH TO 40 COL, COLOR
 	       BREAK 0
-			   .ENDIF
+			   endif_l_2:
 
 
 	 ENDCASE_0:
@@ -295,15 +304,22 @@ ELSE01:
   ;	      7,
   ;	      11:
 
-			     .IF <DS:mode EQ 0> OR
-			     .IF <DS:mode EQ 2> OR
-			     .IF <DS:mode EQ 5> OR
-			     .IF <DS:mode EQ 6> OR
-			     .IF <DS:mode EQ 7> OR
-			     .IF <DS:mode EQ 011H> THEN
+			     cmp DS:mode,0
+			     je @F
+			     cmp DS:mode,2
+			     je @F
+			     cmp DS:mode,5
+			     je @F
+			     cmp DS:mode,6
+			     je @F
+			     cmp DS:mode,7
+			     je @F
+			     cmp DS:mode,011H
+			     jne endif_l_3
+			     @@:
 		 MOV   DS:MODE,2	   ;SWITCH TO 80 COL, BW
 		 BREAK 1
-			     .ENDIF
+			     endif_l_3:
 
   ;	      1,
   ;	      3,
@@ -311,14 +327,20 @@ ELSE01:
   ;	      12,
   ;	      13:
 
-			     .IF <DS:mode EQ 1> OR
-			     .IF <DS:mode EQ 3> OR
-			     .IF <DS:mode EQ 4> OR
-			     .IF <DS:mode EQ 012H> OR
-			     .IF <DS:mode EQ 013H> THEN
+			     cmp DS:mode,1
+			     je @F
+			     cmp DS:mode,3
+			     je @F
+			     cmp DS:mode,4
+			     je @F
+			     cmp DS:mode,012H
+			     je @F
+			     cmp DS:mode,013H
+			     jne endif_l_4
+			     @@:
 		 MOV   DS:MODE,3	   ;SWITCH TO 80 COL, COLOR
 		 BREAK 1
-			     .ENDIF
+			     endif_l_4:
 
 
 	   ENDCASE_1:
@@ -479,7 +501,8 @@ PUBLIC	 ENDIF03
 ;    LEAVE IF THE EXIT SWITCH IS SET
 ;AC001;     CMP    SWITCH,EXIT
 ;AC001;     JE	   ENDDO01
-     .IF <switch NE exit> THEN NEAR
+     cmp switch,exit
+     je endif_l_5
 ;
        SCRN CURRENT_VIDEO_STATE,0
        MOV    DS:MODE,AL	  ;SAVE CURRENT MODE
@@ -515,7 +538,7 @@ ENDIF08:
 ;    : : ENDIF ,END IS IT 40 COL? TEST
 ENDIF07:
 ;
-	 .REPEAT
+	 repeat_l_1:
 	    SCRN   SET_SCREEN_MODE,DS:MODE		;clear the screen
 	    PUSH  CX		    ;save loop counter
 	    DO02:		      ;DO UNTIL LINE IS DISPLAYED across entire screen
@@ -527,8 +550,11 @@ ENDIF07:
 	    MOV   AX,6523H	    ;AN002;yes no check get extended error
 	    INT   21H		    ;AN002;AX returned with indication of yes or no
 	    POP   CX		    ;restore loop counter
-	 .UNTIL <AX EQ yes> OR
-	 .UNTIL <AX EQ no>
+	 cmp ax,yes
+	 je end_repeat_l_1
+	 cmp ax,no
+	 jne repeat_l_1
+	 end_repeat_l_1:
 ;    : : IF RESPONSE IS "Y"
 	 CMP	AL,YES
 	 JNE	ENDIF09
@@ -547,7 +573,7 @@ ENDIF06:
 ;
 ;    ENDDO GO BACK AND SHIFT MORE
      JMP    DO01
-     .ENDIF
+     endif_l_5:
 ENDDO01:
 ;
 ;    IF NO LEGAL FUNCTIONS DONE,
@@ -561,4 +587,3 @@ ENDDO01:
 SHIFT_SCREEN	ENDP			;AN000;
 PRINTF_CODE    ENDS
 	 END
-

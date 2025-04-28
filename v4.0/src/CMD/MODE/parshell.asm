@@ -20,11 +20,10 @@ VAL3SW	 EQU   1	   ;handle list of strings
 BASESW	 EQU   1	   ;use DS addressability for PSDATA.INC variables
 ;INCSW	  EQU	1
 
-INCLUDE  PARSE.ASM
+INCLUDE  parse.asm
 
 PUBLIC	 SYSPARSE
 
 PRINTF_CODE ENDS
 
 END
-

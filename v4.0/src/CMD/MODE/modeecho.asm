@@ -1,10 +1,6 @@
 PAGE ,132 ;
 TITLE MODEECHO - REDIRECT PRINTER OUTPUT FROM PARALLEL TO SERIAL
 
-.XLIST
-INCLUDE STRUC.INC
-.LIST
-
 INCLUDE common.stc	;definition of parm_list_entry struc
 
 DISPLAY 	MACRO	MSG
@@ -180,7 +176,8 @@ MUL   TWO			    ;AL=disp from 40:0 of com port address word
 MOV   AH,BH			    ;restore the lpt number
 XOR   BX,BX			    ;prepare for byte move
 MOV   BL,AL			    ;BX=disp from 40:0 of com port address word
-.IF <ES:RS232_BASE[BX] NE 0> THEN   ;IF the com adapter does exist THEN
+cmp ES:RS232_BASE[BX],0		    ;IF the com adapter does exist THEN
+je else_l_1
 
    ;AT THIS POINT WE KNOW THAT LPTn AND COMm ARE BOTH LEGAL
 
@@ -219,18 +216,19 @@ MOV   BL,AL			    ;BX=disp from 40:0 of com port address word
 	       POP	   DI
 	       POP	   ES	   ;RESTORE SEG REG USED FOR CHECKING/SETTING ADDRESS
 			   ; WORDS AND NEW_PTSFLAG
-	       CALL	   ECHO     ;CHANGE JMP IN MODEPTS COPY IN LOW MEMORY
+	       CALL	   ECHO_    ;CHANGE JMP IN MODEPTS COPY IN LOW MEMORY
    ;				    SO PROPER LPTn GETS REDIRECTED
 	       DISPLAY	   CRLF 					;AN000;
 	       DISPLAY	   REDIRMSG
 
-.ELSE				    ;valid com name, adapter not there
+jmp endif_l_1
+else_l_1:			    ;valid com name, adapter not there
    MOV	 DI,0			    ;COM device name is always the first parm, the value of "LPTX[:]=value"    ;AN000;
    MOV	 BP,OFFSET parm_lst   ;address the parm list via parm_list which is [BP]
    MOV	 CX,parm_list[DI].value1    ;AN000;					     ;AN000;
    MOV	illegal_device_ptr,CX	    ;AN000;set up message with bad com device name string
    DISPLAY ERR1 		       ;"Illegal device name - COMX"
-.ENDIF
+endif_l_1:
 
 
 	POP	ES			;RESTORE SEG REG
@@ -298,7 +296,7 @@ ENDIF07:
 ;AT POWER UP INITIALIZATION TIME. IF THE PRINTER DOESN'T EXIST, THE ADDRESS
 ;WORD IS NOW EQUAL TO 0000H.
 ;
-	    CALL	ECHO		;GO INFORM THE RESIDENT CODE
+	    CALL	ECHO_		;GO INFORM THE RESIDENT CODE
 ;
 ENDIF05:
 	    DISPLAY	CRLF	       ;AN000;carriage return linefeed
@@ -315,7 +313,7 @@ ENDIF06:
 	RET			;RETURN TO CALLER
 MODEECNO ENDP
 ;***************************************************************
-ECHO	PROC	NEAR
+ECHO_	PROC	NEAR
 ;'MODEPTS' STARTS WITH THREE INSTRUCTIONS:
 ;	F6 C2 01	TEST  DL,1
 ;	75 05		JNZ   CK
@@ -399,7 +397,7 @@ ENDC:
 	STI			;REENABLE INTERRUPTS
 	POP	BX
 	RET
-ECHO	ENDP
+ECHO_	ENDP
 
 
 ;ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ					   ;AN000;
@@ -441,35 +439,46 @@ display_printer_reroute_status	PROC  NEAR
 XOR  CX,CX								;AN665;
 MOV  ES,CX			       ;set segment to zero		;AN665;
 
-.IF <<ES:WORD PTR resseg> NE 0000H> AND      ;IF the resident code is loaded AND
+cmp ES:WORD PTR resseg,0000H	       ;IF the resident code is loaded AND
+je else_l_2
 MOV  ES,ES:WORD PTR resseg[2]					     ;AN665;
 ;;XOR	BX,BX
 ;;MOV	BL,printer_reroute_mask
 TEST  BL,ES:PTSFLAG1	   ;see if the printer is rerouted
-.IF NZ THEN				     ;the printer is rerouted
+jz else_l_2				     ;the printer is rerouted
    SHR	 BL,1	  ;was 1, 2, or 4, now is 0, 1, or 2
 ;;;INC	 BL	  ;now is 1, 2, or 3
 ;;;ADD	 BL,resflag2		    ;ES:BX=>the com byte for the desired printer
    ADD	 BX,resflag2		    ;ES:BX=>the com byte for the desired printer
-   .SELECT
 
-      .WHEN <<BYTE PTR ES:[BX]> EQ 0>
+      cmp BYTE PTR ES:[BX],0
+      jne select_l_1_1
 	 MOV   redcom,"1"           ;printer rerouted to COM1
 
-      .WHEN <<BYTE PTR ES:[BX]> EQ 1>
+      jmp endselect_l_1
+      select_l_1_1:
+      cmp BYTE PTR ES:[BX],1
+      jne select_l_1_2
 	 MOV   redcom,"2"           ;printer rerouted to COM2
 
-      .WHEN <<BYTE PTR ES:[BX]> EQ 2>
+      jmp endselect_l_1
+      select_l_1_2:
+      cmp BYTE PTR ES:[BX],2
+      jne select_l_1_3
 	 MOV   redcom,"3"           ;printer rerouted to COM3
 
-      .WHEN <<BYTE PTR ES:[BX]> EQ 3>
+      jmp endselect_l_1
+      select_l_1_3:
+      cmp BYTE PTR ES:[BX],3
+      jne endselect_l_1
 	 MOV   redcom,"4"           ;printer rerouted to COM4
 
-   .ENDSELECT
+   endselect_l_1:
    display  redirmsg	   ;"LPTn rerouted to COMm"
-.ELSE
+jmp endif_l_2
+else_l_2:
    display  notremsg	   ;"LPTn not rerouted"
-.ENDIF
+endif_l_2:
 
 
 

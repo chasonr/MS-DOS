@@ -1,10 +1,6 @@
 	PAGE	,132			;
 	TITLE	MODEVID.SAL
 
-.XLIST
-INCLUDE STRUC.INC		 ;macro library for 'struc'
-.LIST
-
 ;ษออออออออออออออออออออออออออออออออ  P R O L O G  อออออออออออออออออออออออออออออออออออออออออป				   ;AN000;
 ;บ											  บ				   ;AN000;
 															   ;AN000;
@@ -105,7 +101,7 @@ SET_CURSOR_TYPE MACRO
 
 B	EQU	0		       ;POSITION OF "B" IN PARM1 FOR BW?0
 W	EQU	1		       ;POSITION OF "W" IN PARM1 FOR BW?0
-C	EQU	0		       ;POSITION OF "C" IN PARM1 FOR CO?0
+C_	EQU	0		       ;POSITION OF "C" IN PARM1 FOR CO?0
 O	EQU	1		       ;POSITION OF "O" IN PARM1 FOR CO?0
 M	EQU	0		       ;POSITION OF "M" IN PARM1 FOR MONO
 N	EQU	2		       ;POSITION OF "N" IN PARM1 FOR MONO
@@ -278,11 +274,13 @@ EXTRN	P14_model_byte:ABS
 BW40	PROC	NEAR
 
 	CALL	get_video_info
-	.IF    <video_info_DI.active_display EQ all> OR
+	cmp	video_info_DI.active_display,all
+	je	@F
 	find_number  <video_info_DI.active_display>,color_combos
-	.IF    Z OR
+	jz	@F
 	find_number  <video_info_DI.alternate_display>,color_combos
-	.IF    Z THEN
+	jnz else_l_1
+	@@:
 
 	    MOV     DL,BITBW40		;SET FOR BW 40 X 80
 	    MOV     DH,OPTION_BW4025
@@ -291,7 +289,8 @@ BW40	PROC	NEAR
 					;DH HAS BYTE OF VIDEO OPTION
 	    CALL    setup
 
-	.ELSE
+	jmp endif_l_1
+	else_l_1:
 
 	    MOV   DI,0			  ;the screen mode is always the first parm					   ;AC000;
 	    MOV   BP,OFFSET parm_lst   ;address the parm list via parm_list which is [BP]				   ;AC000;
@@ -300,7 +299,7 @@ BW40	PROC	NEAR
 	    DISPLAY Function_not_supported	;'Function not supported - BW40"
 	    MOV     NOERROR,FALSE
 
-	.ENDIF
+	endif_l_1:
 
 	RET				;RETURN TO MAIN ROUTINE
 BW40	ENDP
@@ -309,11 +308,13 @@ BW40	ENDP
 BW80	PROC	NEAR
 
 	CALL	get_video_info
-	.IF    <video_info_DI.active_display EQ all> OR
+	cmp	video_info_DI.active_display,all
+	je	@F
 	find_number  <video_info_DI.active_display>,color_combos
-	.IF    Z OR
+	jz	@F
 	find_number  <video_info_DI.alternate_display>,color_combos
-	.IF    Z THEN
+	jnz	else_l_2
+	@@:
 
 	    MOV     DL,BITBW80		;80 X 25 BW USING GRAPHICS CARD
 	    MOV     DH,OPTION_BW8025
@@ -322,7 +323,8 @@ BW80	PROC	NEAR
 					;DH HAS BYTE OF VIDEO OPTION
 	    CALL    setup
 
-	.ELSE
+	jmp endif_l_2
+	else_l_2:
 
 	    MOV   DI,0			  ;the screen mode is always the first parm					   ;AC000;
 	    MOV   BP,OFFSET parm_lst   ;address the parm list via parm_list which is [BP]				   ;AC000;
@@ -331,7 +333,7 @@ BW80	PROC	NEAR
 	    DISPLAY Function_not_supported	;'Function not supported - BW80"
 	    MOV     NOERROR,FALSE
 
-	.ENDIF
+	endif_l_2:
 
 	RET
 BW80	ENDP
@@ -340,11 +342,13 @@ BW80	ENDP
 MONO	PROC	NEAR
 
 	CALL	get_video_info
-	.IF    <video_info_DI.active_display EQ all> OR
+	cmp	video_info_DI.active_display,all
+	je	@F
 	find_number  <video_info_DI.active_display>,mono_combos
-	.IF    Z OR
+	jz	@F
 	find_number  <video_info_DI.alternate_display>,mono_combos
-	.IF    Z THEN
+	jnz	else_l_3
+	@@:
 
 	    MOV     DL,BITMONO	    ;EQUIP FLAG INDICATING 80 X 25 BW USING MONO CARD
 	    MOV     DH,OPTION_MONO  ;MONOCHROME MODE
@@ -354,7 +358,8 @@ MONO	PROC	NEAR
 					;DH HAS BYTE OF VIDEO OPTION
 		CALL	SETUP
 
-	.ELSE
+	jmp endif_l_3
+	else_l_3:
 
 	    MOV   DI,0			  ;the screen mode is always the first parm					   ;AC000;
 	    MOV   BP,OFFSET parm_lst   ;address the parm list via parm_list which is [BP]				   ;AC000;
@@ -363,7 +368,7 @@ MONO	PROC	NEAR
 	    DISPLAY Function_not_supported	;'Function not supported - MONO"
 	    MOV     NOERROR,FALSE
 
-	.ENDIF
+	endif_l_3:
 
 	RET				;RETURN TO MAIN ROUTINE
 MONO	ENDP
@@ -371,11 +376,13 @@ MONO	ENDP
 CO40	PROC	NEAR
 
 	CALL	get_video_info
-	.IF    <video_info_DI.active_display EQ all> OR
+	cmp	video_info_DI.active_display,all
+	je	@F
 	find_number  <video_info_DI.active_display>,color_combos
-	.IF    Z OR
+	jz	@F
 	find_number  <video_info_DI.alternate_display>,color_combos
-	.IF    Z THEN
+	jnz	else_l_4
+	@@:
 
 	   MOV	   DL,BITBW40	       ;40 X 25 USING COLOR CARD
 	   MOV	   DH,OPTION_CO4025    ; REQUEST COLOR
@@ -384,7 +391,8 @@ CO40	PROC	NEAR
 				    ;DH HAS BYTE OF VIDEO OPTION
 	   CALL    setup
 
-	.ELSE
+	jmp endif_l_4
+	else_l_4:
 
 	    MOV   DI,0			  ;the screen mode is always the first parm					   ;AC000;
 	    MOV   BP,OFFSET parm_lst   ;address the parm list via parm_list which is [BP]				   ;AC000;
@@ -393,7 +401,7 @@ CO40	PROC	NEAR
 	    DISPLAY Function_not_supported	;'Function not supported - CO40"
 	    MOV     NOERROR,FALSE
 
-	.ENDIF
+	endif_l_4:
 
 	RET				;RETURN TO MAIN ROUTINE
 CO40	ENDP
@@ -401,11 +409,13 @@ CO40	ENDP
 CO80	PROC	NEAR
 
 	CALL	get_video_info
-	.IF    <video_info_DI.active_display EQ all> OR
+	cmp	video_info_DI.active_display,all
+	je	@F
 	find_number  <video_info_DI.active_display>,color_combos
-	.IF    Z OR
+	jz	@F
 	find_number  <video_info_DI.alternate_display>,color_combos
-	.IF    Z THEN
+	jnz	else_l_5
+	@@:
 
 	   MOV	   DL,BITBW80	       ;80 X 25 USING COLOR CARD
 	   MOV	   DH,OPTION_CO8025    ; REQUEST COLOR
@@ -415,7 +425,8 @@ CO80	PROC	NEAR
 					;DH HAS BYTE OF VIDEO OPTION
 	   CALL    setup
 
-	.ELSE
+	jmp endif_l_5
+	else_l_5:
 
 	    MOV   DI,0			  ;the screen mode is always the first parm					   ;AC000;
 	    MOV   BP,OFFSET parm_lst   ;address the parm list via parm_list which is [BP]				   ;AC000;
@@ -424,7 +435,7 @@ CO80	PROC	NEAR
 	    DISPLAY Function_not_supported	;'Function not supported - CO80"
 	    MOV     NOERROR,FALSE
 
-	.ENDIF
+	endif_l_5:
 
 	RET				;RETURN TO MAIN ROUTINE
 CO80	ENDP
@@ -483,72 +494,82 @@ POP   ES
 MOV   DI,OFFSET information_block	     ;initialize 'video_info_DI'
 MOV   BX,0				     ;parm to allow for future expansion
 INT   010H
-.IF <AL EQ 01BH> THEN NEAR		     ;IF the call is supported THEN
+cmp   al,01BH				     ;IF the call is supported THEN
+jne   else_l_6
 					     ;ES:DI=>info returned from BIOS
-   .IF <video_info_DI.alternate_display EQ 0> THEN NEAR  ;only 1 display, so see if it can handle all modes
+   cmp video_info_DI.alternate_display,0
+   jne endif_l_6				;only 1 display, so see if it can handle all modes
 
       TEST  video_info_DI.misc_state_info,AMOAMA      ;check the 'all modes on all monitors active' bit
-      .IF   NZ				     ;IF all modes are supported THEN
+      jz    endif_l_6			     ;IF all modes are supported THEN
 	 MOV   video_info_DI.active_display,all 	      ;return the active display type as everything
-      .ENDIF
 
-   .ENDIF
-
-.ELSE					;display code call not supported, look for EGA
+jmp   endif_l_6
+else_l_6:				;display code call not supported, look for EGA
    ;SINCE the display type call was not supported SEE IF IN AN EGA ADVANCED MODE
 
    MOV	   AX,SIGNITURE
    MOV	   ES,AX	       ;PUT SEGMENT OF SIGNITURE OF EGA IN ES
-   .IF	 <ES:SIGWORD EQ EGA_SIG> AND	     ;IF maybe an EGA IN THE MACHINE THEN
+   cmp	 ES:SIGWORD,EGA_SIG	     ;IF maybe an EGA IN THE MACHINE THEN
+   jne else_l_8
    MOV	   AH,ALT_SELECT       ;AH GETS INT FUNCTION SPECIFIER
    MOV	   BL,EGA_INFO	       ;SPECIFY IN BL THE OPTION OF THE FUNCTION OF INT 10 WE
    INT	   10H		       ;RETURN MONITOR TYPE HOOKED TO EGA IN BH
-   .IF	 <BL NE 010H> THEN     ;EGA support available
-      .IF   <BH EQ COLOR_ON_IT> THEN		     ;IF COLOR HOOKED TO EGA THEN
+   cmp	 BL,010H               ;EGA support available
+   je else_l_8
+      cmp  BH,COLOR_ON_IT		     ;IF COLOR HOOKED TO EGA THEN
+      jne else_l_9
 	  MOV  video_info_DI.active_display,ega_color
 
 	  MOV	  AX,0B000H	      ;GET BASE OF MONO SCREEN BUFFER
 	  CALL	  check_buff	      ;IF THERE IS MEMORY WHERE THE MONO CARD HAS IT
-	  .IF  <AH EQ AL> THEN	       ;IF there is a monchrome card buffer present THEN
+	  cmp  AH,AL		      ;IF there is a monchrome card buffer present THEN
+	  jne  endif_l_8
 	     MOV   video_info_DI.alternate_display,mono_card
-	  .ENDIF
 
-      .ELSE
+      jmp endif_l_8
+      else_l_9:
 	  MOV  video_info_DI.active_display,ega_mono
 
 	  MOV	  AX,0B800H		  ;AX= BASE OF GRAPHICS SCREEN BUFFER
 	  CALL	  CHECK_BUFF		  ;DATA PUT OUT IN AL, DATA RETURNED IN AH
-	  .IF  <AH EQ AL> THEN		  ;IF WHAT I GOT BACK IS SAME AS I PUT OUT, THEN BUFFER IS PRESENT
+	  cmp  AH,AL			  ;IF WHAT I GOT BACK IS SAME AS I PUT OUT, THEN BUFFER IS PRESENT
+	  jne  endif_l_8
 	     MOV   video_info_DI.alternate_display,cga
-	  .ENDIF
-      .ENDIF
-   .ELSE				  ;no display type call, no EGA
+
+   jmp endif_l_8
+   else_l_8:				  ;no display type call, no EGA
 					  ;check for convertible
-      .IF   <machine_type EQ P14_model_byte> AND
+      cmp     machine_type,P14_model_byte
+      jne     else_l_10
       MOV     AH,get_sys_stat
       INT     15H			   ;AL=system status
       AND     AL,LCD_bit		   ;check bit 0
-      .IF   <AL EQ LCD_attached> THEN
+      cmp     AL,LCD_attached
+      jne     else_l_10
 	 MOV   video_info_DI.active_display,all 	;LCD supports mono and color
-      .ELSE					;no analog displays, no EGA, no LCD
+      jmp     endif_l_10
+      else_l_10:				;no analog displays, no EGA, no LCD
 
 	  MOV	  AX,0B000H	      ;GET BASE OF MONO SCREEN BUFFER
 	  CALL	  check_buff	      ;IF THERE IS MEMORY WHERE THE MONO CARD HAS IT
-	  .IF  <AH EQ AL> THEN	       ;IF there is a monchrome card buffer present THEN
+	  cmp	  AH,AL		      ;IF there is a monchrome card buffer present THEN
+	  jne	  @F
 	    MOV   video_info_DI.active_display,mono_card
-	  .ENDIF
+	  @@:
 
 	  MOV	  AX,0B800H		  ;AX= BASE OF GRAPHICS SCREEN BUFFER
 	  CALL	  CHECK_BUFF		  ;DATA PUT OUT IN AL, DATA RETURNED IN AH
-	  .IF  <AH EQ AL> THEN		  ;IF WHAT I GOT BACK IS SAME AS I PUT OUT, THEN BUFFER IS PRESENT
+	  cmp	  AH,AL			  ;IF WHAT I GOT BACK IS SAME AS I PUT OUT, THEN BUFFER IS PRESENT
+	  jne	  @F
 	     MOV   video_info_DI.alternate_display,cga
-	  .ENDIF
+	  @@:
 
-      .ENDIF
+      endif_l_10:
 
-   .ENDIF
+   endif_l_8:
 
-.ENDIF
+endif_l_6:
 
 POP   ES
 
