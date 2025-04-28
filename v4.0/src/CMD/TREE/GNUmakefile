@@ -13,22 +13,30 @@ COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
 #######################	dependencies begin here. #########################
 #
 
+.SUFFIXES: .asm .obj
+
+AS = jwasm
+AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.asm.obj:
+	$(AS) $(AFLAGS) -Fo$@ $<
+
 all: tree.com
 
 tree.ctl tree.cl1 tree.cl2 tree.cla: TREE.SKL \
     $(msg)/$(COUNTRY).MSG
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\tree $(subst /,\,$<) $(country)"
 
-tree.obj: TREE.ASM \
-    TREEQU.INC
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\tree $(subst /,\,$<) $(subst /,\,$@)"
+tree.obj: tree.asm \
+    treequ.inc \
+    $(inc)/pathmac.inc
 
-treesysp.obj: TREESYSP.ASM \
+treesysp.obj: treesysp.asm \
+    $(inc)/pathmac.inc \
     $(inc)/psdata.inc \
     $(inc)/parse.asm
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\tree $(subst /,\,$<) $(subst /,\,$@)"
 
-treesysm.obj: TREESYSM.ASM \
+treesysm.obj: treesysm.asm \
     $(inc)/copyrigh.inc \
     $(inc)/versiona.inc \
     $(inc)/sysmsg.inc \
@@ -38,22 +46,31 @@ treesysm.obj: TREESYSM.ASM \
     tree.cl2 \
     tree.cla \
     $(inc)/msghan.inc \
-    TREEMS.INC
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\tree $(subst /,\,$<) $(subst /,\,$@)"
+    $(inc)/msgdcl.inc \
+    $(inc)/pathmac.inc \
+    treems.inc
 
-treepar.obj: TREEPAR.ASM
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\tree $(subst /,\,$<) $(subst /,\,$@)"
+treepar.obj: treepar.asm $(inc)/pathmac.inc
 
 OBJS = tree.obj treepar.obj treesysp.obj treesysm.obj
 
 tree.com: $(OBJS) TREE.LNK
-	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\tree @tree.lnk"
+	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
+	echo 'option map=tree.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name tree.exe' >>resp.txt
+	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
+	wlink @resp.txt
 	exe2bin -q tree.exe tree.com
-	rm tree.exe
 
 clean:
 	rm -f *.obj
+	rm -f *.err
+	rm -f *.lst
 	rm -f tree.com
+	rm -f tree.exe
 	rm -f tree.cl[12a]
 	rm -f tree.ctl
 	rm -f resp.txt
