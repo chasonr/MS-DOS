@@ -105,7 +105,7 @@ HEADER	MACRO	TEXT			;;					;AN000;
 	PAGE				;;					;AN000;
 	ENDM				;;					;AN000;
 ; =  =	=  =  =  =  =  =  =  =	=  =
-	INCLUDE SYSMSG.INC		;PERMIT SYSTEM MESSAGE HANDLER DEFINITION ;AN000;
+	INCLUDE sysmsg.inc		;PERMIT SYSTEM MESSAGE HANDLER DEFINITION ;AN000;
 	MSG_UTILNAME <fastopen> 	;IDENTIFY THE COMPONENT 		;AN000;
 ; =  =	=  =  =  =  =  =  =  =	=  =
 	HEADER	<DEFINITION OF MESSAGES> ;					;AN000;
@@ -116,7 +116,7 @@ CSEG_INIT    SEGMENT PARA PUBLIC 'CODE' ;
 
 	   PUBLIC COPYRIGHT	   ;						;AN000;
 COPYRIGHT  DB	 "MS DOS FASTOPEN Utility " ;                 ;AN000;
-	   INCLUDE COPYRIGH.INC    ;						;AN000;
+	   INCLUDE copyrigh.inc    ;						;AN000;
 	   HEADER <MESSAGE DATA AREAS> ;					;AN000;
 	   MSG_SERVICES <MSGDATA>  ;WORKAREAS FOR SYSTEM MESSAGE HANDLER	;AN000;
 ; =  =	=  =  =  =  =  =  =  =	=  =
@@ -125,7 +125,7 @@ COPYRIGHT  DB	 "MS DOS FASTOPEN Utility " ;                 ;AN000;
 	   PUBLIC SYSDISPMSG	   ;						;AN000;
 
 
-	MSG_SERVICES <FASTOPEN.CLA,FASTOPEN.CL1,FASTOPEN.CL2> ;
+	MSG_SERVICES <fastopen.cla,fastopen.cl1,fastopen.cl2> ;
 
 				   ;DEFAULT=CHECK DOS VERSION
 				   ;DEFAULT=NEARmsg

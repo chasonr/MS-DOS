@@ -137,7 +137,7 @@ include	   version.inc
 
 INCLUDE    fastsegs.inc 									   ;AN000;
 INCLUDE    fastopen.inc 									   ;AN000;
-INCLUDE    SYSCALL.INC ;									   ;AN000;
+INCLUDE    syscall.inc ;									   ;AN000;
 
 ;-----------------------------------------------------------------------
 ;		       EQUATES
@@ -2622,7 +2622,7 @@ ELSE
 	mov	dx, ax
 	
 get_page:
-	cmp	es:[di], 0a000h		; is the page in ax above 640K
+	cmp	word ptr es:[di], 0a000h		; is the page in ax above 640K
 	jb	next_page		; if no get next_page
 
 	mov	bx, di			; we have a valid page
