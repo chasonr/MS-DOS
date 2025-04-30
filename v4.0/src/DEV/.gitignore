@@ -6,6 +6,7 @@
 *.cpi
 *.lst
 *.err
+resp.txt
 ANSI/ansi.sys
 ANSI/ANSI.SYS
 COUNTRY/country.sys
