@@ -7,24 +7,36 @@ inc	=../../INC
 #
 ######################## Dependencies begin here ##########################
 #
+.SUFFIXES: .asm .obj
+
+AS = jwasm
+AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.asm.obj:
+	$(AS) $(AFLAGS) -Fo$@ $<
 
 all: country.sys
 
-mkcntry.obj: MKCNTRY.ASM MKCNTRY.INC
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\country $(subst /,\,$<) $(subst /,\,$@)"
+mkckntry.obj : mkcntry.asm mkcntry.inc $(inc)/copyrigh.inc
 
 OBJS = mkcntry.obj
 
-mkcntry.exe: $(OBJS)
-	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\dev\country mkcntry.obj,mkcntry.exe,,,"
-
-country.sys: mkcntry.exe
-	dosemu -t --Fdrive_c ../../.. -E "src\dev\country\mkcntry"
-	mv ../../../country.sys .
+country.sys: $(OBJS)
+	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
+	echo 'option map=country.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name country.exe' >>resp.txt
+	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
+	wlink @resp.txt
+	exe2bin -q country.exe country.sys
 
 clean:
 	rm -f *.obj
+	rm -f *.err
+	rm -f *.lst
 	rm -f country.sys
-	rm -f mkcntry.exe
-	rm -f mkcntry.map
+	rm -f country.exe
+	rm -f country.map
 	rm -f resp.txt
