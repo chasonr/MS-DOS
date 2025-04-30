@@ -14,9 +14,9 @@
 ;; Modded from Belgian - DTF 20-Aug-86; 08-Sep-86
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 				       ;;
-	INCLUDE KEYBSHAR.INC	       ;;
-	INCLUDE POSTEQU.INC	       ;;
-	INCLUDE KEYBMAC.INC	       ;;
+	INCLUDE keybshar.inc	       ;;
+	INCLUDE postequ.inc	       ;;
+	INCLUDE keybmac.inc	       ;;
 				       ;;
 	PUBLIC NL_LOGIC 	       ;;
 	PUBLIC NL_437_XLAT	       ;;
@@ -53,7 +53,7 @@ NL_LOGIC:
 ;; exit from INT 9.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 				       ;;
-   OPTION EXIT_IF_FOUND 	       ;;
+   OPTION_ EXIT_IF_FOUND 	       ;;
 				       ;;
 				       ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -85,7 +85,7 @@ NL_LOGIC:
 ACUTE_PROC:			       ;;
 				       ;;
    IFF ACUTE,NOT		       ;;
-      GOTO CEDILLA_PROC 	       ;;
+      GOTO_ CEDILLA_PROC 	       ;;
       ENDIFF			       ;;
 				       ;;
       RESET_NLS 		       ;;
@@ -112,7 +112,7 @@ ACUTE_PROC:			       ;;
 INVALID_ACUTE:			       ;;
       PUT_ERROR_CHAR ACUTE_SPACE       ;; If we get here then either the XLATT
       BEEP			       ;; failed or we are ina bad shift state.
-      GOTO NON_DEAD		       ;; Either is invalid so BEEP and fall
+      GOTO_ NON_DEAD		       ;; Either is invalid so BEEP and fall
 				       ;; through to generate the second char.
 				       ;; Note that the dead key flag will be
 				       ;; reset before we get here.
@@ -125,7 +125,7 @@ INVALID_ACUTE:			       ;;
 CEDILLA_PROC:			       ;;
 				       ;;
    IFF CEDILLA,NOT		       ;;
-      GOTO TILDE_PROC		       ;;
+      GOTO_ TILDE_PROC		       ;;
       ENDIFF			       ;;
 				       ;;
       RESET_NLS 		       ;;
@@ -152,7 +152,7 @@ CEDILLA_PROC:			       ;;
 INVALID_CEDILLA:		       ;;
       PUT_ERROR_CHAR CEDILLA_SPACE     ;; If we get here then either the XLATT
       BEEP			       ;; failed or we are ina bad shift state.
-      GOTO NON_DEAD		       ;; Either is invalid so BEEP and fall
+      GOTO_ NON_DEAD		       ;; Either is invalid so BEEP and fall
 				       ;; through to generate the second char.
 				       ;; Note that the dead key flag will be
 				       ;; reset before we get here.
@@ -164,7 +164,7 @@ INVALID_CEDILLA:		       ;;
 TILDE_PROC:			       ;;
 				       ;;
    IFF TILDE,NOT		       ;;
-      GOTO DIARESIS_PROC	       ;;
+      GOTO_ DIARESIS_PROC	       ;;
       ENDIFF			       ;;
 				       ;;
       RESET_NLS 		       ;;
@@ -191,7 +191,7 @@ TILDE_PROC:			       ;;
 INVALID_TILDE:			       ;;
       PUT_ERROR_CHAR TILDE_SPACE       ;; standalone accent
       BEEP			       ;; Invalid dead key combo.
-      GOTO NON_DEAD		       ;;
+      GOTO_ NON_DEAD		       ;;
 				       ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; DIARESIS ACCENT TRANSLATIONS
@@ -200,7 +200,7 @@ INVALID_TILDE:			       ;;
 DIARESIS_PROC:			       ;;
 				       ;;
    IFF DIARESIS,NOT		       ;;
-      GOTO GRAVE_PROC		       ;;
+      GOTO_ GRAVE_PROC		       ;;
       ENDIFF			       ;;
 				       ;;
       RESET_NLS 		       ;;
@@ -227,7 +227,7 @@ DIARESIS_PROC:			       ;;
 INVALID_DIARESIS:		       ;;
       PUT_ERROR_CHAR DIARESIS_SPACE    ;; standalone accent
       BEEP			       ;; Invalid dead key combo.
-      GOTO NON_DEAD		       ;;
+      GOTO_ NON_DEAD		       ;;
 				       ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; GRAVE ACCENT TRANSLATIONS
@@ -236,7 +236,7 @@ INVALID_DIARESIS:		       ;;
 GRAVE_PROC:			       ;;
 				       ;;
    IFF GRAVE,NOT		       ;;
-      GOTO CIRCUMFLEX_PROC	       ;;
+      GOTO_ CIRCUMFLEX_PROC	       ;;
       ENDIFF			       ;;
 				       ;;
       RESET_NLS 		       ;;
@@ -263,7 +263,7 @@ GRAVE_PROC:			       ;;
 INVALID_GRAVE:			       ;;
       PUT_ERROR_CHAR GRAVE_SPACE       ;; standalone accent
       BEEP			       ;; Invalid dead key combo.
-      GOTO NON_DEAD		       ;;
+      GOTO_ NON_DEAD		       ;;
 				       ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; CIRCUMFLEX ACCENT TRANSLATIONS
@@ -272,7 +272,7 @@ INVALID_GRAVE:			       ;;
 CIRCUMFLEX_PROC:		       ;;
 				       ;;
    IFF CIRCUMFLEX,NOT		       ;;
-      GOTO NON_DEAD		       ;;
+      GOTO_ NON_DEAD		       ;;
       ENDIFF			       ;;
 				       ;;
       RESET_NLS 		       ;;
@@ -299,7 +299,7 @@ CIRCUMFLEX_PROC:		       ;;
 INVALID_CIRCUMFLEX:		       ;;
       PUT_ERROR_CHAR CIRCUMFLEX_SPACE  ;; standalone accent
       BEEP			       ;; Invalid dead key combo.
-      GOTO NON_DEAD		       ;;
+      GOTO_ NON_DEAD		       ;;
 				       ;;
 				       ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

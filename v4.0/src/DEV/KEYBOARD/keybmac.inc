@@ -260,7 +260,7 @@ PUT_ERROR_CHAR	MACRO STATE
        ENDM
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-OPTION MACRO MASK,MASK_TYPE
+OPTION_ MACRO MASK,MASK_TYPE
     MAC_OK = 1
     IFB  <MASK_TYPE>
 	 NOT_BIT = 00000000B
@@ -297,7 +297,7 @@ BEEP   MACRO
        ENDM
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-GOTO	MACRO GOTO_OFFSET
+GOTO_	MACRO GOTO_OFFSET
        DB  GOTO_COMMAND
        DW  GOTO_OFFSET-$-2
        ENDM

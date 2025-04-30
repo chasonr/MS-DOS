@@ -41,9 +41,9 @@ TITLE	DOS - LAD Keyboard Definition File
 ;			DW   OFFSET LA_850_XLAT,0 ; table pointer
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	INCLUDE KEYBSHAR.INC		;
-	INCLUDE POSTEQU.INC		;
-	INCLUDE KEYBMAC.INC		;
+	INCLUDE keybshar.inc		;
+	INCLUDE postequ.inc		;
+	INCLUDE keybmac.inc		;
 					;
 	PUBLIC LA_LOGIC 		;
 	PUBLIC LA_437_XLAT		;
@@ -71,7 +71,7 @@ LA_LOGIC:				;
 ;  an XLATT or SET_FLAG operation then
 ;  exit from INT 9.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   OPTION EXIT_IF_FOUND 		;
+   OPTION_ EXIT_IF_FOUND 		;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;   Dead key definitions must come before
 ;   dead key translations to handle
@@ -109,7 +109,7 @@ ENDIFF				       ;;
 ACUTE_PROC:				;
 					;
    IFF ACUTE,NOT			;
-      GOTO DIARESIS_PROC		;
+      GOTO_ DIARESIS_PROC		;
       ENDIFF				;
 					;
       RESET_NLS 			;
@@ -136,7 +136,7 @@ ACUTE_PROC:				;
 INVALID_ACUTE:				;
       PUT_ERROR_CHAR ACUTE_LOWER	; If we get here then either the XLATT
       BEEP				; failed or we are ina bad shift state.
-      GOTO NON_DEAD			; Either is invalid so BEEP and fall
+      GOTO_ NON_DEAD			; Either is invalid so BEEP and fall
 					; through to generate the second char.
 					; Note that the dead key flag will be
 					; reset before we get here.
@@ -145,7 +145,7 @@ INVALID_ACUTE:				;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 DIARESIS_PROC:				;
    IFF DIARESIS,NOT			;
-      GOTO GRAVE_PROC			;
+      GOTO_ GRAVE_PROC			;
       ENDIFF				;
 					;
       RESET_NLS 			;
@@ -172,14 +172,14 @@ DIARESIS_PROC:				;
 INVALID_DIARESIS:			;
       PUT_ERROR_CHAR DIARESIS_LOWER	; standalone accent
       BEEP				; Invalid dead key combo.
-      GOTO NON_DEAD			;
+      GOTO_ NON_DEAD			;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  GRAVE ACCENT TRANSLATIONS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 GRAVE_PROC:				;
 					;
    IFF GRAVE,NOT			;
-      GOTO CIRCUMFLEX_PROC		;
+      GOTO_ CIRCUMFLEX_PROC		;
       ENDIFF				;
 					;
       RESET_NLS 			;
@@ -206,14 +206,14 @@ GRAVE_PROC:				;
 INVALID_GRAVE:				;
       PUT_ERROR_CHAR GRAVE_LOWER	; standalone accent
       BEEP				; Invalid dead key combo.
-      GOTO NON_DEAD			;
+      GOTO_ NON_DEAD			;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  CIRCUMFLEX ACCENT TRANSLATIONS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 CIRCUMFLEX_PROC:			;
 					;
    IFF CIRCUMFLEX,NOT			;
-      GOTO NON_DEAD			;
+      GOTO_ NON_DEAD			;
       ENDIFF				;
 					;
       RESET_NLS 			;
@@ -240,7 +240,7 @@ CIRCUMFLEX_PROC:			;
 INVALID_CIRCUMFLEX:			;
       PUT_ERROR_CHAR CIRCUMFLEX_LOWER	; standalone accent
       BEEP				; Invalid dead key combo.
-      GOTO NON_DEAD			;
+      GOTO_ NON_DEAD			;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  Upper, lower and third shifts
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

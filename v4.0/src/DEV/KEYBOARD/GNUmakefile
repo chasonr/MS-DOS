@@ -8,67 +8,55 @@ inc	=../../INC
 ###################### Dependencies begin here #########################
 #
 
+.SUFFIXES: .asm .obj
+
+AS = jwasm
+AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.asm.obj:
+	$(AS) $(AFLAGS) -Fo$@ $<
+
 all:           keyboard.sys
 
-kdfnow.obj:    KDFNOW.ASM KEYBMAC.INC KEYBSHAR.INC $(inc)/postequ.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\keyboard $(subst /,\,$<) $(subst /,\,$@)"
+kdfnow.obj:    kdfnow.asm
 
-kdffr120.obj:  KDFFR120.ASM KEYBMAC.INC KEYBSHAR.INC $(inc)/postequ.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\keyboard $(subst /,\,$<) $(subst /,\,$@)"
+kdffr120.obj:  kdffr120.asm keybmac.inc keybshar.inc $(inc)/postequ.inc
 
-kdffr189.obj:  KDFFR189.ASM KEYBMAC.INC KEYBSHAR.INC $(inc)/postequ.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\keyboard $(subst /,\,$<) $(subst /,\,$@)"
+kdffr189.obj:  kdffr189.asm keybmac.inc keybshar.inc $(inc)/postequ.inc
 
-kdfeof.obj:    KDFEOF.ASM KEYBMAC.INC KEYBSHAR.INC $(inc)/postequ.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\keyboard $(subst /,\,$<) $(subst /,\,$@)"
+kdfeof.obj:    kdfeof.asm $(inc)/copyrigh.inc
 
-kdfuk166.obj:  KDFUK166.ASM KEYBMAC.INC KEYBSHAR.INC $(inc)/postequ.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\keyboard $(subst /,\,$<) $(subst /,\,$@)"
+kdfuk166.obj:  kdfuk166.asm keybmac.inc keybshar.inc $(inc)/postequ.inc
 
-kdfuk168.obj:  KDFUK168.ASM KEYBMAC.INC KEYBSHAR.INC $(inc)/postequ.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\keyboard $(subst /,\,$<) $(subst /,\,$@)"
+kdfuk168.obj:  kdfuk168.asm keybmac.inc keybshar.inc $(inc)/postequ.inc
 
-kdfit141.obj:  KDFIT141.ASM KEYBMAC.INC KEYBSHAR.INC $(inc)/postequ.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\keyboard $(subst /,\,$<) $(subst /,\,$@)"
+kdfit141.obj:  kdfit141.asm keybmac.inc keybshar.inc $(inc)/postequ.inc
 
-kdfit142.obj:  KDFIT142.ASM KEYBMAC.INC KEYBSHAR.INC $(inc)/postequ.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\keyboard $(subst /,\,$<) $(subst /,\,$@)"
+kdfit142.obj:  kdfit142.asm keybmac.inc keybshar.inc $(inc)/postequ.inc
 
-kdfge.obj:     KDFGE.ASM KEYBMAC.INC KEYBSHAR.INC $(inc)/postequ.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\keyboard $(subst /,\,$<) $(subst /,\,$@)"
+kdfge.obj:     kdfge.asm keybmac.inc keybshar.inc $(inc)/postequ.inc
 
-kdfsp.obj:     KDFSP.ASM KEYBMAC.INC KEYBSHAR.INC $(inc)/postequ.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\keyboard $(subst /,\,$<) $(subst /,\,$@)"
+kdfsp.obj:     kdfsp.asm keybmac.inc keybshar.inc $(inc)/postequ.inc
 
-kdfnl.obj:     KDFNL.ASM KEYBMAC.INC KEYBSHAR.INC $(inc)/postequ.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\keyboard $(subst /,\,$<) $(subst /,\,$@)"
+kdfnl.obj:     kdfnl.asm keybmac.inc keybshar.inc $(inc)/postequ.inc
 
-kdfno.obj:     KDFNO.ASM KEYBMAC.INC KEYBSHAR.INC $(inc)/postequ.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\keyboard $(subst /,\,$<) $(subst /,\,$@)"
+kdfno.obj:     kdfno.asm keybmac.inc keybshar.inc $(inc)/postequ.inc
 
-kdfdk.obj:     KDFDK.ASM KEYBMAC.INC KEYBSHAR.INC $(inc)/postequ.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\keyboard $(subst /,\,$<) $(subst /,\,$@)"
+kdfdk.obj:     kdfdk.asm keybmac.inc keybshar.inc $(inc)/postequ.inc
 
-kdfsg.obj:     KDFSG.ASM KEYBMAC.INC KEYBSHAR.INC $(inc)/postequ.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\keyboard $(subst /,\,$<) $(subst /,\,$@)"
+kdfsg.obj:     kdfsg.asm keybmac.inc keybshar.inc $(inc)/postequ.inc
 
-kdfsf.obj:     KDFSF.ASM KEYBMAC.INC KEYBSHAR.INC $(inc)/postequ.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\keyboard $(subst /,\,$<) $(subst /,\,$@)"
+kdfsf.obj:     kdfsf.asm keybmac.inc keybshar.inc $(inc)/postequ.inc
 
-kdfpo.obj:     KDFPO.ASM KEYBMAC.INC KEYBSHAR.INC $(inc)/postequ.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\keyboard $(subst /,\,$<) $(subst /,\,$@)"
+kdfpo.obj:     kdfpo.asm keybmac.inc keybshar.inc $(inc)/postequ.inc
 
-kdfbe.obj:     KDFBE.ASM KEYBMAC.INC KEYBSHAR.INC $(inc)/postequ.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\keyboard $(subst /,\,$<) $(subst /,\,$@)"
+kdfbe.obj:     kdfbe.asm keybmac.inc keybshar.inc $(inc)/postequ.inc
 
-kdfcf.obj:     KDFCF.ASM KEYBMAC.INC KEYBSHAR.INC $(inc)/postequ.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\keyboard $(subst /,\,$<) $(subst /,\,$@)"
+kdfcf.obj:     kdfcf.asm keybmac.inc keybshar.inc $(inc)/postequ.inc
 
-kdfla.obj:     KDFLA.ASM KEYBMAC.INC KEYBSHAR.INC $(inc)/postequ.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\keyboard $(subst /,\,$<) $(subst /,\,$@)"
+kdfla.obj:     kdfla.asm keybmac.inc keybshar.inc $(inc)/postequ.inc
 
-kdfsv.obj:     KDFSV.ASM KEYBMAC.INC KEYBSHAR.INC $(inc)/postequ.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\keyboard $(subst /,\,$<) $(subst /,\,$@)"
+kdfsv.obj:     kdfsv.asm keybmac.inc keybshar.inc $(inc)/postequ.inc
 
 OBJS = kdfnow.obj kdfsp.obj kdfpo.obj kdffr120.obj kdffr189.obj kdfdk.obj \
        kdfsg.obj kdfge.obj kdfit141.obj kdfit142.obj kdfuk166.obj \
@@ -76,10 +64,21 @@ OBJS = kdfnow.obj kdfsp.obj kdfpo.obj kdffr120.obj kdffr189.obj kdfdk.obj \
        kdfsv.obj kdfla.obj kdfeof.obj
 
 keyboard.sys: $(OBJS)
-	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\dev\keyboard @keyboard.lnk"
+	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
+	echo 'option map=keyboard.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name keyboard.exe' >>resp.txt
+	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
+	wlink @resp.txt
 	exe2bin -q keyboard.exe keyboard.sys
-	rm keyboard.exe
 
 clean:
 	rm -f *.obj
+	rm -f *.err
+	rm -f *.lst
 	rm -f keyboard.sys
+	rm -f keyboard.exe
+	rm -f keyboard.map
+	rm -f resp.txt
