@@ -46,10 +46,9 @@
 	PUBLIC	COPY_SD_AREA	       ;;
 	PUBLIC	SHARED_DATA	       ;;
 				       ;;
-	INCLUDE STRUC.INC
-	INCLUDE KEYBSHAR.INC	       ;;
-	INCLUDE KEYBCMD.INC	       ;;
-	INCLUDE KEYBTBBL.INC	       ;;
+	INCLUDE keybshar.inc	       ;;
+	INCLUDE keybcmd.inc	       ;;
+	INCLUDE keybtbbl.inc	       ;;
 				       ;;
 CODE	SEGMENT PUBLIC 'CODE'          ;;
 				       ;;
@@ -101,11 +100,12 @@ NO_FREEDOM:
 
 						  ;AN004;     ;Terminate and stay resident
 	     mov     bx,4			  ;AN004;     ;1st close file handles
-	 .REPEAT				  ;AN004;     ;STDIN,STDOUT,STDERR
+	 @@:					  ;AN004;     ;STDIN,STDOUT,STDERR
 	     mov  ah,3eh			  ;AN004;     ;
 	     int  21h				  ;AN004;     ;
 	     dec  bx				  ;AN004;     ;
-	.UNTIL <BX eq 0>			  ;AN004;     ;
+	cmp BX,0				  ;AN004;     ;
+	jne @B
 
 		 pop	 bx			  ;AN004;
 		 pop	 ax			  ;AN004;

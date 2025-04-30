@@ -37,14 +37,14 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
                                        ;;
 ;****
-        INCLUDE KEYBEQU.INC            ;;
-        INCLUDE DSEG.inc               ;; System data segments
-        INCLUDE POSTEQU.inc            ;; System equates
-        INCLUDE KEYBSHAR.INC           ;;
-        INCLUDE KEYBI2F.INC            ;;
-        INCLUDE KEYBI9C.INC            ;;
-        INCLUDE KEYBCPSD.INC           ;;
-        INCLUDE KEYBCMD.INC            ;;
+        INCLUDE keybequ.inc            ;;
+        INCLUDE dseg.inc               ;; System data segments
+        INCLUDE postequ.inc            ;; System equates
+        INCLUDE keybshar.inc           ;;
+        INCLUDE keybi2f.inc            ;;
+        INCLUDE keybi9c.inc            ;;
+        INCLUDE keybcpsd.inc           ;;
+        INCLUDE keybcmd.inc            ;;
                                        ;;
         PUBLIC KEYB_STATE_PROCESSOR    ;;
                                        ;;

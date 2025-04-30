@@ -39,14 +39,14 @@
 ;; ;AN002; - PTM 3090  ENABLING RIGHT CTL FOR RE-BOOTING
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 				       ;;
-	INCLUDE KEYBEQU.INC	       ;;
-	INCLUDE DSEG.inc	       ;; System data segments
-	INCLUDE POSTEQU.inc	       ;; System equates
-	INCLUDE KEYBSHAR.INC	       ;;
-	INCLUDE KEYBI2F.INC	       ;;
-	INCLUDE KEYBI9.INC	       ;;
-	INCLUDE KEYBCPSD.INC	       ;;
-	INCLUDE KEYBCMD.INC	       ;;
+	INCLUDE keybequ.inc	       ;;
+	INCLUDE dseg.inc	       ;; System data segments
+	INCLUDE postequ.inc	       ;; System equates
+	INCLUDE keybshar.inc	       ;;
+	INCLUDE keybi2f.inc	       ;;
+	INCLUDE keybi9.inc	       ;;
+	INCLUDE keybcpsd.inc	       ;;
+	INCLUDE keybcmd.inc	       ;;
 				       ;;
 	PUBLIC KEYB_INT_9	       ;;
 	PUBLIC K8		       ;; CTRL case tables
@@ -218,7 +218,8 @@ K14	LABEL	BYTE		       ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 				       ;;
 KEYB_INT_9    PROC   NEAR	       ;;
-	JMP	KB_INT_1	; THIS JUMP AND ENSUING BYTE MUST BE HERE TO BE
+	JMP	SHORT KB_INT_1	; THIS JUMP AND ENSUING BYTE MUST BE HERE TO BE
+	NOP
  COUNTRY_FLAG	 DB	 -1	;  COMPATIBLE WITH APL.  APL WILL FORCE THIS
 				;  BYTE TO BE ZERO, ONLY BECAUSE IT'S 3 BYTES
 KB_INT_1:			;  AWAY FROM WHERE THE INT9 VECTOR POINTS

@@ -44,12 +44,12 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
                                        ;;
-        INCLUDE KEYBEQU.INC            ;;
-        INCLUDE KEYBSHAR.INC           ;;
-        INCLUDE KEYBMAC.INC            ;;
-        INCLUDE KEYBCMD.INC            ;;
-        INCLUDE KEYBCPSD.INC           ;;
-        INCLUDE KEYBI9C.INC            ;;
+        INCLUDE keybequ.inc            ;;
+        INCLUDE keybshar.inc           ;;
+        INCLUDE keybmac.inc            ;;
+        INCLUDE keybcmd.inc            ;;
+        INCLUDE keybcpsd.inc           ;;
+        INCLUDE keybi9c.inc            ;;
                                        ;;
         PUBLIC KEYB_INT_2F             ;;
                                        ;;

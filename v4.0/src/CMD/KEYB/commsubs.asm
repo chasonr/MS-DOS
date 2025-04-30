@@ -43,12 +43,12 @@
 	PUBLIC SECURE_FL	       ;;
 
 				       ;;
-	INCLUDE KEYBEQU.INC	       ;;
-	INCLUDE KEYBCPSD.INC	       ;;
-	INCLUDE KEYBSHAR.INC	       ;;
-	INCLUDE KEYBCMD.INC	       ;;
-	INCLUDE DSEG.INC	       ;;
-	INCLUDE POSTEQU.INC	       ;;
+	INCLUDE keybequ.inc	       ;;
+	INCLUDE keybcpsd.inc	       ;;
+	INCLUDE keybshar.inc	       ;;
+	INCLUDE keybcmd.inc	       ;;
+	INCLUDE dseg.inc	       ;;
+	INCLUDE postequ.inc	       ;;
 				       ;;
 CODE	SEGMENT PUBLIC 'CODE'          ;;
 				       ;;

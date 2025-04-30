@@ -45,7 +45,7 @@ TITLE	    PARSE CODE AND CONTROL BLOCKS FOR KEYB.COM
 ;
 ;****************** END OF SPECIFICATIONS ****************************
 
-INCLUDE     KEYBDCL.INC 							    ;AN000
+INCLUDE     keybdcl.inc 							    ;AN000
 
 ID_VALID	     EQU  0		;AN000; 				    ;AN000
 ID_INVALID	     EQU  1		;AN000; 					   ;AN000
@@ -83,10 +83,6 @@ TOO_MANY	     EQU  1
 INVALID_PARAM	     EQU  10
 VALUE_DISALLOW	     EQU  8
 
-.XLIST
-INCLUDE     STRUC.INC	    ; Structured macros 				    ;AN000
-.LIST
-
 PUBLIC	    PARSE_PARAMETERS ;AN003;; near procedure for parsing command line		   ;AN000
 PUBLIC	    CUR_PTR ;AN003;; near procedure for parsing command line		  ;AN000
 PUBLIC	    OLD_PTR ;AN003;; near procedure for parsing command line		  ;AN000
@@ -118,7 +114,7 @@ CODE	      SEGMENT  PUBLIC 'CODE' BYTE            ;AN000;                       
 	      ASSUME CS:CODE,DS:CODE		     ;AN000;				   ;AN000
 
 .XLIST
-INCLUDE     PARSE.ASM	    ; Parsing code					    ;AN000
+INCLUDE     parse.asm	    ; Parsing code					    ;AN000
 .LIST
 
 
@@ -228,10 +224,16 @@ PARSE_PARAMETERS       PROC	NEAR						    ;AN000
       XOR    CX,CX				 ;AN000;;				   ;AN000
       XOR    DX,DX				 ;AN000;;				   ;AN000
       CALL   SYSPARSE				 ;AN000;;				   ;AN000
-      .WHILE <AX NE RC_EOL> near AND		 ;AN000;; while not end of line and..	   ;AN000
-      .WHILE <LOOP_COUNT NE ERROR_COND> near	 ;AN000;; parameters valid do.		   ;AN000
-	.IF <AX EQ RC_NOT_IN_SW> near OR	 ;AN000;; invalid switch?		   ;AN000
-	.IF <AX EQ RC_SW_FIRST>  near		;AN000;; invalid switch?		  ;AN000
+      while_l_1:
+      cmp AX,RC_EOL				 ;AN000;; while not end of line and..	   ;AN000
+      je endwhile_l_1
+      cmp LOOP_COUNT,ERROR_COND			 ;AN000;; parameters valid do.		   ;AN000
+      je endwhile_l_1
+	cmp AX,RC_NOT_IN_SW			 ;AN000;; invalid switch?		   ;AN000
+	je @F
+	cmp AX,RC_SW_FIRST			 ;AN000;; invalid switch?		  ;AN000
+	jne else_l_3
+	@@:
 	  MOV	 [BP].RET_CODE_3,INVALID_SYNTAX  ;AN000;; set invalid syntax flag.	   ;AN000
 	  MOV	 LOOP_COUNT,ERROR_COND		 ;AN000;; set error flag to exit parse.    ;AN000
 ;***CNS
@@ -243,13 +245,17 @@ PARSE_PARAMETERS       PROC	NEAR						    ;AN000
 	  POP AX				 ;AN003;Restore the environment
 
 ;***CNS
-	.ELSE					 ;AN000;;				   ;AN000
-	  .IF <RESULT_SYN_PTR NE 0>		 ;AN000;; was the switch found? 	   ;AN000
+	jmp while_l_1
+	else_l_3:				 ;AN000;;				   ;AN000
+	  cmp RESULT_SYN_PTR,0			 ;AN000;; was the switch found? 	   ;AN000
+	  je else_l_2
 	    MOV    AX,WORD PTR RESULT_VAL+2	 ;AN000;; is it valid?			   ;AN000
 	    OR	   AX,AX			 ;AN000;;				   ;AN000
-	    .IF NZ OR				 ;AN000;;				   ;AN000
+	    jnz @F				 ;AN000;;				   ;AN000
 	    MOV    AX,WORD PTR RESULT_VAL	 ;AN000;;				   ;AN000
-	    .IF <AX A MAX_ID>			 ;AN000;;				   ;AN000
+	    cmp AX,MAX_ID			 ;AN000;;				   ;AN000
+	    jbe else_l_1
+	    @@:
 	      MOV    [BP].RET_CODE_1,ID_INVALID  ;AN000;; no...invalid id.		   ;AN000
 	      MOV    [BP].RET_CODE_3,INVALID_SYNTAX ;AN000;; syntax error.		   ;AN000
 	      MOV    LOOP_COUNT,ERROR_COND	 ;AN000;; set flag to exit parse	   ;AN000
@@ -263,16 +269,18 @@ PARSE_PARAMETERS       PROC	NEAR						    ;AN000
 	  POP AX				 ;AN003;Restore the environment
 
 ;***CNS
-	    .ELSE				 ;AN000;;				   ;AN000
+	    jmp endif_l_2
+	    else_l_1:				 ;AN000;;				   ;AN000
 	      MOV    [BP].RET_CODE_4,ID_VALID	 ;AN000;; yes...set return code 4.	   ;AN000
 	      MOV    [BP].ID_PARM,AX		 ;AN000;;				   ;AN000
 	      mov    fourth_parm,1		 ;AN000;;				   ;AN000
 	      mov    fth_parmid,1		 ;AN000;;				   ;AN000
-	    .ENDIF				 ;AN000;;				   ;AN000
-	  .ELSE 				 ;AN000;;				   ;AN000
+	    endif_l_1:				 ;AN000;;				   ;AN000
+	  jmp endif_l_2
+	  else_l_2: 				 ;AN000;;				   ;AN000
 	    INC    LOOP_COUNT			 ;AN000;; positional encountered...	   ;AN000
-	    .SELECT				 ;AN000;;				   ;AN000
-	    .WHEN <LOOP_COUNT EQ 1>		 ;AN000;; check for language		   ;AN000
+	    cmp LOOP_COUNT,1			 ;AN000;; check for language		   ;AN000
+	    jne select_l_1_1
 	      CALL   PROCESS_1ST_PARM		 ;AN000;;				   ;AN000
 
 ;***CNS
@@ -285,7 +293,10 @@ PARSE_PARAMETERS       PROC	NEAR						    ;AN000
 ;***CNS
 
 
-	    .WHEN <LOOP_COUNT EQ 2>		 ;AN000;; check for code page		   ;AN000
+	    jmp endselect_l_1
+	    select_l_1_1:
+	    cmp LOOP_COUNT,2			 ;AN000;; check for code page		   ;AN000
+	    jne select_l_1_2
 	      CALL   PROCESS_2ND_PARM		 ;AN000;;				   ;AN000
 ;***CNS
 
@@ -295,7 +306,10 @@ PARSE_PARAMETERS       PROC	NEAR						    ;AN000
 	  MOV CUR_PTR,SI			 ;AN003;
 	  POP AX				 ;AN003;Restore the environment
 ;***CNS
-	    .WHEN <LOOP_COUNT EQ 3>		 ;AN000;; check for file name		   ;AN000
+	    jmp endselect_l_1
+	    select_l_1_2:
+	    cmp LOOP_COUNT,3			 ;AN000;; check for file name		   ;AN000
+	    jne otherwise_l_1
 	      CALL   PROCESS_3RD_PARM		 ;AN000;;				   ;AN000
 ;***CNS
 
@@ -305,7 +319,8 @@ PARSE_PARAMETERS       PROC	NEAR						    ;AN000
 	  MOV CUR_PTR,SI			 ;AN003;
 	  POP AX				 ;AN003;Restore the environment
 ;***CNS
-	    .OTHERWISE				 ;AN000;;				   ;AN000
+	    jmp endselect_l_1
+	    otherwise_l_1:			 ;AN000;;				   ;AN000
 	      MOV    [BP].RET_CODE_3,INVALID_SYNTAX ;AN000;; too many parms		   ;AN000
 ;***CNS
 
@@ -317,14 +332,17 @@ PARSE_PARAMETERS       PROC	NEAR						    ;AN000
 ;***CNS
 	  MOV	ERR_PART,TOO_MANY
 	      MOV    LOOP_COUNT,ERROR_COND	 ;AN000;; set error flag to exit parse.    ;AN000
-	    .ENDSELECT				 ;AN000;;				   ;AN000
-	  .ENDIF				 ;AN000;;				   ;AN000
+	    endselect_l_1:			 ;AN000;;				   ;AN000
+	  endif_l_2:				 ;AN000;;				   ;AN000
 	  MOV	 RESULT_TYPE,0			 ;AN000;; reset result block.		   ;AN000
 	  CALL	 SYSPARSE			 ;AN000;; parse next parameter. 	   ;AN000
-	.ENDIF					 ;AN000;;				   ;AN000
-      .ENDWHILE 				 ;AN000;;				   ;AN000
-      .IF <[BP].RET_CODE_4 EQ ID_VALID> AND	 ;AN000;; ensure that if the switch	   ;AN000
-      .IF <[BP].RET_CODE_1 NE LANGUAGE_VALID>	 ;AN000;; was used..that a valid keyboard  ;AN000
+	endif_l_3:				 ;AN000;;				   ;AN000
+      jmp while_l_1
+      endwhile_l_1: 				 ;AN000;;				   ;AN000
+      cmp [BP].RET_CODE_4,ID_VALID		 ;AN000;; ensure that if the switch	   ;AN000
+      jne @F
+      cmp [BP].RET_CODE_1,LANGUAGE_VALID	 ;AN000;; was used..that a valid keyboard  ;AN000
+      je @F
 	MOV	[BP].RET_CODE_3,INVALID_SYNTAX	 ;AN000;; code was used..		   ;AN000
 ;***CNS
 
@@ -335,7 +353,7 @@ PARSE_PARAMETERS       PROC	NEAR						    ;AN000
 	  POP AX				 ;AN003;Restore the environment
 	  MOV	ERR_PART,VALUE_DISALLOW
 ;***CNS
-      .ENDIF					 ;AN000;;				   ;AN000
+      @@:					 ;AN000;;				   ;AN000
       RET					 ;AN000;;				   ;AN000
 PARSE_PARAMETERS       ENDP			 ;AN000;				   ;AN000
 
@@ -358,31 +376,40 @@ PARSE_PARAMETERS       ENDP			 ;AN000;				   ;AN000
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 PROCESS_1ST_PARM       PROC    NEAR						    ;AN000
-       .IF <AX GT RC_NO_ERROR>			 ;AN000;; error on parse?		   ;AN000
+       cmp AX,RC_NO_ERROR			 ;AN000;; error on parse?		   ;AN000
+       jle else_l_7
 	 MOV	[BP].RET_CODE_1,LANGUAGE_INVALID ;AN000;; yes...set invalid language	   ;AN000
 	 MOV	[BP].RET_CODE_3,INVALID_SYNTAX	 ;AN000;; and syntax error..		   ;AN000
 	 MOV	LOOP_COUNT,ERROR_COND		 ;AN000;; set flag to exit parse.	   ;AN000
       MOV    ERR_PART,AX			 ;AN003;;
-       .ELSE near				 ;AN000;;				   ;AN000
+       jmp endif_l_7
+       else_l_7:				 ;AN000;;				   ;AN000
 
-	 .IF <RESULT_TYPE EQ NUMBER>		 ;AN000;; was this a number (id)?	   ;AN000
+	 cmp RESULT_TYPE,NUMBER			 ;AN000;; was this a number (id)?	   ;AN000
+	 jne elseif_l_6
 	   MOV	  AX,WORD PTR RESULT_VAL+2	 ;AN000;; yes...check to see if 	   ;AN000
 	   OR	  AX,AX 			 ;AN000;; within range. 		   ;AN000
-	   .IF NZ OR				 ;AN000;;				   ;AN000
+	   jnz @F				 ;AN000;;				   ;AN000
 	   MOV	  AX,WORD PTR RESULT_VAL	 ;AN000;;				   ;AN000
-	   .IF <AX A MAX_ID>			 ;AN000;;				   ;AN000
+	   cmp AX,MAX_ID			 ;AN000;;				   ;AN000
+	   jbe else_l_4
+	   @@:
 	     MOV    [BP].RET_CODE_1,ID_INVALID	 ;AN000;; no...invalid id.		   ;AN000
 	     MOV    [BP].RET_CODE_3,INVALID_SYNTAX ;AN000;; syntax error.		   ;AN000
 	     MOV    LOOP_COUNT,ERROR_COND	 ;AN000;; set flag to exit parse	   ;AN000
 	     mov    bad_id,1			 ;AN000;;				   ;AN000
-	   .ELSE				 ;AN000;;				   ;AN000
+	   jmp endif_l_6
+	   else_l_4:				 ;AN000;;				   ;AN000
 	     MOV    [BP].RET_CODE_1,ID_VALID	 ;AN000;; valid id...set		   ;AN000
 	     MOV    [BP].RET_CODE_4,ID_VALID	 ;AN000;; valid id...set		   ;AN000
 	     MOV    [BP].ID_PARM,AX		 ;AN000;; and value moved into block	   ;AN000
 	     MOV    LOOP_COUNT,4		 ;AN000;; there should be no more parms    ;AN000
 	     mov    one_parmid,1		 ;AN000;;				   ;AN000
-	   .ENDIF				 ;AN000;;				   ;AN000
-	 .ELSEIF <RESULT_TYPE EQ STRING>	 ;AN000;; must be a string then..	   ;AN000
+	   endif_l_4:				 ;AN000;;				   ;AN000
+	 jmp endif_l_6
+	 elseif_l_6:
+	 cmp RESULT_TYPE,STRING			 ;AN000;; must be a string then..	   ;AN000
+	 jne else_l_6
 	   PUSH   SI				 ;AN000;;				   ;AN000
 	   PUSH   DI				 ;AN000;;				   ;AN000
 	   PUSH   CX				 ;AN000;;				   ;AN000
@@ -392,30 +419,39 @@ PROCESS_1ST_PARM       PROC    NEAR						    ;AN000
 	   ADD	  DI,LANGUAGE_PARM		 ;AN000;; point to block for copy.	   ;AN000
 	   MOV	  CX,LANG_LENGTH		 ;AN000;; maximum length = 2		   ;AN000
 	   LODSB				 ;AN000;; load AL with 1st char..	   ;AN000
-	   .WHILE <CX NE 0> AND 		 ;AN000;; do twice....unless		   ;AN000
-	   .WHILE <AL NE 0>			 ;AN000;; there is only 1 character.	   ;AN000
+	   while_l_2:
+	   cmp CX,0		 		 ;AN000;; do twice....unless		   ;AN000
+	   je endwhile_l_2
+	   cmp AL,0				 ;AN000;; there is only 1 character.	   ;AN000
+	   je endwhile_l_2
 	     STOSB				 ;AN000;; store 			   ;AN000
 	     DEC    CX				 ;AN000;; dec count			   ;AN000
 	     LODSB				 ;AN000;; load				   ;AN000
-	   .ENDWHILE				 ;AN000;;				   ;AN000
-	   .IF <CX NE 0> OR			 ;AN000;; if there was less than 2 or..    ;AN000
-	   .IF <AL NE 0>			 ;AN000;; greater than 2 characters then.. ;AN000
+	   jmp while_l_2
+	   endwhile_l_2:			 ;AN000;;				   ;AN000
+	   cmp CX,0				 ;AN000;; if there was less than 2 or..    ;AN000
+	   jne @F
+	   cmp AL,0				 ;AN000;; greater than 2 characters then.. ;AN000
+	   je else_l_5
+	   @@:
 	     MOV    [BP].RET_CODE_1,LANGUAGE_INVALID ;AN000;; invalid.			   ;AN000
 	     MOV    [BP].RET_CODE_3,INVALID_SYNTAX ;AN000;; syntax error		   ;AN000
 	  MOV	ERR_PART,INVALID_PARAM
 	     MOV    LOOP_COUNT,ERROR_COND	 ;AN000;; set flag to exit parse.	   ;AN000
-	   .ELSE				 ;AN000;;				   ;AN000
+	   jmp endif_l_5
+	   else_l_5:				 ;AN000;;				   ;AN000
 	     MOV    [BP].RET_CODE_1,LANGUAGE_VALID ;AN000;; valid language has been copied ;AN000
 	     MOV    ALPHA,1			 ;AN000;; language found		   ;AN000
-	   .ENDIF				 ;AN000;;				   ;AN000
+	   endif_l_5:				 ;AN000;;				   ;AN000
 	   POP	  DS				 ;AN000;;				   ;AN000
 	   POP	  CX				 ;AN000;;				   ;AN000
 	   POP	  DI				 ;AN000;;				   ;AN000
 	   POP	  SI				 ;AN000;;				   ;AN000
-	 .ELSE					 ;AN000;; ommited parameter...		   ;AN000
+	 jmp endif_l_6
+	 else_l_6:				 ;AN000;; ommited parameter...		   ;AN000
 	   MOV	  [BP].RET_CODE_3,INVALID_SYNTAX ;AN000;; invalid since further parameters.;AN000
-	 .ENDIF 				 ;AN000;;				   ;AN000
-       .ENDIF					 ;AN000;;				   ;AN000
+	 endif_l_6: 				 ;AN000;;				   ;AN000
+       endif_l_7:				 ;AN000;;				   ;AN000
        RET					 ;AN000;;				   ;AN000
 PROCESS_1ST_PARM       ENDP			 ;AN000;				   ;AN000
 
@@ -438,29 +474,36 @@ PROCESS_1ST_PARM       ENDP			 ;AN000;				   ;AN000
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 PROCESS_2ND_PARM       PROC    NEAR						    ;AN000
-       .IF <AX GT RC_NO_ERROR>			   ;AN000;; if parse error..		   ;AN000
+       cmp AX,RC_NO_ERROR			   ;AN000;; if parse error..		   ;AN000
+       jle else_l_10
 	 MOV	[BP].RET_CODE_2,CODE_PAGE_INVALID  ;AN000;; mark invalid..		   ;AN000
 	 MOV	[BP].RET_CODE_3,INVALID_SYNTAX	   ;AN000;; syntax error		   ;AN000
 	 MOV	LOOP_COUNT,ERROR_COND		   ;AN000;; set flag to exit parse	   ;AN000
       MOV    ERR_PART,AX			 ;AN003;;
-       .ELSE					   ;AN000;;				   ;AN000
-	 .IF <RESULT_TYPE EQ NUMBER>		   ;AN000;; was parameter specified?	   ;AN000
+       jmp endif_l_10
+       else_l_10:				   ;AN000;;				   ;AN000
+	 cmp RESULT_TYPE,NUMBER			   ;AN000;; was parameter specified?	   ;AN000
+	 jne else_l_9
 	   MOV	  AX,WORD PTR RESULT_VAL+2	   ;AN000;; yes..if code page not..	   ;AN000
 	   OR	  AX,AX 			   ;AN000;;				   ;AN000
-	   .IF NZ OR				   ;AN000;;				   ;AN000
+	   jnz @F				   ;AN000;;				   ;AN000
 	   MOV	  AX,WORD PTR RESULT_VAL	   ;AN000;; valid..then 		   ;AN000
-	   .IF <AX A MAX_ID>			   ;AN000;;				   ;AN000
+	   cmp AX,MAX_ID			   ;AN000;;				   ;AN000
+	   jbe else_l_8
+	   @@:
 	     MOV    [BP].RET_CODE_2,CODE_PAGE_INVALID ;AN000;; mark invalid..		   ;AN000
 	     MOV    [BP].RET_CODE_3,INVALID_SYNTAX ;AN000;; syntax error		   ;AN000
 	     MOV    LOOP_COUNT,ERROR_COND	   ;AN000;; set flag to exit parse	   ;AN000
-	   .ELSE				   ;AN000;;				   ;AN000
+	   jmp endif_l_9
+	   else_l_8:				   ;AN000;;				   ;AN000
 	     MOV    [BP].RET_CODE_2,CODE_PAGE_VALID;AN000;; else...valid code page	   ;AN000
 	     MOV    [BP].CODE_PAGE_PARM,AX	   ;AN000;; move into parm		   ;AN000
-	   .ENDIF				   ;AN000;;				   ;AN000
-	 .ELSE					   ;AN000;;				   ;AN000
+	   endif_l_8:				   ;AN000;;				   ;AN000
+	 jmp endif_l_9
+	 else_l_9:				   ;AN000;;				   ;AN000
 	   MOV	    [BP].RET_CODE_2,NO_CODE_PAGE   ;AN000;; mark as not specified.	   ;AN000
-	 .ENDIF 				   ;AN000;;				   ;AN000
-       .ENDIF					   ;AN000;;				   ;AN000
+	 endif_l_9: 				   ;AN000;;				   ;AN000
+       endif_l_10:				   ;AN000;;				   ;AN000
        RET					   ;AN000;;				   ;AN000
 PROCESS_2ND_PARM      ENDP			   ;AN000;				   ;AN000
 
@@ -483,12 +526,15 @@ PROCESS_2ND_PARM      ENDP			   ;AN000;				   ;AN000
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 PROCESS_3RD_PARM       PROC    NEAR	     ;AN000;					   ;AN000
-       .IF <AX GT RC_NO_ERROR>		     ;AN000;; if parse error then..		   ;AN000
+       cmp AX,RC_NO_ERROR		     ;AN000;; if parse error then..		   ;AN000
+       jle else_l_12
 	 MOV	[BP].RET_CODE_3,INVALID_SYNTAX ;AN000;; syntax error.			   ;AN000
 	 MOV	LOOP_COUNT,ERROR_COND	     ;AN000;; set flag to exit parse		   ;AN000
       MOV    ERR_PART,AX			 ;AN003;;
-       .ELSE				     ;AN000;;					   ;AN000
-	 .IF <RESULT_TYPE EQ FILE_SPEC>      ;AN000;;					   ;AN000
+       jmp endif_l_12
+       else_l_12:			     ;AN000;;					   ;AN000
+	 cmp RESULT_TYPE,FILE_SPEC	     ;AN000;;					   ;AN000
+	 jne endif_l_11
 	   PUSH   DS			     ;AN000;;					   ;AN000
 	   PUSH   SI			     ;AN000;;					   ;AN000
 	   PUSH   DI			     ;AN000;;					   ;AN000
@@ -498,18 +544,21 @@ PROCESS_3RD_PARM       PROC    NEAR	     ;AN000;					   ;AN000
 	   MOV	  [BP].PATH_OFFSET,DI	     ;AN000;; copy to parameter block		   ;AN000
 	   XOR	  CX,CX 		     ;AN000;;					   ;AN000
 	   LODSB			     ;AN000;; count the length of the path.	   ;AN000
-	   .WHILE <AL NE 0>		     ;AN000;;					   ;AN000
+	   while_l_3:
+	   cmp AL,0			     ;AN000;;					   ;AN000
+	   je endwhile_l_3
 	     STOSB			     ;AN000;;					   ;AN000
 	     LODSB			     ;AN000;;					   ;AN000
 	     INC    CX			     ;AN000;;					   ;AN000
-	   .ENDWHILE			     ;AN000;;					   ;AN000
+	   jmp while_l_3
+	   endwhile_l_3:		     ;AN000;;					   ;AN000
 	   MOV	  [BP].PATH_LENGTH,CX	     ;AN000;; copy to parameter block		   ;AN000
 	   POP	  CX			     ;AN000;;					   ;AN000
 	   POP	  DI			     ;AN000;;					   ;AN000
 	   POP	  SI			     ;AN000;;					   ;AN000
 	   POP	  DS			     ;AN000;;					   ;AN000
-	 .ENDIF 			     ;AN000;;					   ;AN000
-       .ENDIF				     ;AN000;;					   ;AN000
+	 endif_l_11: 			     ;AN000;;					   ;AN000
+       endif_l_12:			     ;AN000;;					   ;AN000
        RET				     ;AN000;;					   ;AN000
 PROCESS_3RD_PARM       ENDP		     ;AN000;					   ;AN000
 					     ;AN000;

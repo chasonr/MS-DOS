@@ -115,29 +115,28 @@
 	EXTRN  ERR_PART:WORD		;an003;
 ;***CNS
 .xlist
-	INCLUDE STRUC.INC	       ;AN000;;; WGR structured macros			   ;AN000
-	INCLUDE SYSMSG.INC	       ;AN000;;; WGR message retriever			   ;AN000
+	INCLUDE sysmsg.inc	       ;AN000;;; WGR message retriever			   ;AN000
 .list
 				       ;;
-MSG_UTILNAME <KEYB>		       ;AN000;;; WGR identify to message retriever	   ;AN000
+MSG_UTILNAME <keyb>		       ;AN000;;; WGR identify to message retriever	   ;AN000
 				       ;;
 CODE	SEGMENT PUBLIC 'CODE'          ;;
 				       ;;
 .xlist				       ;;
-	INCLUDE KEYBEQU.INC	       ;;
-	INCLUDE KEYBSYS.INC	       ;;
-	INCLUDE KEYBI9.INC	       ;;
-	INCLUDE KEYBI9C.INC	       ;;
-	INCLUDE KEYBI2F.INC	       ;;
-	INCLUDE KEYBI48.INC	       ;;
-	INCLUDE KEYBSHAR.INC	       ;;
-	INCLUDE KEYBDCL.INC	       ;;
-	INCLUDE KEYBTBBL.INC	       ;;
-	INCLUDE COMMSUBS.INC	       ;;
-	INCLUDE KEYBCPSD.INC	       ;;
+	INCLUDE keybequ.inc	       ;;
+	INCLUDE keybsys.inc	       ;;
+	INCLUDE keybi9.inc	       ;;
+	INCLUDE keybi9c.inc	       ;;
+	INCLUDE keybi2f.inc	       ;;
+	INCLUDE keybi48.inc	       ;;
+	INCLUDE keybshar.inc	       ;;
+	INCLUDE keybdcl.inc	       ;;
+	INCLUDE keybtbbl.inc	       ;;
+	INCLUDE commsubs.inc	       ;;
+	INCLUDE keybcpsd.inc	       ;;
 .xlist
-	INCLUDE POSTEQU.INC	       ;;
-	INCLUDE DSEG.INC	       ;;
+	INCLUDE postequ.inc	       ;;
+	INCLUDE dseg.inc	       ;;
 				       ;;
 .list
 	ASSUME	CS:CODE,DS:CODE        ;;
@@ -1836,7 +1835,7 @@ BUILD_PATH    PROC  NEAR	       ;;
 	JE	APPEND_KEYB_SYS        ;;
 	MOV	SI,[BP].PATH_OFFSET    ;;   Get the offset of the path
 				       ;;
-	REPE	MOVSB		       ;AC000;;;   Copy each char of the specified
+	REP	MOVSB		       ;AC000;;;   Copy each char of the specified
 	MOV	AX,3D00H	       ;AC000;;; WGR Open the KEYBOARD.SYS file 	   ;AN000
 	MOV	DX,OFFSET FILE_NAME    ;AC000;;; WGR					   ;AN000
 	INT	21H		       ;AC000;;; WGR					   ;AN000
@@ -1845,35 +1844,43 @@ BUILD_PATH    PROC  NEAR	       ;;
 APPEND_KEYB_SYS:		       ;;;;;
 	MOV	SI,OFFSET KEYB_SYS_ACTIVE ;AC000;;; WGR  copy name for active directory    ;AN000
 	MOV	CX,KEYB_SYS_A_LENG     ;AC000;;;;;; WGR  to file name variable. 	   ;AN000
-	REPE	MOVSB		       ;AC000;;; WGR					   ;AN000
+	REP	MOVSB		       ;AC000;;; WGR					   ;AN000
 	MOV	AX,3D00H	       ;AC000;;; WGR try to open it.			   ;AN000
 	MOV	DX,OFFSET FILE_NAME    ;AC000;;; WGR					   ;AN000
 	INT	21H		       ;AC000;;; WGR					   ;AN000
-	.IF C			       ;AC000;;; WGR error in opening...was it..	   ;AN000
-	  .IF <AX EQ PATH_NOT_FOUND> OR ;AN000;;; WGR path or.. 			   ;AN000
-	  .IF <AX EQ FILE_NOT_FOUND>   ;AN000;;; WGR file not found?... 		   ;AN000
+	jnc endif_l_4		       ;AC000;;; WGR error in opening...was it..	   ;AN000
+	  cmp AX,PATH_NOT_FOUND        ;AN000;;; WGR path or.. 			   ;AN000
+	  je @F
+	  cmp AX,FILE_NOT_FOUND        ;AN000;;; WGR file not found?... 		   ;AN000
+	  jne else_l_3
+	  @@:
 	    CALL   COPY_ARGV0	       ;AC000;;; WGR yes....try ARGV(0) directory.	   ;AN000
 	    MOV    AX,3D00H	       ;AC000;;; WGR					   ;AN000
 	    MOV    DX,OFFSET FILE_NAME ;AC000;;; WGR					   ;AN000
 	    INT    21H		       ;AC000;;; WGR					   ;AN000
-	    .IF C		       ;AC000;;; WGR error in opening....was it..	   ;AN000
-	      .IF <AX EQ PATH_NOT_FOUND> OR ;AC000;;; WGR path or..			   ;AN000
-	      .IF <AX EQ FILE_NOT_FOUND> ;AC000;;; WGR file not found?			   ;AN000
+	    jnc endif_l_3	       ;AC000;;; WGR error in opening....was it..	   ;AN000
+	      cmp AX,PATH_NOT_FOUND      ;AC000;;; WGR path or..			   ;AN000
+	      je @F
+	      cmp AX,FILE_NOT_FOUND      ;AC000;;; WGR file not found?			   ;AN000
+	      jne else_l_1
+	      @@:
 		MOV	SI,OFFSET KEYBOARD_SYS ;AC000;;; WGR try ROOT directory.	   ;AN000
 		MOV	DI,OFFSET FILE_NAME    ;AC000;;; WGR				   ;AN000
 		MOV	CX,KEYB_SYS_LENG       ;AC000;;; WGR				   ;AN000
-		REPE	MOVSB		       ;AC000;;; WGR				   ;AN000
+		REP	MOVSB		       ;AC000;;; WGR				   ;AN000
 		MOV	AX,3D00H	       ;AC000;;; WGR				   ;AN000
 		MOV	DX,OFFSET FILE_NAME    ;AC000;;; WGR				   ;AN000
 		INT	21H		       ;AC000;;; WGR				   ;AN000
-	      .ELSE			       ;AC000;;; WGR if failed then carry set..    ;AN000
+	      jmp endif_l_3
+	      else_l_1:			       ;AC000;;; WGR if failed then carry set..    ;AN000
 		STC			      ;AC000;;; WGR some other error..set flag	   ;AN000
-	      .ENDIF			     ;AC000;;; WGR				   ;AN000
-	    .ENDIF			    ;AC000;;; WGR				   ;AN000
-	  .ELSE 			   ;AN000;;; WGR				   ;AN000
+	      endif_l_1:		     ;AC000;;; WGR				   ;AN000
+	    endif_l_2:			    ;AC000;;; WGR				   ;AN000
+	  jmp endif_l_3
+	  else_l_3: 			   ;AN000;;; WGR				   ;AN000
 	    STC 			  ;AN000;;; WGR some other error..set flag.	   ;AN000
-	  .ENDIF			 ;AN000;;; WGR					   ;AN000
-	.ENDIF				;AN000;;; WGR					   ;AN000
+	  endif_l_3:			 ;AN000;;; WGR					   ;AN000
+	endif_l_4:			;AN000;;; WGR					   ;AN000
 				       ;;
 	RET			       ;AN000;;;
 				       ;;
@@ -1897,27 +1904,34 @@ COPY_ARGV0  PROC		       ;; WGR					    ;AN000
   MOV	 DI,2CH 		       ;AN000;;; WGR Locate environment string		   ;AN000
   MOV	 ES,[DI]		       ;AN000;;; WGR					   ;AN000
   XOR	 SI,SI			       ;AN000;;; WGR					   ;AN000
-  .WHILE <<WORD PTR ES:[SI]> NE 0>     ;AN000;;; WGR find ARGV(0) string.		   ;AN000
+  while_l_1:
+  cmp WORD PTR ES:[SI],0	       ;AN000;;; WGR find ARGV(0) string.		   ;AN000
+  je endwhile_l_1
      INC   SI			       ;AN000;;; WGR					   ;AN000
-  .ENDWHILE			       ;AN000;;; WGR					   ;AN000
+  jmp while_l_1
+  endwhile_l_1:			       ;AN000;;; WGR					   ;AN000
   ADD	 SI,4			       ;AN000;;; WGR					   ;AN000
   LEA	 DI,FILE_NAME		       ;AN000;;; WGR move string to work area		   ;AN000
-  .REPEAT			       ;AN000;;; WGR					   ;AN000
+  @@:				       ;AN000;;; WGR					   ;AN000
      MOV    AL,ES:[SI]		       ;AN000;;; WGR					   ;AN000
      MOV    [DI],AL		       ;AN000;;; WGR					   ;AN000
      INC    SI			       ;AN000;;; WGR					   ;AN000
      INC    DI			       ;AN000;;; WGR					   ;AN000
-  .UNTIL <<BYTE PTR ES:[SI]> EQ 0>     ;AN000;;; WGR					   ;AN000
-  .REPEAT			       ;AN000;;; WGR					   ;AN000
+  cmp BYTE PTR ES:[SI],0	       ;AN000;;; WGR					   ;AN000
+  jne @B
+  repeat_l_1:			       ;AN000;;; WGR					   ;AN000
      DEC    DI			       ;AN000;;; WGR					   ;AN000
-  .UNTIL <<BYTE PTR [DI]> EQ '\'> OR   ;AN000;;; WGR                                       ;AN000
-  .UNTIL <<BYTE PTR [DI]> EQ 0>        ;AN000;;; WGR scan back to..			   ;AN000
+  cmp BYTE PTR [DI],'\'		       ;AN000;;; WGR                                       ;AN000
+  je @F
+  cmp BYTE PTR [DI],0		       ;AN000;;; WGR scan back to..			   ;AN000
+  jne repeat_l_1
+  @@:
   INC	 DI			       ;AN000;;; WGR first character after "\"             ;AN000
   PUSH	 CS			       ;AN000;;; WGR					   ;AN000
   POP	 ES			       ;AN000;;; WGR					   ;AN000
   LEA	 SI,KEYB_SYS_ACTIVE	       ;AN000;;; WGR copy in "KEYBOARD.SYS"                ;AN000
   MOV	 CX,KEYB_SYS_A_LENG	       ;AN000;;; WGR					   ;AN000
-  REPE	 MOVSB			       ;AN000;;; WGR					   ;AN000
+  REP	 MOVSB			       ;AN000;;; WGR					   ;AN000
 				       ;AN000;;; WGR					   ;AN000
   POP	    CX			       ;AN000;;; WGR					   ;AN000
   POP	    SI			       ;AN000;;; WGR					   ;AN000
@@ -2045,9 +2059,9 @@ FIND_FIRST_CP	     ENDP	       ;;
 .xlist						  ;;
 MSG_SERVICES <MSGDATA>				  ;AN000;;; WGR 			   ;AN000
 MSG_SERVICES <LOADmsg,DISPLAYmsg,CHARmsg,NUMmsg>  ;AN000;;; WGR 			   ;AN000
-MSG_SERVICES <KEYB.CL1> 			  ;AN000;;; WGR 			   ;AN000
-MSG_SERVICES <KEYB.CL2> 			  ;AN000;;; WGR 			   ;AN000
-MSG_SERVICES <KEYB.CLA> 			  ;AN000;;; WGR 			   ;AN000
+MSG_SERVICES <keyb.cl1> 			  ;AN000;;; WGR 			   ;AN000
+MSG_SERVICES <keyb.cl2> 			  ;AN000;;; WGR 			   ;AN000
+MSG_SERVICES <keyb.cla> 			  ;AN000;;; WGR 			   ;AN000
 .list						  ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Temp Shared Data Area
@@ -2069,4 +2083,3 @@ CODE	ENDS
 include msgdcl.inc
 
 	END
-

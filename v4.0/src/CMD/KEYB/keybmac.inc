@@ -256,25 +256,25 @@ PUT_ERROR_CHAR  MACRO STATE
        ENDM
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-OPTION MACRO MASK,MASK_TYPE
-    MAC_OK = 1
-    IFB  <MASK_TYPE>
-         NOT_BIT = 00000000B
-    ELSE
-         IFIDN <MASK_TYPE>,<NOT>
-             NOT_BIT = 00001000B
-         ELSE
-             MAC_OK = 0
-             IF2
-                 %OUT Unknown parameter MASK_TYPE on OPTION MACRO
-             ENDIF
-         ENDIF
-    ENDIF
-    IF MAC_OK
-       DB  OPTION_COMMAND+NOT_BIT
-       DB  MASK
-    ENDIF
-    ENDM
+;RLC OPTION MACRO MASK,MASK_TYPE
+;RLC     MAC_OK = 1
+;RLC     IFB  <MASK_TYPE>
+;RLC          NOT_BIT = 00000000B
+;RLC     ELSE
+;RLC          IFIDN <MASK_TYPE>,<NOT>
+;RLC              NOT_BIT = 00001000B
+;RLC          ELSE
+;RLC              MAC_OK = 0
+;RLC              IF2
+;RLC                  %OUT Unknown parameter MASK_TYPE on OPTION MACRO
+;RLC              ENDIF
+;RLC          ENDIF
+;RLC     ENDIF
+;RLC     IF MAC_OK
+;RLC        DB  OPTION_COMMAND+NOT_BIT
+;RLC        DB  MASK
+;RLC     ENDIF
+;RLC     ENDM
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 SET_FLAG  MACRO STATE
@@ -293,10 +293,10 @@ BEEP   MACRO
        ENDM
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-GOTO    MACRO GOTO_OFFSET
-       DB  GOTO_COMMAND
-       DW  GOTO_OFFSET-$-2
-       ENDM
+;RLC GOTO   MACRO GOTO_OFFSET
+;RLC        DB  GOTO_COMMAND
+;RLC        DW  GOTO_OFFSET-$-2
+;RLC        ENDM
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 EXIT_INT_9  MACRO
