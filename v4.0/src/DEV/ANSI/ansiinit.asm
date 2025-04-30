@@ -20,10 +20,7 @@ TITLE	ANSI Console device CON$INIT routine
 ;AN004; D493 New INIT request structure for error message	   02/25/88 J.K.
 ;-------------------------------------------------------------------------------
 
-INCLUDE    ANSI.INC		   ; WGR equates and strucs				 ;AN000;
-.XLIST
-INCLUDE    STRUC.INC		   ; WGR structured macros				 ;AN000;
-.LIST
+INCLUDE    ansi.inc		   ; WGR equates and strucs				 ;AN000;
 
 PUBLIC	   CON$INIT		   ; WGR						 ;AN000;
 
@@ -58,7 +55,7 @@ EXTRN	ABORT:BYTE		       ; WGR						 ;AN000;
 extrn	Display_Loaded_Before_me:byte  ;AN002;Defined in IOCTL.ASM
 extrn	Switch_K:Byte		       ;AN003;
 
-INCLUDE   ANSIVID.INC		       ; WGR video tables data				 ;AN000;
+INCLUDE   ansivid.inc		       ; WGR video tables data				 ;AN000;
 
 CON$INIT:
 	LDS	BX,CS:[PTRSAV]	       ; WGR establish addressability to request header  ;AC000;
@@ -81,16 +78,19 @@ CONT_INIT:			       ; WGR						 ;AN000;
 	MOV	AX,ROM_BIOS	       ; WGR						 ;AN000;
 	MOV	ES,AX		       ; WGR DS now points to BIOS data area		 ;AN000;
 	MOV	AH,ES:[KBD_FLAG_3]     ; WGR load AH with KBD_FLAG_3			 ;AN000;
-	.IF  <BIT AH AND EXT16_FLAG> AND   ; WGR see if extended INT16 is loaded	       ;AN000;
-	.IF  <Switch_K EQ OFF>	       ;The user does not want to disable the extended INT 16h ;AN003;
+	test AH, EXT16_FLAG	       ; WGR see if extended INT16 is loaded	       ;AN000;
+	jz @F
+	cmp Switch_K,OFF	       ;The user does not want to disable the extended INT 16h ;AN003;
+	jne @F
 	  MOV	  EXT_16,ON	       ; WGR extended INT16 available, set flag 	 ;AN000;
-	.ENDIF			       ; WGR						 ;AN000;
+	@@:			       ; WGR						 ;AN000;
 	CALL	DET_HDWR	       ; WGR procedure to determine video hardware status;AN000;
-	.IF <HDWR_FLAG GE MCGA_ACTIVE> ; WGR if we have EGA or better then..		 ;AN000;
+	cmp HDWR_FLAG,MCGA_ACTIVE      ; WGR if we have EGA or better then..		 ;AN000;
+	jl @F
 	  MOV	  AH,ALT_SELECT        ; WGR issue select alternate print..		 ;AN000;
 	  MOV	  BL,ALT_PRT_SC        ; WGR screen routine call..			 ;AN000;
 	  INT	  10H		       ; WGR						 ;AN000;
-	.ENDIF
+	@@:
 	CALL	LOAD_INT10	       ; WGR load interrupt 10h handler 		 ;AN000;
 	CALL	LOAD_INT2F	       ; WGR load interrupt 2Fh handler 		 ;AN000;
 	int	11h
@@ -147,10 +147,12 @@ setbrk:
 DET_HDWR  PROC	  NEAR									 ;AN000;
 	  MOV	 AH,GET_SYS_ID		     ; see if this is a Convertible		 ;AN000;
 	  INT	 15H			     ;						 ;AN000;
-	  .IF <ES:[BX].MODEL_BYTE EQ LCD_MODEL> AND ; yes...check for LCD attached?	 ;AN000;
+	  cmp ES:[BX].MODEL_BYTE,LCD_MODEL   ; yes...check for LCD attached?	 ;AN000;
+	  jne else_l_1
 	  MOV	 AH,GET_STATUS		     ; system status will tell us		 ;AN000;
 	  INT	 15H			     ;						 ;AN000;
-	  .IF <BIT AL NAND ON>		     ; if bit 0 = 0 then LCD..			 ;AN000;
+	  test AL,ON			     ; if bit 0 = 0 then LCD..			 ;AN000;
+	  jnz else_l_1
 	     OR     HDWR_FLAG,LCD_ACTIVE     ; so ...set hdwr flag and...		 ;AN000;
 	     LEA    SI,COLOR_TABLE	     ;						 ;AN000;
 	     MOV    CX,COLOR_NUM	     ; load color table (for LCD)		 ;AN000;
@@ -158,24 +160,27 @@ DET_HDWR  PROC	  NEAR									 ;AN000;
 	     LEA    SI,MONO_TABLE	     ; and mono table				 ;AN000;
 	     MOV    CX,MONO_NUM 	     ;						 ;AN000;
 	     CALL   LOAD_TABLE		     ;						 ;AN000;
-	  .ELSE 			     ; not LCD...check for CGA and mono 	 ;AN000;
+	  jmp endif_l_1
+	  else_l_1: 			     ; not LCD...check for CGA and mono 	 ;AN000;
 	    MOV   AX,MONO_ADDRESS	     ; write to mono buffer to see if present	 ;AN000;
 	    CALL  CHECK_BUF		     ;						 ;AN000;
-	    .IF <AH EQ AL>		     ; if present then...			 ;AN000;
+	    cmp AH,AL			     ; if present then...			 ;AN000;
+	    jne @F
 	      OR     HDWR_FLAG,MONO_ACTIVE   ; set hdwr flag and..			 ;AN000;
 	      LEA    SI,MONO_TABLE	     ;						 ;AN000;
 	      MOV    CX,MONO_NUM	     ; load mono table				 ;AN000;
 	      CALL   LOAD_TABLE 	     ;						 ;AN000;
-	    .ENDIF			     ;						 ;AN000;
+	    @@:				     ;						 ;AN000;
 	    MOV   AX,COLOR_ADDRESS	     ; write to CGA buffer to see if present	 ;AN000;
 	    CALL  CHECK_BUF		     ;						 ;AN000;
-	    .IF <AH EQ AL>		     ; if present then..			 ;AN000;
+	    cmp AH,AL			     ; if present then..			 ;AN000;
+	    jne @F
 	      OR     HDWR_FLAG,CGA_ACTIVE    ; set hdwr flag and...			 ;AN000;
 	      LEA    SI,COLOR_TABLE	     ;						 ;AN000;
 	      MOV    CX,COLOR_NUM	     ; load color table 			 ;AN000;
 	      CALL   LOAD_TABLE 	     ;						 ;AN000;
-	    .ENDIF			     ;						 ;AN000;
-	  .ENDIF			     ;						 ;AN000;
+	    @@:				     ;						 ;AN000;
+	  endif_l_1:			     ;						 ;AN000;
 	  PUSH	  CS			     ; setup addressiblity for			 ;AN000;
 	  POP	  ES			     ;	functionality call			 ;AN000;
 	  XOR	  AX,AX 		     ;						 ;AN000;
@@ -183,8 +188,10 @@ DET_HDWR  PROC	  NEAR									 ;AN000;
 	  XOR	  BX,BX 		     ; implementation type 0			 ;AN000;
 	  LEA	  DI,FUNC_INFO		     ; block to hold data			 ;AN000;
 	  INT	  10H			     ;						 ;AN000;
-	  .IF <AL EQ FUNC_CALL> 	     ; if call supported then.. 		 ;AN000;
-	    .IF <BIT [DI].MISC_INFO AND ON>  ; test bit to see if VGA			 ;AN000;
+	  cmp AL,FUNC_CALL	 	     ; if call supported then.. 		 ;AN000;
+	  jne else_l_7
+	    test [DI].MISC_INFO,ON	     ; test bit to see if VGA			 ;AN000;
+	    jz else_l_3
 	      OR     HDWR_FLAG,VGA_ACTIVE    ; yes ....so				 ;AN000;
 	      LEA    SI,COLOR_TABLE	     ; set hdwr flag and...			 ;AN000;
 	      MOV    CX,COLOR_NUM	     ; load color table +..			 ;AN000;
@@ -192,11 +199,17 @@ DET_HDWR  PROC	  NEAR									 ;AN000;
 	      LEA    SI,VGA_TABLE	     ; load VGA table				 ;AN000;
 	      MOV    CX,VGA_NUM 	     ;						 ;AN000;
 	      CALL   LOAD_TABLE 	     ;						 ;AN000;
-	    .ELSE			     ; not VGA...then must be MCGA		 ;AN000;
-	      .IF <[DI].ACTIVE_DISPLAY EQ MOD30_MONO> OR				 ;AN000;
-	      .IF <[DI].ACTIVE_DISPLAY EQ MOD30_COLOR> OR				 ;AN000;
-	      .IF <[DI].ALT_DISPLAY EQ MOD30_MONO> OR					 ;AN000;
-	      .IF <[DI].ALT_DISPLAY EQ MOD30_COLOR>					 ;AN000;
+	    jmp endif_l_3
+	    else_l_3:			     ; not VGA...then must be MCGA		 ;AN000;
+	      cmp [DI].ACTIVE_DISPLAY,MOD30_MONO
+	      je @F
+	      cmp [DI].ACTIVE_DISPLAY,MOD30_COLOR
+	      je @F
+	      cmp [DI].ALT_DISPLAY,MOD30_MONO
+	      je @F
+	      cmp [DI].ALT_DISPLAY,MOD30_COLOR
+	      jne endif_l_2
+	      @@:
 		OR     HDWR_FLAG,MCGA_ACTIVE ; so...set hdwr flag and...		 ;AN000;
 		LEA    SI,COLOR_TABLE	     ;						 ;AN000;
 		MOV    CX,COLOR_NUM	     ; load color table +..			 ;AN000;
@@ -204,27 +217,34 @@ DET_HDWR  PROC	  NEAR									 ;AN000;
 		LEA    SI,MCGA_TABLE	     ; load MCGA table				 ;AN000;
 		MOV    CX,MCGA_NUM	     ;						 ;AN000;
 		CALL   LOAD_TABLE	     ;						 ;AN000;
-	      .ENDIF			     ;						 ;AN000;
-	    .ENDIF			     ;						 ;AN000;
+	      endif_l_2:		     ;						 ;AN000;
+	    endif_l_3:			     ;						 ;AN000;
 	    MOV    AL,[DI].CURRENT_SCANS     ; copy current scan line setting.. 	 ;AN000;
 	    MOV    MAX_SCANS,AL 	     ; as maximum text mode scan setting.	 ;AN000;
 	    LES    DI,[DI].STATIC_ADDRESS    ; point to static functionality table	 ;AN000;
 	    MOV    AL,ES:[DI].SCAN_TEXT      ; load available scan line flag byte..	 ;AN000;
 	    MOV    SCAN_LINES,AL	     ; and store it in resident data.		 ;AN000;
-	  .ELSE 			     ; call not supported..try EGA		 ;AN000;
+	  jmp endif_l_7
+	  else_l_7: 			     ; call not supported..try EGA		 ;AN000;
 	    MOV    AH,ALT_SELECT	     ; alternate select call			 ;AN000;
 	    MOV    BL,EGA_INFO		     ; get EGA information subcall		 ;AN000;
 	    INT    10H			     ;						 ;AN000;
-	    .IF <BL NE EGA_INFO>	     ; check if call was valid			 ;AN000;
-	      .IF <BH EQ MONOCHROME>	     ; yes...check for monochrome		 ;AN000;
+	    cmp BL,EGA_INFO		     ; check if call was valid			 ;AN000;
+	    je endif_l_6
+	      cmp BH,MONOCHROME		     ; yes...check for monochrome		 ;AN000;
+	      jne else_l_5
 		OR    HDWR_FLAG,E5151_ACTIVE ; ..5151 found so set hdwr flag and..	 ;AN000;
 		LEA   SI,EGA_5151_TABLE      ;						 ;AN000;
 		MOV   CX,EGA_5151_NUM	     ; load 5151 table. 			 ;AN000;
 		CALL  LOAD_TABLE	     ;						 ;AN000;
-	      .ELSE			     ;						 ;AN000;
+	      jmp endif_l_5
+	      else_l_5:			     ;						 ;AN000;
 		AND   CL,0FH		     ; clear upper nibble of switch setting byte ;AN000;
-		.IF <CL EQ NINE> OR	     ; test for switch settings of 5154 	 ;AN000;
-		.IF <CL EQ THREE>	     ; ..5154 found..				 ;AN000;
+		cmp CL,NINE		     ; test for switch settings of 5154 	 ;AN000;
+		je @F
+		cmp CL,THREE		     ; ..5154 found..				 ;AN000;
+		jne else_l_4
+		@@:
 		  OR	 HDWR_FLAG,E5154_ACTIVE ; so..set hdwr flag and...		 ;AN000;
 		  LEA	 SI,COLOR_TABLE      ;						 ;AN000;
 		  MOV	 CX,COLOR_NUM	     ; load color table +..			 ;AN000;
@@ -232,7 +252,8 @@ DET_HDWR  PROC	  NEAR									 ;AN000;
 		  LEA	 SI,EGA_5154_TABLE   ; load 5154 table				 ;AN000;
 		  MOV	 CX,EGA_5154_NUM     ;						 ;AN000;
 		  CALL	 LOAD_TABLE	     ;						 ;AN000;
-		.ELSE			     ; 5154 not found...must be 5153... 	 ;AN000;
+		jmp endif_l_4
+		else_l_4:		     ; 5154 not found...must be 5153... 	 ;AN000;
 		  OR	 HDWR_FLAG,E5153_ACTIVE ; so..set hdwr flag and...		 ;AN000;
 		  LEA	 SI,COLOR_TABLE      ;						 ;AN000;
 		  MOV	 CX,COLOR_NUM	     ; load color table +..			 ;AN000;
@@ -240,10 +261,10 @@ DET_HDWR  PROC	  NEAR									 ;AN000;
 		  LEA	 SI,EGA_5153_TABLE   ; load 5153 table				 ;AN000;
 		  MOV	 CX,EGA_5153_NUM     ;						 ;AN000;
 		  CALL	 LOAD_TABLE	     ;						 ;AN000;
-		.ENDIF			     ;						 ;AN000;
-	      .ENDIF			     ;						 ;AN000;
-	    .ENDIF			     ;						 ;AN000;
-	  .ENDIF			     ;						 ;AN000;
+		endif_l_4:		     ;						 ;AN000;
+	      endif_l_5:		     ;						 ;AN000;
+	    endif_l_6:			     ;						 ;AN000;
+	  endif_l_7:			     ;						 ;AN000;
 	  RET
 DET_HDWR  ENDP
 
@@ -307,21 +328,28 @@ LOAD_TABLE PROC   NEAR									 ;AN000;
 	   PUSH   CS			  ; setup ES to code segment			 ;AN000;
 	   POP	  ES			  ;						 ;AN000;
 	   LEA	  DI,VIDEO_MODE_TABLE	  ; point DI to resident video table		 ;AN000;
-	   .WHILE <CX NE 0> AND 	  ; do for as many records as there are 	 ;AN000;
-	   .WHILE <DI LT VIDEO_TABLE_MAX> ; check to ensure other data not overwritten	 ;AN000;
+	   while_l_1:
+	   cmp CX,0		 	  ; do for as many records as there are 	 ;AN000;
+	   je endwhile_l_1
+	   cmp DI,VIDEO_TABLE_MAX	  ; check to ensure other data not overwritten	 ;AN000;
+	   jge endwhile_l_1
 	     MOV    AL,[DI].V_MODE	  ; prepare to check resident table		 ;AN000;
-	     .IF <AL NE UNOCCUPIED> AND   ; if this spot is occupied...and		 ;AN000;
-	     .IF <AL NE [SI].V_MODE>	  ; ...is not the same mode then...		 ;AN000;
+	     cmp AL,UNOCCUPIED		  ; if this spot is occupied...and		 ;AN000;
+	     je else_l_8
+	     cmp AL,[SI].V_MODE		  ; ...is not the same mode then...		 ;AN000;
+	     je else_l_8
 	       ADD    DI,TYPE MODE_TABLE  ; do not touch...go to next mode		 ;AN000;
-	     .ELSE			  ; can write at this location			 ;AN000;
+	     jmp while_l_1
+	     else_l_8:			  ; can write at this location			 ;AN000;
 	       PUSH   CX		  ; save record count				 ;AN000;
 	       MOV    CX,TYPE MODE_TABLE  ; load record length				 ;AN000;
 	       REP    MOVSB		  ; copy record to resident data		 ;AN000;
 	       lea    DI,VIDEO_MODE_TABLE ;AN001; Set DI to the top of the target again.
 	       POP    CX		  ; restore record count and..			 ;AN000;
 	       DEC    CX		  ; decrement					 ;AN000;
-	     .ENDIF			  ;						 ;AN000;
-	   .ENDWHILE			  ;						 ;AN000;
+	     endif_l_8:			  ;						 ;AN000;
+	   jmp while_l_1
+	   endwhile_l_1:		  ;						 ;AN000;
 	   POP	  ES			  ; restore..					 ;AN000;
 	   POP	  DI			  ; registers					 ;AN000;
 	   RET				  ;						 ;AN000;
@@ -394,12 +422,12 @@ LOAD_INT2F PROC   NEAR									 ;AN000;
 	   MOV	  CX,ES:WORD PTR INT2F_HI	   ; location.. 			 ;AN000;
 	   MOV	  CS:ROM_INT2F+2,CX		   ;					 ;AN000;
 	   OR	  AX,CX 			   ; check if old int2F..		 ;AN000;
-	   .IF Z				   ; is 0.				 ;AN000;
+	   jnz @F				   ; is 0.				 ;AN000;
 	     MOV    AX,OFFSET ABORT		   ; yes....point to..			 ;AN000;
 	     MOV    CS:ROM_INT2F,AX		   ; IRET.				 ;AN000;
 	     MOV    AX,CS			   ;					 ;AN000;
 	     MOV    CS:ROM_INT2F+2,AX		   ;					 ;AN000;
-	   .ENDIF				   ;					 ;AN000;
+	   @@:					   ;					 ;AN000;
 	   CLI					   ;					 ;AN000;
 	   MOV	  ES:WORD PTR INT2F_LOW,OFFSET INT2F_COM ; replace vector..		 ;AN000;
 	   MOV	  ES:WORD PTR INT2F_HI,CS	   ; with our own..			 ;AN000;

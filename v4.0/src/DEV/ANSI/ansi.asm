@@ -39,12 +39,9 @@ var = FALSE
 ENDIF
 ENDM
 
-INCLUDE VECTOR.INC
-INCLUDE MULT.INC
-INCLUDE ANSI.INC                ; WGR equates and structures                             ;AN000;
-.xlist
-INCLUDE STRUC.INC               ; WGR include STRUC macros                               ;AN000;
-.list
+INCLUDE vector.inc
+INCLUDE mult.inc
+INCLUDE ansi.inc                ; WGR equates and structures                             ;AN000;
 
 BREAK <ANSI driver code>
 
@@ -465,11 +462,13 @@ lf:     inc     [row]
         JE      LF2                     ; GHG  Fix for ROUNDUP/PALACE
         CMP     AL,12H                  ; GHG  Fix for ROUNDUP/PALACE
         JE      LF2                     ; GHG  Fix for ROUNDUP/PALACE
-        .IF <GRAPHICS_FLAG EQ GRAPHICS_MODE> ; WGR                                       ;AN000;
+        cmp GRAPHICS_FLAG,GRAPHICS_MODE ; WGR                                       ;AN000;
+        jne else_l_1
           MOV     AH,DEFAULT_LENGTH     ; WGR                                            ;AN000;
-        .ELSE                           ; WGR                                            ;AN000;
+        jmp endif_l_1
+        else_l_1:                       ; WGR                                            ;AN000;
           MOV     AH,BYTE PTR [REQ_TXT_LENGTH] ; GHG  Fix for ROUNDUP/PALACE
-        .ENDIF                          ; WGR                                            ;AN000;
+        endif_l_1:                      ; WGR                                            ;AN000;
 LF2:                                    ; GHG  Fix for ROUNDUP/PALACE
         cmp     [row],AH                ; GHG  Fix for ROUNDUP/PALACE
         jb      setit
@@ -500,10 +499,13 @@ setit:  mov     dh,row
 scroll:
 ;AN006;AN008; Myscroll is only for Mode 2 and 3 of all display unit.
 ;        .IF <BIT HDWR_FLAG eq CGA_ACTIVE>     ; GHG is this the CGA?            ;AN000;
-           .IF < MODE eq 2 > or
-           .IF < MODE eq 3 >
+           cmp MODE,2
+           je @F
+           cmp MODE,3
+           jne endif_l_2
+           @@:
               jmp     myscroll
-           .ENDIF
+           endif_l_2:
 ;        .ENDIF
 ;AN006;AN008; Other modes (=APA mode) use TeleType function of
 ; writing LF to scroll the screen!.
@@ -519,11 +521,13 @@ myscroll:
         MOV     BP,AX                           ; WGR                                    ;AN000;
         MOV     SI,BP                           ; WGR                                    ;AN000;
         ADD     SI,BP                           ; WGR                                    ;AN000;
-        .IF <GRAPHICS_FLAG EQ GRAPHICS_MODE>    ; WGR                                    ;AN000;
+        cmp GRAPHICS_FLAG,GRAPHICS_MODE         ; WGR                                    ;AN000;
+        jne else_l_3
           MOV     AX,DEFAULT_LENGTH             ; WGR                                    ;AN000;
-        .ELSE                                   ; WGR                                    ;AN000;
+        jmp endif_l_3
+        else_l_3:                               ; WGR                                    ;AN000;
           MOV     AX,[REQ_TXT_LENGTH]           ; WGR                                    ;AN000;
-        .ENDIF                                  ; WGR                                    ;AN000;
+        endif_l_3:                              ; WGR                                    ;AN000;
         DEC     AX                              ; WGR                                    ;AN000;
         MUL     BP                              ; WGR                                    ;AN000;
         MOV     CX,AX                           ; WGR                                    ;AN000;
@@ -607,34 +611,41 @@ INAGN:  CMP     KEYCNT,0
         JNZ     KEY5A
 
         XOR     AH,AH
-        .IF  <EXT_16 EQ ON>          ; WGR extended interrupt available?                 ;AN000;
+        cmp EXT_16,ON                ; WGR extended interrupt available?                 ;AN000;
+        jne else_l_4
            MOV    AH,10h             ; WGR yes..perform extended call                    ;AN000;
            INT    16H                ; WGR                                               ;AN000;
-           .IF  <SWITCH_X EQ OFF>    ; WGR /X switch used?                               ;AN000;
+           cmp SWITCH_X,OFF          ; WGR /X switch used?                               ;AN000;
+           jne @F
               CALL   CHECK_FOR_REMAP ; WGR no....map to normal call                      ;AN000;
-           .ENDIF                    ; WGR                                               ;AN000;
+           @@:                       ; WGR                                               ;AN000;
            CALL    SCAN              ; WGR check for redefinition                        ;AN000;
-           .IF  NZ  AND              ; WGR no redefinition?...and                        ;AN000;
-           .IF  <SWITCH_X EQ ON>     ; WGR /X switch used?                               ;AN000;
+           jz endif_l_4              ; WGR no redefinition?...and                        ;AN000;
+           cmp SWITCH_X,ON           ; WGR /X switch used?                               ;AN000;
+           jne endif_l_4
               CALL   CHECK_FOR_REMAP ; WGR then remap..                                  ;AN000;
               OR     BX,BX           ; WGR reset zero flag for jump test in old code     ;AN000;
-           .ENDIF                    ; WGR                                               ;AN000;
-        .ELSE                        ; WGR extended interrupt not available              ;AN000;
+        jmp endif_l_4                ; WGR                                               ;AN000;
+        else_l_4:                    ; WGR extended interrupt not available              ;AN000;
            INT   16H                 ; WGR                                               ;AN000;
            CALL    SCAN              ; WGR check for redefinition                        ;AN000;
-        .ENDIF                       ; WGR                                               ;AN000;
+        endif_l_4:                   ; WGR                                               ;AN000;
         JNZ     ALT10           ;IF NO MATCH JUST RETURN IT
 
         DEC     CX
         DEC     CX
         INC     BX
         INC     BX
-        .IF  <AL EQ 0> OR              ; WGR check whether the                           ;AN000;
-        .IF  <AL EQ 0E0H> AND          ; WGR keypacket is an extended one?               ;AN000;
-        .IF  <SWITCH_X EQ 1>           ; WGR switch must be set for 0E0h extended        ;AN000;
+        cmp AL,0                       ; WGR check whether the                           ;AN000;
+        je @F
+        cmp AL,0E0H                    ; WGR keypacket is an extended one?               ;AN000;
+        jne endif_l_5
+        cmp SWITCH_X,1                 ; WGR switch must be set for 0E0h extended        ;AN000;
+        jne endif_l_5
+        @@:
            DEC     CX                  ; WGR adjust pointers                             ;AN000;
            INC     BX                  ; WGR appropiately                                ;AN000;
-        .ENDIF
+        endif_l_5:
         MOV     KEYCNT,CL
         MOV     KEYPTR,BX
 KEY5A:                          ; Jmp here to get rest of translation
@@ -663,13 +674,18 @@ KEYLP:  MOV     CL,BYTE PTR [BX]
         XOR     CH,CH
         OR      CX,CX
         JZ      NOTFND
-        .IF  <AL EQ 0> OR              ; WGR check whether the                           ;AN000;
-        .IF  <AL EQ 0E0H> AND          ; WGR keypacket is an extended one.               ;AN000;
-        .IF  <SWITCH_X EQ ON>          ; WGR switch must be set for 0E0h extended        ;AN000;
+        cmp AL,0                       ; WGR check whether the                           ;AN000;
+        je @F
+        cmp AL,0E0H                    ; WGR keypacket is an extended one.               ;AN000;
+        jne else_l_6
+        cmp SWITCH_X,ON                ; WGR switch must be set for 0E0h extended        ;AN000;
+        jne else_l_6
+        @@:
            CMP     AX,WORD PTR [BX+1]  ; WGR yes...compare the word                      ;AN000;
-        .ELSE                          ; WGR                                             ;AN000;
+        jmp endif_l_6
+        else_l_6:                      ; WGR                                             ;AN000;
            CMP     AL,BYTE PTR [BX+1]  ; WGR no...compare the byte                       ;AN000;
-        .ENDIF                         ; WGR                                             ;AN000;
+        endif_l_6:                     ; WGR                                             ;AN000;
         JZ      MATCH
         ADD     BX,CX
         JMP     KEYLP
@@ -691,32 +707,37 @@ CON$RDND:
         JMP     SHORT RDEXIT
 
 RD1:    MOV     AH,1
-        .IF   <EXT_16 EQ ON>  ; WGR extended INT16 available?                            ;AN000;
+        cmp EXT_16,ON         ; WGR extended INT16 available?                            ;AN000;
+        jne @F
            ADD     AH,10H     ; WGR yes....adjust to extended call                       ;AN000;
-        .ENDIF
+        @@:
         INT     16H
         JZ      CONBUS
         OR      AX,AX
         JNZ     RD2
         MOV     AH,0
-        .IF  <EXT_16 EQ ON>          ; WGR extended interrupt available?                 ;AN000;
+        cmp EXT_16,ON                ; WGR extended interrupt available?                 ;AN000;
+        jne else_l_7
            MOV    AH,10h             ; WGR yes..perform extended call                    ;AN000;
            INT    16H                ; WGR                                               ;AN000;
-           .IF  <SWITCH_X EQ OFF>    ; WGR /X switch used?                               ;AN000;
+           cmp SWITCH_X,OFF          ; WGR /X switch used?                               ;AN000;
+           jne endif_l_7
               CALL   CHECK_FOR_REMAP ; WGR no....map to normal call                      ;AN000;
-           .ENDIF                    ; WGR                                               ;AN000;
-        .ELSE                        ; WGR                                               ;AN000;
+        jmp endif_l_7                ; WGR                                               ;AN000;
+        else_l_7:                    ; WGR                                               ;AN000;
            INT    16H                ; WGR                                               ;AN000;
-        .ENDIF                       ; WGR                                               ;AN000;
+        endif_l_7:                   ; WGR                                               ;AN000;
         JMP     CON$RDND
 
 RD2:    CALL    SCAN
-        .IF  NZ  AND                 ; WGR if no redefinition                            ;AN000;
-        .IF  <EXT_16 EQ ON> AND      ; WGR and extended INT16 used                       ;AN000;
-        .IF  <SWITCH_X EQ ON>        ; WGR and /x used ....then                          ;AN000;
+        jz @F                        ; WGR if no redefinition                            ;AN000;
+        cmp EXT_16,ON                ; WGR and extended INT16 used                       ;AN000;
+        jne @F
+        cmp SWITCH_X,ON              ; WGR and /x used ....then                          ;AN000;
+        jne @F
            CALL   CHECK_FOR_REMAP    ; WGR remap to standard call                        ;AN000;
            OR     BX,BX              ; WGR reset zero flag for jump test in old code     ;AN000;
-        .ENDIF
+        @@:
         JNZ     RDEXIT
 
         MOV     AL,BYTE PTR [BX+2]
@@ -743,15 +764,17 @@ CON$FLSH:
 ;       POP     DS
 
 Flush:  mov     ah,1
-        .IF  <EXT_16 EQ ON>     ; WGR is extended call available?                        ;AN000;
+        cmp EXT_16,ON           ; WGR is extended call available?                        ;AN000;
+        jne @F
            ADD    AH,10H        ; WGR yes....adjust for extended                         ;AN000;
-        .ENDIF                  ; WGR                                                    ;AN000;
+        @@:                     ; WGR                                                    ;AN000;
         int     16h
         jz      FlushDone
         mov     ah,0
-        .IF  <EXT_16 EQ ON>     ; WGR is extended call available?                        ;AN000;
+        cmp EXT_16,ON           ; WGR is extended call available?                        ;AN000;
+        jne @F
            ADD    AH,10H        ; WGR yes....adjust for extended                         ;AN000;
-        .ENDIF                  ; WGR                                                    ;AN000;
+        @@:                     ; WGR                                                    ;AN000;
         int     16h
         jmp     Flush
 FlushDone:
@@ -928,11 +951,13 @@ SETCUR: MOV     DX,WORD PTR COL
         INT     16
         JMP     S1A
 
-CUP:    .IF <GRAPHICS_FLAG EQ GRAPHICS_MODE>   ; WGR                                     ;AN000;
+CUP:    cmp GRAPHICS_FLAG,GRAPHICS_MODE        ; WGR                                     ;AN000;
+        jne else_l_8
           CMP     CL,DEFAULT_LENGTH            ; WGR                                     ;AN000;
-        .ELSE                                  ; WGR                                     ;AN000;
+        jmp endif_l_8
+        else_l_8:                              ; WGR                                     ;AN000;
           CMP     CL,BYTE PTR [REQ_TXT_LENGTH] ; WGR                                     ;AN000;
-        .ENDIF                                 ; WGR                                     ;AN000;
+        endif_l_8:                             ; WGR                                     ;AN000;
         JA      SETCUR
         MOV     AL,MAXCOL
         MOV     CH,BYTE PTR [BX+1]
@@ -959,11 +984,13 @@ CUU:    MOV     AX,00FFH
 CUU1:   MOV     BX,OFFSET ROW
         JMP     MOVCUR
 
-CUD:    .IF <GRAPHICS_FLAG EQ GRAPHICS_MODE>   ; WGR                                     ;AN000;
+CUD:    cmp GRAPHICS_FLAG,GRAPHICS_MODE        ; WGR                                     ;AN000;
+        jne else_l_9
           MOV     AH,DEFAULT_LENGTH            ; WGR                                     ;AN000;
-        .ELSE                                  ; WGR                                     ;AN000;
+        jmp endif_l_9
+        else_l_9:                              ; WGR                                     ;AN000;
           MOV     AH,BYTE PTR [REQ_TXT_LENGTH] ; WGR                                     ;AN000;
-        .ENDIF                                 ; WGR                                     ;AN000;
+        endif_l_9:                             ; WGR                                     ;AN000;
         MOV     AL,1                           ; WGR                                     ;AN000;
         JMP     CUU1
 
@@ -1017,17 +1044,21 @@ ED:     XOR     CX,CX
         JE      ERASE                   ;                                      ;AN009;
         CMP     AL,12H                  ;                                      ;AN009;
         JE      ERASE                   ;                                      ;AN009;
-        .IF <GRAPHICS_FLAG EQ GRAPHICS_MODE>      ; WGR                                  ;AN000;
+        cmp GRAPHICS_FLAG,GRAPHICS_MODE           ; WGR                                  ;AN000;
+        jne else_l_10
           MOV     DH,DEFAULT_LENGTH               ; WGR                                  ;AN000;
-        .ELSE                                     ; WGR                                  ;AN000;
+        jmp endif_l_10
+        else_l_10:                                ; WGR                                  ;AN000;
           MOV     DH,BYTE PTR [REQ_TXT_LENGTH]    ; WGR                                  ;AN000;
-        .ENDIF                                    ; WGR                                  ;AN000;
+        endif_l_10:                               ; WGR                                  ;AN000;
 ERASE:  MOV     DL,MAXCOL
-        .IF <GRAPHICS_FLAG EQ GRAPHICS_MODE>      ; WGR if we are in a graphics mode..   ;AN000;
+        cmp GRAPHICS_FLAG,GRAPHICS_MODE           ; WGR if we are in a graphics mode..   ;AN000;
+        jne else_l_11
           XOR    BH,BH                            ; WGR then use 0 as attribute...       ;AN000;
-        .ELSE                                     ; WGR else...                          ;AN000;
+        jmp endif_l_11
+        else_l_11:                                ; WGR else...                          ;AN000;
           MOV     BH,ATTR                         ; WGR ...use active attribute         ;AC000;
-        .ENDIF                                    ; WGR                                  ;AN000;
+        endif_l_11:                               ; WGR                                  ;AN000;
         MOV     AX,0600H
         INT     16
 ED3:    JMP     SETCUR
@@ -1064,10 +1095,15 @@ RM:     MOV     CL,1
 
 SM:     XOR     CX,CX
 SM1:    MOV     AL,DL
-        .IF <AL LT MODE7> OR        ;; WGR check to see if valid mode..                  ;AN000;
-        .IF <AL GE MODE13> AND      ;; WGR  (0-6,13-19)                                  ;AN000;
-        .IF <AL LE MODE19>          ;; WGR                                               ;AN000;
-          .IF <BIT HDWR_FLAG AND LCD_ACTIVE> ;; WGR is this the LCD?                     ;AN000;
+        cmp AL,MODE7                  ;; WGR check to see if valid mode..                  ;AN000;
+        jl @F
+        cmp AL,MODE13                 ;; WGR  (0-6,13-19)                                  ;AN000;
+        jl else_l_12
+        cmp AL,MODE19                 ;; WGR                                               ;AN000;
+        jg else_l_12
+        @@:
+          test HDWR_FLAG,LCD_ACTIVE ;; WGR is this the LCD?                     ;AN000;
+          jz @F
             PUSH   DS                 ;; WGR yes...                                      ;AN000;
             PUSH   AX                 ;; WGR save mode                                   ;AN000;
             MOV    AX,ROM_BIOS        ;; WGR                                             ;AN000;
@@ -1078,14 +1114,16 @@ SM1:    MOV     AL,DL
             MOV    DS:[EQUIP_FLAG],AX ;; WGR replace updated flag.                       ;AN000;
             POP    AX                 ;; WGR restore mode.                               ;AN000;
             POP    DS                 ;; WGR                                             ;AN000;
-          .ENDIF                      ;; WGR                                             ;AN000;
+          @@:                         ;; WGR                                             ;AN000;
           MOV     AH,SET_MODE       ;; WGR yes....set mode..                             ;AN000;
           INT     10H               ;; WGR                                               ;AN000;
-        .ELSE                       ;; WGR no...check for 7 (wrap at EOL)                ;AN000;
-          .IF <AL EQ 7>             ;; WGR                                               ;AN000;
+        jmp endif_l_12
+        else_l_12:                  ;; WGR no...check for 7 (wrap at EOL)                ;AN000;
+          cmp AL,7                  ;; WGR                                               ;AN000;
+          jne @F
             MOV    [WRAP],CL        ;; WGR yes....wrap...                                ;AN000;
-          .ENDIF                    ;; WGR                                               ;AN000;
-        .ENDIF                      ;; WGR                                               ;AN000;
+          @@:                       ;; WGR                                               ;AN000;
+        endif_l_12:                 ;; WGR                                               ;AN000;
         JMP     CPR
 
 KEYASN: XOR     DX,DX
@@ -1152,12 +1190,13 @@ GET1:   ADD     BX,OFFSET BUF
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; WGR                          ;AN000;
                                                                                          ;AN000;
 CHECK_FOR_REMAP PROC NEAR     ; WGR                                                      ;AN000;
-        .IF  <AL EQ 0E0h>     ; WGR is this an extended key?                             ;AN000;
+        cmp AL,0E0h           ; WGR is this an extended key?                             ;AN000;
+        jne endif_l_13
            OR   AH,AH         ; WGR probably...but check for alpha character             ;AN000;
-           .IF  NZ            ; WGR if it's not an alpha character ....then              ;AN000;
+           jz @F              ; WGR if it's not an alpha character ....then              ;AN000;
               XOR   AL,AL     ; WGR map extended to standard                             ;AN000;
-           .ENDIF             ; WGR                                                      ;AN000;
-        .ENDIF                ; WGR                                                      ;AN000;
+           @@:                ; WGR                                                      ;AN000;
+        endif_l_13:           ; WGR                                                      ;AN000;
         RET                   ; WGR                                                      ;AN000;
 CHECK_FOR_REMAP ENDP          ; WGR                                                      ;AN000;
 

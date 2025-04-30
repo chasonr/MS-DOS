@@ -53,12 +53,10 @@ TITLE	    PARSE CODE AND CONTROL BLOCKS FOR ANSI.SYS
 ;******************************************************************************
 
 
-INCLUDE     ANSI.INC	    ; ANSI equates and structures				 ;AN000;
+INCLUDE     ansi.inc	    ; ANSI equates and structures				 ;AN000;
 .XLIST
-INCLUDE     STRUC.INC	    ; Structured macros 					 ;AN000;
-
-INCLUDE     SYSMSG.INC	    ; Message retriever code					 ;AN000;
-MSG_UTILNAME <ANSI>	    ; Let message retriever know its ANSI.SYS			 ;AN000;
+INCLUDE     sysmsg.inc	    ; Message retriever code					 ;AN000;
+MSG_UTILNAME <ansi>	    ; Let message retriever know its ANSI.SYS			 ;AN000;
 .LIST
 
 PUBLIC	    PARSE_PARM	     ; near procedure for parsing DEVICE= statement		 ;AN000;
@@ -87,11 +85,11 @@ CODE	      SEGMENT  PUBLIC BYTE
 .XLIST
 MSG_SERVICES <MSGDATA>									 ;AN000;
 MSG_SERVICES <DISPLAYmsg,LOADmsg,CHARmsg>						 ;AN000;
-MSG_SERVICES <ANSI.CL1> 								 ;AN000;
-MSG_SERVICES <ANSI.CL2> 								 ;AN000;
-MSG_SERVICES <ANSI.CLA> 								 ;AN000;
+MSG_SERVICES <ansi.cl1> 								 ;AN000;
+MSG_SERVICES <ansi.cl2> 								 ;AN000;
+MSG_SERVICES <ansi.cla> 								 ;AN000;
 
-INCLUDE     PARSE.ASM	    ; Parsing code						 ;AN000;
+INCLUDE     parse.asm	    ; Parsing code						 ;AN000;
 .LIST
 
 
@@ -179,10 +177,11 @@ Parse_Err_Flag	db	OFF			;AN002;
 
 PARSE_PARM    PROC     NEAR								 ;AN000;
 	      CALL     SYSLOADMSG		; load message				 ;AN000;
-	      .IF C NEAR								 ;AN000;
+	      jnc else_l_6								 ;AN000;
 		CALL	 SYSDISPMSG		; display error message 		 ;AN000;
 		STC				; ensure carry still set		 ;AN000;
-	      .ELSE NEAR								 ;AN000;
+	      jmp endif_l_6
+	      else_l_6:								 	 ;AN000;
 		PUSH	 CS			; establish ES ..			 ;AN000;
 		POP	 ES			; addressability to data		 ;AN000;
 		LEA	 DI,PARMS		; point to PARMS control block		 ;AN000;
@@ -191,39 +190,52 @@ PARSE_PARM    PROC     NEAR								 ;AN000;
 		CALL	 SYSPARSE		; move pointer past file spec		 ;AN000;
 		mov	 Switch_L, OFF		;AN002;
 		mov	 Switch_X, OFF		;AN002;
-		.WHILE <Continue_Flag EQ ON>	;AN002;
+		while_l_1:
+		cmp Continue_Flag,ON		;AN002;
+		jne endwhile_l_1
 		     mov Old_SI, SI		;AN001;to be use by PARM_ERROR
 		     call SysParse		;AN002;
-		     .IF <AX EQ RC_EOL> 	;AN002;
+		     cmp AX,RC_EOL	 	;AN002;
+		     jne else_l_4
 			mov Continue_Flag, OFF	;AN002;
-		     .ELSE			;AN002;
-			.IF <AX NE RC_NO_ERROR> ;AN002;
+		     jmp while_l_1
+		     else_l_4:			;AN002;
+			cmp AX,RC_NO_ERROR	;AN002;
+			je else_l_3
 			   mov Continue_Flag, OFF    ;AN002;
 			   mov Switch_X, OFF	;AN002;
 			   mov Switch_L, OFF	;AN002;
 			   mov Switch_K, OFF	;AN003;
 			   call Parm_Error	;AN002;
 			   mov Parse_Err_Flag,ON;AN002;
-			.ELSE			;AN002;
-			   .IF <Synonym_ptr EQ <offset X_SWITCH>>      ;AN002;
+			jmp while_l_1
+			else_l_3:		;AN002;
+			   cmp Synonym_ptr,offset X_SWITCH	       ;AN002;
+			   jne else_l_2
 				mov	Switch_X, ON		       ;AN002;
-			   .ELSE				       ;AN002;
-			       .IF <Synonym_ptr EQ <offset L_SWITCH>>  ;AN003;
+			   jmp endif_l_2
+			   else_l_2:				       ;AN002;
+			       cmp Synonym_ptr,offset L_SWITCH	       ;AN003;
+			       jne else_l_1
 				    mov     Switch_L, ON ;AN002;
-			       .ELSE			 ;AN003;Must be /K option.
+			       jmp endif_l_1
+			       else_l_1:		 ;AN003;Must be /K option.
 				    mov     Switch_K, ON ;AN003;/K entered.
-			       .ENDIF			 ;AN003;
-			   .ENDIF			 ;AN002;
+			       endif_l_1:		 ;AN003;
+			   endif_l_2:			 ;AN002;
 			    clc 		;AN002;
-			.ENDIF			;AN002;
-		     .ENDIF			;AN002;
-		.ENDWHILE			;AN002;
-		.IF <Parse_Err_Flag EQ ON>	;AN002;
+			endif_l_3:		;AN002;
+		     endif_l_4:			;AN002;
+		jmp while_l_1
+		endwhile_l_1:			;AN002;
+		cmp Parse_Err_Flag,ON		;AN002;
+		jne else_l_5
 		     stc			;AN002;
-		.ELSE				;AN002;
+		jmp endif_l_5
+		else_l_5:			;AN002;
 		     clc			;AN002;
-		.ENDIF				;AN002;
-	      .ENDIF				;AN002;
+		endif_l_5:			;AN002;
+	      endif_l_6:			;AN002;
 
 ;		 mov	  cs:Old_SI, SI 	 ;AN001; Save pointer to parm
 ;		 CALL	  SYSPARSE		 ; look for /X switch			  ;AN000;

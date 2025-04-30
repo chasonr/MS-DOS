@@ -253,14 +253,14 @@ UNLIMITED       EQU     0               ; unlimited message size.              ;
 ;  Request Header Structure (Generic IOCTL)
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-INIT_REQ_HDR    STRUC                   ;                                      ;AN000;
+INIT_REQ_HDR2   STRUC                   ;                                      ;AN000;
                 DB   13 DUP(?)          ; standard request header              ;AN000;
 MAJ_FUNC        DB   ?                  ; major function                       ;AN000;
 MIN_FUNC        DB   ?                  ; minor function                       ;AN000;
 IOCTL_SI        DW   ?                  ; contents of SI                       ;AN000;
 IOCTL_DI        DW   ?                  ; contents of DI                       ;AN000;
 REQ_PCKT_PTR    DD   ?                  ; pointer to request packet            ;AN000;
-INIT_REQ_HDR    ENDS                    ;                                      ;AN000;
+INIT_REQ_HDR2   ENDS                    ;                                      ;AN000;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
 ; REQUEST PACKET STRUCTURE (Generic IOCTL)

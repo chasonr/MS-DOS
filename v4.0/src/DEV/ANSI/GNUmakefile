@@ -12,39 +12,51 @@ COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
 ####################### Dependencies Begin Here ##########################
 #
 
+.SUFFIXES: .asm .obj
+
+AS = jwasm
+AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.asm.obj:
+	$(AS) $(AFLAGS) -Fo$@ $<
+
 all: ansi.sys
 
 ansi.ctl ansi.cl1 ansi.cl2 ansi.cla: ANSI.SKL $(msg)/$(COUNTRY).MSG
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\dev\ansi $(subst /,\,$<) $(country)"
 
-ansi.obj:       ANSI.ASM ANSI.INC \
+ansi.obj:       ansi.asm ansi.inc \
                 $(inc)/vector.inc \
-                $(inc)/mult.inc \
-                $(inc)/STRUC.INC
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\ansi $(subst /,\,$<) $(subst /,\,$@)"
+                $(inc)/mult.inc
 
-ioctl.obj:      IOCTL.ASM ANSI.INC \
-                $(inc)/STRUC.INC
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\ansi $(subst /,\,$<) $(subst /,\,$@)"
+ioctl.obj:      ioctl.asm ansi.inc
 
-ansiinit.obj:   ANSIINIT.ASM ANSI.INC ANSIVID.INC \
-                $(inc)/STRUC.INC
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\ansi $(subst /,\,$<) $(subst /,\,$@)"
+ansiinit.obj:   ansiinit.asm ansi.inc ansivid.inc
 
-parser.obj:     PARSER.ASM ANSI.INC $(inc)/sysmsg.inc $(inc)/parse.asm \
-                $(inc)/STRUC.INC ansi.ctl $(inc)/versiona.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\ansi $(subst /,\,$<) $(subst /,\,$@)"
+parser.obj:     parser.asm ansi.inc $(inc)/sysmsg.inc $(inc)/msgserv.asm \
+                $(inc)/copyrigh.inc $(inc)/versiona.inc $(inc)/parse.asm \
+                $(inc)/psdata.inc $(inc)/msgdcl.inc \
+                ansi.ctl ansi.cl1 ansi.cl2 ansi.cla
 
 OBJS = ansi.obj ioctl.obj ansiinit.obj parser.obj
 
 ansi.sys: $(OBJS) ANSI.LNK
-	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\dev\ansi @ansi.lnk"
+	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
+	echo 'option map=ansi.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name ansi.exe' >>resp.txt
+	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
+	wlink @resp.txt
 	exe2bin -q ansi.exe ansi.sys
-	rm      ansi.exe
 
 clean:
 	rm -f *.obj
+	rm -f *.err
+	rm -f *.lst
 	rm -f ansi.sys
+	rm -f ansi.exe
 	rm -f ansi.cl[12a]
 	rm -f ansi.ctl
 	rm -f ansi.map
