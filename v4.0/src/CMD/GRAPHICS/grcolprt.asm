@@ -39,8 +39,6 @@
 ;;										;AN000;
 ;;	 GRSHAR.STR   - Shared Data Area Structure				;AN000;
 ;;										;AN000;
-;;	 STRUC.INC    - Macros for using structured assembly language		;AN000;
-;;										;AN000;
 ;; External Procedure References:						;AN000;
 ;; ------------------------------						;AN000;
 ;;	 FROM FILE  GRCTRL.ASM: 						;AN000;
@@ -66,12 +64,11 @@ CODE	SEGMENT PUBLIC 'CODE'                                                   ;AN
 	PUBLIC	LEN_OF_COLOR_MODULES   ;;					;AN000;
 				       ;;					;AN000;
 .XLIST					;					;AN000;
-INCLUDE GRCTRL.STR			; Stuctures needed			;AN000;
-INCLUDE GRSHAR.STR			;  for both set of print modules	;AN000;
-INCLUDE GRPATTRN.STR			;					;AN000;
+INCLUDE grctrl.str			; Stuctures needed			;AN000;
+INCLUDE grshar.str			;  for both set of print modules	;AN000;
+INCLUDE grpattrn.str			;					;AN000;
 					;					;AN000;
-INCLUDE GRCTRL.EXT			; Externals from PRT_SCR control module ;AN000;
-INCLUDE STRUC.INC			;					;AN000;
+INCLUDE grctrl.ext			; Externals from PRT_SCR control module ;AN000;
 .LIST					;					;AN000;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;AN000;
 ;;										;AN000;
@@ -120,13 +117,14 @@ REQ_BAND_MASK	DB	?	; Mask = "All color bands needed for the current;AN000;
 				;	   print line".                         ;AN000;
 										;AN000;
 PRINT_COLOR_BEGIN:								;AN000;
-.IF <MODE_TYPE EQ TXT>								;AN000;
-.THEN										;AN000;
+cmp MODE_TYPE,TXT
+jne else_l_2
 ;-------------------------------------------------------------------------------;AN000;
 ; The screen is in a text mode: 						;AN000;
 ;-------------------------------------------------------------------------------;AN000;
   CALL PRINT_COLOR_TXT			; Print a text screen on a color printer;AN000;
-.ELSE										;AN000;
+jmp endif_l_2
+else_l_2:
 ;-------------------------------------------------------------------------------;AN000;
 ; The screen is in All Points Addressable mode: 				;AN000;
 ; Locate and extract printer DISPLAYMODE information from			;AN000;
@@ -135,11 +133,11 @@ PRINT_COLOR_BEGIN:								;AN000;
 	CALL	LOC_MODE_PRT_INFO	; Get printer info related to curr. mode;AN000;
 ;										;AN000;
 ;-------Test if DISPLAYMODE info record was found:				;AN000;
-       .IF <ERROR_CODE EQ DISPLAYMODE_INFO_NOT_FOUND>				;AN000;
-       .THEN									;AN000;
+       cmp ERROR_CODE,DISPLAYMODE_INFO_NOT_FOUND
+       jne @F
 	  MOV	  ERROR_CODE,UNABLE_TO_PRINT ; IF no record found,		;AN000;
 	  JMP	  SHORT PRINT_COLOR_END      ; then, return error code		;AN000;
-       .ENDIF				     ;	      and quit procedure	;AN000;
+       @@:				     ;	      and quit procedure	;AN000;
 ;										;AN000;
 ;-------Get the box size from the DISPLAYMODE info record:			;AN000;
 	MOV	BX,CUR_MODE_PTR 	; BX := Offset current DISPLAYMODE info.;AN000;
@@ -149,20 +147,22 @@ PRINT_COLOR_BEGIN:								;AN000;
 	MOV	BOX_H,AL							;AN000;
 ;										;AN000;
 ;-------Verify if the box size obtained from DISPLAYMODE info. is valid 	;AN000;
-       .IF <ZERO AL> OR 		; IF height of the box is 0		;AN000;
-       .IF <ZERO AH>			;  OR width of the box is 0		;AN000;
-       .THEN				; THEN we can't print:                  ;AN000;
+       or AL,AL				; IF height of the box is 0		;AN000;
+       jz @F
+       or AH,AH				;  OR width of the box is 0		;AN000;
+       jnz endif_l_1			; THEN we can't print:                  ;AN000;
+       @@:
 	  MOV	  ERROR_CODE,UNABLE_TO_PRINT ; return error code		;AN000;
 	  JMP	  SHORT PRINT_COLOR_END      ;	     and quit			;AN000;
-       .ENDIF									;AN000;
+       endif_l_1:
 ;										;AN000;
 ;-------Get the Print Orientation from the DISPLAYMODE info record		;AN000;
-       .IF <[BX].PRINT_OPTIONS EQ ROTATE>; If printing sideways 		;AN000;
-       .THEN				;  then:				;AN000;
+       cmp [BX].PRINT_OPTIONS,ROTATE	; If printing sideways 		;AN000;
+       jne @F				;  then:				;AN000;
 	  MOV	  ROTATE_SW,ON		;    Rotate switch := "ON"              ;AN000;
-       .ENDIF									;AN000;
+       @@:
   CALL PRINT_COLOR_APA			; Print APA screen on a color printer	;AN000;
-.ENDIF										;AN000;
+endif_l_2:
 PRINT_COLOR_END:								;AN000;
 	RET									;AN000;
 PRINT_COLOR ENDP								;AN000;
@@ -262,23 +262,22 @@ PRINT_1_TEXT_LINE:								;AN000;
 	;									;AN000;
 	;-----------------------------------------------------------------------;AN000;
 	PRINT_1_COLOR_BAND_TXT: 	  ; Do one pass of the printer head:	;AN000;
-	 .IF <BIT REQ_BAND_MASK AND DL>   ; IF this color band is needed	;AN000;
-	 .THEN				  ;  by any character on the line	;AN000;
+	 test REQ_BAND_MASK,DL		  ; IF this color band is needed	;AN000;
+	 jz endif_l_3			  ;  by any character on the line	;AN000;
 	    CALL SET_COLOR_BAND 	  ; then, select the color band 	;AN000;
 	    CALL PRINT_BAND_TXT 	  ;    and do one Print Pass for it.	;AN000;
-	   .IF	<BIT ERROR_CODE NZ PRINTER_ERROR>				;AN000;
-	   .THEN			  ; A printer error occurred:		;AN000;
+	   test ERROR_CODE,PRINTER_ERROR
+	   jz @F			  ; A printer error occurred:		;AN000;
 	      POP     CX		  ;   Restore the line counter		;AN000;
 	      JMP     PRINT_COLOR_TXT_END ;    and quit.			;AN000;
-	   .ENDIF								;AN000;
+	   @@:
 	    MOV     AL,CR		  ;    Print a carriage return		;AN000;
 	    CALL    PRINT_BYTE							;AN000;
-	   .IF	C								;AN000;
-	   .THEN			  ; A printer error occurred:		;AN000;
+	   jnc @F
 	      POP     CX		  ;   Restore the line counter		;AN000;
 	      JMP     PRINT_COLOR_TXT_END ;    and quit.			;AN000;
-	   .ENDIF			  ; ENDIF printer error 		;AN000;
-	 .ENDIF 			  ; ENDIF this color band is needed	;AN000;
+	   @@:				  ; ENDIF printer error 		;AN000;
+	 endif_l_3: 			  ; ENDIF this color band is needed	;AN000;
 	  SHL	  DL,1			  ; Get next Color Band mask		;AN000;
 					  ; [BX] := Next COLORSELECT record:	;AN000;
 	  MOV	  AL,[BX].NUM_SELECT_ESC  ;	skip the escape bytes		;AN000;
@@ -456,17 +455,19 @@ PRINT_1_CHAR:									;AN000;
 	MOV	AL,AH			; AL:=color used as index in the XLT_TAB;AN000;
 	MOV	BX,OFFSET XLT_TAB	; BX := Offset of translation table	;AN000;
 	XLAT	XLT_TAB 		; AL := Band mask (DL=current band mask);AN000;
-       .IF     <BIT AL AND DL>		;If needs this band to print the color	;AN000;
-       .THEN				; of this character			;AN000;
-	 .IF	 <AH EQ DH>		; then: when foreground = background	;AN000;
-	 .THEN				;	send a solid box		;AN000;
+       test AL,DL			;If needs this band to print the color	;AN000;
+       jz else_l_5			; of this character			;AN000;
+	 cmp AH,DH			; then: when foreground = background	;AN000;
+	 jne else_l_4			;	send a solid box		;AN000;
 	    MOV     AL,SOLID_BOX	;					;AN000;
-	 .ELSE				;	when foreground <> background	;AN000;
+	 jmp endif_l_5
+	 else_l_4:			;	when foreground <> background	;AN000;
 	    MOV     AL,CUR_CHAR 	;	send the character		;AN000;
-	 .ENDIF 			; Endif foreground = background 	;AN000;
-       .ELSE				; else: send a blank			;AN000;
+	 endif_l_4: 			; Endif foreground = background 	;AN000;
+       jmp endif_l_5
+       else_l_5:			; else: send a blank			;AN000;
 	  MOV	  AL,BLANK		;					;AN000;
-       .ENDIF				; Endif color band needed		;AN000;
+       endif_l_5:			; Endif color band needed		;AN000;
 	CALL	PRINT_BYTE		; Print the byte			;AN000;
 	JC	PRINT_BAND_TXT_END	; If printer error occurred: QUIT	;AN000;
 	INC CUR_COLUMN			; Else, Get next column; keep going	;AN000;
@@ -594,10 +595,10 @@ PRINT_COLOR_APA PROC								;AN000;
 ;-------------------------------------------------------------------------------;AN000;
 	CALL	GET_SCREEN_INFO 	; Get info. about how to read the screen;AN000;
 	CALL	SETUP_PRT		; Set up the printer (Line spacing, etc);AN000;
-       .IF  <BIT ERROR_CODE NZ PRINTER_ERROR>					;AN000;
-       .THEN				; A printer error occurred: quit	;AN000;
+       test ERROR_CODE,PRINTER_ERROR
+       jz @F				; A printer error occurred: quit	;AN000;
 	  JMP	  PRINT_COLOR_APA_END	;					;AN000;
-       .ENDIF									;AN000;
+       @@:
 										;AN000;
 	MOV	CX,NB_SCAN_LINES						;AN000;
 ;----------------------------------------------------------------------------	;AN000;
@@ -607,8 +608,8 @@ PRINT_COLOR_APA PROC								;AN000;
 ;----------------------------------------------------------------------------	;AN000;
 PRINT_SCAN_LINE:								;AN000;
 	CALL	DET_CUR_SCAN_LNE_LENGTH ; Determine length of the scan line	;AN000;
-       .IF <CUR_SCAN_LNE_LENGTH NE 0>	; If line is not empty			;AN000;
-       .THEN									;AN000;
+       cmp CUR_SCAN_LNE_LENGTH,0	; If line is not empty			;AN000;
+       je endif_l_7
 	  CALL	  SCAN_FOR_BANDS_APA	  ; REQ_BAND_MASK := Mask for what print;AN000;
 					  ;  bands are needed.			;AN000;
 	  MOV	  DL,01H		  ; DL := "Current Band to be printed"  ;AN000;
@@ -623,26 +624,25 @@ PRINT_SCAN_LINE:								;AN000;
 	  ;									;AN000;
 	  ;---------------------------------------------------------------------;AN000;
        PRINT_1_COLOR_BAND_APA:		  ; Only if this color band is needed:	;AN000;
-	   .IF <BIT REQ_BAND_MASK AND DL> ;   Do one pass of the printer head	;AN000;
-	   .THEN			  ;					;AN000;
+	   test REQ_BAND_MASK,DL	  ;   Do one pass of the printer head	;AN000;
+	   jz endif_l_6
 	      CALL    SET_COLOR_BAND	  ; Select the color band on the printer;AN000;
 	      CALL    NEW_PRT_LINE	  ; Send escape sequence to the printer ;AN000;
 					  ;  for starting a new graphics line	;AN000;
-	     .IF  <BIT ERROR_CODE NZ PRINTER_ERROR>				;AN000;
-	     .THEN			  ; A printer error occurred:		;AN000;
+	     test ERROR_CODE,PRINTER_ERROR
+	     jz @F			  ; A printer error occurred:		;AN000;
 		POP   CX		  ; Restore the line counter and	;AN000;
 		JMP   PRINT_COLOR_APA_END ;  return				;AN000;
-	     .ENDIF			  ; Endif printer error occurred	;AN000;
+	     @@:			  ; Endif printer error occurred	;AN000;
 										;AN000;
 	      CALL PRINT_BAND_APA	  ; Do one Print Pass for current band	;AN000;
 	      MOV     AL,CR		  ;   Print a carriage return		;AN000;
 	      CALL    PRINT_BYTE						;AN000;
-	     .IF      C 		  ; If a printer error occurred 	;AN000;
-	     .THEN								;AN000;
+	     jnc @F	 		  ; If a printer error occurred 	;AN000;
 		POP   CX		  ; Restore the line counter and	;AN000;
 		JMP   PRINT_COLOR_APA_END ;  return				;AN000;
-	     .ENDIF			  ; End if printer error occurred	;AN000;
-	   .ENDIF			  ; End if this color band is needed	;AN000;
+	     @@:			  ; End if printer error occurred	;AN000;
+	   endif_l_6:			  ; End if this color band is needed	;AN000;
 	    SHL     DL,1		  ; Get next Color Band mask		;AN000;
 					  ; Locate next COLORSELECT record:	;AN000;
 	    MOV     AL,[BX].NUM_SELECT_ESC;  skip the escape bytes		;AN000;
@@ -651,7 +651,7 @@ PRINT_SCAN_LINE:								;AN000;
 	    INC     BX			  ;  skip the NUM_SELECT_ESC field	;AN000;
 	  LOOP	  PRINT_1_COLOR_BAND_APA					;AN000;
 	  POP	  CX			  ; Restore scan line counter		;AN000;
-       .ENDIF ; Scan line length <> 0						;AN000;
+       endif_l_7: ; Scan line length <> 0
 ;										;AN000;
 ;-----Print a line feed:							;AN000;
 	MOV	AL,LF								;AN000;
@@ -659,20 +659,21 @@ PRINT_SCAN_LINE:								;AN000;
 	JC	PRINT_COLOR_APA_END	  ; If a printer error occurred: quit	;AN000;
 ;										;AN000;
 ;-------Get coordinates of next scan line:					;AN000;
-       .IF <ROTATE_SW EQ ON>		; If printing sideways			;AN000;
-       .THEN				; then: 				;AN000;
+       cmp ROTATE_SW,ON			; If printing sideways			;AN000;
+       jne else_l_8			; then: 				;AN000;
 	  MOV	  AL,NB_BOXES_PER_PRT_BUF;  AX := Numbers of pels read on row	;AN000;
 	  CBW				;					;AN000;
 	  ADD	  CUR_COLUMN,AX 	;   CUR_COLUMN + Number of pels read	;AN000;
 	  MOV	  AX,SCREEN_HEIGHT	;   CUR_ROW := SCREEN_HEIGHT - 1	;AN000;
 	  DEC	  AX			;					;AN000;
 	  MOV	  CUR_ROW,AX		;					;AN000;
-       .ELSE				; else, printing NOT rotated:		;AN000;
+       jmp endif_l_8
+       else_l_8:			; else, printing NOT rotated:		;AN000;
 	  MOV	  AL,NB_BOXES_PER_PRT_BUF ; AX := Number of pels read on column ;AN000;
 	  CBW				;					;AN000;
 	  ADD	  CUR_ROW,AX		;   CUR_ROW + Number of pels read	;AN000;
 	  MOV	  CUR_COLUMN,0		;   CUR_COLUMN := 0			;AN000;
-       .ENDIF				; End if printing sideways		;AN000;
+       endif_l_8:			; End if printing sideways		;AN000;
 	LOOP	PRINT_SCAN_LINE 	;					;AN000;
 										;AN000;
 ;-------------------------------------------------------------------------------;AN000;
@@ -783,12 +784,13 @@ SCAN_1_PIXEL:									;AN000;
 	OR	REQ_BAND_MASK,AL	; Add bands required for this pixel	;AN000;
 										;AN000;
 ;-------Get coordinates of next pixel:						;AN000;
-       .IF <ROTATE_SW EQ ON>		; If printing sideways			;AN000;
-       .THEN				;					;AN000;
+       cmp ROTATE_SW,ON			; If printing sideways			;AN000;
+       jne else_l_9
 	  INC CUR_COLUMN		; then, increment column number 	;AN000;
-       .ELSE				;					;AN000;
+       jmp endif_l_9
+       else_l_9:
 	  INC CUR_ROW			; else, increment row number		;AN000;
-       .ENDIF				;					;AN000;
+       endif_l_9:
 	LOOP SCAN_1_PIXEL							;AN000;
 	POP	CUR_COLUMN		; Restore coordinates of the "column"   ;AN000;
 	POP	CUR_ROW 		;					;AN000;
@@ -796,12 +798,13 @@ SCAN_1_PIXEL:									;AN000;
 										;AN000;
 										;AN000;
 ;-------Get coordinates of next "column":                                       ;AN000;
-       .IF <ROTATE_SW EQ ON>		; If printing sideways			;AN000;
-       .THEN				;					;AN000;
+       cmp ROTATE_SW,ON			; If printing sideways			;AN000;
+       jne else_l_10			;					;AN000;
 	  DEC CUR_ROW			; then, get row above on screen 	;AN000;
-       .ELSE				;					;AN000;
+       jmp endif_l_10
+       else_l_10:
 	  INC CUR_COLUMN		; else, get column next right		;AN000;
-       .ENDIF				;					;AN000;
+       endif_l_10:
 	LOOP	SCAN_1_COLUMN							;AN000;
 										;AN000;
 	POP	CX								;AN000;
@@ -932,22 +935,24 @@ CLEAR_BUF:			; For each byte in the PRT_BUF: 		;AN000;
 STORE_1_PIXEL:									;AN000;
 	CALL	READ_DOT		; AL := Index into translation table	;AN000;
 	XLAT	XLT_TAB 		; AL := Band mask			;AN000;
-       .IF <BIT AL AND DL>		; If color of the current pixel needs	;AN000;
-       .THEN				;  the current printer band		;AN000;
+       test AL,DL			; If color of the current pixel needs	;AN000;
+       jz else_l_11			;  the current printer band		;AN000;
 	  MOV	SI,OFFSET BLACK_BOX	; then, store a box in the		;AN000;
 	  CALL STORE_BOX		;	 PRT_BUF			;AN000;
-       .ELSE				;					;AN000;
+       jmp endif_l_11
+       else_l_11:
 	  MOV	SI,OFFSET WHITE_BOX	;  else, store an empty box		;AN000;
 	  CALL STORE_BOX		;	  in the PRT_BUF		;AN000;
-       .ENDIF									;AN000;
+       endif_l_11:
 ;										;AN000;
 ;-------Get coordinates of next pixel:						;AN000;
-       .IF <ROTATE_SW EQ ON>		; If printing sideways			;AN000;
-       .THEN				;					;AN000;
+       cmp ROTATE_SW,ON			; If printing sideways			;AN000;
+       jne else_l_12			;					;AN000;
 	  INC CUR_COLUMN		; then, increment column number 	;AN000;
-       .ELSE				;					;AN000;
+       jmp endif_l_12
+       else_l_12:
 	  INC CUR_ROW			; else, increment row number		;AN000;
-       .ENDIF				;					;AN000;
+       endif_l_12:
 	LOOP STORE_1_PIXEL							;AN000;
 										;AN000;
 	POP	CUR_COLUMN		; Restore coordinates of the "column"   ;AN000;
@@ -959,22 +964,23 @@ STORE_1_PIXEL:									;AN000;
 ;										;AN000;
 ;-------------------------------------------------------------------------------;AN000;
 	CALL	PRINT_BUFFER							;AN000;
-       .IF  <BIT ERROR_CODE NZ PRINTER_ERROR>					;AN000;
-       .THEN				; A printer error occurred: QUIT	;AN000;
+       test ERROR_CODE,PRINTER_ERROR
+       jz @F				; A printer error occurred: QUIT	;AN000;
 	  JMP SHORT PRINT_BAND_APA_END	;					;AN000;
-       .ENDIF									;AN000;
+       @@:
 										;AN000;
 ;-------------------------------------------------------------------------------;AN000;
 ;										;AN000;
 ; Get coordinates of next "column":                                             ;AN000;
 ;										;AN000;
 ;-------------------------------------------------------------------------------;AN000;
-       .IF <ROTATE_SW EQ ON>		; If printing sideways			;AN000;
-       .THEN				;					;AN000;
+       cmp ROTATE_SW,ON			; If printing sideways			;AN000;
+       jne else_l_13			;					;AN000;
 	  DEC CUR_ROW			; then, get row above on screen 	;AN000;
-       .ELSE				;					;AN000;
+       jmp endif_l_13
+       else_l_13:
 	  INC CUR_COLUMN		; else, get column next right		;AN000;
-       .ENDIF				;					;AN000;
+       endif_l_13:
 	LOOP	PRINT_1_COLUMN							;AN000;
 										;AN000;
 PRINT_BAND_APA_END:								;AN000;
@@ -1092,10 +1098,10 @@ INIT_BLACK_BOX PROC NEAR							;AN000;
 	XOR	CX,CX								;AN000;
 	MOV	CL,BOX_H	; CX := Height in bits of the print box 	;AN000;
 	XOR	AL,AL		; AX := Bit mask for creating box column	;AN000;
-       .REPEAT			; For height of the box:			;AN000;
+       repeat_l_1:		; For height of the box:			;AN000;
 	  SHL	  AL,1		;						;AN000;
 	  OR	  AL,1		;   Insert one bit in the box column		;AN000;
-       .LOOP									;AN000;
+       LOOP repeat_l_1
 										;AN000;
 ;-------------------------------------------------------------------------------;AN000;
 ;										;AN000;
@@ -1116,7 +1122,7 @@ INIT_1_BLACK_COLUMN:								;AN000;
 	POP	AX								;AN000;
 	RET									;AN000;
 INIT_BLACK_BOX ENDP								;AN000;
-INCLUDE GRCOMMON.ASM								;AN000;
+INCLUDE grcommon.asm								;AN000;
 LEN_OF_COLOR_MODULES EQU $-PRINT_COLOR						;AN000;
 CODE	ENDS									;AN000;
 	END									;AN000;

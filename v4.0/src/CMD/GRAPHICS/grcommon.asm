@@ -352,8 +352,8 @@ GET_SCREEN_INFO PROC NEAR							;AN000;
 ;										;AN000;
 ;-------------------------------------------------------------------------------;AN000;
 	MOV	CUR_COLUMN,0		; Reading always start from left of scr ;AN000;
-.IF <[BX].PRINT_OPTIONS EQ ROTATE>						;AN000;
-.THEN										;AN000;
+cmp [BX].PRINT_OPTIONS,ROTATE
+jne else_lc_1
 ;-------------------------------------------------------------------------------;AN000;
 ;										;AN000;
 ; Printing is sideways; screen must be read starting in low-left corner.	;AN000;
@@ -371,7 +371,8 @@ GET_SCREEN_INFO PROC NEAR							;AN000;
 	MOV	BL,NB_BOXES_PER_PRT_BUF ;					;AN000;
 	DIV	BX			; Screen width / number boxes per buff	;AN000;
 	MOV	NB_SCAN_LINES,AX	; Number of scan lines := result	;AN000;
-.ELSE										;AN000;
+jmp short endif_lc_1
+else_lc_1:
 ;-------------------------------------------------------------------------------;AN000;
 ;										;AN000;
 ; Printing is not sideways; screen must be read starting in top-left corner	;AN000;
@@ -388,7 +389,7 @@ GET_SCREEN_INFO PROC NEAR							;AN000;
 	MOV	BL,NB_BOXES_PER_PRT_BUF ;					;AN000;
 	DIV	BX			; Screen height/number boxes per buff.	;AN000;
 	MOV	NB_SCAN_LINES,AX	; Number of scan lines := result	;AN000;
-.ENDIF										;AN000;
+endif_lc_1:
 	POP	DX								;AN000;
 	POP	BX								;AN000;
 	POP	AX								;AN000;
@@ -461,14 +462,15 @@ DET_CUR_SCAN_LNE_LENGTH PROC NEAR						;AN000;
 ; scan line:									;AN000;
 ;										;AN000;
 ;-------------------------------------------------------------------------------;AN000;
-       .IF <ROTATE_SW EQ ON>		; If printing sideways			;AN000;
-       .THEN				; then, 				;AN000;
+       cmp ROTATE_SW,ON			; If printing sideways			;AN000;
+       jne else_lc_2			; then, 				;AN000;
 	  MOV	  CUR_ROW,0		;   CUR_ROW := 0			;AN000;
-       .ELSE				; else, 				;AN000;
+       jmp short endif_lc_2
+       else_lc_2:			; else, 				;AN000;
 	  MOV	  CX,SCREEN_WIDTH	;   CUR_COLUMN := SCREEN_WIDTH - 1	;AN000;
 	  DEC	  CX			;					;AN000;
 	  MOV	  CUR_COLUMN,CX 	;					;AN000;
-       .ENDIF									;AN000;
+       endif_lc_2:
 ;-------------------------------------------------------------------------------;AN000;
 ;										;AN000;
 ; Read the scan line backwards "column" by "column" until a non-blank is found: ;AN000;
@@ -489,35 +491,38 @@ CHECK_1_PIXEL:									;AN000;
 	XLAT	XLT_TAB 		; AL := Band mask or Intensity		;AN000;
 										;AN000;
 ;-------Check if pixel will map to an empty box:				;AN000;
-       .IF <DS:[BP].PRINTER_TYPE EQ BLACK_WHITE> ; If BLACK AND WHITE printer	;AN000;
-       .THEN				; then, check for intensity of white	;AN000;
+       cmp DS:[BP].PRINTER_TYPE,BLACK_WHITE ; If BLACK AND WHITE printer	;AN000;
+       jne else_lc_3			; then, check for intensity of white	;AN000;
 	  CMP	  AL,WHITE_INT		;      If curent pixel not blank	;AN000;
 	  JNE	  DET_LENGTH_END	;      THEN, LEAVE THE LOOP		;AN000;
-       .ELSE				; else, COLOR printer			;AN000;
+       jmp short endif_lc_3
+       else_lc_3:			; else, COLOR printer			;AN000;
 	  OR	  AL,AL 		;      IF Band mask not blank		;AN000;
 	  JNZ	  DET_LENGTH_END	;      THEN, LEAVE THE LOOP		;AN000;
-       .ENDIF									;AN000;
+       endif_lc_3:
 										;AN000;
 ;-------All pixels so far on this "column" are blank, get next pixel:           ;AN000;
-       .IF <ROTATE_SW EQ ON>		; If printing sideways			;AN000;
-       .THEN				;					;AN000;
+       cmp ROTATE_SW,ON			; If printing sideways			;AN000;
+       jne else_lc_4			;					;AN000;
 	  INC CUR_COLUMN		; then, increment column number 	;AN000;
-       .ELSE				;					;AN000;
+       jmp short endif_lc_4
+       else_lc_4:			;					;AN000;
 	  INC CUR_ROW			; else, increment row number		;AN000;
-       .ENDIF				;					;AN000;
+       endif_lc_4:
 	INC	DL			; One more pixel checked		;AN000;
 	CMP	DL,NB_BOXES_PER_PRT_BUF ; All pixels for that column done ?	;AN000;
 	JL	CHECK_1_PIXEL		;   No, check next one. 		;AN000;
 										;AN000;
 ;-------Nothing to print for this column, get next column			;AN000;
-       .IF <ROTATE_SW EQ ON>		; If printing sideways			;AN000;
-       .THEN				; then, 				;AN000;
+       cmp ROTATE_SW,ON			; If printing sideways			;AN000;
+       jne else_lc_5			; then, 				;AN000;
 	  MOV CUR_COLUMN,DI		;   Restore column number		;AN000;
 	  INC CUR_ROW			;   Get next row			;AN000;
-       .ELSE				; else, 				;AN000;
+       jmp short endif_lc_5
+       else_lc_5:			; else, 				;AN000;
 	  MOV CUR_ROW,SI		;   Restore row number			;AN000;
 	  DEC CUR_COLUMN		;   Get next column			;AN000;
-       .ENDIF				;					;AN000;
+       endif_lc_5:
 	LOOP CHECK_1_COLUMN		; CX (length) := CX - 1 		;AN000;
 										;AN000;
 DET_LENGTH_END: 								;AN000;
@@ -573,8 +578,8 @@ SETUP_PRT PROC NEAR								;AN000;
 										;AN000;
 	XOR	CX,CX			; CX := Number of bytes to print	;AN000;
 	MOV	CL,[BX].NUM_SETUP_ESC	;					;AN000;
-.IF <CL G 0>				; If there is at least one		;AN000;
-.THEN					; byte to be printed:			;AN000;
+cmp CL,0				; If there is at least one		;AN000;
+jle endif_lc_6				; byte to be printed:			;AN000;
 	MOV	BX,[BX].SETUP_ESC_PTR	; BX := Offset sequence to send 	;AN000;
 	ADD	BX,BP								;AN000;
 										;AN000;
@@ -584,7 +589,7 @@ SEND_1_SETUP_BYTE:								;AN000;
 	JC	SETUP_PRT_END		; If printer error, quit the loop	;AN000;
 	INC	BX			; Get next byte 			;AN000;
 	LOOP	SEND_1_SETUP_BYTE						;AN000;
-.ENDIF										;AN000;
+endif_lc_6:
 SETUP_PRT_END:									;AN000;
 	POP	CX								;AN000;
 	POP	BX								;AN000;
@@ -629,8 +634,8 @@ RESTORE_PRT PROC NEAR								;AN000;
 										;AN000;
 	XOR	CX,CX			; CX := Number of bytes to print	;AN000;
 	MOV	CL,[BX].NUM_RESTORE_ESC 					;AN000;
-.IF <CL G 0>				; If there is at least one		;AN000;
-.THEN					; byte to be printed:			;AN000;
+cmp CL,0				; If there is at least one		;AN000;
+jle endif_lc_7				; byte to be printed:			;AN000;
 	MOV	BX,[BX].RESTORE_ESC_PTR ; BX := Offset sequence to send 	;AN000;
 	ADD	BX,BP								;AN000;
 										;AN000;
@@ -640,7 +645,7 @@ SEND_1_RESTORE_BYTE:								;AN000;
 	JC	RESTORE_PRT_END 	; If printer error, quit the loop	;AN000;
 	INC	BX			; Get next byte 			;AN000;
 	LOOP	SEND_1_RESTORE_BYTE						;AN000;
-.ENDIF										;AN000;
+endif_lc_7:
 RESTORE_PRT_END:								;AN000;
 	POP	CX								;AN000;
 	POP	BX								;AN000;

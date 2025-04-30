@@ -54,10 +54,9 @@ CODE	SEGMENT PUBLIC 'CODE'          ;;                                       ;AN
 				       ;;					;AN000;
 				       ;;					;AN000;
 .XLIST										;AN000;
-INCLUDE STRUC.INC								;AN000;
-INCLUDE GRINST.EXT								;AN000;
-INCLUDE GRCTRL.EXT								;AN000;
-INCLUDE GRCPSD.EXT								;AN000;
+INCLUDE grinst.ext								;AN000;
+INCLUDE grctrl.ext								;AN000;
+INCLUDE grcpsd.ext								;AN000;
 .LIST										;AN000;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;					;AN000;
 ;;										;AN000;
@@ -116,9 +115,10 @@ INT_2FH:									;AN000;
 ;-------------------------------------------------------------------------------;AN000;
 ; Verify if the 2FH Interrupt call is for our interrupt handler:		;AN000;
 ;-------------------------------------------------------------------------------;AN000;
-       .IF <AH EQ PRT_SCR_2FH_NUMBER> AND;If 2FH call is for us 		;AN000;
-       .IF <ZERO AL>			;  and request is "Get install state"   ;AN000;
-       .THEN				; then, 				;AN000;
+       cmp AH,PRT_SCR_2FH_NUMBER	; If 2FH call is for us 		;AN000;
+       jne else_l_2
+       or AL,AL				;  and request is "Get install state"   ;AN000;
+       jnz else_l_2			; then, 				;AN000;
 ;-------------------------------------------------------------------------------;AN000;
 ; Yes: return results								;AN000;
 ;-------------------------------------------------------------------------------;AN000;
@@ -128,18 +128,21 @@ INT_2FH:									;AN000;
 	MOV	AH,0FFH 		; AL and AH := "We are installed"       ;AN000;
 	MOV	AL,AH			;					;AN000;
 	IRET				; Return to interrupted process 	;AN000;
+       jmp endif_l_2
 ;-------------------------------------------------------------------------------;AN000;
 ; No, pass control to next 2FH interrupt handler:				;AN000;
 ;-------------------------------------------------------------------------------;AN000;
-       .ELSE				; else, this call is not for us:	;AN000;
-	 .IF <<WORD PTR CS:OLD_INT_2FH> NE 0> AND ;if there is another		;AN000;
-	 .IF <<WORD PTR CS:OLD_INT_2FH+2> NE 0> ;  2FH driver			;AN000;
-	 .THEN				;	below us then,			;AN000;
+       else_l_2:			; else, this call is not for us:	;AN000;
+	 cmp WORD PTR CS:OLD_INT_2FH,0	; if there is another			;AN000;
+	 je else_l_1
+	 cmp WORD PTR CS:OLD_INT_2FH+2,0; 2FH driver				;AN000;
+	 je else_l_1			;	below us then,			;AN000;
 	    JMP CS:OLD_INT_2FH		;	  pass control to it		;AN000;
-	 .ELSE				;	else, there is nobody to pass	;AN000;
+	 jmp endif_l_1
+	 else_l_1:			;	else, there is nobody to pass	;AN000;
 	    IRET			;	  control to, just return.	;AN000;
-	 .ENDIF 			;     END If there is a driver below us.;AN000;
-      .ENDIF				;  END If this call is for us.		;AN000;
+	 endif_l_1: 			;     END If there is a driver below us.;AN000;
+       endif_l_2:			;  END If this call is for us.		;AN000;
 INT_2FH_DRIVER	ENDP								;AN000;
 										;AN000;
 CODE   ENDS									;AN000;

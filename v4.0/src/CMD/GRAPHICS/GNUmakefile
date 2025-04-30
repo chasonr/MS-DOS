@@ -13,6 +13,14 @@ COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
 #######################	dependencies begin here. #########################
 #
 
+.SUFFIXES: .asm .obj
+
+AS = jwasm
+AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.asm.obj:
+	$(AS) $(AFLAGS) -Fo$@ $<
+
 all: graphics.com
 
 
@@ -20,72 +28,66 @@ graphics.ctl graphics.cl1 graphics.cl2 graphics.cla graphics.clb graphics.clc: \
         GRAPHICS.SKL $(msg)/$(COUNTRY).MSG
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\graphics $(subst /,\,$<) $(country)"
 
-graphics.obj: GRAPHICS.ASM  GRINST.EXT
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\graphics $(subst /,\,$<) $(subst /,\,$@)"
+graphics.obj: graphics.asm  grinst.ext
 
-grinst.obj: GRINST.ASM	GRLOAD.EXT GRLOAD2.EXT GRCTRL.EXT GRPRINT.EXT \
-	    GRCPSD.EXT	GRPARMS.EXT  GRPARSE.EXT GRBWPRT.EXT GRCOLPRT.EXT \
-	    GRINT2FH.EXT GRMSG.EQU  graphics.ctl graphics.cla graphics.cl1 \
-	    graphics.clb \
-	    graphics.cl2 graphics.clc \
-	    $(inc)/sysmsg.inc $(inc)/STRUC.INC GRSHAR.STR
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\graphics $(subst /,\,$<) $(subst /,\,$@)"
+grinst.obj: grinst.asm grload.ext grload2.ext grload3.ext grctrl.ext \
+            grcpsd.ext grparms.ext grparse.ext grbwprt.ext grcolprt.ext \
+            grint2fh.ext grmsg.equ grshar.str $(inc)/sysmsg.inc \
+            $(inc)/copyrigh.inc $(inc)/msgdcl.inc \
+            $(inc)/msgserv.asm $(inc)/versiona.inc \
+            graphics.ctl graphics.cl1 graphics.cl2 graphics.cla graphics.clb \
+            graphics.clc
 
-grcpsd.obj: GRCPSD.ASM GRCTRL.EXT GRCTRL.STR
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\graphics $(subst /,\,$<) $(subst /,\,$@)"
+grcpsd.obj: grcpsd.asm grctrl.ext grctrl.str
 
-grparse.obj: GRPARSE.ASM $(inc)/STRUC.INC $(inc)/parse.asm $(inc)/psdata.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\graphics $(subst /,\,$<) $(subst /,\,$@)"
+grparse.obj: grparse.asm $(inc)/parse.asm $(inc)/psdata.inc
 
-grpattrn.obj: GRPATTRN.ASM GRPATTRN.STR
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\graphics $(subst /,\,$<) $(subst /,\,$@)"
+grpattrn.obj: grpattrn.asm grpattrn.str
 
-grbwprt.obj: GRBWPRT.ASM GRCOMMON.EXT GRCTRL.STR GRSHAR.STR \
-	     GRPATTRN.STR $(inc)/STRUC.INC
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\graphics $(subst /,\,$<) $(subst /,\,$@)"
+grbwprt.obj: grbwprt.asm grctrl.str grshar.str \
+	     grpattrn.str grctrl.ext grcommon.asm
 
-grint2fh.obj: GRINT2FH.ASM  GRLOAD.EXT	GRCTRL.EXT GRPRINT.EXT \
-	      GRCPSD.EXT
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\graphics $(subst /,\,$<) $(subst /,\,$@)"
+grint2fh.obj: grint2fh.asm grinst.ext grctrl.ext grcpsd.ext
 
-grctrl.obj: GRCTRL.ASM GRINT2FH.EXT GRBWPRT.EXT GRCOLPRT.EXT GRSHAR.STR \
-	    GRPATTRN.STR GRPATTRN.EXT GRCTRL.STR $(inc)/STRUC.INC
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\graphics $(subst /,\,$<) $(subst /,\,$@)"
+grctrl.obj: grctrl.asm grint2fh.ext grbwprt.ext grcolprt.ext grshar.str \
+	    grpattrn.str grpattrn.ext grctrl.str
 
-grcolprt.obj: GRCOLPRT.ASM GRCTRL.STR GRSHAR.STR GRPATTRN.STR GRCTRL.EXT  \
-	      $(inc)/STRUC.INC GRCOMMON.ASM
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\graphics $(subst /,\,$<) $(subst /,\,$@)"
+grcolprt.obj: grcolprt.asm grctrl.str grshar.str grpattrn.str grctrl.ext  \
+	      grcommon.asm
 
-grload.obj: GRLOAD.ASM $(inc)/STRUC.INC GRINST.EXT GRSHAR.STR GRPARSE.EXT \
-	    GRLOAD2.EXT GRLOAD3.EXT GRMSG.EQU
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\graphics $(subst /,\,$<) $(subst /,\,$@)"
+grload.obj: grload.asm grinst.ext grshar.str grparse.ext \
+	    grload2.ext grload3.ext grmsg.equ
 
-grload2.obj: GRLOAD2.ASM $(inc)/STRUC.INC GRINST.EXT GRSHAR.STR GRMSG.EQU \
-	     GRINST.EXT GRLOAD.EXT GRPARSE.EXT GRPATTRN.STR GRPATTRN.EXT
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\graphics $(subst /,\,$<) $(subst /,\,$@)"
+grload2.obj: grload2.asm grinst.ext grshar.str grmsg.equ \
+	     grinst.ext grload.ext grparse.ext grpattrn.str grpattrn.ext
 
-grload3.obj: GRLOAD3.ASM $(inc)/STRUC.INC GRINST.EXT GRSHAR.STR GRMSG.EQU \
-	     GRINST.EXT GRLOAD.EXT GRLOAD2.EXT GRPARSE.EXT GRPATTRN.STR \
-	     GRPATTRN.EXT
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\graphics $(subst /,\,$<) $(subst /,\,$@)"
+grload3.obj: grload3.asm grinst.ext grshar.str grmsg.equ \
+	     grinst.ext grload.ext grload2.ext grparse.ext grpattrn.str \
+	     grpattrn.ext
 
-grparms.obj: GRPARMS.ASM GRMSG.EQU GRSHAR.STR GRINST.EXT GRPARSE.EXT \
-	     $(inc)/STRUC.INC
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\graphics $(subst /,\,$<) $(subst /,\,$@)"
+grparms.obj: grparms.asm grmsg.equ grshar.str grinst.ext grparse.ext
 
-##############################################################################
 OBJS = graphics.obj grint2fh.obj grpattrn.obj grctrl.obj grcpsd.obj \
        grcolprt.obj grbwprt.obj grinst.obj grparse.obj grparms.obj \
        grload.obj grload2.obj grload3.obj
 
 graphics.com: $(OBJS) GRAPHICS.LNK
-	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\graphics /map @graphics.lnk"
+	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
+	echo 'option map=graphics.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name graphics.exe' >>resp.txt
+	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
+	wlink @resp.txt
 	exe2bin -q graphics.exe graphics.com
-	rm graphics.exe
 
 clean:
 	rm -f *.obj
+	rm -f *.err
+	rm -f *.lst
 	rm -f graphics.com
+	rm -f graphics.exe
 	rm -f graphics.map
 	rm -f graphics.cl[12a-c]
 	rm -f graphics.ctl

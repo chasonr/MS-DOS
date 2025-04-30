@@ -53,14 +53,13 @@
 				       ;;					;AN000;
 CODE	SEGMENT PUBLIC 'CODE' BYTE     ;;                                       ;AN000;
 				       ;;					;AN000;
-	INCLUDE STRUC.INC	       ;;					;AN000;
-	INCLUDE GRINST.EXT	       ;; Bring in external declarations	;AN000;
+	INCLUDE grinst.ext	       ;; Bring in external declarations	;AN000;
 				       ;;  for transient command processing	;AN000;
-	INCLUDE GRSHAR.STR	       ;;					;AN000;
-	INCLUDE GRPARSE.EXT	       ;;					;AN000;
-	INCLUDE GRLOAD2.EXT	       ;;					;AN000;
-	INCLUDE GRLOAD3.EXT	       ;;					;AN000;
-	INCLUDE GRMSG.EQU	       ;;					;AN000;
+	INCLUDE grshar.str	       ;;					;AN000;
+	INCLUDE grparse.ext	       ;;					;AN000;
+	INCLUDE grload2.ext	       ;;					;AN000;
+	INCLUDE grload3.ext	       ;;					;AN000;
+	INCLUDE grmsg.equ	       ;;					;AN000;
 				       ;;					;AN000;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;					;AN000;
 ;;										;AN000;
@@ -336,10 +335,11 @@ LOAD_PROFILE  PROC NEAR 	       ;;					;AN000;
   POP	SUBLIST_SEG		       ;; setup segment for message sublist	;AN000;
 				       ;;					;AN000;
   CALL OPEN_FILE		       ;;					;AN000;
- .IF <FILE_ERROR EQ YES>	       ;; Check for error during open		;AN000;
+ cmp FILE_ERROR,YES		       ;; Check for error during open		;AN000;
+ jne @F
      STC			       ;;					;AN000;
      RET			       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
 				       ;;					;AN000;
   MOV  BP,TEMP_SHARED_DATA_PTR	       ;; BP points to START of Shared Data	;AN000;
   MOV  AX,SIZE SHARED_DATA_AREA_STR    ;; size of fixed part of Shared Data	;AN000;
@@ -360,84 +360,108 @@ LOAD_PROFILE  PROC NEAR 	       ;;					;AN000;
      CALL GET_BYTE		       ;; Get first byte from file		;AN000;
      MOV  NEXT_BYTE,AL		       ;;  and store it 			;AN000;
      MOV  BUFFER_PTR,SI 	       ;; Save SI for next GET_BYTE		;AN000;
-    .WHILE <END_OF_FILE EQ NO> AND     ;; Keep parsing until end of file or	;AN000;
-    .WHILE <FILE_ERROR EQ NO>	       ;;  file error occurs			;AN000;
+    while_l_1:
+    cmp END_OF_FILE,NO		       ;; Keep parsing until end of file or	;AN000;
+    jne endwhile_l_1
+    cmp FILE_ERROR,NO		       ;;  file error occurs			;AN000;
+    jne endwhile_l_1
        MOV STMT_ERROR,0 	       ;; Clear parse error flags		;AN000;
        CALL GET_STATEMENT	       ;; Get next profile statement		;AN000;
        INC  STMT_NUM		       ;;					;AN000;
-      .IF NC			       ;; Carry flag set if get unsuccessful	;AN000;
+      jc while_l_1		       ;; Carry flag set if get unsuccessful	;AN000;
 	  CALL PARSE_VERB	       ;; Index into verb jump table returned	;AN000;
 				       ;;  in BX				;AN000;
-	 .IF <AX EQ 0> THEN	       ;; AX=0 if there is a recognized 	;AN000;
+	 cmp AX,0		       ;; AX=0 if there is a recognized 	;AN000;
+	 jne elseif_l_1
 	    MOV  AX,CUR_STMT	       ;;					;AN000;
 	    MOV  PREV_STMT,AX	       ;; Save last statement verb		;AN000;
 	    CALL VERB_JMP_TAB[BX]      ;;  statement to parse			;AN000;
-	 .ELSEIF <AX NE -1> THEN       ;;					;AN000;
+	 jmp endif_l_1
+	 elseif_l_1:
+	 cmp AX,-1		       ;;					;AN000;
+	 je endif_l_1
 	    OR	 STMT_ERROR,INVALID    ;;					;AN000;
 	    MOV  PARSE_ERROR,YES       ;;					;AN000;
 	    MOV  BUILD_STATE,NO        ;;					;AN000;
-	 .ENDIF 		       ;;					;AN000;
-	 .IF <STMT_ERROR NE 0>	       ;; An error was detected 		;AN000;
+	 endif_l_1: 		       ;;					;AN000;
+	 cmp STMT_ERROR,0	       ;; An error was detected 		;AN000;
+	 je while_l_1
 	    CALL SHOW_PARSE_ERROR      ;;					;AN000;
 	    MOV PARSE_ERROR,YES        ;;					;AN000;
 	    MOV STMT_ERROR,0	       ;;					;AN000;
-	 .ENDIF 		       ;;					;AN000;
-      .ENDIF			       ;;					;AN000;
-    .ENDWHILE			       ;;					;AN000;
+      endif_l_2:		       ;;					;AN000;
+    jmp while_l_1 		       ;;					;AN000;
+    endwhile_l_1:		       ;;					;AN000;
 				       ;;					;AN000;
- .IF <BIT STMTS_DONE  AND PRT>	       ;; Must have at least one PRINTER	;AN000;
+ test STMTS_DONE,PRT		       ;; Must have at least one PRINTER	;AN000;
+ jz else_l_3
      CALL TERMINATE_DISPLAYMODE        ;; Terminate the last PRINTER and	;AN000;
      CALL TERMINATE_PRINTER	       ;;  DISPLAYMODE sections 		;AN000;
- .ELSE				       ;;					;AN000;
+ jmp endif_l_3
+ else_l_3:			       ;;					;AN000;
      OR  STMT_ERROR,MISSING	       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
- .IF <STMT_ERROR NE 0>		       ;;					;AN000;
+ endif_l_3: 			       ;;					;AN000;
+ cmp STMT_ERROR,0		       ;;					;AN000;
+ je @F
      CALL  SHOW_PARSE_ERROR	       ;; Issue Profile syntax messages 	;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
 				       ;;					;AN000;
 				       ;;					;AN000;
   MOV  AX,3E00H 		       ;; Close the file			;AN000;
   MOV  BX,HANDLE		       ;;					;AN000;
   INT  21H			       ;;					;AN000;
 				       ;;					;AN000;
- .IF <PARSE_ERROR EQ YES>	       ;;					;AN000;
+ cmp PARSE_ERROR,YES		       ;;					;AN000;
+ jne @F
       MOV  AX,SYNTAX_ERRORS	       ;; Issue "Syntax errors found in         ;AN000;
       MOV  CX,0 		       ;;  profile" message.                    ;AN000;
       CALL DISP_ERROR		       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
 				       ;;					;AN000;
- .IF <PTD_FOUND EQ NO>		       ;; Did we find the requested printer	;AN000;
+ cmp PTD_FOUND,NO		       ;; Did we find the requested printer	;AN000;
+ jne @F
       MOV  AX,INVALID_PRT	       ;;  type?  If not issue error		;AN000;
       MOV  CX,0 		       ;;  message.				;AN000;
       CALL DISP_ERROR		       ;;					;AN000;
       MOV  PARSE_ERROR,YES	       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
 				       ;;					;AN000;
- .IF <PARSE_ERROR EQ YES> OR	       ;;					;AN000;
- .IF <PRT_BOX_ERROR EQ YES> OR	       ;;					;AN000;
- .IF <FILE_ERROR EQ YES>	       ;; Set carry flag if profile load	;AN000;
+ cmp PARSE_ERROR,YES		       ;;					;AN000;
+ je @F
+ cmp PRT_BOX_ERROR,YES		       ;;					;AN000;
+ je @F
+ cmp FILE_ERROR,YES		       ;; Set carry flag if profile load	;AN000;
+ jne else_l_7
+ @@:
      STC			       ;;  was unsuccessful			;AN000;
- .ELSE				       ;;					;AN000;
-    .IF <MEM_OVERFLOW EQ YES>	       ;; Everthing else was OK BUT we ran	;AN000;
-	.IF <INSTALLED EQ YES>	       ;;  out of memory!!!			;AN000;
+ jmp endif_l_7
+ else_l_7:			       ;;					;AN000;
+    cmp MEM_OVERFLOW,YES	       ;; Everthing else was OK BUT we ran	;AN000;
+    jne else_l_6
+	cmp INSTALLED,YES	       ;;  out of memory!!!			;AN000;
+	jne else_l_5
 	    MOV   AX,NB_FREE_BYTES     ;;					;AN000;
-	   .IF <AX LT RESIDENT_SHARED_DATA_SIZE>				;AN000;
+	   cmp AX,RESIDENT_SHARED_DATA_SIZE					;AN000;
+	   jge else_l_4
 	       MOV   AX,NO_MEMORY      ;; We ran out of physical memory!	;AN000;
-	   .ELSE		       ;;					;AN000;
+	   jmp endif_l_5
+	   else_l_4:		       ;;					;AN000;
 	       MOV   AX,UNABLE_RELOAD  ;; Allocated shared data is too small	;AN000;
-	   .ENDIF		       ;;					;AN000;
-	.ELSE			       ;;					;AN000;
+	   endif_l_4:		       ;;					;AN000;
+	jmp endif_l_5
+	else_l_5:		       ;;					;AN000;
 	    MOV   AX,NO_MEMORY	       ;; We ran out of physical memory 	;AN000;
-	.ENDIF			       ;;					;AN000;
+	endif_l_5:		       ;;					;AN000;
 	 MOV   CX,0		       ;;					;AN000;
 	 CALL  DISP_ERROR	       ;;					;AN000;
 	 STC			       ;; Indicate unsuccessful 		;AN000;
-    .ELSE			       ;;					;AN000;
+    jmp endif_l_6
+    else_l_6:			       ;;					;AN000;
 	 MOV  AX,MAX_BLOCK_END	       ;; Extent of largest PRINTER section	;AN000;
 	 MOV  [BP].SD_TOTAL_SIZE,AX    ;;  we parsed.				;AN000;
 	 CLC			       ;; SUCCESSFUL LOAD!!!!			;AN000;
-    .ENDIF			       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+    endif_l_6:			       ;;					;AN000;
+ endif_l_7: 			       ;;					;AN000;
 				       ;;					;AN000;
   RET				       ;;					;AN000;
 				       ;;					;AN000;
@@ -457,30 +481,33 @@ SHOW_PARSE_ERROR   PROC 	       ;;					;AN000;
 				       ;;					;AN000;
   MOV  ERROR_DEVICE,STDOUT	       ;; profile syntax messages to STDOUT	;AN000;
 				       ;;					;AN000;
- .IF <BIT STMT_ERROR AND MISSING>						;AN000;
+ test STMT_ERROR,MISSING							;AN000;
+ jz @F
     PUSH SI		    ;;							;AN000;
     MOV  AX,MISSING_STMT    ;;							;AN000;
     MOV  CX,1		    ;;							;AN000;
     MOV  SI,OFFSET SUBLIST  ;;							;AN000;
     CALL DISP_ERROR	    ;;							;AN000;
     POP  SI		    ;;							;AN000;
- .ENDIF 		    ;;							;AN000;
- .IF <BIT STMT_ERROR AND INVALID>						;AN000;
+ @@:	 		    ;;							;AN000;
+ test STMT_ERROR,INVALID							;AN000;
+ jz @F
     PUSH SI		    ;;							;AN000;
     MOV  AX,INVALID_STMT    ;;							;AN000;
     MOV  CX,1									;AN000;
     MOV  SI,OFFSET SUBLIST  ;;							;AN000;
     CALL DISP_ERROR	    ;;							;AN000;
     POP  SI		    ;;							;AN000;
- .ENDIF 		    ;;							;AN000;
- .IF <BIT STMT_ERROR AND SEQUENCE>						;AN000;
+ @@:	 		    ;;							;AN000;
+ test STMT_ERROR,SEQUENCE							;AN000;
+ jz @F
     PUSH SI		    ;;							;AN000;
     MOV  AX,OUT_SEQ_STMT    ;;							;AN000;
     MOV  CX,1									;AN000;
     MOV  SI,OFFSET SUBLIST  ;;							;AN000;
     CALL DISP_ERROR	    ;;							;AN000;
     POP  SI		    ;;							;AN000;
- .ENDIF 		    ;;							;AN000;
+ @@:	 		    ;;							;AN000;
 				       ;;					;AN000;
   MOV  DI,STMT_END_INDEX  ;;							;AN000;
   MOV  STMT_BUFFER[DI],'$'           ;; For display                             ;AN000;
@@ -511,54 +538,71 @@ SHOW_PARSE_ERROR   ENDP 	       ;;					;AN000;
 				       ;;					;AN000;
 OPEN_FILE     PROC NEAR 	       ;;					;AN000;
 				       ;;					;AN000;
- .IF <PROFILE_PATH NE 0>	       ;; If a path was specified then		;AN000;
+ cmp PROFILE_PATH,0		       ;; If a path was specified then		;AN000;
+ je else_l_14
      MOV  DX,OFFSET PROFILE_PATH       ;;  try and open it			;AN000;
      MOV  AX,3D00H		       ;;					;AN000;
      INT  21H			       ;; Open it				;AN000;
-    .IF C			       ;; Open error if carry flag set		;AN000;
-       .IF <AX EQ FILE_NOT_FOUND> OR   ;; Check for error other than		;AN000;
-       .IF <AX EQ PATH_NOT_FOUND>      ;;  file not found			;AN000;
+    jnc else_l_9		       ;; Open error if carry flag set		;AN000;
+       cmp AX,FILE_NOT_FOUND	       ;; Check for error other than		;AN000;
+       je @F
+       cmp AX,PATH_NOT_FOUND	       ;;  file not found			;AN000;
+       jne else_l_8
+       @@:
 	   MOV	 AX,PROFILE_NOT_FOUND  ;;					;AN000;
 	   MOV	 CX,0		       ;;					;AN000;
 	   CALL  DISP_ERROR	       ;; Issue "File not found" common msg     ;AN000;
 	   MOV	 FILE_ERROR,YES        ;;					;AN000;
-       .ELSE			       ;;					;AN000;
+       jmp endif_l_14
+       else_l_8:		       ;;					;AN000;
 	   CALL  FILE_ERROR_PROC       ;; Issue "Open error"                    ;AN000;
-       .ENDIF			       ;;					;AN000;
-    .ELSE			       ;;					;AN000;
+       endif_l_8:		       ;;					;AN000;
+    jmp endif_l_14
+    else_l_9:			       ;;					;AN000;
 	MOV  HANDLE,AX		       ;;					;AN000;
-    .ENDIF			       ;; File opened OK			;AN000;
- .ELSE				       ;; No path parameter			;AN000;
+    endif_l_9:			       ;; File opened OK			;AN000;
+ jmp endif_l_14
+ else_l_14:			       ;; No path parameter			;AN000;
      MOV  DX,OFFSET DEFAULT_PATH       ;; Try and open "GRAPHICS.PRO"           ;AN000;
      MOV  AX,3D00H		       ;;					;AN000;
      INT  21H			       ;; Open it				;AN000;
-    .IF C			       ;; Open error if carry flag set		;AN000;
-       .IF <AX EQ FILE_NOT_FOUND> OR   ;; Check for file not found error	;AN000;
-       .IF <AX EQ PATH_NOT_FOUND>      ;;					;AN000;
+    jnc else_l_13		       ;; Open error if carry flag set		;AN000;
+       cmp AX,FILE_NOT_FOUND	       ;; Check for file not found error	;AN000;
+       je @F
+       cmp AX,PATH_NOT_FOUND	       ;;					;AN000;
+       jne else_l_12
+       @@:
 	   CALL COPY_ARGV0	       ;;					;AN000;
 	   MOV	DX,OFFSET PROFILE_PATH ;; Try and open "GRAPHICS.PRO" in        ;AN000;
 	   MOV	AX,3D00H	       ;;  ARGV0 directory			;AN000;
 	   INT	21H		       ;;					;AN000;
-	  .IF C 		       ;; Issue "File not found" common msg     ;AN000;
-	     .IF <AX EQ FILE_NOT_FOUND> OR					;AN000;
-	     .IF <AX EQ PATH_NOT_FOUND> 					;AN000;
+	  jnc else_l_11		       ;; Issue "File not found" common msg     ;AN000;
+	     cmp AX,FILE_NOT_FOUND						;AN000;
+	     je @F
+	     cmp AX,PATH_NOT_FOUND 						;AN000;
+	     jne else_l_10
+	     @@:
 		 MOV   AX,PROFILE_NOT_FOUND  ;; 				;AN000;
 		 MOV   CX,0		     ;; 				;AN000;
 		 CALL  DISP_ERROR	     ;; Issue "File not found"common MSG;AN000;
 		 MOV   FILE_ERROR,YES	     ;; 				;AN000;
-	     .ELSE		       ;;					;AN000;
+	     jmp endif_l_13
+	     else_l_10:		       ;;					;AN000;
 		 CALL  FILE_ERROR_PROC ;; Issue "Open error"                    ;AN000;
-	     .ENDIF		       ;;					;AN000;
-	  .ELSE 		       ;;					;AN000;
+	     endif_l_10:	       ;;					;AN000;
+	  jmp endif_l_13
+	  else_l_11: 		       ;;					;AN000;
 	      MOV  HANDLE,AX	       ;;					;AN000;
-	  .ENDIF		       ;; File opened OK			;AN000;
-       .ELSE			       ;;					;AN000;
+	  endif_l_11:		       ;; File opened OK			;AN000;
+       jmp endif_l_13
+       else_l_12:		       ;;					;AN000;
 	   CALL  FILE_ERROR_PROC       ;; Issue "Open error"                    ;AN000;
-       .ENDIF			       ;;					;AN000;
-    .ELSE			       ;;					;AN000;
+       endif_l_12:		       ;;					;AN000;
+    jmp endif_l_13
+    else_l_13:			       ;;					;AN000;
 	MOV  HANDLE,AX		       ;;					;AN000;
-    .ENDIF			       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+    endif_l_13:			       ;;					;AN000;
+ endif_l_14: 			       ;;					;AN000;
 				       ;;					;AN000;
   RET				       ;;					;AN000;
 OPEN_FILE     ENDP		       ;;					;AN000;
@@ -580,17 +624,21 @@ COPY_ARGV0  PROC		       ;;					;AN000;
   MOV	 DI,2CH 		       ;; Locate environment string		;AN000;
   MOV	 ES,[DI]		       ;;					;AN000;
   XOR	 SI,SI			       ;;					;AN000;
-  .WHILE <<WORD PTR ES:[SI]> NE 0>     ;;					;AN000;
+  while_l_2:
+  cmp WORD PTR ES:[SI],0	       ;;					;AN000;
+  je endwhile_l_2
      INC   SI			       ;;					;AN000;
-  .ENDWHILE			       ;;					;AN000;
+  jmp while_l_2			       ;;					;AN000;
+  endwhile_l_2:
   ADD	 SI,4			       ;;					;AN000;
   LEA	 DI,PROFILE_PATH	       ;; Move string to work area		;AN000;
-  .REPEAT			       ;;					;AN000;
+  @@:				       ;;					;AN000;
      MOV    AL,ES:[SI]		       ;;					;AN000;
      MOV    [DI],AL		       ;;					;AN000;
      INC    SI			       ;;					;AN000;
      INC    DI			       ;;					;AN000;
-  .UNTIL <<BYTE PTR ES:[SI]> EQ 0>     ;;					;AN000;
+  cmp BYTE PTR ES:[SI],0	       ;;					;AN000;
+  jne @B
   MOV	 BYTE PTR [DI],0	       ;;					;AN000;
   MOV	 BYTE PTR [DI]-3,"P"           ;; Change COM to PRO                     ;AN000;
   MOV	 BYTE PTR [DI]-2,"R"           ;;                                       ;AN000;
@@ -705,62 +753,83 @@ GET_STATEMENT PROC		       ;;					;AN000;
   MOV  CR_FOUND,NO		       ;;					;AN000;
 				       ;;					;AN000;
 				       ;;					;AN000;
- .WHILE <FOUND EQ NO> AND	       ;; Keep parsing until we find a stmt	;AN000;
- .WHILE <FILE_ERROR EQ NO> AND	       ;;  or a file error occurs		;AN000;
- .WHILE <END_OF_FILE EQ NO>	       ;;   or we reach end of file		;AN000;
-   .IF <CR_FOUND EQ YES>	       ;;					;AN000;
-      .IF <AL EQ LINE_FEED>	       ;; Return the line feed as well		;AN000;
-	 .IF <DI NA MAX_STMT_LEN>      ;; Truncate lines longer than MAX	;AN000;
+ while_l_3:
+ cmp FOUND,NO			       ;; Keep parsing until we find a stmt	;AN000;
+ jne endwhile_l_3
+ cmp FILE_ERROR,NO		       ;;  or a file error occurs		;AN000;
+ jne endwhile_l_3
+ cmp END_OF_FILE,NO		       ;;   or we reach end of file		;AN000;
+ jne endwhile_l_3
+   cmp CR_FOUND,YES		       ;;					;AN000;
+   jne else_l_18
+      cmp AL,LINE_FEED		       ;; Return the line feed as well		;AN000;
+      jne endif_l_16
+	 cmp DI,MAX_STMT_LEN	       ;; Truncate lines longer than MAX	;AN000;
+	 ja else_l_15
 	     MOV  STMT_BUFFER[DI],AL   ;;  MOVE TO statement buffer		;AN000;
 	     INC  DI		       ;; Point to next byte in file buffr	;AN000;
-	  .ELSE 		       ;;					;AN000;
+	  jmp endif_l_15
+	  else_l_15: 		       ;;					;AN000;
 	      OR   STMT_ERROR,INVALID  ;; Line has been truncated > ERROR	;AN000;
 	      MOV  PARSE_ERROR,YES     ;;					;AN000;
 	      MOV  BUILD_STATE,NO      ;;					;AN000;
-	 .ENDIF 		       ;;					;AN000;
+	 endif_l_15: 		       ;;					;AN000;
 	  CALL GET_BYTE 	       ;; Get the first byte of next statement	;AN000;
-      .ENDIF			       ;;					;AN000;
+      endif_l_16:		       ;;					;AN000;
        MOV  FOUND,YES		       ;; Time to leave this WHILE		;AN000;
        MOV  NEXT_BYTE,AL	       ;; Save the byte we just read		;AN000;
-   .ELSE			       ;;					;AN000;
-      .IF <DI NA MAX_STMT_LEN>	       ;; Truncate lines longer than MAX	;AN000;
+   jmp while_l_3
+   else_l_18:			       ;;					;AN000;
+      cmp DI,MAX_STMT_LEN	       ;; Truncate lines longer than MAX	;AN000;
+      ja else_l_17
 	  MOV  STMT_BUFFER[DI],AL      ;; move byte to statement buffer 	;AN000;
 	  INC  DI		       ;; Point to next byte in file buffer	;AN000;
-      .ELSE			       ;;					;AN000;
+      jmp endif_l_17
+      else_l_17:		       ;;					;AN000;
 	  OR   STMT_ERROR,INVALID      ;; Line has been truncated > ERROR	;AN000;
 	  MOV  PARSE_ERROR,YES	       ;;					;AN000;
 	  MOV  BUILD_STATE,NO	       ;;					;AN000;
-      .ENDIF			       ;;					;AN000;
-      .IF <AL EQ CARRIAGE_RET>	       ;; Found a line terminator		;AN000;
+      endif_l_17:		       ;;					;AN000;
+      cmp AL,CARRIAGE_RET	       ;; Found a line terminator		;AN000;
+      jne @F
 	  MOV  CR_FOUND,YES	       ;; Indicate carriage return found	;AN000;
-      .ENDIF			       ;;  and go through once more to		;AN000;
+      @@:			       ;;  and go through once more to		;AN000;
        CALL GET_BYTE		       ;;   check for a line feed		;AN000;
-   .ENDIF			       ;;					;AN000;
- .ENDWHILE			       ;;					;AN000;
+   endif_l_18:			       ;;					;AN000;
+ jmp while_l_3			       ;;					;AN000;
+ endwhile_l_3:
 				       ;;					;AN000;
- .IF <STMT_BUFFER[DI-1] NE CARRIAGE_RET> AND		 ;;			;AN000;
- .IF <STMT_BUFFER[DI-1] NE LINE_FEED>		      ;;			;AN000;
+ cmp STMT_BUFFER[DI-1],CARRIAGE_RET    ;;					;AN000;
+ je @F
+ cmp STMT_BUFFER[DI-1],LINE_FEED       ;;					;AN000;
+ je @F
      MOV  STMT_BUFFER[DI],CARRIAGE_RET ;;					;AN000;
      MOV  STMT_BUFFER[DI+1],LINE_FEED  ;;					;AN000;
      INC  DI			       ;;					;AN000;
      INC  DI			       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
   MOV STMT_END_INDEX,DI 	       ;;					;AN000;
   MOV BUFFER_PTR,SI		       ;; Save buffer ptr for next time 	;AN000;
 				       ;;					;AN000;
- .IF <END_OF_FILE EQ YES>	       ;;					;AN000;
-     .IF <DI EQ 0>		       ;; Clear carry if we read something	;AN000;
+ cmp END_OF_FILE,YES		       ;;					;AN000;
+ jne else_l_21
+     cmp DI,0			       ;; Clear carry if we read something	;AN000;
+     jne else_l_19
 	STC			       ;;  and no file error occured otherwise	;AN000;
-     .ELSE			       ;;   set carry indicating unsuccessful	;AN000;
+     jmp endif_l_21
+     else_l_19:			       ;;   set carry indicating unsuccessful	;AN000;
 	CLC			       ;;    get.				;AN000;
-     .ENDIF			       ;;					;AN000;
- .ELSE				       ;;					;AN000;
-     .IF <FILE_ERROR EQ YES>	       ;;					;AN000;
+     endif_l_19:		       ;;					;AN000;
+ jmp endif_l_21
+ else_l_21:			       ;;					;AN000;
+     cmp FILE_ERROR,YES		       ;;					;AN000;
+     jne else_l_20
 	 STC			       ;;					;AN000;
-     .ELSE			       ;;					;AN000;
+     jmp endif_l_20
+     else_l_20:			       ;;					;AN000;
 	 CLC			       ;;					;AN000;
-     .ENDIF			       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+     endif_l_20:		       ;;					;AN000;
+ endif_l_21: 			       ;;					;AN000;
   RET				       ;;					;AN000;
 				       ;;					;AN000;
 GET_STATEMENT ENDP		       ;;					;AN000;
@@ -775,40 +844,50 @@ GET_STATEMENT ENDP		       ;;					;AN000;
 				       ;;					;AN000;
 GET_BYTE      PROC		       ;;					;AN000;
 				       ;;					;AN000;
- .IF <SI EQ BUFFER_END> 	       ;; If buffer empty do another read	;AN000;
+ cmp SI,BUFFER_END	 	       ;; If buffer empty do another read	;AN000;
+ jne endif_l_24
      MOV  AH,3FH		       ;;					;AN000;
      MOV  DX,OFFSET FILE_BUFFER        ;;					;AN000;
      MOV  CX,BUFFER_SIZE	       ;;					;AN000;
      MOV  BX,HANDLE		       ;;					;AN000;
      INT  21H			       ;;					;AN000;
-    .IF C			       ;; Carry set by DOS if file error	;AN000;
+    jnc else_l_23		       ;; Carry set by DOS if file error	;AN000;
 	CALL FILE_ERROR_PROC	       ;;					;AN000;
-    .ELSE			       ;;					;AN000;
-       .IF <AX EQ 0>		       ;; End of file if AX=0			;AN000;
+    jmp endif_l_23
+    else_l_23:			       ;;					;AN000;
+       cmp AX,0			       ;; End of file if AX=0			;AN000;
+       jne else_l_22
 	   MOV	END_OF_FILE,YES        ;;					;AN000;
 	   MOV	AH,3EH		       ;; Close the file			;AN000;
 	   MOV	BX,HANDLE	       ;;					;AN000;
 	   INT	21H		       ;;					;AN000;
-       .ELSE			       ;;					;AN000;
+       jmp endif_l_22
+       else_l_22:		       ;;					;AN000;
 	   MOV BUFFER_END,AX	       ;; Number of bytes read			;AN000;
 	   XOR SI,SI		       ;; Buffer pointer := 0			;AN000;
-       .ENDIF			       ;;					;AN000;
-    .ENDIF			       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+       endif_l_22:		       ;;					;AN000;
+    endif_l_23:			       ;;					;AN000;
+ endif_l_24: 			       ;;					;AN000;
 				       ;;					;AN000;
- .IF <FILE_ERROR EQ YES> OR	       ;;					;AN000;
- .IF <END_OF_FILE EQ YES>	       ;;					;AN000;
+ cmp FILE_ERROR,YES		       ;;					;AN000;
+ je @F
+ cmp END_OF_FILE,YES		       ;;					;AN000;
+ jne else_l_26
+ @@:
      STC			       ;; Unsuccessful get			;AN000;
- .ELSE				       ;;					;AN000;
-    .IF <<FILE_BUFFER[SI]> EQ 1AH>	;; cHECK for EOF marker 		;AN000;
+ jmp endif_l_26
+ else_l_26:			       ;;					;AN000;
+    cmp FILE_BUFFER[SI],1AH		;; cHECK for EOF marker 		;AN000;
+    jne else_l_25
 	MOV END_OF_FILE,YES	       ;;					;AN000;
 	STC			       ;;					;AN000;
-    .ELSE			       ;;					;AN000;
+    jmp endif_l_25
+    else_l_25:			       ;;					;AN000;
 	MOV  AL,FILE_BUFFER[SI] 	  ;; Return byte in AL			;AN000;
 	INC  SI 			  ;;					;AN000;
 	CLC				  ;; Successful get			;AN000;
-    .ENDIF				  ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+    endif_l_25:				  ;;					;AN000;
+ endif_l_26: 			       ;;					;AN000;
   RET				       ;;					;AN000;
 				       ;;					;AN000;
 GET_BYTE      ENDP		       ;;					;AN000;
@@ -825,10 +904,11 @@ GROW_SHARED_DATA  PROC		       ;;					;AN000;
   PUSH BX			       ;;					;AN000;
   ADD  BLOCK_END,AX		       ;; Grow the current block by AX		;AN000;
   MOV  BX,BLOCK_END		       ;;					;AN000;
- .IF <BX A NB_FREE_BYTES>	       ;; Check for overflow			;AN000;
+ cmp BX,NB_FREE_BYTES		       ;; Check for overflow			;AN000;
+ jbe @F
      MOV  BUILD_STATE,NO	       ;; Stop building shared data		;AN000;
      MOV  MEM_OVERFLOW,YES	       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
   POP  BX			       ;;					;AN000;
   RET				       ;;					;AN000;
 GROW_SHARED_DATA  ENDP		       ;;					;AN000;

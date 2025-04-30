@@ -34,8 +34,6 @@
 ;;										;AN000;
 ;;	 GRSHAR.STR   - Shared Data Area Structure				;AN000;
 ;;										;AN000;
-;;	 STRUC.INC    - Macros for using structured assembly language		;AN000;
-;;										;AN000;
 ;;										;AN000;
 ;; External Procedure References:						;AN000;
 ;; ------------------------------						;AN000;
@@ -61,11 +59,10 @@ CODE	SEGMENT PUBLIC 'CODE'                                                   ;AN
 	PUBLIC	LEN_OF_BW_MODULES						;AN000;
 										;AN000;
 .XLIST										;AN000;
-INCLUDE GRCTRL.STR			; Stuctures needed			;AN000;
-INCLUDE GRSHAR.STR			;  for both set of print modules	;AN000;
-INCLUDE GRPATTRN.STR			;					;AN000;
-INCLUDE GRCTRL.EXT			; Externals from PRT_SCR control module ;AN000;
-INCLUDE STRUC.INC			;					;AN000;
+INCLUDE grctrl.str			; Stuctures needed			;AN000;
+INCLUDE grshar.str			;  for both set of print modules	;AN000;
+INCLUDE grpattrn.str			;					;AN000;
+INCLUDE grctrl.ext			; Externals from PRT_SCR control module ;AN000;
 										;AN000;
 	PUBLIC PRINT_BW_APA		; Black and white modules,		;AN000;
 .LIST										;AN000;
@@ -200,11 +197,11 @@ PRINT_BW_APA PROC NEAR								;AN000;
 	CALL	LOC_MODE_PRT_INFO	; Get printer info related to curr. mode;AN000;
 ;										;AN000;
 ;-------Test if DISPLAYMODE info record was found:				;AN000;
-       .IF <ERROR_CODE EQ DISPLAYMODE_INFO_NOT_FOUND>				;AN000;
-       .THEN									;AN000;
+       cmp ERROR_CODE,DISPLAYMODE_INFO_NOT_FOUND
+       jne @F
 	  MOV	  ERROR_CODE,UNABLE_TO_PRINT ; IF no record found,		;AN000;
 	  JMP	  PRINT_BW_APA_END	     ; then, return error code		;AN000;
-       .ENDIF				     ;	      and quit procedure	;AN000;
+       @@:				     ;	      and quit procedure	;AN000;
 ;										;AN000;
 ;-------Get the box size from the DISPLAYMODE info record:			;AN000;
 	MOV	BX,CUR_MODE_PTR 	; BX := Offset current DISPLAYMODE info.;AN000;
@@ -214,27 +211,29 @@ PRINT_BW_APA PROC NEAR								;AN000;
 	MOV	BOX_H,AL							;AN000;
 ;										;AN000;
 ;-------Verify if the box size obtained from DISPLAYMODE info. is valid 	;AN000;
-       .IF <ZERO AL> OR 		; IF height of the box is 0		;AN000;
-       .IF <ZERO AH>			;  OR width of the box is 0		;AN000;
-       .THEN				; THEN we can't print:                  ;AN000;
+       or al,al		 		; IF height of the box is 0		;AN000;
+       jz @F
+       or ah,ah				;  OR width of the box is 0		;AN000;
+       jnz endif_l_1
+       @@:				; THEN we can't print:                  ;AN000;
 	  MOV	  ERROR_CODE,UNABLE_TO_PRINT ; return error code		;AN000;
 	  JMP	  PRINT_BW_APA_END	;	and quit			;AN000;
-       .ENDIF									;AN000;
+       endif_l_1:
 ;										;AN000;
 ;-------Get the Print Orientation from the DISPLAYMODE info record		;AN000;
-       .IF <[BX].PRINT_OPTIONS EQ ROTATE>; If printing sideways 		;AN000;
-       .THEN				;  then:				;AN000;
+       cmp [BX].PRINT_OPTIONS,ROTATE	; If printing sideways 		;AN000;
+       jne @F				;  then:				;AN000;
 	  MOV	  ROTATE_SW,ON		;    Rotate switch := "ON"              ;AN000;
-       .ENDIF									;AN000;
+       @@:
 										;AN000;
 ;										;AN000;
 ;-------Initialize print variables and the printer:				;AN000;
 	CALL	GET_SCREEN_INFO 	; Get info. about how to read the screen;AN000;
 	CALL	SETUP_PRT		; Set up the printer (Line spacing, etc);AN000;
-       .IF  <BIT ERROR_CODE NZ PRINTER_ERROR>					;AN000;
-       .THEN				; A printer error occurred: quit	;AN000;
+       test ERROR_CODE,PRINTER_ERROR						;AN000;
+       jz @F				; A printer error occurred: quit	;AN000;
 	  JMP	  PRINT_BW_APA_END	;					;AN000;
-       .ENDIF									;AN000;
+       @@:
 										;AN000;
 	MOV	CX,NB_SCAN_LINES						;AN000;
 ;-------------------------------------------------------------------------------;AN000;
@@ -244,13 +243,13 @@ PRINT_BW_APA PROC NEAR								;AN000;
 ;-------------------------------------------------------------------------------;AN000;
 PRINT_1_SCAN_LINE:								;AN000;
 	CALL	DET_CUR_SCAN_LNE_LENGTH ; Determine how many non-blanks on line ;AN000;
-.IF <CUR_SCAN_LNE_LENGTH NE 0>		; If line is not empty			;AN000;
-.THEN					; then, 				;AN000;
+cmp CUR_SCAN_LNE_LENGTH,0		; If line is not empty			;AN000;
+je endif_l_3				; then, 				;AN000;
 	CALL	NEW_PRT_LINE		;  Send escape sequence to the printer	;AN000;
-       .IF  <BIT ERROR_CODE NZ PRINTER_ERROR> ; for starting a new line.	;AN000;
-       .THEN				; If a printer error occurred:		;AN000;
+       test ERROR_CODE,PRINTER_ERROR	; for starting a new line.	;AN000;
+       jz @F				; If a printer error occurred:		;AN000;
 	  JMP	  PRINT_BW_APA_END	;   Quit !				;AN000;
-       .ENDIF									;AN000;
+       @@:
 										;AN000;
 	PUSH	CX			; Save scan line counter		;AN000;
 	MOV	CX,CUR_SCAN_LNE_LENGTH						;AN000;
@@ -266,25 +265,26 @@ PRINT_1_SCAN_COLUMN:								;AN000;
 					;     (a buffer contains one "column"   ;AN000;
 					;      of pixels).			;AN000;
 	CALL	PRINT_BUFFER		; Print the buffer.			;AN000;
-       .IF  <BIT ERROR_CODE NZ PRINTER_ERROR>					;AN000;
-       .THEN				; A printer error occurred:		;AN000;
+       test ERROR_CODE,PRINTER_ERROR
+       jz @F				; A printer error occurred:		;AN000;
 	  POP	  CX			; Restore scan line counter and quit	;AN000;
 	  JMP	  PRINT_BW_APA_END	;					;AN000;
-       .ENDIF									;AN000;
+       @@:
 										;AN000;
 										;AN000;
 ;-------Get coordinates of next "column":                                       ;AN000;
-       .IF <ROTATE_SW EQ ON>		; If printing sideways			;AN000;
-       .THEN				;					;AN000;
+       cmp ROTATE_SW,ON			; If printing sideways			;AN000;
+       jne else_l_2
 	  DEC CUR_ROW			; then, get row above on screen 	;AN000;
-       .ELSE				;					;AN000;
+       jmp endif_l_2
+       else_l_2:
 	  INC CUR_COLUMN		; else, get column next right		;AN000;
-       .ENDIF				;					;AN000;
+       endif_l_2:
 										;AN000;
 	LOOP	PRINT_1_SCAN_COLUMN	; Print next column			;AN000;
 										;AN000;
 	POP	CX			; Restore scan line counter		;AN000;
-.ENDIF					; Endif line is not empty		;AN000;
+endif_l_3:				; Endif line is not empty		;AN000;
 ;-------------------------------------------------------------------------------;AN000;
 ;										;AN000;
 ; Print a carriage return and a line feed:					;AN000;
@@ -301,20 +301,21 @@ PRINT_1_SCAN_COLUMN:								;AN000;
 ; Get coordinates of next scan line:						;AN000;
 ;										;AN000;
 ;-------------------------------------------------------------------------------;AN000;
-       .IF <ROTATE_SW EQ ON>		; If printing sideways			;AN000;
-       .THEN				; then: 				;AN000;
+       cmp ROTATE_SW,ON			; If printing sideways			;AN000;
+       jne else_l_4			; then: 				;AN000;
 	  MOV	  AL,NB_BOXES_PER_PRT_BUF ;   AX := Numbers of pels read on row ;AN000;
 	  CBW				;					;AN000;
 	  ADD	  CUR_COLUMN,AX 	;   CUR_COLUMN + Number of pels read	;AN000;
 	  MOV	  AX,SCREEN_HEIGHT	;   CUR_ROW := SCREEN_HEIGHT - 1	;AN000;
 	  DEC	  AX			;					;AN000;
 	  MOV	  CUR_ROW,AX		;					;AN000;
-       .ELSE				; else, printing NOT rotated:		;AN000;
+       jmp endif_l_4
+       else_l_4:			; else, printing NOT rotated:		;AN000;
 	  MOV	  AL,NB_BOXES_PER_PRT_BUF ;   AX := Number of pels read on colum;AN000;
 	  CBW				;					;AN000;
 	  ADD	  CUR_ROW,AX		;   CUR_ROW + Number of pels read	;AN000;
 	  MOV	  CUR_COLUMN,0		;   CUR_COLUMN := 0			;AN000;
-       .ENDIF				;					;AN000;
+       endif_l_4:
 	LOOP	PRINT_1_SCAN_LINE	;					;AN000;
 										;AN000;
 ;-------------------------------------------------------------------------------;AN000;
@@ -417,12 +418,13 @@ READ_AND_STORE_1_PIXEL: 							;AN000;
 	CALL	STORE_BOX							;AN000;
 										;AN000;
 ;-------Get coordinates of next pixel:						;AN000;
-       .IF <ROTATE_SW EQ ON>		; If printing sideways			;AN000;
-       .THEN				;					;AN000;
+       cmp ROTATE_SW,ON			; If printing sideways			;AN000;
+       jne else_l_5			;					;AN000;
 	  INC CUR_COLUMN		; then, increment column number 	;AN000;
-       .ELSE				;					;AN000;
+       jmp endif_l_5
+       else_l_5:
 	  INC CUR_ROW			; else, increment row number		;AN000;
-       .ENDIF				;					;AN000;
+       endif_l_5:
 	LOOP READ_AND_STORE_1_PIXEL						;AN000;
 										;AN000;
 ;-------------------------------------------------------------------------------;AN000;
@@ -625,7 +627,7 @@ BOTTOM_BOX:				; The box we want is now at bottom	;AN000;
 	POP	AX								;AN000;
 	RET									;AN000;
 PAT2BOX ENDP									;AN000;
-INCLUDE GRCOMMON.ASM								;AN000;
+INCLUDE grcommon.asm								;AN000;
 LEN_OF_BW_MODULES EQU $-PRINT_BW_APA						;AN000;
 CODE	ENDS									;AN000;
 	END									;AN000;

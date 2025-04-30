@@ -37,7 +37,6 @@
 ;;	 GRPARSE.EXT - Externals for the DOS parser code			;AN000;
 ;;	 GRSHAR.STR  - Shared Data Area Structure				;AN000;
 ;;	 GRMSG.EQU   - Equates for GRAPHICS.COM error messages			;AN000;
-;;	 STRUC.INC   - Macros for using structured assembly language		;AN000;
 ;;										;AN000;
 ;; External Procedure References:						;AN000;
 ;; ------------------------------						;AN000;
@@ -61,11 +60,10 @@ PARSE_PARMS PROC NEAR								;AN000;
 	jmp	PARSE_PARMS_START						;AN000;
 PUBLIC PARSE_PARMS								;AN000;
 .XLIST										;AN000;
-INCLUDE GRMSG.EQU		; Include GRAPHICS error messages equates	;AN000;
-INCLUDE GRSHAR.STR		; Include the Shared data area structure	;AN000;
-INCLUDE GRINST.EXT		; Include externals for the installation module ;AN000;
-INCLUDE GRPARSE.EXT		; Include externals for the DOS parse code	;AN000;
-INCLUDE STRUC.INC		; Include macros for using STRUCTURES		;AN000;
+INCLUDE grmsg.equ		; Include GRAPHICS error messages equates	;AN000;
+INCLUDE grshar.str		; Include the Shared data area structure	;AN000;
+INCLUDE grinst.ext		; Include externals for the installation module ;AN000;
+INCLUDE grparse.ext		; Include externals for the DOS parse code	;AN000;
 .LIST										;AN000;
 										;AN000;
 PAGE										;AN000;
@@ -323,28 +321,47 @@ PARSE_PARMS_START:								;AN000;
 ;(deleted ;AN001;) CALL SYSPARSE	; Get one argument from the command line;AN000;
 	CALL	CALL_SYSPARSE		; Get one argument from the command line;AN001;
 ;(deleted ;AN001;) MOV BX,DX		; BX := Offset of result block		;AN000;
-.WHILE <AX EQ RC_NO_ERROR>		; While there is no error		;AN000;
+while_l_1:
+cmp AX,RC_NO_ERROR			; While there is no error		;AN000;
+jne endwhile_l_1
 ;-------------------------------------------------------------------------------;AN000;
 ; Get the argument:								;AN000;
 ;-------------------------------------------------------------------------------;AN000;
-       .SELECT									;AN000;
-       .WHEN <BX EQ <OFFSET TYPE_RESULT>>					;AN000;
+       cmp BX,OFFSET TYPE_RESULT						;AN000;
+       jne select_l_1_1
 	  CALL	GET_TYPE							;AN000;
-       .WHEN <BX EQ <OFFSET PROFILE_RESULT>>					;AN000;
+       jmp endselect_l_1
+       select_l_1_1:
+       cmp BX,OFFSET PROFILE_RESULT						;AN000;
+       jne select_l_1_2
 	  CALL	GET_PROFILE_NAME						;AN000;
-       .WHEN <BX EQ <OFFSET LCD_RESULT >>					;AN000;
+       jmp endselect_l_1
+       select_l_1_2:
+       cmp BX,OFFSET LCD_RESULT							;AN000;
+       jne select_l_1_3
 	  CALL	GET_LCD 							;AN000;
-       .WHEN <BX EQ <OFFSET R_RESULT>>						;AN000;
+       jmp endselect_l_1
+       select_l_1_3:
+       cmp BX,OFFSET R_RESULT							;AN000;
+       jne select_l_1_4
 	  CALL	GET_REVERSE							;AN000;
-       .WHEN <BX EQ <OFFSET B_RESULT>>						;AN000;
+       jmp endselect_l_1
+       select_l_1_4:
+       cmp BX,OFFSET B_RESULT							;AN000;
+       jne select_l_1_5
 	  CALL	GET_BACKGROUND							;AN000;
-       .WHEN <BX EQ <OFFSET PRINTBOX_RESULT>>					;AN000;
+       jmp endselect_l_1
+       select_l_1_5:
+       cmp BX,OFFSET PRINTBOX_RESULT						;AN000;
+       jne otherwise_l_1
 	  CALL	GET_PRINTBOX_ID 						;AN000;
-       .OTHERWISE								;AN000;
+       jmp endselect_l_1
+       select_l_1_6:
+       otherwise_l_1:								;AN000;
 ;-------No result block was returned by the parser				;AN000;
 	STC				; Set error				;AN000;
-       .ENDSELECT								;AN000;
-       .LEAVE C 			; IF error occurred while parsing the	;AN000;
+       endselect_l_1:								;AN000;
+       jc endwhile_l_1 			; IF error occurred while parsing the	;AN000;
 					;  previous argument, exit the loop:	;AN000;
 					;   stop parsing the command line.	;AN000;
 ;-------------------------------------------------------------------------------;AN000;
@@ -354,19 +371,27 @@ PARSE_PARMS_START:								;AN000;
 ;(deleted ;AN001;) CALL SYSPARSE	; Get one argument from the command line;AN000;
 	CALL	CALL_SYSPARSE		; Get one argument from the command line;AN001;
 ;(deleted ;AN001;) MOV BX,DX		; ES:BX := Offset of result block	;AN000;
-.ENDWHILE									;AN000;
+jmp while_l_1
+endwhile_l_1:									;AN000;
 ;-------------------------------------------------------------------------------;AN000;
 ; Check for error, select and display an error message				;AN000;
 ;-------------------------------------------------------------------------------;AN000;
-.IF <AL NE RC_EOL>			; IF an error occurred			;AN000;
-.THEN					; then, display error message		;AN000;
+cmp AL,RC_EOL				; IF an error occurred			;AN000;
+je endif_l_1				; then, display error message		;AN000;
     MOV 	CX,0			; Assume no substitutions		;AN000;
-   .SELECT				; (CX := Number of substitutions	;AN000;
-   .WHEN <AL EQ RC_TOO_MANY>		; When RC = Too many parameters 	;AN000;
+   					; (CX := Number of substitutions	;AN000;
+   cmp AL,RC_TOO_MANY			; When RC = Too many parameters 	;AN000;
+   jne select_l_2_1
 	MOV	AX,TOO_MANY_PARMS	;   (AL = Message number to display)	;AN000;
-   .WHEN <AL EQ RC_Not_In_Val>		; When RC = Not in value list provided	;AN000;
+   jmp endselect_l_2
+   select_l_2_1:
+   cmp AL,RC_Not_In_Val			; When RC = Not in value list provided	;AN000;
+   jne select_l_2_2
 	MOV	AX,VALUE_NOT_ALLOWED	;   (AL = Message number to display)	;AN000;
-   .WHEN <AL EQ RC_Not_In_Sw>		; When RC = Not in switch list provided ;AN000;
+   jmp endselect_l_2
+   select_l_2_2:
+   cmp AL,RC_Not_In_Sw			; When RC = Not in switch list provided ;AN000;
+   jne select_l_2_3
 	MOV	CX,1			;   1 substitution in this message	;AN000;
 	MOV	BYTE PTR [SI],0 	; PUT NUL AT END OF THIS PARM		;AN001;
 	LEA	SI,SUBLIST		;   DS:[SI]:="Invalid parm" Substitution;AN000; list
@@ -374,17 +399,24 @@ PARSE_PARMS_START:								;AN000;
 ;(deleted ;AN001;) MOV [SI]+2,DX	;   Store offset to this offender in the;AN000;
 	MOV	[SI]+4,ES		;    substitution list control block	;AN000;
 	MOV	AX,INVALID_PARM 	;   AL := 'Invalid parameter' msg number;AN000;
-   .WHEN <AL EQ RC_INVLD_COMBINATION>	; When RC = Invalid combination of parms;AN000;
+   jmp endselect_l_2
+   select_l_2_3:
+   cmp AL,RC_INVLD_COMBINATION		; When RC = Invalid combination of parms;AN000;
+   jne select_l_2_4
 	MOV	AX,INVALID_COMBINATION	;   (AL = Message number to display)	;AN000;
-   .WHEN <AL EQ RC_DUPLICATE_PARMS>	; When RC = Invalid combination of parms;AN000;
+   jmp endselect_l_2
+   select_l_2_4:
+   cmp AL,RC_DUPLICATE_PARMS		; When RC = Invalid combination of parms;AN000;
+   jne otherwise_l_2
 	MOV	AX,DUPLICATE_PARM	;   (AL = Message number to display)	;AN000;
-   .OTHERWISE				;					;AN000;
+   jmp endselect_l_2
+   otherwise_l_2:			;					;AN000;
 	MOV	AX,FORMAT_NOT_CORRECT	; RC = Anything else, tell the user	;AN000;
 					;	something is wrong with his	;AN000;
-   .ENDSELECT				;	 command line.			;AN000;
+   endselect_l_2:			;	 command line.			;AN000;
     CALL DISP_ERROR			; Display the selected error message	;AN000;
     STC 				; Indicate parse error occurred 	;AN000;
-.ENDIF										;AN000;
+endif_l_1:										;AN000;
 										;AN000;
 	POP	ES								;AN000;
 	POP	DI								;AN000;
@@ -435,13 +467,15 @@ GET_PROFILE_NAME PROC								;AN000;
 	XOR	BX,BX		; BX := Byte index				;AN000;
 	MOV	SI,OFFSET PROFILE_PATH	; [BX][SI] := Where to store it 	;AN000;
 										;AN000;
-.IF <<BYTE PTR [DI]> NE 0>	; Don't copy a NULL parm                        ;AN000;
-  .REPEAT			; While not end of path name (NULL terminated)	;AN000;
+cmp BYTE PTR [DI],0		; Don't copy a NULL parm                        ;AN000;
+je endif_l_2
+  @@:				; While not end of path name (NULL terminated)	;AN000;
 	MOV	AL,[BX][DI]	; Copy the byte (including the NULL)		;AN000;
 	MOV	[BX][SI],AL							;AN000;
 	INC	BX		; Get next one					;AN000;
-  .UNTIL <<BYTE PTR [BX-1][DI]> EQ 0> ; 					;AN000;
-.ENDIF										;AN000;
+  cmp BYTE PTR [BX-1][DI],0	; 					;AN000;
+  jne @B
+endif_l_2:									;AN000;
 										;AN000;
 	POP	DI								;AN000;
 	POP	SI								;AN000;
@@ -475,8 +509,8 @@ GET_TYPE PROC									;AN000;
 ; Overwrite the DEFAULT TYPE with the type found on the command line		;AN000;
 ;---------------------------------------------------------------------- 	;AN000;
   MOV	  SI,ES:[BX+4]		       ; DS:SI := Offset of printer type found	;AN000;
- .IF <<BYTE PTR [SI]> NE 0>	       ; Do not copy an empty string		;AN000;
- .THEN				       ;					;AN000;
+ cmp BYTE PTR [SI],0		       ; Do not copy an empty string		;AN000;
+ je endif_l_4			       ;					;AN000;
     MOV     CL,PRINTER_TYPE_LENGTH     ; CX := Maximum number of bytes		;AN000;
     XOR     CH,CH		       ;	to copy 			;AN000;
     MOV     DI,OFFSET PRINTER_TYPE_PARM; ES:DI := Where to store it		;AN000;
@@ -484,15 +518,16 @@ GET_TYPE PROC									;AN000;
   ;----------------------------------------------------------------------	;AN000;
   ; Verify that the string supplied is not too long:				;AN000;
   ;----------------------------------------------------------------------	;AN000;
-   .IF	<<BYTE PTR [DI-1]> EQ 0>       ; If the last byte is a null		;AN000;
-   .THEN			       ; then, the string was not longer	;AN000;
+   cmp BYTE PTR [DI-1],0	       ; If the last byte is a null		;AN000;
+   jne else_l_3			       ; then, the string was not longer	;AN000;
 				       ;       than the maximum 		;AN000;
       CLC			       ;   Clear the carry flag = No error	;AN000;
-   .ELSE			       ; else, string provided is too long	;AN000;
+   jmp endif_l_3
+   else_l_3:			       ; else, string provided is too long	;AN000;
       MOV  AX,RC_Not_In_Sw	       ;   Error := RC for Invalid parm 	;AN000;
       STC			       ; Set error				;AN000;
-   .ENDIF			       ; ENDIF string too long			;AN000;
- .ENDIF 			       ; ENDIF string provided			;AN000;
+   endif_l_3:			       ; ENDIF string too long			;AN000;
+ endif_l_4: 			       ; ENDIF string provided			;AN000;
 										;AN000;
 GET_TYPE_END:									;AN000;
 	POP	DI								;AN000;
@@ -659,14 +694,15 @@ GET_PRINTBOX_ID PROC								;AN000;
 										;AN000;
 	MOV	DI,ES:[BX+4]		    ; DI := Offset of switch VALUE found;AN000;
 										;AN000;
-       .IF <<BYTE PTR [DI]> EQ 0>	    ; IF no printbox id 		;AN000;
-       .THEN				    ; then,				;AN000;
+       cmp BYTE PTR [DI],0		    ; IF no printbox id 		;AN000;
+       jne else_l_6			    ; then,				;AN000;
 	 ;----------------------------------------------------------------------;AN000;
 	 ; No printbox id. was found:						;AN000;
 	 ;----------------------------------------------------------------------;AN000;
 	  MOV	  AX,FORMAT_NOT_CORRECT     ;	AX := Error code		;AN000;
 	  STC				    ;	Set the error flag		;AN000;
-       .ELSE				    ; else,				;AN000;
+       jmp endif_l_6
+       else_l_6:			    ; else,				;AN000;
 	  OR	  SWITCH_PARSED,GOT_PRINTBOX;	Say we found this switch	;AN000;
 	 ;----------------------------------------------------------------------;AN000;
 	 ; Overwrite DEFAULT_BOX with the Printbox id. found			;AN000;
@@ -679,15 +715,16 @@ GET_PRINTBOX_ID PROC								;AN000;
 	 ;----------------------------------------------------------------------;AN000;
 	 ; Verify that the Printbox id. string is not too long: 		;AN000;
 	 ;----------------------------------------------------------------------;AN000;
-	 .IF  <<BYTE PTR [DI-1]> EQ 0>	    ; If the last byte is a null	;AN000;
-	 .THEN				    ; then, the string was not longer	;AN000;
+	 cmp BYTE PTR [DI-1],0		    ; If the last byte is a null	;AN000;
+	 jne else_l_5			    ; then, the string was not longer	;AN000;
 					    ;	    than the maximum		;AN000;
 	    CLC 			    ;	Clear the carry flag = No error ;AN000;
-	 .ELSE				    ; else, string provided is too long ;AN000;
+	 jmp endif_l_5
+	 else_l_5:			    ; else, string provided is too long ;AN000;
 	    MOV  AX,RC_Not_In_Sw	    ;	Error := RC for Invalid parm	;AN000;
 	    STC 			    ; Set error 			;AN000;
-	 .ENDIF 			    ; ENDIF printbox id. too long	;AN000;
-       .ENDIF				    ; ENDIF printbox id. provided	;AN000;
+	 endif_l_5: 			    ; ENDIF printbox id. too long	;AN000;
+       endif_l_6:			    ; ENDIF printbox id. provided	;AN000;
 										;AN000;
 	JMP	SHORT GET_PRINTBOX_END	    ; Return				;AN000;
 										;AN000;

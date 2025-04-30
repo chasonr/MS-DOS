@@ -53,17 +53,16 @@
 				       ;;					;AN000;
 CODE	SEGMENT PUBLIC 'CODE' BYTE     ;;                                       ;AN000;
 				       ;;					;AN000;
-	INCLUDE STRUC.INC	       ;;					;AN000;
-	INCLUDE GRINST.EXT	       ;; Bring in external declarations	;AN000;
+	INCLUDE grinst.ext	       ;; Bring in external declarations	;AN000;
 				       ;;  for transient command processing	;AN000;
-	INCLUDE GRSHAR.STR	       ;;					;AN000;
-	INCLUDE GRMSG.EQU	       ;;					;AN000;
-	INCLUDE GRINST.EXT	       ;;					;AN000;
-	INCLUDE GRLOAD.EXT	       ;;					;AN000;
-	INCLUDE GRLOAD2.EXT	       ;;					;AN000;
-	INCLUDE GRPARSE.EXT	       ;;					;AN000;
-	INCLUDE GRPATTRN.STR	       ;;					;AN000;
-	INCLUDE GRPATTRN.EXT	       ;;					;AN000;
+	INCLUDE grshar.str	       ;;					;AN000;
+	INCLUDE grmsg.equ	       ;;					;AN000;
+	INCLUDE grinst.ext	       ;;					;AN000;
+	INCLUDE grload.ext	       ;;					;AN000;
+	INCLUDE grload2.ext	       ;;					;AN000;
+	INCLUDE grparse.ext	       ;;					;AN000;
+	INCLUDE grpattrn.str	       ;;					;AN000;
+	INCLUDE grpattrn.ext	       ;;					;AN000;
 				       ;;					;AN000;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;					;AN000;
 ;;										;AN000;
@@ -149,18 +148,20 @@ HIGHCOUNT_FOUND  DB  NO 	       ;;					;AN000;
 PARSE_GRAPHICS	PROC		       ;;					;AN000;
 				       ;;					;AN000;
   MOV  CUR_STMT,GR		       ;;					;AN000;
- .IF <BIT STMTS_DONE NAND DISP>        ;;					;AN000;
+ test STMTS_DONE,DISP		       ;;					;AN000;
+ jnz @F
      OR  STMT_ERROR,MISSING	       ;;					;AN000;
 	MOV  PARSE_ERROR,YES	       ;;					;AN000;
 	MOV  BUILD_STATE,NO	       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
 				       ;;					;AN000;
- .IF <BUILD_STATE EQ YES>	       ;;					;AN000;
+ cmp BUILD_STATE,YES		       ;;					;AN000;
+ jne @F
      MOV  DI,BLOCK_START	       ;;					;AN000;
      MOV  AX,BLOCK_END		       ;;					;AN000;
      MOV  [BP+DI].GRAPHICS_ESC_PTR,AX  ;; Set pointer to GRAPHICS seq		;AN000;
      MOV  [BP+DI].NUM_GRAPHICS_ESC,0   ;; Init sequence size			;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
 				       ;;					;AN000;
   MOV  LOWCOUNT_FOUND,NO	       ;; Flags to indicate whether the LOW	;AN000;
   MOV  HIGHCOUNT_FOUND,NO	       ;;  and HIGHCOUNT parms were found	;AN000;
@@ -173,18 +174,20 @@ PARSE_GRAPHICS	PROC		       ;;					;AN000;
   MOV  DI,OFFSET GRAPHICS_PARSE_PARMS  ;; parse parms				;AN000;
 				       ;; SI => the line to parse		;AN000;
   XOR  DX,DX			       ;;					;AN000;
- .REPEAT			       ;;					;AN000;
+ repeat_l_1:			       ;;					;AN000;
     XOR  CX,CX			       ;;					;AN000;
     CALL SYSPARSE		       ;;					;AN000;
 				       ;;					;AN000;
-   .IF <AX EQ 0> NEAR		       ;; If PARM is valid			;AN000;
+   cmp AX,0			       ;; If PARM is valid			;AN000;
+   jne else_l_3
 	MOV  BL,RESULT_TAG	       ;;					;AN000;
-       .SELECT			       ;;					;AN000;
-       .WHEN <BL EQ 1>		       ;; Escape byte				;AN000;
+       cmp BL,1			       ;; Escape byte				;AN000;
+       jne select_l_1_1
 	  PUSH AX		       ;;					;AN000;
 	  MOV	AX,1		       ;; Add a byte to the sequence		;AN000;
 	  CALL	GROW_SHARED_DATA       ;; Update block end			;AN000;
-	 .IF <BUILD_STATE EQ YES>      ;;					;AN000;
+	 cmp BUILD_STATE,YES	       ;;					;AN000;
+	 jne @F
 	     PUSH DI		       ;;					;AN000;
 	     MOV  DI,BLOCK_START       ;;					;AN000;
 	     INC  [BP+DI].NUM_GRAPHICS_ESC ;; Bump number of bytes in sequence	;AN000;
@@ -192,15 +195,20 @@ PARSE_GRAPHICS	PROC		       ;;					;AN000;
 	     MOV  AL,RESULT_VAL        ;; Get esc byte from result buffer	;AN000;
 	     MOV  [BP+DI-1],AL	       ;; Store at end of sequence		;AN000;
 	     POP  DI		       ;;					;AN000;
-	 .ENDIF 		       ;;					;AN000;
+	 @@:	 		       ;;					;AN000;
 	  POP  AX		       ;;					;AN000;
-       .WHEN <BL EQ 2>		       ;; LOWCOUNT				;AN000;
-	  .IF <LOWCOUNT_FOUND EQ NO>   ;;					;AN000;
+       jmp endif_l_3
+       select_l_1_1:
+       cmp BL,2			       ;; LOWCOUNT				;AN000;
+       jne select_l_1_2
+	  cmp LOWCOUNT_FOUND,NO        ;;					;AN000;
+	  jne else_l_1
 	       MOV   LOWCOUNT_FOUND,YES ;;					;AN000;
 	       PUSH AX		       ;;					;AN000;
 	       MOV   AX,1	       ;; Add a byte to the sequence		;AN000;
 	       CALL  GROW_SHARED_DATA  ;; Update block end			;AN000;
-	      .IF <BUILD_STATE EQ YES> ;;					;AN000;
+	      cmp BUILD_STATE,YES      ;;					;AN000;
+	      jne @F
 		  PUSH DI	       ;;					;AN000;
 		  MOV  DI,BLOCK_START  ;;					;AN000;
 		  INC  [BP+DI].NUM_GRAPHICS_ESC ;; Bump number of bytes in seq. ;AN000;
@@ -210,21 +218,27 @@ PARSE_GRAPHICS	PROC		       ;;					;AN000;
 		  MOV  DI,AX	       ;;					;AN000;
 		  MOV  BYTE PTR[BP+DI],0 ;; Store 0 in place of count		;AN000;
 		  POP  DI	       ;;					;AN000;
-	      .ENDIF		       ;;					;AN000;
+	      @@:		       ;;					;AN000;
 	       POP  AX		       ;;					;AN000;
 				       ;;					;AN000;
-	  .ELSE 		       ;;					;AN000;
+	  jmp endif_l_3
+	  else_l_1: 		       ;;					;AN000;
 	       OR  STMT_ERROR,INVALID  ;; Duplicate LOWCOUNT parms		;AN000;
 	       MOV  PARSE_ERROR,YES    ;;					;AN000;
 	       MOV  BUILD_STATE,NO     ;;					;AN000;
-	  .ENDIF		       ;;					;AN000;
-       .WHEN <BL EQ 3>		       ;; HIGHCOUNT				;AN000;
-	  .IF <HIGHCOUNT_FOUND EQ NO>  ;;					;AN000;
+	  endif_l_1:		       ;;					;AN000;
+       jmp endif_l_3
+       select_l_1_2:
+       cmp BL,3			       ;; HIGHCOUNT				;AN000;
+       jne endif_l_3
+	  cmp HIGHCOUNT_FOUND,NO       ;;					;AN000;
+	  jne else_l_2
 	      MOV   HIGHCOUNT_FOUND,YES ;;					;AN000;
 	      PUSH AX		       ;;					;AN000;
 	      MOV   AX,1	       ;; Add a byte to the sequence		;AN000;
 	      CALL  GROW_SHARED_DATA   ;; Update block end			;AN000;
-	     .IF <BUILD_STATE EQ YES>  ;;					;AN000;
+	     cmp BUILD_STATE,YES       ;;					;AN000;
+	     jne @F
 		 PUSH DI	       ;;					;AN000;
 		 MOV  DI,BLOCK_START   ;;					;AN000;
 		 INC  [BP+DI].NUM_GRAPHICS_ESC ;; Bump number of bytes in sequen;AN000;
@@ -234,29 +248,36 @@ PARSE_GRAPHICS	PROC		       ;;					;AN000;
 		 MOV  DI,AX	       ;;					;AN000;
 		 MOV  BYTE PTR[BP+DI],0 ;; Store 0 in place of count		;AN000;
 		 POP  DI	       ;;					;AN000;
-	     .ENDIF		       ;;					;AN000;
+	     @@:		       ;;					;AN000;
 	      POP  AX		       ;;					;AN000;
-	  .ELSE 		       ;;					;AN000;
+	  jmp endif_l_3
+	  else_l_2: 		       ;;					;AN000;
 	       OR  STMT_ERROR,INVALID  ;; Duplicate HIGHCOUNT parms		;AN000;
 	       MOV  PARSE_ERROR,YES    ;;					;AN000;
 	       MOV  BUILD_STATE,NO     ;;					;AN000;
-	  .ENDIF		       ;;					;AN000;
-       .ENDSELECT		       ;;					;AN000;
-   .ELSE NEAR			       ;;					;AN000;
-      .IF <AX NE -1>		       ;;					;AN000;
+	  endif_l_2:		       ;;					;AN000;
+       endselect_l_1:		       ;;					;AN000;
+   jmp endif_l_3
+   else_l_3:			       ;;					;AN000;
+      cmp AX,-1			       ;;					;AN000;
+      je @F
 	  OR   STMT_ERROR,INVALID      ;; parm is invalid			;AN000;
 	  MOV  PARSE_ERROR,YES	       ;;					;AN000;
 	  MOV  BUILD_STATE,NO	       ;;					;AN000;
-      .ENDIF			       ;;					;AN000;
-   .ENDIF			       ;;					;AN000;
- .UNTIL <AX EQ -1> NEAR 	       ;;					;AN000;
+      @@:			       ;;					;AN000;
+   endif_l_3:			       ;;					;AN000;
+ cmp AX,-1		 	       ;;					;AN000;
+ jne repeat_l_1
 				       ;;					;AN000;
- .IF  <LOWCOUNT_FOUND EQ NO> OR        ;;					;AN000;
- .IF  <HIGHCOUNT_FOUND EQ NO>	       ;; Missing LOWCOUNT/HIGHCOUNT parms	;AN000;
+ cmp LOWCOUNT_FOUND,NO		       ;;					;AN000;
+ je @F
+ cmp HIGHCOUNT_FOUND,NO		       ;; Missing LOWCOUNT/HIGHCOUNT parms	;AN000;
+ jne endif_l_4
+ @@:
       OR   STMT_ERROR,INVALID	       ;;					;AN000;
       MOV  PARSE_ERROR,YES	       ;;					;AN000;
       MOV  BUILD_STATE,NO	       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+ endif_l_4: 			       ;;					;AN000;
 				       ;;					;AN000;
   RET				       ;;					;AN000;
 				       ;;					;AN000;
@@ -317,48 +338,55 @@ SEQ_LENGTH_PTR	DW   0		       ;; Number of colorselect statements	;AN000;
 PARSE_COLORSELECT  PROC 	       ;;					;AN000;
 				      ;;					;AN000;
   MOV  CUR_STMT,COLS		       ;;					;AN000;
- .IF <BIT STMTS_DONE NAND PRT>	       ;; PRINTER  statemnet must have been	;AN000;
+ test STMTS_DONE,PRT		       ;; PRINTER  statemnet must have been	;AN000;
+ jnz @F
      OR  STMT_ERROR,MISSING	       ;;  processed				;AN000;
 	MOV  PARSE_ERROR,YES	       ;;					;AN000;
 	MOV  BUILD_STATE,NO	       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
 				       ;;					;AN000;
- .IF <BIT STMTS_DONE AND DISP+COLP>    ;; DISDPLAYMODE and COLORPRINT  stmts	;AN000;
+ test STMTS_DONE,DISP+COLP	       ;; DISDPLAYMODE and COLORPRINT  stmts	;AN000;
+ jz @F
      OR  STMT_ERROR,SEQUENCE	       ;;  should NOT have been processed	;AN000;
 	MOV  PARSE_ERROR,YES	       ;;					;AN000;
 	MOV  BUILD_STATE,NO	       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
 				       ;;					;AN000;
- .IF <BIT GROUPS_DONE AND COLS>        ;; Check for a previous group of 	;AN000;
+ test GROUPS_DONE,COLS		       ;; Check for a previous group of 	;AN000;
+ jz @F
      OR  STMT_ERROR,SEQUENCE	       ;;  COLORSELECTS within this PTD 	;AN000;
 	MOV  PARSE_ERROR,YES	       ;;					;AN000;
 	MOV  BUILD_STATE,NO	       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
 				       ;;					;AN000;
- .IF <BIT STMTS_DONE NAND COLS>        ;; If first COLORSELECT...		;AN000;
+ test STMTS_DONE,COLS		       ;; If first COLORSELECT...		;AN000;
+ jnz endif_l_5
       MOV  NUM_BANDS,0		       ;; Init number of COLORSELECT bands	;AN000;
-     .IF <BUILD_STATE EQ YES>	       ;; Update count and pointer in the	;AN000;
+     cmp BUILD_STATE,YES	       ;; Update count and pointer in the	;AN000;
+     jne @F
 	 MOV  AX,BLOCK_END	       ;;  Shared Data Area header		;AN000;
 	 MOV  [BP].COLORSELECT_PTR,AX  ;; Set pointer to COLORSELECT info	;AN000;
 	 MOV  [BP].NUM_PRT_BANDS,0     ;; Init NUMBER OF COLORSELECTS		;AN000;
-     .ENDIF			       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+     @@:			       ;;					;AN000;
+ endif_l_5: 			       ;;					;AN000;
 				       ;;					;AN000;
   OR   STMTS_DONE,COLS		       ;; Indicate found			;AN000;
- .IF <PREV_STMT NE COLS> THEN	       ;; Terminate any preceeding groups	;AN000;
+ cmp PREV_STMT,COLS		       ;; Terminate any preceeding groups	;AN000;
+ je @F
      MOV  AX,PREV_STMT		       ;;  except for COLORSELECT		;AN000;
      OR   GROUPS_DONE,AX	       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
 				       ;;					;AN000;
   MOV	AX,1			       ;; Make room for sequence length field	;AN000;
   CALL	GROW_SHARED_DATA	       ;;					;AN000;
- .IF <BUILD_STATE EQ YES>	       ;;					;AN000;
+ cmp BUILD_STATE,YES		       ;;					;AN000;
+ jne @F
      INC  [BP].NUM_PRT_BANDS	       ;; Inc number of selects 		;AN000;
      MOV  DI,BLOCK_END		       ;;					;AN000;
      MOV  BYTE PTR [BP+DI-1],0	       ;; Init sequence length field		;AN000;
      LEA  AX,[DI-1]		       ;;					;AN000;
      MOV  SEQ_LENGTH_PTR,AX	       ;; Save pointer to length of sequence	;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
 				       ;;					;AN000;
   MOV  DI,OFFSET COLORSELECT_PARSE_PARMS  ;; parse parms			;AN000;
   MOV  CS_NUM_REQ,1		       ;; Change to 1 required parameters	;AN000;
@@ -372,35 +400,39 @@ PARSE_COLORSELECT  PROC 	       ;;					;AN000;
   XOR  CX,CX			       ;;					;AN000;
 				       ;;					;AN000;
   CALL SYSPARSE 		       ;; PARSE the band ID			;AN000;
- .IF <AX NE 0>			       ;;					;AN000;
+ cmp AX,0			       ;;					;AN000;
+ je @F
      OR  STMT_ERROR,INVALID	       ;;					;AN000;
      MOV  PARSE_ERROR,YES	       ;;					;AN000;
      MOV  BUILD_STATE,NO	       ;;					;AN000;
      RET			       ;;  statement.				;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
 				       ;;					;AN000;
   PUSH	ES			       ;; We got a band id........		;AN000;
   PUSH	DI			       ;;					;AN000;
 				       ;;					;AN000;
   LES	DI,DWORD PTR RESULT_VAL        ;; Get pointer to the parsed band id	;AN000;
- .IF <<BYTE PTR ES:[DI+1]> NE 0>       ;; Make sure the band id is only 	;AN000;
+ cmp BYTE PTR ES:[DI+1],0              ;; Make sure the band id is only 	;AN000;
+ je @F
      OR  STMT_ERROR,INVALID	       ;;  one byte long			;AN000;
      MOV  PARSE_ERROR,YES	       ;;					;AN000;
      MOV  BUILD_STATE,NO	       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
 				       ;;					;AN000;
   MOV  BL,NUM_BANDS		       ;;					;AN000;
   XOR  BH,BH			       ;;					;AN000;
- .IF <BX EQ MAX_BANDS> THEN	       ;; Watch out for too many COLORSELECTs	;AN000;
+ cmp BX,MAX_BANDS		       ;; Watch out for too many COLORSELECTs	;AN000;
+ jne else_l_6
      OR  STMT_ERROR,SEQUENCE	       ;;					;AN000;
      MOV  PARSE_ERROR,YES	       ;;					;AN000;
      MOV  BUILD_STATE,NO	       ;;					;AN000;
- .ELSE				       ;;					;AN000;
+ jmp endif_l_6
+ else_l_6:			       ;;					;AN000;
      SHL  BX,1			       ;; calc index to store band in value list;AN000;
      MOV  AL,ES:[DI]		       ;; get BAND ID FROM PARSEr		;AN000;
      MOV  BAND_VAL_LIST[BX],AL	       ;;					;AN000;
      INC  NUM_BANDS		       ;; bump number of bands			;AN000;
- .ENDIF 			       ;;					;AN000;
+ endif_l_6: 			       ;;					;AN000;
 				       ;;					;AN000;
   POP  DI			       ;;					;AN000;
   POP  ES			       ;;					;AN000;
@@ -410,14 +442,16 @@ PARSE_COLORSELECT  PROC 	       ;;					;AN000;
   MOV  CS_POSITIONAL,AX 	       ;;					;AN000;
   MOV  CS_NUM_REQ,0		       ;; Change to 0 required parameters	;AN000;
   XOR  DX,DX			       ;; PARSE the sequence of escape bytes	;AN000;
- .REPEAT			       ;;					;AN000;
+ repeat_l_2:			       ;;					;AN000;
     XOR  CX,CX			       ;;					;AN000;
     CALL SYSPARSE		       ;;					;AN000;
-   .IF <AX EQ 0>		       ;; If esc byte is valid			;AN000;
+   cmp AX,0			       ;; If esc byte is valid			;AN000;
+   jne else_l_7
 	  PUSH AX		       ;;					;AN000;
 	  MOV	AX,1		       ;; Add a byte to the sequence		;AN000;
 	  CALL	GROW_SHARED_DATA       ;; Update block end			;AN000;
-	 .IF <BUILD_STATE EQ YES>      ;;					;AN000;
+	 cmp BUILD_STATE,YES	       ;;					;AN000;
+	 jne @F
 	     PUSH DI		       ;;					;AN000;
 	     MOV  DI,SEQ_LENGTH_PTR    ;;					;AN000;
 	     INC  byte ptr [BP+DI]     ;; Bump number of bytes in sequence	;AN000;
@@ -425,16 +459,19 @@ PARSE_COLORSELECT  PROC 	       ;;					;AN000;
 	     MOV  AL,RESULT_VAL        ;; Get esc byte from result buffer	;AN000;
 	     MOV  [BP+DI-1],AL	       ;; Store at end of sequence		;AN000;
 	     POP  DI		       ;;					;AN000;
-	 .ENDIF 		       ;;					;AN000;
+	 @@:	 		       ;;					;AN000;
 	  POP  AX		       ;;					;AN000;
-   .ELSE			       ;;					;AN000;
-      .IF <AX NE -1>		       ;;					;AN000;
+   jmp endif_l_7
+   else_l_7:			       ;;					;AN000;
+      cmp AX,-1			       ;;					;AN000;
+      je @F
 	  OR   STMT_ERROR,INVALID      ;; parm is invalid			;AN000;
 	  MOV  PARSE_ERROR,YES	       ;;					;AN000;
 	  MOV  BUILD_STATE,NO	       ;;					;AN000;
-      .ENDIF			       ;;					;AN000;
-   .ENDIF			       ;;					;AN000;
- .UNTIL <AX EQ -1> NEAR 	       ;;					;AN000;
+      @@:			       ;;					;AN000;
+   endif_l_7:			       ;;					;AN000;
+ cmp AX,-1		 	       ;;					;AN000;
+ jne repeat_l_2
 				       ;;					;AN000;
 				       ;;					;AN000;
   RET				       ;;					;AN000;
@@ -519,44 +556,51 @@ BAND_PTR_8  DB	 ?,0		       ;;					;AN000;
 PARSE_COLORPRINT  PROC		       ;;					;AN000;
 				       ;;					;AN000;
   MOV  CUR_STMT,COLP		       ;;					;AN000;
- .IF <BIT STMTS_DONE NAND PRT>	       ;; PRINTER  statemnet must have been	;AN000;
+ test STMTS_DONE,PRT		       ;; PRINTER  statemnet must have been	;AN000;
+ jnz @F
      OR  STMT_ERROR,MISSING	       ;;  processed				;AN000;
 	MOV  PARSE_ERROR,YES	       ;;					;AN000;
 	MOV  BUILD_STATE,NO	       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
 				       ;;					;AN000;
- .IF <BIT STMTS_DONE AND DISP>	       ;; DISPLAYMODE stmts			;AN000;
+ test STMTS_DONE,DISP		       ;; DISPLAYMODE stmts			;AN000;
+ jz @F
      OR  STMT_ERROR,SEQUENCE	       ;;  should NOT have been processed	;AN000;
 	MOV  PARSE_ERROR,YES	       ;;					;AN000;
 	MOV  BUILD_STATE,NO	       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
 				       ;;					;AN000;
- .IF <BIT GROUPS_DONE AND COLP>        ;; Check for a previous group of 	;AN000;
+ test GROUPS_DONE,COLP		       ;; Check for a previous group of 	;AN000;
+ jz @F
      OR  STMT_ERROR,SEQUENCE	       ;;  COLORPRINTS within this PTD		;AN000;
 	MOV  PARSE_ERROR,YES	       ;;					;AN000;
 	MOV  BUILD_STATE,NO	       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
 				       ;;					;AN000;
   MOV  CUR_PRINTER_TYPE,COLOR	       ;;					;AN000;
 				       ;;					;AN000;
- .IF <BIT STMTS_DONE NAND COLP>        ;; If first COLORPRINT...		;AN000;
-     .IF <BUILD_STATE EQ YES>	       ;; Update count and pointer in the	;AN000;
+ test STMTS_DONE,COLP		       ;; If first COLORPRINT...		;AN000;
+ jnz endif_l_8
+     cmp BUILD_STATE,YES	       ;; Update count and pointer in the	;AN000;
+     jne @F
 	 MOV  AX,BLOCK_END	       ;;  Shared Data Area header		;AN000;
 	 MOV  [BP].COLORPRINT_PTR,AX   ;; Set pointer to COLORPRINT info	;AN000;
 	 MOV  [BP].PRINTER_TYPE,COLOR  ;;					;AN000;
 	 MOV  [BP].NUM_PRT_COLOR,0     ;; Init NUMBER OF COLORPRINTS		;AN000;
-     .ENDIF			       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+     @@:			       ;;					;AN000;
+ endif_l_8: 			       ;;					;AN000;
 				       ;;					;AN000;
- .IF <BUILD_STATE EQ YES>	       ;;					;AN000;
+ cmp BUILD_STATE,YES		       ;;					;AN000;
+ jne @F
      INC  [BP].NUM_PRT_COLOR	       ;; Inc number of selects 		;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
 				       ;;					;AN000;
   OR   STMTS_DONE,COLP		       ;; Indicate found			;AN000;
- .IF <PREV_STMT NE COLP> THEN	       ;; Terminate any preceeding groups	;AN000;
+ cmp PREV_STMT,COLP		       ;; Terminate any preceeding groups	;AN000;
+ je @F
      MOV  AX,PREV_STMT		       ;;  except for COLORPRINT		;AN000;
      OR   GROUPS_DONE,AX	       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
 				       ;;					;AN000;
   MOV	AX,BLOCK_END		       ;; Start a new block			;AN000;
   MOV	BLOCK_START,AX		       ;;					;AN000;
@@ -569,77 +613,91 @@ PARSE_COLORPRINT  PROC		       ;;					;AN000;
   XOR  CX,CX			       ;;					;AN000;
 				       ;;					;AN000;
   CALL SYSPARSE 		       ;; PARSE the RED value			;AN000;
- .IF <AX NE 0>			       ;;					;AN000;
+ cmp AX,0			       ;;					;AN000;
+ je else_l_9
      OR  STMT_ERROR,INVALID	       ;;					;AN000;
      MOV  PARSE_ERROR,YES	       ;;					;AN000;
      MOV  BUILD_STATE,NO	       ;;					;AN000;
- .ELSE				       ;;					;AN000;
-     .IF <BUILD_STATE EQ YES>	       ;;					;AN000;
+ jmp endif_l_9
+ else_l_9:			       ;;					;AN000;
+     cmp BUILD_STATE,YES	       ;;					;AN000;
+     jne @F
 	 PUSH  DI		       ;;					;AN000;
 	 MOV  DI,BLOCK_START	       ;;					;AN000;
 	 MOV  AL,RESULT_VAL	       ;; Store RED value in COLORPRINT info	;AN000;
 	 MOV  [BP+DI].RED,AL	       ;;					;AN000;
 	 POP  DI		       ;;					;AN000;
-     .ENDIF			       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+     @@:			       ;;					;AN000;
+ endif_l_9: 			       ;;					;AN000;
 				       ;;					;AN000;
   CALL SYSPARSE 		       ;; PARSE the GREEN value 		;AN000;
- .IF <AX NE 0>			       ;;					;AN000;
+ cmp AX,0			       ;;					;AN000;
+ je else_l_10
      OR  STMT_ERROR,INVALID	       ;;					;AN000;
      MOV  PARSE_ERROR,YES	       ;;					;AN000;
      MOV  BUILD_STATE,NO	       ;;					;AN000;
- .ELSE				       ;;					;AN000;
-     .IF <BUILD_STATE EQ YES>	       ;;					;AN000;
+ jmp endif_l_10
+ else_l_10:			       ;;					;AN000;
+     cmp BUILD_STATE,YES	       ;;					;AN000;
+     jne @F
 	 PUSH  DI		       ;;					;AN000;
 	 MOV  DI,BLOCK_START	       ;;					;AN000;
 	 MOV  AL,RESULT_VAL	       ;; Store GREEN value in COLORPRINT info	;AN000;
 	 MOV  [BP+DI].GREEN,AL	       ;;					;AN000;
 	 POP  DI		       ;;					;AN000;
-     .ENDIF			       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+     @@:			       ;;					;AN000;
+ endif_l_10: 			       ;;					;AN000;
 				       ;;					;AN000;
   CALL SYSPARSE 		       ;; PARSE the BLUE value			;AN000;
- .IF <AX NE 0>			       ;;					;AN000;
+ cmp AX,0			       ;;					;AN000;
+ je else_l_11
      OR  STMT_ERROR,INVALID	       ;;					;AN000;
      MOV  PARSE_ERROR,YES	       ;;					;AN000;
      MOV  BUILD_STATE,NO	       ;;					;AN000;
- .ELSE				       ;;					;AN000;
-     .IF <BUILD_STATE EQ YES>	       ;;					;AN000;
+ jmp endif_l_11
+ else_l_11:			       ;;					;AN000;
+     cmp BUILD_STATE,YES	       ;;					;AN000;
+     jne @F
 	 PUSH  DI		       ;;					;AN000;
 	 MOV  DI,BLOCK_START	       ;;					;AN000;
 	 MOV  AL,RESULT_VAL	       ;; Store BLUE value in COLORPRINT info	;AN000;
 	 MOV  [BP+DI].BLUE,AL	       ;;					;AN000;
 	 POP  DI		       ;;					;AN000;
-     .ENDIF			       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+     @@:			       ;;					;AN000;
+ endif_l_11: 			       ;;					;AN000;
 				       ;;					;AN000;
- .IF <BUILD_STATE EQ YES>	       ;;					;AN000;
+ cmp BUILD_STATE,YES		       ;;					;AN000;
+ jne @F
      PUSH  DI			       ;;					;AN000;
      MOV   DI,BLOCK_START	       ;;					;AN000;
      MOV   [BP+DI].SELECT_MASK,0       ;; Initialize band select mask		;AN000;
      POP   DI			       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
   XOR  DX,DX			       ;; For each band found "OR" the item     ;AN000;
- .REPEAT			       ;;  tag into the select mask		;AN000;
+ repeat_l_3:			       ;;  tag into the select mask		;AN000;
     MOV  CX,3			       ;; Avoid getting too many parms error	;AN000;
     CALL SYSPARSE		       ;;  from parser				;AN000;
-   .IF <AX EQ 0>		       ;;					;AN000;
-     .IF <BUILD_STATE EQ YES>	       ;;					;AN000;
+   cmp AX,0			       ;;					;AN000;
+   jne else_l_12
+     cmp BUILD_STATE,YES	       ;;					;AN000;
+     jne endif_l_12
 	  PUSH	DI		       ;;					;AN000;
 	  MOV	DI,BLOCK_START	       ;;					;AN000;
 	  MOV	AL,RESULT_TAG	       ;;					;AN000;
 	  OR	[BP+DI].SELECT_MASK,AL ;; OR the mask for this band into the	;AN000;
 				       ;;  select mask for this color		;AN000;
 	  POP	DI		       ;;					;AN000;
-     .ENDIF			       ;;					;AN000;
-   .ELSE			       ;;					;AN000;
-      .IF <AX NE -1>		       ;;					;AN000;
+   jmp endif_l_12		       ;;					;AN000;
+   else_l_12:			       ;;					;AN000;
+      cmp AX,-1			       ;;					;AN000;
+      je @F
 	  OR   STMT_ERROR,INVALID      ;; parm is invalid			;AN000;
 	  MOV  PARSE_ERROR,YES	       ;;					;AN000;
 	  MOV  BUILD_STATE,NO	       ;;					;AN000;
-      .ENDIF			       ;;					;AN000;
-   .ENDIF			       ;;					;AN000;
- .UNTIL <AX EQ -1> NEAR 	       ;;					;AN000;
+      @@:			       ;;					;AN000;
+   endif_l_12:			       ;;					;AN000;
+ cmp AX,-1		 	       ;;					;AN000;
+ jne repeat_l_3
 				       ;;					;AN000;
   RET				       ;;					;AN000;
 				       ;;					;AN000;
@@ -685,11 +743,12 @@ DARKADJUST_P0V	 DB   1 	       ;; # of value lists			;AN000;
 PARSE_DARKADJUST  PROC		       ;;					;AN000;
 				       ;;					;AN000;
   MOV  CUR_STMT,DARK		       ;;					;AN000;
- .IF <BIT STMTS_DONE NAND PRT>	       ;; PRINTER  statemnet must have been	;AN000;
+ test STMTS_DONE,PRT		       ;; PRINTER  statemnet must have been	;AN000;
+ jnz @F
      OR  STMT_ERROR,MISSING	       ;;  processed				;AN000;
 	MOV  PARSE_ERROR,YES	       ;;					;AN000;
 	MOV  BUILD_STATE,NO	       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
 				       ;;					;AN000;
 				       ;;					;AN000;
   OR   STMTS_DONE,DARK		       ;; Indicate found			;AN000;
@@ -703,22 +762,26 @@ PARSE_DARKADJUST  PROC		       ;;					;AN000;
   XOR  CX,CX			       ;;					;AN000;
 				       ;;					;AN000;
   CALL SYSPARSE 		       ;; PARSE the ADJUST VALUE		;AN000;
- .IF <AX NE 0>			       ;;					;AN000;
+ cmp AX,0			       ;;					;AN000;
+ je else_l_13
      OR  STMT_ERROR,INVALID	       ;;					;AN000;
      MOV  PARSE_ERROR,YES	       ;;					;AN000;
      MOV  BUILD_STATE,NO	       ;;					;AN000;
- .ELSE				       ;;					;AN000;
-     .IF <BUILD_STATE EQ YES>	       ;;					;AN000;
+ jmp endif_l_13
+ else_l_13:			       ;;					;AN000;
+     cmp BUILD_STATE,YES	       ;;					;AN000;
+     jne @F
 	 MOV  AL,RESULT_VAL	       ;;					;AN000;
 	 MOV  [BP].DARKADJUST_VALUE,AL ;;					;AN000;
-     .ENDIF			       ;;					;AN000;
+     @@:			       ;;					;AN000;
       CALL SYSPARSE		       ;; CHECK FOR EXTRA PARMS 		;AN000;
-     .IF <AX NE -1>		       ;;					;AN000;
+     cmp AX,-1			       ;;					;AN000;
+     je @F
 	OR  STMT_ERROR,INVALID	       ;;					;AN000;
 	MOV PARSE_ERROR,YES	       ;;					;AN000;
 	MOV BUILD_STATE,NO	       ;;					;AN000;
-     .ENDIF			       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+     @@:			       ;;					;AN000;
+ endif_l_13: 			       ;;					;AN000;
 				       ;;					;AN000;
   RET				       ;;					;AN000;
 				       ;;					;AN000;

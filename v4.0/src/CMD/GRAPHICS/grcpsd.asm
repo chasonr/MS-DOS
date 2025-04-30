@@ -45,8 +45,8 @@
 				       ;;					;AN000;
 CODE	SEGMENT PUBLIC 'CODE'          ;;                                       ;AN000;
 	ASSUME CS:CODE,DS:CODE	       ;;					;AN000;
-	INCLUDE GRCTRL.EXT	       ;; Bring in external declarations	;AN000;
-	INCLUDE GRCTRL.STR	       ;;  for transient command processing	;AN000;
+	INCLUDE grctrl.ext	       ;; Bring in external declarations	;AN000;
+	INCLUDE grctrl.str	       ;;  for transient command processing	;AN000;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;					;AN000;
 ;;										;AN000;
 ;; Public Symbols								;AN000;

@@ -60,13 +60,12 @@ CODE	SEGMENT PUBLIC 'CODE'                                                   ;AN
 	ASSUME		CS:CODE,DS:CODE 					;AN000;
 										;AN000;
 .XLIST										;AN000;
-INCLUDE GRINT2FH.EXT								;AN000;
-INCLUDE GRBWPRT.EXT								;AN000;
-INCLUDE GRCOLPRT.EXT								;AN000;
-INCLUDE GRSHAR.STR								;AN000;
-INCLUDE GRPATTRN.STR								;AN000;
-INCLUDE GRPATTRN.EXT								;AN000;
-INCLUDE STRUC.INC								;AN000;
+INCLUDE grint2fh.ext								;AN000;
+INCLUDE grbwprt.ext								;AN000;
+INCLUDE grcolprt.ext								;AN000;
+INCLUDE grshar.str								;AN000;
+INCLUDE grpattrn.str								;AN000;
+INCLUDE grpattrn.ext								;AN000;
 .LIST										;AN000;
 PRT_SCR PROC NEAR								;AN000;
 	JMP PRT_SCR_BEGIN							;AN000;
@@ -90,7 +89,7 @@ PUBLIC NB_CHAR_COLUMNS								;AN000;
 PUBLIC RGB2INT									;AN000;
 PUBLIC RGB2BAND 								;AN000;
 .list										;AN000;
-INCLUDE GRCTRL.STR								;AN000;
+INCLUDE grctrl.str								;AN000;
 ;-------------------------------------------------------------------------------;AN000;
 ;										;AN000;
 ; ENTRY POINT TO BIOS HARDWARE INTERRUPT 5 HANDLER				;AN000;
@@ -320,15 +319,16 @@ PRT_SCR_INIT:				  ; Disable print screen while		;AN000;
  ;------------------------------------------------------------------------------;AN000;
  ; Check the printer type:							;AN000;
  ;------------------------------------------------------------------------------;AN000;
- .IF <DS:[BP].PRINTER_TYPE EQ BLACK_WHITE> ; Is a black and white printer	;AN000;
- .THEN					   ;  attached ?			;AN000;
+ cmp DS:[BP].PRINTER_TYPE,BLACK_WHITE	   ; Is a black and white printer	;AN000;
+ jne else_l_1				   ;  attached ?			;AN000;
  ;------------------------------------------------------------------------------;AN000;
  ; A Black and White printer is attached					;AN000;
  ;------------------------------------------------------------------------------;AN000;
    CMP	   MODE_TYPE,TXT	   ; Is the screen in text mode ?		;AN000;
    JNE	   INVOKE_PRINT_ROUTINE    ; No, call GRAPHICS B&W routine		;AN000;
    JMP	   SHORT EXIT_TO_BIOS	   ; Yes, give control to BIOS INTERRUPT 5	;AN000;
- .ELSE										;AN000;
+ jmp endif_l_1
+ else_l_1:
  ;------------------------------------------------------------------------------;AN000;
  ; A Color printer is attached							;AN000;
  ;------------------------------------------------------------------------------;AN000;
@@ -338,7 +338,7 @@ PRT_SCR_INIT:				  ; Disable print screen while		;AN000;
    JNZ	   INVOKE_PRINT_ROUTINE 						;AN000;
    JMP	   SHORT EXIT_TO_BIOS	   ; Yes, let BIOS INTERRUPT 5 handle it	;AN000;
 				   ; No, we handle it.				;AN000;
-.ENDIF				   ; ENDIF black and white or color printer	;AN000;
+ endif_l_1:			   ; ENDIF black and white or color printer	;AN000;
 ;-------------------------------------------------------------------------------;AN000;
 ;										;AN000;
 ; Call the print routine (which is either PRINT_COLOR or PRINT_BW_APA)		;AN000;
@@ -453,41 +453,60 @@ DET_HW_CONFIG PROC NEAR 							;AN000;
 	MOV	AX,READ_CONFIG_CALL						;AN000;
 	INT	10H			; Call video BIOS			;AN000;
 										;AN000;
-       .IF <AL EQ 1AH>			; If call is supported			;AN000;
-       .THEN									;AN000;
+       cmp AL,1AH			; If call is supported			;AN000;
+       jne else_l_4								;AN000;
 ;-------------------------------------------------------------------------------;AN000;
 ;										;AN000;
 ; Call is supported, PS/2 BIOS is present (Model 39,50,60,80 or BRECON-B card), ;AN000;
 ; Determine what is the primary video adapter:					;AN000;
 ;										;AN000;
 ;-------------------------------------------------------------------------------;AN000;
-	 .SELECT								;AN000;
-	   .WHEN    <BL EQ 1> OR	    ; MONO or				;AN000;
-	   .WHEN    <BL EQ 2>		    ; CGA				;AN000;
+	   cmp BL,1			    ; MONO or				;AN000;
+	   je @F
+	   cmp BL,2			    ; CGA				;AN000;
+	   jne select_l_1_1
+	   @@:
 	      MOV     DS:[BP].HARDWARE_CONFIG,OLD_ADAPTER			;AN000;
-	   .WHEN    <BL EQ 4> OR	    ; EGA with Mono or			;AN000;
-	   .WHEN    <BL EQ 5>		    ; EGA with Color			;AN000;
+	   jmp endif_l_4
+	   select_l_1_1:
+	   cmp BL,4			    ; EGA with Mono or			;AN000;
+	   je @F
+	   cmp BL,5			    ; EGA with Color			;AN000;
+	   jne select_l_1_2
+	   @@:
 	      MOV     DS:[BP].HARDWARE_CONFIG,EGA				;AN000;
-	   .WHEN    <BL EQ 7> OR	    ; BRECON-B with Mono or		;AN000;
-	   .WHEN    <BL EQ 8>		    ; BRECON-B with Color		;AN000;
+	   jmp endif_l_4
+	   select_l_1_2:
+	   cmp BL,7			    ; BRECON-B with Mono or		;AN000;
+	   je @F
+	   cmp BL,8			    ; BRECON-B with Color		;AN000;
+	   jne select_l_1_3
+	   @@:
 	      MOV     DS:[BP].HARDWARE_CONFIG,ROUNDUP				;AN000;
-	   .WHEN    <BL EQ 0Bh> OR	    ; PS/2 Model 30 with Mono or	;AN000;
-	   .WHEN    <BL EQ 0Ch> 	    ; PS/2 Model 30 with Color		;AN000;
+	   jmp endif_l_4
+	   select_l_1_3:
+	   cmp BL,0Bh			    ; PS/2 Model 30 with Mono or	;AN000;
+	   je @F
+	   cmp BL,0Ch			    ; PS/2 Model 30 with Color		;AN000;
+	   jne endif_l_4
+	   @@:
 	      MOV     DS:[BP].HARDWARE_CONFIG,PALACE				;AN000;
-	 .ENDSELECT								;AN000;
+	 endselect_l_1:								;AN000;
+       jmp endif_l_4
 ;-------------------------------------------------------------------------------;AN000;
 ;										;AN000;
 ; PS/2 call is not supported, try the EGA info call:				;AN000;
 ;										;AN000;
 ;-------------------------------------------------------------------------------;AN000;
-       .ELSE									;AN000;
+       else_l_4:									;AN000;
 	  MOV	  AH,ALT_SELECT_CALL	  ; Request Alternate select's          ;AN000;
 	  MOV	  BL,EGA_INFO_CALL	  ;  "return EGA information call"      ;AN000;
 	  INT	  10H			  ; Call video BIOS			;AN000;
-	 .IF	  <BL NE EGA_INFO_CALL>   ; If a memory value is returned	;AN000;
-	 .THEN				  ; then, there is an EGA		;AN000;
+	 cmp BL,EGA_INFO_CALL		  ; If a memory value is returned	;AN000;
+	 je else_l_3			  ; then, there is an EGA		;AN000;
 	    MOV     DS:[BP].HARDWARE_CONFIG,EGA 				;AN000;
-	 .ELSE				  ; else, call is not supported:	;AN000;
+	 jmp endif_l_3
+	 else_l_3:			  ; else, call is not supported:	;AN000;
 ;-------------------------------------------------------------------------------;AN000;
 ;										;AN000;
 ; EGA call is not supported, try the PC CONVERTIBLE display description call:	;AN000;
@@ -495,14 +514,15 @@ DET_HW_CONFIG PROC NEAR 							;AN000;
 ;-------------------------------------------------------------------------------;AN000;
 	    MOV     AH,DISP_DESC_CALL						;AN000;
 	    INT     10H 		    ; Call BIOS, ES:DI :=Offset of parms;AN000;
-	   .IF	    <ES:[DI] EQ 5140H>	    ; If LCD display type,		;AN000;
-	   .THEN			    ;	set LCD bit in Shared Data area ;AN000;
+	   cmp word ptr ES:[DI],5140H	    ; If LCD display type,		;AN000;
+	   jne else_l_2			    ;	set LCD bit in Shared Data area ;AN000;
 	      MOV     DS:[BP].HARDWARE_CONFIG,PC_CONVERTIBLE			;AN000;
-	   .ELSE			    ; else, we have an old adapter.	;AN000;
+	   jmp endif_l_2
+	   else_l_2:			    ; else, we have an old adapter.	;AN000;
 	      MOV     DS:[BP].HARDWARE_CONFIG,OLD_ADAPTER ; (either MONO or CGA);AN000;
-	   .ENDIF   ; Display type is LCD					;AN000;
-	 .ENDIF ; EGA BIOS is present						;AN000;
-       .ENDIF ; PS/2 BIOS is present						;AN000;
+	   endif_l_2:   ; Display type is LCD					;AN000;
+	 endif_l_3: ; EGA BIOS is present						;AN000;
+       endif_l_4: ; PS/2 BIOS is present						;AN000;
 	RET									;AN000;
 DET_HW_CONFIG ENDP								;AN000;
 PAGE										;AN000;
@@ -690,10 +710,11 @@ ITS_TXT:									;AN000;
 	MOV	AL,NB_CHAR_COLUMNS	; Get number of columns 		;AN000;
 	CBW									;AN000;
 	MOV	SCREEN_WIDTH,AX 						;AN000;
-       .IF  <DS:[BP].HARDWARE_CONFIG EQ OLD_ADAPTER>; If an old adapter is there;AN000;
-       .THEN ; The number of lines is 25					;AN000;
+       cmp DS:[BP].HARDWARE_CONFIG,OLD_ADAPTER; If an old adapter is there;AN000;
+       jne else_l_5 ; The number of lines is 25					;AN000;
 	  MOV	  SCREEN_HEIGHT,25						;AN000;
-       .ELSE									;AN000;
+       jmp endif_l_5
+       else_l_5:								;AN000;
 	  MOV	  AX,BIOS_SEG		; Get number of rows			;AN000;
 	  MOV	  ES,AX 		;  from BIOS Data Area			;AN000;
 	  MOV	  BX,NB_ROWS_OFFSET	;   at 0040:0084			;AN000;
@@ -701,7 +722,7 @@ ITS_TXT:									;AN000;
 	  CBW									;AN000;
 	  INC	  AX								;AN000;
 	  MOV	  SCREEN_HEIGHT,AX						;AN000;
-       .ENDIF									;AN000;
+       endif_l_5:								;AN000;
 	JMP	SHORT GET_MODE_ATTR_END 					;AN000;
 										;AN000;
 ;										;AN000;
@@ -778,27 +799,42 @@ SET_UP_XLT_TAB PROC NEAR							;AN000;
 ;	display adater. (When a Mono. adapter is attached, a jump is made to	;AN000;
 ;	the ROM BIOS for printing the screen, and no translation table is set). ;AN000;
 ;-------------------------------------------------------------------------------;AN000;
-.IF <BIT DS:[BP].HARDWARE_CONFIG  NZ OLD_ADAPTER> OR ; IF it is a CGA		;AN000;
-.IF <BIT DS:[BP].HARDWARE_CONFIG  NZ PC_CONVERTIBLE> ; or a PC convertible	;AN000;
-.THEN						     ; THEN set up CGA colors	;AN000;
+test DS:[BP].HARDWARE_CONFIG,OLD_ADAPTER	     ; IF it is a CGA		;AN000;
+jnz @F
+test DS:[BP].HARDWARE_CONFIG,PC_CONVERTIBLE	     ; or a PC convertible	;AN000;
+jz elseif_l_6_1					     ; THEN set up CGA colors	;AN000;
+@@:
    CALL    SET_CGA_XLT_TAB			     ;				;AN000;
-.ELSEIF <BIT DS:[BP].HARDWARE_CONFIG NZ EGA>	     ; ELSEIF it is an EGA	;AN000;
+jmp endif_l_6
+elseif_l_6_1:
+test DS:[BP].HARDWARE_CONFIG,EGA		     ; ELSEIF it is an EGA	;AN000;
+jz elseif_l_6_2
    CALL    SET_EGA_XLT_TAB			     ;	  set up EGA colors.	;AN000;
-.ELSEIF <CUR_MODE EQ 0FH>			     ; ELSEIF we are in mode 15 ;AN000;
+jmp endif_l_6
+elseif_l_6_2:
+cmp CUR_MODE,0FH				     ; ELSEIF we are in mode 15 ;AN000;
+jne elseif_l_6_3
    CALL    SET_MODE_F_XLT_TAB			     ;	  set up its 4 shades	;AN000;
+jmp endif_l_6
+elseif_l_6_3:
 ;-------------------------------------------------------------------------------;AN000;
 ; A PS/2 system is attached: (we either have a PALACE [Model 30] or a ROUNDUP)	;AN000;
 ;-------------------------------------------------------------------------------;AN000;
-.ELSEIF <CUR_MODE EQ 13H>			    ; ELSEIF current mode is 13h;AN000;
+cmp CUR_MODE,13H				    ; ELSEIF current mode is 13h;AN000;
+jne elseif_l_6_4
    CALL    SET_MODE_13H_XLT_TAB 		    ;	  set up 256 colors	;AN000;
-.ELSEIF <BIT DS:[BP].HARDWARE_CONFIG NZ PALACE>     ; ELSEIF PS/2 Model 30(MCGA);AN000;
+jmp endif_l_6
+elseif_l_6_4:
+test DS:[BP].HARDWARE_CONFIG,PALACE		    ; ELSEIF PS/2 Model 30(MCGA);AN000;
+jz else_l_6
    CALL    SET_CGA_XLT_TAB			    ;	  handle it like a CGA	;AN000;
-.ELSE						    ; ELSE we have a ROUNDUP	;AN000;
+jmp endif_l_6
+else_l_6:					    ; ELSE we have a ROUNDUP	;AN000;
 ;-------------------------------------------------------------------------------;AN000;
 ; A PS/2 model 50, 60 or 80 or an ADA 'B' card is attached (in 16 color mode):  ;AN000;
 ;-------------------------------------------------------------------------------;AN000;
    CALL    SET_ROUNDUP_XLT_TAB			;   set up 16 colors		;AN000;
-.ENDIF										;AN000;
+endif_l_6:									;AN000;
 ;-------------------------------------------------------------------------------;AN000;
 ; Finish setting up the translation table:					;AN000;
 ;-------------------------------------------------------------------------------;AN000;
@@ -852,21 +888,25 @@ SET_BACKG_IN_XLT_TAB PROC NEAR							;AN000;
 ; Test if a black and white printer is attached.				;AN000;
 ;										;AN000;
 ;-------------------------------------------------------------------------------;AN000;
-.IF <BIT DS:[BP].PRINTER_TYPE NZ BLACK_WHITE> AND    ; IF black and white	;AN000;
-.IF <BIT DS:[BP].SWITCHES Z REVERSE_SW> 	     ;	   printer and not /R	;AN000;
-.THEN						     ; then, map background	;AN000;
+test DS:[BP].PRINTER_TYPE,BLACK_WHITE		     ; IF black and white	;AN000;
+jz elseif_l_7
+test DS:[BP].SWITCHES,REVERSE_SW 		     ;	   printer and not /R	;AN000;
+jnz elseif_l_7					     ; then, map background	;AN000;
 	MOV	XLT_TAB,WHITE_INT		     ;	   to white.		;AN000;
+jmp endif_l_7
 ;-------------------------------------------------------------------------------;AN000;
 ;										;AN000;
 ; A Color printer is attached:							;AN000;
 ;										;AN000;
 ;-------------------------------------------------------------------------------;AN000;
-.ELSEIF <BIT DS:[BP].PRINTER_TYPE NZ COLOR> AND      ; else, if color printer	;AN000;
-.IF <BIT DS:[BP].SWITCHES Z BACKGROUND_SW>	     ;	      and  /B if OFF	;AN000;
-.THEN						     ;				;AN000;
+elseif_l_7:
+test DS:[BP].PRINTER_TYPE,COLOR			     ; else, if color printer	;AN000;
+jz endif_l_7
+test DS:[BP].SWITCHES,BACKGROUND_SW		     ;	      and  /B if OFF	;AN000;
+jnz endif_l_7						     ;				;AN000;
 						     ; Store a null band mask	;AN000;
 	MOV	XLT_TAB,0			     ;	the translation table.	;AN000;
-.ENDIF										;AN000;
+endif_l_7:										;AN000;
 	RET									;AN000;
 SET_BACKG_IN_XLT_TAB  ENDP							;AN000;
 PAGE										;AN000;
@@ -958,10 +998,13 @@ EGA_SAVE_PTR	EQU	4A8H		; EGA BIOS pointer to table of		;AN000;
 ; Set up one entry in the translation table for each color available.		;AN000;
 ;										;AN000;
 ;-------------------------------------------------------------------------------;AN000;
-.IF <CUR_MODE EQ 4> OR			; If the current mode is an old CGA	;AN000;
-.IF <CUR_MODE EQ 5> OR			;  GRAPHICS mode:			;AN000;
-.IF <CUR_MODE EQ 6>								;AN000;
-.THEN										;AN000;
+cmp CUR_MODE,4				; If the current mode is an old CGA	;AN000;
+je @F
+cmp CUR_MODE,5				;  GRAPHICS mode:			;AN000;
+je @F
+cmp CUR_MODE,6									;AN000;
+jne else_l_9									;AN000;
+@@:
 ;-------------------------------------------------------------------------------;AN000;
 ; Current mode is either mode 4, 5 or 6;					;AN000;
 ; Store each color of the old CGA All Points Addressable mode:			;AN000;
@@ -988,7 +1031,8 @@ EGA_SAVE_PTR	EQU	4A8H		; EGA BIOS pointer to table of		;AN000;
 	CALL	CGA_COL2RGB		; Convert IRGB to R,G,B values		;AN001;
 	CALL	RGB2XLT_TAB		; Convert RGB to an entry in XLT_TAB	;AN000;
 										;AN000;
-.ELSE					; ELSE, we have an EGA graphics mode:	;AN000;
+jmp endif_l_9
+else_l_9:				; ELSE, we have an EGA graphics mode:	;AN000;
 ;-------------------------------------------------------------------------------;AN000;
 ; The current mode is a either a text mode or one of the EGA enhanced mode;	;AN000;
 ; Store in the translation table each color available (these modes have 16 col.);AN000;
@@ -999,22 +1043,25 @@ EGA_SAVE_PTR	EQU	4A8H		; EGA BIOS pointer to table of		;AN000;
 					;  and index in the translation table	;AN000;
 STORE_1_EGA_COLOR:								;AN000;
 	MOV	AL,ES:[BX][DI]		; AL := Palette register		;AN000;
-       .IF   <CUR_MODE EQ 14> OR	; If mode E (hex) OR mode D (hex)	;AN000;
-       .IF   <CUR_MODE EQ 13>		; the colors are			;AN000;
-       .THEN				;  stored as I0CGA colors		;AN000;
+       cmp CUR_MODE,14			; If mode E (hex) OR mode D (hex)	;AN000;
+       je @F
+       cmp CUR_MODE,13			; the colors are			;AN000;
+       jne else_l_8			;  stored as I0CGA colors		;AN000;
+       @@:
 	  MOV	  AH,AL 		;  Convert I0RGB to IRGB (CGA color)	;AN000;
 	  AND	  AL,111B		;    Isolate RGB bits			;AN000;
 	  AND	  AH,10000B		;    Isolate I bit			;AN000;
 	  SHR	  AH,1			;    Move I bit from position 5 to 4	;AN000;
 	  OR	  AL,AH 		;    Get IRGB byte.			;AN000;
 	  CALL	  CGA_COL2RGB		;  Convert IRGB to R,G,B values 	;AN000;
-       .ELSE				; Else, they are stored as (rgbRGB);	;AN000;
+       jmp endif_l_8
+       else_l_8:			; Else, they are stored as (rgbRGB);	;AN000;
 	  CALL	  EGA_COL2RGB		;   Convert register to R,G,B values	;AN000;
-       .ENDIF									;AN000;
+       endif_l_8:									;AN000;
 	CALL	RGB2XLT_TAB		; Convert RGB to an entry in XLT_TAB	;AN000;
 	INC	DI			; Get next palette register number	;AN000;
 	LOOP	STORE_1_EGA_COLOR						;AN000;
-.ENDIF					; ENDIF 4 colors or 16 colors		;AN000;
+endif_l_9:				; ENDIF 4 colors or 16 colors		;AN000;
 										;AN000;
 	POP	DI			; Restore the registers 		;AN000;
 	POP	DX								;AN000;
@@ -1099,14 +1146,15 @@ SET_CGA_XLT_TAB  PROC NEAR							;AN000;
 	PUSH	DI								;AN000;
 	PUSH	ES								;AN000;
 										;AN000;
-.IF <CUR_MODE EQ 4> OR								;AN000;
-.IF <CUR_MODE EQ 5>								;AN000;
+cmp CUR_MODE,4									;AN000;
+je @F
+cmp CUR_MODE,5									;AN000;
+jne elseif_l_10
+@@:
 ;===============================================================================;AN000;
 ;										;AN000;
 ; THE CURRENT MODE IS MODE 4 OR 5						;AN000;
 ;										;AN000;
-;-------------------------------------------------------------------------------;AN000;
-.THEN										;AN000;
 ;-------------------------------------------------------------------------------;AN000;
 ; Read the CRT palette from the BIOS ROM to obtain the background color and	;AN000;
 ; the current palette number; store the palette number in BL			;AN000;
@@ -1147,13 +1195,14 @@ STORE_1_CGA_MODE4_COLOR:							;AN000;
 	CALL	CGA_COL2RGB	     ; Convert color (in AL) to R, G, B values	;AN000;
 	CALL	RGB2XLT_TAB	     ; Convert RGB to an entry in XLT_TAB	;AN000;
 	LOOP	STORE_1_CGA_MODE4_COLOR 					;AN000;
-.ELSEIF <CUR_MODE EQ 6> 							;AN000;
+jmp endif_l_10
+elseif_l_10:
+cmp CUR_MODE,6		 							;AN000;
+jne else_l_10
 ;===============================================================================;AN000;
 ;										;AN000;
 ; THE CURRENT MODE IS MODE 6							;AN000;
 ;										;AN000;
-;-------------------------------------------------------------------------------;AN000;
-.THEN										;AN000;
 ;-------------------------------------------------------------------------------;AN000;
 ; Store background color for mode 6 (mode 6 is a 2 colors, APA mode)		;AN000;
 ; Background is stored as BLACK 						;AN000;
@@ -1171,7 +1220,8 @@ STORE_1_CGA_MODE4_COLOR:							;AN000;
 	MOV	RGB.G,WHITE_INT   ; RGB := RGB of BLACK 			;AN000;
 	MOV	RGB.B,WHITE_INT   ;						;AN000;
 	CALL	RGB2XLT_TAB	  ; Convert RGB to an entry in XLT_TAB		;AN000;
-.ELSE										;AN000;
+jmp endif_l_10
+else_l_10:									;AN000;
 ;===============================================================================;AN000;
 ;										;AN000;
 ; THE CURRENT MODE IS A TEXT MODE:						;AN000;
@@ -1185,7 +1235,7 @@ STORE_1_CGA_TEXT_COLOR: 							;AN000;
 	CALL	RGB2XLT_TAB	  ; Convert RGB to an entry in XLT_TAB		;AN000;
 	INC	DI		  ; Increment index in the translation table	;AN000;
 	LOOP	STORE_1_CGA_TEXT_COLOR						;AN000;
-.ENDIF				  ;						;AN000;
+endif_l_10:			  ;						;AN000;
 										;AN000;
 	POP	ES								;AN000;
 	POP	DI								;AN000;
@@ -1221,14 +1271,15 @@ PAGE										;AN000;
 ;   Store the result in the XLT_TAB						;AN000;
 ;										;AN000;
 RGB2XLT_TAB PROC NEAR								;AN000;
-       .IF <DS:[BP].PRINTER_TYPE EQ COLOR>; Color printer ?			;AN000;
-       .THEN									;AN000;
+       cmp DS:[BP].PRINTER_TYPE,COLOR	; Color printer ?			;AN000;
+       jne else_l_11								;AN000;
 ;-------A color printer is attached:						;AN000;
 	  CALL	  RGB2BAND		; Yes, convert RGB to color band (in AL);AN000;
-       .ELSE									;AN000;
+       jmp endif_l_11
+       else_l_11:								;AN000;
 ;-------A black and white printer is attached:					;AN000;
 	  CALL	  RGB2INT		; No, RGB to an intensity in AL 	;AN000;
-       .ENDIF									;AN000;
+       endif_l_11:								;AN000;
 ;-------Store the result							;AN000;
 	MOV	XLT_TAB[DI],AL							;AN000;
        RET									;AN000;
@@ -1293,31 +1344,31 @@ CGA_COL2RGB PROC NEAR								;AN000;
 ; Test the Intensity bit:							;AN000;
 ;										;AN000;
 ;-----------------------------------------------------------------------	;AN000;
-       .IF <BIT AL AND I_BIT_MASK>	; IF, I is on				;AN000;
-       .THEN									;AN000;
+       test AL,I_BIT_MASK		; IF, I is on				;AN000;
+       jz @F									;AN000;
 	  ADD	  RGB.R,ONE_THIRD	; Then, add one third to each		;AN000;
 	  ADD	  RGB.G,ONE_THIRD	; color.				;AN000;
 	  ADD	  RGB.B,ONE_THIRD						;AN000;
-       .ENDIF									;AN000;
+       @@:									;AN000;
 ;-----------------------------------------------------------------------	;AN000;
 ;										;AN000;
 ; Test the RGB bits:								;AN000;
 ;										;AN000;
 ;-----------------------------------------------------------------------	;AN000;
-       .IF <BIT AL AND R_BIT_MASK>	; If, Red is on 			;AN000;
-       .THEN									;AN000;
+       test AL,R_BIT_MASK		; If, Red is on 			;AN000;
+       jz @F									;AN000;
 	  ADD	  RGB.R,TWO_THIRD	; then, add two third RED		;AN000;
-       .ENDIF									;AN000;
+       @@:									;AN000;
 										;AN000;
-       .IF <BIT AL AND G_BIT_MASK>	; If, Green is on			;AN000;
-       .THEN									;AN000;
+       test AL,G_BIT_MASK		; If, Green is on			;AN000;
+       jz @F									;AN000;
 	  ADD	  RGB.G,TWO_THIRD	; then, add two third GREEN		;AN000;
-       .ENDIF									;AN000;
+       @@:									;AN000;
 										;AN000;
-       .IF <BIT AL AND B_BIT_MASK>	; If, Blue is on			;AN000;
-       .THEN									;AN000;
+       test AL,B_BIT_MASK		; If, Blue is on			;AN000;
+       jz @F									;AN000;
 	  ADD	  RGB.B,TWO_THIRD	; then, add two third BLUE		;AN000;
-       .ENDIF									;AN000;
+       @@:									;AN000;
 										;AN000;
 	RET									;AN000;
 CGA_COL2RGB ENDP								;AN000;
@@ -1585,10 +1636,13 @@ PAGING_MODE_64 EQU 0								;AN000;
 ;-------------------------------------------------------------------------------;AN000;
 ; Check the video mode: 							;AN000;
 ;-------------------------------------------------------------------------------;AN000;
-.SELECT 									;AN000;
-.WHEN <CUR_MODE EQ 4> OR		  ; If the current mode is an old CGA	;AN000;
-.WHEN <CUR_MODE EQ 5> OR		  ;  mode:				;AN000;
-.WHEN <CUR_MODE EQ 6>			  ;					;AN000;
+cmp CUR_MODE,4				  ; If the current mode is an old CGA	;AN000;
+je @F
+cmp CUR_MODE,5				  ;  mode:				;AN000;
+je @F
+cmp CUR_MODE,6				  ;					;AN000;
+jne select_l_2_1
+@@:
 ;-------------------------------------------------------------------------------;AN000;
 ;										;AN000;
 ; Old CGA graphics mode (mode 4, 5 or 6)					;AN000;
@@ -1616,7 +1670,10 @@ PAGING_MODE_64 EQU 0								;AN000;
 	MOV	DI,0			; DI := Index in the translation table	;AN000;
 	CALL	RGB2XLT_TAB		; Store mapping in the translation table;AN000;
 										;AN000;
-.WHEN  <CUR_MODE EQ 11H>							;AN000;
+jmp endselect_l_2
+select_l_2_1:
+cmp CUR_MODE,11H								;AN000;
+jne otherwise_l_2
 ;-------------------------------------------------------------------------------;AN000;
 ;										;AN000;
 ; Mode 11h (2 colors out of 256,000 colors)					;AN000;
@@ -1637,7 +1694,8 @@ PAGING_MODE_64 EQU 0								;AN000;
 	CALL	GET_PALETTE_RGB 	; Get the RGB values for this color	;AN000;
 	MOV	DI,1			; DI := Index in translation table	;AN000;
 	CALL	RGB2XLT_TAB		; Store mapping in the translation table;AN000;
-.OTHERWISE									;AN000;
+jmp endselect_l_2
+otherwise_l_2:									;AN000;
 ;-------------------------------------------------------------------------------;AN000;
 ;										;AN000;
 ; The current mode is a 16 color mode						;AN000;
@@ -1655,7 +1713,7 @@ STORE_1_PS2_COLOR:								;AN000;
 	INC	DI			; Get next palette register number	;AN000;
 	INC	PAL_REGISTER_NB 	;					;AN000;
 	LOOP	STORE_1_PS2_COLOR	; Read it.				;AN000;
-.ENDSELECT									;AN000;
+endselect_l_2:									;AN000;
 										;AN000;
 	POP	DI								;AN000;
 	POP	CX								;AN000;
@@ -1700,14 +1758,15 @@ GET_PALETTE_RGB PROC								;AN000;
 ; (calculated in SI)								;AN000;
 ;										;AN000;
 ;-------------------------------------------------------------------------------;AN000;
-.IF <BL EQ PAGING_MODE_64>		; If mode is 64 Color page		;AN000;
-.THEN					; then					;AN000;
+cmp BL,PAGING_MODE_64			; If mode is 64 Color page		;AN000;
+jne else_l_12				; then					;AN000;
 	MOV	CL,6			;    SI := Current page num * 64	;AN000;
 	SHL	SI,CL			;					;AN000;
-.ELSE					; else, Mode is 16 Color page		;AN000;
+jmp endif_l_12
+else_l_12:				; else, Mode is 16 Color page		;AN000;
 	MOV	CL,4			;    SI := Current page num * 16	;AN000;
 	SHL	SI,CL			;					;AN000;
-.ENDIF										;AN000;
+endif_l_12:									;AN000;
 										;AN000;
 ;										;AN000;
 ;-------Read the PALETTE REGISTER						;AN000;
@@ -1880,29 +1939,39 @@ RGB2INT PROC NEAR								;AN000;
 	XOR	DX,DX			; DL := Running sum for grey intensity	;AN000;
 										;AN000;
 ;-------Process /R   (Reverse black and white)					;AN000;
-.IF <BIT DS:[BP].SWITCHES Z REVERSE_SW>  ; IF reverse is OFF			;AN000;
-.THEN					 ; THEN REVERSE BLACK AND WHITE:	;AN000;
+test DS:[BP].SWITCHES, REVERSE_SW	 ; IF reverse is OFF			;AN000;
+jnz endif_l_14				 ; THEN REVERSE BLACK AND WHITE:	;AN000;
 ;-------Test if the color is BLACK						;AN000;
-       .IF     <RGB.R EQ BLACK_INT> AND ; If black				;AN000;
-       .IF     <RGB.G EQ BLACK_INT> AND ;					;AN000;
-       .IF     <RGB.B EQ BLACK_INT>	;					;AN000;
-       .THEN				; then, replace it with white		;AN000;
+       cmp RGB.R,BLACK_INT		; If black				;AN000;
+       jne elseif_l_13_1
+       cmp RGB.G,BLACK_INT		;					;AN000;
+       jne elseif_l_13_1
+       cmp RGB.B,BLACK_INT		;					;AN000;
+       jne elseif_l_13_1		; then, replace it with white		;AN000;
 	  MOV	  AL,WHITE_INT							;AN000;
 	  JMP	  SHORT RGB2INT_END						;AN000;
-       .ELSEIF <RGB.R EQ WHITE_INT> AND ; else if, high-intensity white 	;AN000;
-       .IF     <RGB.G EQ WHITE_INT> AND ;					;AN000;
-       .IF     <RGB.B EQ WHITE_INT>	;					;AN000;
-       .THEN				; then, replace it with black		;AN000;
+       jmp endif_l_13
+       elseif_l_13_1:
+       cmp RGB.R,WHITE_INT		; else if, high-intensity white 	;AN000;
+       jne elseif_l_13_2
+       cmp RGB.G,WHITE_INT		;					;AN000;
+       jne elseif_l_13_2
+       cmp RGB.B,WHITE_INT		;					;AN000;
+       jne elseif_l_13_2		; then, replace it with black		;AN000;
 	  MOV	  AL,BLACK_INT							;AN000;
 	  JMP	  SHORT RGB2INT_END						;AN000;
-       .ELSEIF <RGB.R EQ TWO_THIRD> AND ; else if, white			;AN000;
-       .IF     <RGB.G EQ TWO_THIRD> AND ;					;AN000;
-       .IF     <RGB.B EQ TWO_THIRD>	;					;AN000;
-       .THEN				; then, replace it with black		;AN000;
+       jmp endif_l_13
+       elseif_l_13_2:
+       cmp RGB.R,TWO_THIRD		; else if, white			;AN000;
+       jne endif_l_13
+       cmp RGB.G,TWO_THIRD		;					;AN000;
+       jne endif_l_13
+       cmp RGB.B,TWO_THIRD		;					;AN000;
+       jne endif_l_13			; then, replace it with black		;AN000;
 	  MOV	  AL,BLACK_INT							;AN000;
 	  JMP	  SHORT RGB2INT_END						;AN000;
-       .ENDIF									;AN000;
-.ENDIF										;AN000;
+       endif_l_13:								;AN000;
+endif_l_14:									;AN000;
 										;AN000;
 ;-------Calculate Green component						;AN000;
 	MOV	AL,RGB.G		; AL := Green component 		;AN000;
@@ -1935,10 +2004,10 @@ RGB2INT PROC NEAR								;AN000;
 	MOV	BH,10			; BH := 10				;AN000;
 	DIV	BH			; AL := Total remainder / 10		;AN000;
 	ADD	DL,AL			; DL := Cumulative intensity		;AN000;
-       .IF <AH GT 4>			; If remainder > 4			;AN000;
-       .THEN				; Then, add 1				;AN000;
+       cmp AH,4				; If remainder > 4			;AN000;
+       jle @F				; Then, add 1				;AN000;
 	INC	DL			;  to the intensity			;AN000;
-       .ENDIF									;AN000;
+       @@:									;AN000;
 										;AN000;
 ;-------Adjust darkness 							;AN000;
 	ADD	DL,DS:[BP].DARKADJUST_VALUE					;AN000;
@@ -2051,36 +2120,46 @@ RGB2BAND PROC NEAR								;AN000;
 	PUSH	DX								;AN000;
 										;AN000;
 ;-------Process /R   (Reverse black and white)					;AN000;
-.IF <BIT DS:[BP].SWITCHES Z REVERSE_SW>  ; IF reverse is OFF			;AN000;
-.THEN					 ; THEN REVERSE BLACK AND WHITE:	;AN000;
+test DS:[BP].SWITCHES, REVERSE_SW	 ; IF reverse is OFF			;AN000;
+jnz endif_l_16				 ; THEN REVERSE BLACK AND WHITE:	;AN000;
 ;------------------------------------------------------------------------------ ;AN000;
 ;										;AN000;
 ; REVERSE BLACK AND WHITE:							;AN000;
 ;										;AN000;
 ;------------------------------------------------------------------------------ ;AN000;
 ;-------Test if the color is BLACK						;AN000;
-       .IF     <RGB.R EQ BLACK_INT> AND ; If black				;AN000;
-       .IF     <RGB.G EQ BLACK_INT> AND ;					;AN000;
-       .IF     <RGB.B EQ BLACK_INT>	;					;AN000;
-       .THEN				; then, replace it with the		;AN000;
+       cmp RGB.R,BLACK_INT		; If black				;AN000;
+       jne elseif_l_15_1
+       cmp RGB.G,BLACK_INT		;					;AN000;
+       jne elseif_l_15_1
+       cmp RGB.B,BLACK_INT		;					;AN000;
+       jne elseif_l_15_1		; then, replace it with the		;AN000;
 	  MOV	  BEST_CHOICE,0 	;	band mask for white		;AN000;
 	  JMP	  RGB2BAND_END		;	return this band mask		;AN000;
-       .ELSEIF <RGB.R EQ WHITE_INT> AND ; else if, high-intensity white 	;AN000;
-       .IF     <RGB.G EQ WHITE_INT> AND ;					;AN000;
-       .IF     <RGB.B EQ WHITE_INT>	;					;AN000;
-       .THEN				; then, replace it with the		;AN000;
+       jmp endif_l_15
+       elseif_l_15_1:
+       cmp RGB.R,WHITE_INT		; else if, high-intensity white 	;AN000;
+       jne elseif_l_15_2
+       cmp RGB.G,WHITE_INT		;					;AN000;
+       jne elseif_l_15_2
+       cmp RGB.B,WHITE_INT		;					;AN000;
+       jne elseif_l_15_2		; then, replace it with the		;AN000;
 	  MOV	  RGB.R,BLACK_INT	;	RGB values of black		;AN000;
 	  MOV	  RGB.G,BLACK_INT						;AN000;
 	  MOV	  RGB.B,BLACK_INT						;AN000;
-       .ELSEIF <RGB.R EQ TWO_THIRD> AND ; else if, white			;AN000;
-       .IF     <RGB.G EQ TWO_THIRD> AND ;					;AN000;
-       .IF     <RGB.B EQ TWO_THIRD>	;					;AN000;
-       .THEN				; then, replace it with the		;AN000;
+       jmp endif_l_15
+       elseif_l_15_2:
+       cmp RGB.R,TWO_THIRD		; else if, white			;AN000;
+       jne endif_l_15
+       cmp RGB.G,TWO_THIRD		;					;AN000;
+       jne endif_l_15
+       cmp RGB.B,TWO_THIRD		;					;AN000;
+       jne endif_l_15			; then, replace it with the		;AN000;
 	  MOV	  RGB.R,BLACK_INT	;	RGB values of black		;AN000;
 	  MOV	  RGB.G,BLACK_INT						;AN000;
 	  MOV	  RGB.B,BLACK_INT						;AN000;
-       .ENDIF									;AN000;
-.ENDIF										;AN000;
+       endif_l_15:								;AN000;
+endif_l_16:									;AN000;
 ;------------------------------------------------------------------------------ ;AN000;
 ;										;AN000;
 ; CALCULATE THE GEOMETRIC DISTANCE BETWEEN THE COLORS OF THE PIXEL AND THOSE OF ;AN000;
@@ -2131,12 +2210,12 @@ INSPECT_1_PRINT_COLOR:								;AN000;
 ;	Check how close is this print color to the screen color:		;AN000;
 ;------------------------------------------------------------------------------ ;AN000;
 	MOV	AX,CUR_DIFF		; If this color is better than what we	;AN000;
-       .IF <AX L MIN_DIFF>		;  had before.				;AN000;
-       .THEN				;					;AN000;
+       cmp AX,MIN_DIFF			;  had before.				;AN000;
+       jge @F				;					;AN000;
 	  MOV	  MIN_DIFF,AX		; then, new minimum distance;		;AN000;
 	  MOV	  AL,[BX].SELECT_MASK	;	get its band mask.		;AN000;
 	  MOV	  BEST_CHOICE,AL	;					;AN000;
-       .ENDIF				;					;AN000;
+       @@:				;					;AN000;
 										;AN000;
 ;------------------------------------------------------------------------------ ;AN000;
 ;	Get offset of next COLORPRINT info record:				;AN000;

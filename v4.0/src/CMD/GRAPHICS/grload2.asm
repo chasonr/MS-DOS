@@ -53,16 +53,15 @@
 				       ;;					;AN000;
 CODE	SEGMENT PUBLIC 'CODE' BYTE     ;;                                       ;AN000;
 				       ;;					;AN000;
-	INCLUDE STRUC.INC	       ;;					;AN000;
-	INCLUDE GRINST.EXT	       ;; Bring in external declarations	;AN000;
+	INCLUDE grinst.ext	       ;; Bring in external declarations	;AN000;
 				       ;;  for transient command processing	;AN000;
-	INCLUDE GRSHAR.STR	       ;;					;AN000;
-	INCLUDE GRMSG.EQU	       ;;					;AN000;
-	INCLUDE GRINST.EXT	       ;;					;AN000;
-	INCLUDE GRLOAD.EXT	       ;;					;AN000;
-	INCLUDE GRPARSE.EXT	       ;;					;AN000;
-	INCLUDE GRPATTRN.STR	       ;;					;AN000;
-	INCLUDE GRPATTRN.EXT	       ;;					;AN000;
+	INCLUDE grshar.str	       ;;					;AN000;
+	INCLUDE grmsg.equ	       ;;					;AN000;
+	INCLUDE grinst.ext	       ;;					;AN000;
+	INCLUDE grload.ext	       ;;					;AN000;
+	INCLUDE grparse.ext	       ;;					;AN000;
+	INCLUDE grpattrn.str	       ;;					;AN000;
+	INCLUDE grpattrn.ext	       ;;					;AN000;
 				       ;;					;AN000;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;					;AN000;
 ;;										;AN000;
@@ -113,9 +112,12 @@ RESULT_VAL	    DB	 ?,?,?,?       ;; returned numeric value		;AN000;
 TERMINATE_DISPLAYMODE	PROC	       ;;					;AN000;
 				       ;;					;AN000;
   MOV  AX,STMTS_DONE		       ;;					;AN000;
- .IF <PTD_FOUND EQ YES> AND	       ;; For the matched PTD			;AN000;
- .IF <BIT AX NAND BOX> AND	       ;;  issue "Invalid parm value"           ;AN000;
- .IF <PRT_BOX_ERROR EQ NO>	       ;;  message if PRINTBOX ID not		;AN000;
+ cmp PTD_FOUND,YES		       ;; For the matched PTD			;AN000;
+ jne @F
+ test AX,BOX			       ;;  issue "Invalid parm value"           ;AN000;
+ jnz @F
+ cmp PRT_BOX_ERROR,NO		       ;;  message if PRINTBOX ID not		;AN000;
+ jne @F
 				       ;;  matched in each DISPLAYMODE section	;AN000;
 	 PUSH AX		       ;; Save STMT_DONE flags			;AN000;
 	 MOV  AX,INVALID_PB	       ;;					;AN000;
@@ -124,13 +126,14 @@ TERMINATE_DISPLAYMODE	PROC	       ;;					;AN000;
 	 MOV  BUILD_STATE,NO	       ;;					;AN000;
 	 MOV  PRT_BOX_ERROR,YES        ;; Issue this message only once		;AN000;
 	 POP  AX		       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
   AND  AX,GR			       ;; Check for missing statements is last	;AN000;
- .IF <AX NE GR> 		       ;;  DISPLAYMODE section: 		;AN000;
+ cmp AX,GR	 		       ;;  DISPLAYMODE section: 		;AN000;
+ je @F
      OR  STMT_ERROR,MISSING	       ;;    GRAPHICS stmt is required		;AN000;
      MOV  PARSE_ERROR,YES	       ;;					;AN000;
      MOV  BUILD_STATE,NO	       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
 				       ;;					;AN000;
 				       ;;					;AN000;
 				       ;;					;AN000;
@@ -148,19 +151,21 @@ TERMINATE_DISPLAYMODE	ENDP	       ;;					;AN000;
 TERMINATE_PRINTER	PROC	       ;;					;AN000;
 				       ;;					;AN000;
   MOV  AX,BLOCK_END		       ;;					;AN000;
- .IF <AX A MAX_BLOCK_END>	       ;; Keep track of the largest PRINTER	;AN000;
+ cmp AX,MAX_BLOCK_END		       ;; Keep track of the largest PRINTER	;AN000;
+ jbe @F
     MOV  MAX_BLOCK_END,AX	       ;;  section so we can allow space for	;AN000;
- .ENDIF 			       ;;  reload with a different printer	;AN000;
+ @@:	 			       ;;  reload with a different printer	;AN000;
 				       ;;  type.				;AN000;
 				       ;;					;AN000;
 				       ;; Check for missing statements		;AN000;
   MOV  AX,STMTS_DONE		       ;;					;AN000;
   AND  AX,DISP			       ;; At least one DISPLAYMODE		;AN000;
- .IF <AX NE DISP>		       ;;  must have been found in last 	;AN000;
+ cmp AX,DISP			       ;;  must have been found in last 	;AN000;
+ je @F
      OR  STMT_ERROR,MISSING	       ;;   PRINTER section			;AN000;
      MOV  PARSE_ERROR,YES	       ;;					;AN000;
      MOV  BUILD_STATE,NO	       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
 				       ;;					;AN000;
   RET				       ;;					;AN000;
 				       ;;					;AN000;
@@ -208,10 +213,11 @@ PARSE_PRINTER  PROC		       ;;					;AN000;
   MOV  CUR_PRINTER_TYPE,BLACK_WHITE    ;; Assume black & white until we hit	;AN000;
 				       ;;  a COLORPRINT 			;AN000;
 				       ;;					;AN000;
- .IF <BIT STMTS_DONE AND PRT>	       ;; If not the first PRINTER section	;AN000;
+ test STMTS_DONE,PRT		       ;; If not the first PRINTER section	;AN000;
+ jz @F
      CALL  TERMINATE_DISPLAYMODE       ;;  then clean up the last one and	;AN000;
      CALL  TERMINATE_PRINTER	       ;;    the last DISPLAYMODE section.	;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
 				       ;;					;AN000;
  MOV  AX,FIRST_BLOCK		       ;;					;AN000;
  MOV  BLOCK_START,AX		       ;; Reset block pointers to start 	;AN000;
@@ -220,18 +226,19 @@ PARSE_PRINTER  PROC		       ;;					;AN000;
   MOV  STMTS_DONE,PRT		       ;; Clear all bits except for PRT 	;AN000;
   MOV  GROUPS_DONE,0		       ;; Clear 				;AN000;
 				       ;;					;AN000;
- .IF <PTD_FOUND EQ YES> 	       ;; PRINTER statement marks the end of	;AN000;
+ cmp PTD_FOUND,YES	 	       ;; PRINTER statement marks the end of	;AN000;
+ jne @F
      MOV  PTD_FOUND,PROCESSED	       ;;  the previous PTD			;AN000;
      MOV  BUILD_STATE,NO	       ;; Stop building shared data		;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
 				       ;;					;AN000;
   MOV  CL,TAB_DIR_NB_ENTRIES	       ;; Reset the pattern table copy		;AN000;
   XOR  CH,CH			       ;;  pointers.  These pointers		;AN000;
   MOV  BX,OFFSET TAB_DIRECTORY	       ;;   are established when a pattern	;AN000;
- .REPEAT			       ;;    table is copied to the shared	;AN000;
+ @@:				       ;;    table is copied to the shared	;AN000;
     MOV [BX].TAB_COPY,-1	       ;;     data area.  Initially they	;AN000;
     ADD BX,SIZE TAB_ENTRY	       ;;      are -1.				;AN000;
- .LOOP				       ;;					;AN000;
+ LOOP @B			       ;;					;AN000;
 				       ;;					;AN000;
   MOV  AX,OFFSET PRINTER_TYPE_PARM     ;; Store printer type from command	;AN000;
   MOV  PRINTER_P1V1,AX		       ;;  line in value list			;AN000;
@@ -239,34 +246,44 @@ PARSE_PRINTER  PROC		       ;;					;AN000;
 				       ;; SI => the line to parse		;AN000;
   XOR  DX,DX			       ;;					;AN000;
 				       ;;					;AN000;
- .REPEAT			       ;;					;AN000;
+ repeat_l_1:			       ;;					;AN000;
      XOR  CX,CX 		       ;; Don't worry about number of operands  ;AN000;
      CALL SYSPARSE		       ;;					;AN000;
-    .IF <AX EQ 9>		       ;; Syntax error is the only thing	;AN000;
+    cmp AX,9			       ;; Syntax error is the only thing	;AN000;
+    jne @F
 	OR  STMT_ERROR,INVALID	       ;;  which can go wrong			;AN000;
 	MOV  PARSE_ERROR,YES	       ;;					;AN000;
 	MOV  BUILD_STATE,NO	       ;;					;AN000;
-    .ENDIF			       ;;					;AN000;
- .UNTIL <AX EQ 0> OR		       ;;					;AN000;
- .UNTIL <AX EQ -1>		       ;;					;AN000;
+    @@:				       ;;					;AN000;
+ cmp AX,0			       ;;					;AN000;
+ je @F
+ cmp AX,-1			       ;;					;AN000;
+ jne repeat_l_1
+ @@:
 				       ;; Printer type parm matched one coded	;AN000;
 				       ;;  on the PRINTER statement		;AN000;
- .IF <AX EQ 0>			       ;;					;AN000;
-    .IF <PTD_FOUND EQ NO>	       ;;					;AN000;
+ cmp AX,0			       ;;					;AN000;
+ jne else_l_2
+    cmp PTD_FOUND,NO		       ;;					;AN000;
+    jne endif_l_2
 	MOV  PTD_FOUND,YES	       ;; If the printer type matches and	;AN000;
-       .IF <PARSE_ERROR EQ NO> AND     ;;  no errors have been found yet	;AN000;
-       .IF <PRT_BOX_ERROR EQ NO> AND   ;;					;AN000;
-       .IF <MEM_OVERFLOW EQ NO>        ;;					;AN000;
+       cmp PARSE_ERROR,NO	       ;;  no errors have been found yet	;AN000;
+       jne endif_l_2
+       cmp PRT_BOX_ERROR,NO	       ;;					;AN000;
+       jne endif_l_2
+       cmp MEM_OVERFLOW,NO	       ;;					;AN000;
+       jne endif_l_2
 	   MOV BUILD_STATE,YES	       ;;   then start building the shared	;AN000;
-       .ENDIF			       ;;    data				;AN000;
-    .ENDIF			       ;;					;AN000;
- .ELSE				       ;; No match				;AN000;
+    endif_l_1:			       ;;    data				;AN000;
+ jmp endif_l_2
+ else_l_2:			       ;; No match				;AN000;
     MOV  BUILD_STATE,NO 	       ;;					;AN000;
-   .IF <AX NE -1>		       ;; Error during parse			;AN000;
+   cmp AX,-1			       ;; Error during parse			;AN000;
+   je @F
       OR  STMT_ERROR,INVALID	       ;; set error flag for caller		;AN000;
       MOV PARSE_ERROR,YES	       ;; set error flag for caller		;AN000;
-   .ENDIF			       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+   @@:				       ;;					;AN000;
+ endif_l_2: 			       ;;					;AN000;
 				       ;;					;AN000;
   RET										;AN000;
 				       ;;					;AN000;
@@ -310,33 +327,38 @@ PARSE_DISPLAYMODE  PROC 	       ;;					;AN000;
 				       ;;					;AN000;
   MOV  CUR_STMT,DISP		       ;;					;AN000;
 				       ;; Check for a preceeding PRINTER	;AN000;
- .IF <BIT STMTS_DONE NAND PRT>	       ;;					;AN000;
+ test STMTS_DONE,PRT		       ;;					;AN000;
+ jnz @F
      OR  STMT_ERROR,MISSING	       ;;					;AN000;
 	MOV  PARSE_ERROR,YES	       ;;					;AN000;
 	MOV  BUILD_STATE,NO	       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
 				       ;;					;AN000;
 				       ;;					;AN000;
- .IF <BIT STMTS_DONE NAND DISP>        ;; If first DISPLAYMODE...		;AN000;
-     .IF <BUILD_STATE EQ YES>	       ;;					;AN000;
+ test STMTS_DONE,DISP                  ;; If first DISPLAYMODE...		;AN000;
+ jnz else_l_3
+     cmp BUILD_STATE,YES	       ;;					;AN000;
+     jne endif_l_3
 	 MOV  AX,BLOCK_END	       ;;					;AN000;
 	 MOV  [BP].DISPLAYMODE_PTR,AX  ;; Set pointer to first DISPLAYMODE	;AN000;
 	 MOV  BLOCK_START,AX	       ;; New block starts after last one	;AN000;
-     .ENDIF			       ;;					;AN000;
- .ELSE				       ;;					;AN000;
+ jmp endif_l_3			       ;;					;AN000;
+ else_l_3:			       ;;					;AN000;
      CALL TERMINATE_DISPLAYMODE        ;; If not the first DISPLAYMODE then	;AN000;
 				       ;;  clean up the last one.		;AN000;
      MOV  DI,BLOCK_START	       ;; DI=pointer to DISPLAYMODE block just	;AN000;
      MOV  AX,BLOCK_END		       ;;  built				;AN000;
-    .IF <BUILD_STATE EQ YES>	       ;;					;AN000;
+    cmp BUILD_STATE,YES		       ;;					;AN000;
+    jne @F
 	MOV  [BP+DI].NEXT_DISP_MODE,AX ;; Add new block to DISPLAYMODE chain	;AN000;
-    .ENDIF			       ;;					;AN000;
+    @@:				       ;;					;AN000;
      MOV  BLOCK_START,AX	       ;; New block starts after last one	;AN000;
- .ENDIF 			       ;;					;AN000;
+ endif_l_3: 			       ;;					;AN000;
 				       ;;					;AN000;
   MOV  AX,SIZE DISPLAYMODE_STR	       ;; Allocate space for new DISPLAYMODE	;AN000;
   CALL	GROW_SHARED_DATA	       ;;  block				;AN000;
- .IF <BUILD_STATE EQ YES>	       ;;					;AN000;
+ cmp BUILD_STATE,YES		       ;;					;AN000;
+ jne @F
      MOV  DI,BLOCK_START	       ;; Start of new block			;AN000;
      MOV  [BP+DI].NUM_SETUP_ESC,0	  ;; SETUP, RESTORE are optional so set ;AN000;
      MOV  [BP+DI].NUM_RESTORE_ESC,0	  ;;  to defaults			;AN000;
@@ -349,7 +371,7 @@ PARSE_DISPLAYMODE  PROC 	       ;;					;AN000;
      MOV  [BP+DI].NEXT_DISP_MODE,-1    ;; This is the last DISPLAYMODE for now! ;AN000;
      MOV  AX,BLOCK_END		       ;;					;AN000;
      MOV  [BP+DI].DISP_MODE_LIST_PTR,AX;; Start mode list at end of new block	;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
 				       ;;					;AN000;
   OR   STMTS_DONE,DISP		       ;; Indicate DISPLAYMODE found		;AN000;
   AND  STMTS_DONE,NOT (BOX+GR+SET+REST) ;; Reset flags for PRINTBOX, GRAPHICS	;AN000;
@@ -359,14 +381,16 @@ PARSE_DISPLAYMODE  PROC 	       ;;					;AN000;
   MOV  DI,OFFSET DISPMODE_PARSE_PARMS  ;; parse parms				;AN000;
 				       ;; SI => the line to parse		;AN000;
   XOR  DX,DX			       ;;					;AN000;
- .REPEAT			       ;;					;AN000;
+ repeat_l_2:			       ;;					;AN000;
     XOR  CX,CX			       ;;					;AN000;
     CALL SYSPARSE		       ;;					;AN000;
-   .IF <AX EQ 0>		       ;; If mode is valid			;AN000;
+   cmp AX,0			       ;; If mode is valid			;AN000;
+   jne else_l_4
 	  PUSH AX		       ;;					;AN000;
 	  MOV	AX,1		       ;; Add a mode to the list		;AN000;
 	  CALL	GROW_SHARED_DATA       ;; Update block end			;AN000;
-	 .IF <BUILD_STATE EQ YES>      ;;					;AN000;
+	 cmp BUILD_STATE,YES           ;;					;AN000;
+	 jne @F
 	     PUSH DI		       ;;					;AN000;
 	     MOV  DI,BLOCK_START       ;;					;AN000;
 	     INC  [BP+DI].NUM_DISP_MODE   ;; Bump number of modes in list	;AN000;
@@ -374,16 +398,19 @@ PARSE_DISPLAYMODE  PROC 	       ;;					;AN000;
 	     MOV  AL,RESULT_VAL   ;; Get mode from result buffer		;AN000;
 	     MOV  [BP+DI-1],AL	       ;; Store the mode at end of list 	;AN000;
 	     POP  DI		       ;;					;AN000;
-	 .ENDIF 		       ;;					;AN000;
+	 @@:	 		       ;;					;AN000;
 	  POP  AX		       ;;					;AN000;
-   .ELSE			       ;;					;AN000;
-      .IF <AX NE -1>		       ;;					;AN000;
+   jmp endif_l_4
+   else_l_4:			       ;;					;AN000;
+      cmp AX,-1			       ;;					;AN000;
+      je @F
 	  OR   STMT_ERROR,INVALID	  ;; Mode is invalid			;AN000;
 	  MOV  PARSE_ERROR,YES		  ;;					;AN000;
 	  MOV  BUILD_STATE,NO		  ;;					;AN000;
-      .ENDIF				  ;;					;AN000;
-   .ENDIF			       ;;					;AN000;
- .UNTIL <AX EQ -1>		       ;;					;AN000;
+      @@:				  ;;					;AN000;
+   endif_l_4:			       ;;					;AN000;
+ cmp AX,-1			       ;;					;AN000;
+ jne repeat_l_2
 				       ;;					;AN000;
   RET										;AN000;
 				       ;;					;AN000;
@@ -425,44 +452,51 @@ SETUP_P1V    DB   1		    ;; # of value lists 			;AN000;
 PARSE_SETUP  PROC		       ;;					;AN000;
 				       ;;					;AN000;
   MOV  CUR_STMT,SET		       ;;					;AN000;
- .IF <BIT STMTS_DONE NAND DISP>        ;; DISPLAYMODE must preceed this 	;AN000;
+ test STMTS_DONE,DISP                  ;; DISPLAYMODE must preceed this 	;AN000;
+ jnz @F
      OR  STMT_ERROR,MISSING	       ;;					;AN000;
 	MOV  PARSE_ERROR,YES	       ;;					;AN000;
 	MOV  BUILD_STATE,NO	       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@: 				       ;;					;AN000;
 				       ;;					;AN000;
- .IF <BIT GROUPS_DONE AND SET>	       ;; Check for previous group of SETUP	;AN000;
+ test GROUPS_DONE,SET		       ;; Check for previous group of SETUP	;AN000;
+ jz @F
      OR  STMT_ERROR,SEQUENCE	       ;;  stmts				;AN000;
 	MOV  PARSE_ERROR,YES	       ;;					;AN000;
 	MOV  BUILD_STATE,NO	       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
 				       ;;					;AN000;
- .IF <BIT STMTS_DONE NAND SET>	       ;; If first SETUP...			;AN000;
-     .IF <BUILD_STATE EQ YES>	       ;;					;AN000;
+ test STMTS_DONE,SET		       ;; If first SETUP...			;AN000;
+ jnz endif_l_5
+     cmp BUILD_STATE,YES	       ;;					;AN000;
+     jne @F
 	 MOV  DI,BLOCK_START	       ;;					;AN000;
 	 MOV  AX,BLOCK_END	       ;;					;AN000;
 	 MOV  [BP+DI].SETUP_ESC_PTR,AX ;; Set pointer to SETUP seq		;AN000;
 	 MOV  [BP+DI].NUM_SETUP_ESC,0  ;; Init sequence size			;AN000;
-     .ENDIF			       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+     @@:			       ;;					;AN000;
+ endif_l_5: 			       ;;					;AN000;
 				       ;;					;AN000;
   OR   STMTS_DONE,SET		       ;; Indicate SETUP found			;AN000;
- .IF <PREV_STMT NE SET> THEN	       ;; Terminate any preceeding groups	;AN000;
+ cmp PREV_STMT,SET		       ;; Terminate any preceeding groups	;AN000;
+ je @F
      MOV  AX,PREV_STMT		       ;;  except for SETUP group		;AN000;
      OR   GROUPS_DONE,AX	       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
 				       ;;					;AN000;
   MOV  DI,OFFSET SETUP_PARSE_PARMS     ;; parse parms				;AN000;
 				       ;; SI => the line to parse		;AN000;
   XOR  DX,DX			       ;;					;AN000;
- .REPEAT			       ;;					;AN000;
+ repeat_l_3:			       ;;					;AN000;
     XOR  CX,CX			       ;;					;AN000;
     CALL SYSPARSE		       ;;					;AN000;
-   .IF <AX EQ 0>		       ;; If esc byte is valid			;AN000;
+   cmp AX,0			       ;; If esc byte is valid			;AN000;
+   jne else_l_6
 	  PUSH AX		       ;;					;AN000;
 	  MOV	AX,1		       ;; Add a byte to the sequence		;AN000;
 	  CALL	GROW_SHARED_DATA       ;; Update block end			;AN000;
-	 .IF <BUILD_STATE EQ YES>      ;;					;AN000;
+	 cmp BUILD_STATE,YES           ;;					;AN000;
+	 jne @F
 	     PUSH DI		       ;;					;AN000;
 	     MOV  DI,BLOCK_START       ;;					;AN000;
 	     INC  [BP+DI].NUM_SETUP_ESC   ;; Bump number of bytes in sequence	;AN000;
@@ -470,16 +504,19 @@ PARSE_SETUP  PROC		       ;;					;AN000;
 	     MOV  AL,RESULT_VAL  ;; Get esc byte from result buffer		;AN000;
 	     MOV  [BP+DI-1],AL	       ;; Store at end of sequence		;AN000;
 	     POP  DI		       ;;					;AN000;
-	 .ENDIF 		       ;;					;AN000;
+	 @@:	 		       ;;					;AN000;
 	  POP  AX		       ;;					;AN000;
-   .ELSE			       ;;					;AN000;
-      .IF <AX NE -1>		       ;;					;AN000;
+   jmp endif_l_6
+   else_l_6:			       ;;					;AN000;
+      cmp AX,-1			       ;;					;AN000;
+      je @F
 	  OR   STMT_ERROR,INVALID      ;; parm is invalid			;AN000;
 	  MOV  PARSE_ERROR,YES	       ;;					;AN000;
 	  MOV  BUILD_STATE,NO	       ;;					;AN000;
-      .ENDIF			       ;;					;AN000;
-   .ENDIF			       ;;					;AN000;
- .UNTIL <AX EQ -1> NEAR 	       ;;					;AN000;
+      @@:			       ;;					;AN000;
+   endif_l_6:			       ;;					;AN000;
+ cmp AX,-1		 	       ;;					;AN000;
+ jne repeat_l_3
   RET				       ;;					;AN000;
 				       ;;					;AN000;
 PARSE_SETUP  ENDP		    ;;						;AN000;
@@ -520,44 +557,51 @@ RESTORE_P1V    DB   1		      ;; # of value lists			;AN000;
 PARSE_RESTORE  PROC			 ;;					;AN000;
 				       ;;					;AN000;
   MOV  CUR_STMT,SET		       ;;					;AN000;
- .IF <BIT STMTS_DONE NAND DISP>        ;; DISPLAYMODE must preceed this 	;AN000;
+ test STMTS_DONE,DISP                  ;; DISPLAYMODE must preceed this 	;AN000;
+ jnz @F
      OR  STMT_ERROR,MISSING	       ;;					;AN000;
 	MOV  PARSE_ERROR,YES	       ;;					;AN000;
 	MOV  BUILD_STATE,NO	       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
 				       ;;					;AN000;
- .IF <BIT GROUPS_DONE AND REST>        ;; Check for previous group of RESTORE	;AN000;
+ test GROUPS_DONE,REST                 ;; Check for previous group of RESTORE	;AN000;
+ jz @F
      OR  STMT_ERROR,SEQUENCE	       ;;  stmts				;AN000;
 	MOV  PARSE_ERROR,YES	       ;;					;AN000;
 	MOV  BUILD_STATE,NO	       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
 				       ;;					;AN000;
- .IF <BIT STMTS_DONE NAND REST>        ;; If first RESTORE...			;AN000;
-     .IF <BUILD_STATE EQ YES>	       ;;					;AN000;
+ test STMTS_DONE,REST		       ;; If first RESTORE...			;AN000;
+ jnz endif_l_7
+     cmp BUILD_STATE,YES	       ;;					;AN000;
+     jne @F
 	 MOV  DI,BLOCK_START	       ;;					;AN000;
 	 MOV  AX,BLOCK_END	       ;;					;AN000;
 	 MOV  [BP+DI].RESTORE_ESC_PTR,AX ;; Set pointer to RESTORE seq		;AN000;
 	 MOV  [BP+DI].NUM_RESTORE_ESC,0  ;; Init sequence size			;AN000;
-     .ENDIF			       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+     @@:			       ;;					;AN000;
+ endif_l_7: 			       ;;					;AN000;
 				       ;;					;AN000;
   OR   STMTS_DONE,REST		       ;; Indicate RESTORE found		;AN000;
- .IF <PREV_STMT NE REST> THEN		;; Terminate any preceeding groups	;AN000;
+ cmp PREV_STMT,REST		       ;; Terminate any preceeding groups	;AN000;
+ je @F
      MOV  AX,PREV_STMT		       ;;  except for RESTORE group		;AN000;
      OR   GROUPS_DONE,AX	       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
 				       ;;					;AN000;
   MOV  DI,OFFSET RESTORE_PARSE_PARMS	 ;; parse parms 			;AN000;
 				       ;; SI => the line to parse		;AN000;
   XOR  DX,DX			       ;;					;AN000;
- .REPEAT			       ;;					;AN000;
+ repeat_l_4:			       ;;					;AN000;
     XOR  CX,CX			       ;;					;AN000;
     CALL SYSPARSE		       ;;					;AN000;
-   .IF <AX EQ 0>		       ;; If esc byte is valid			;AN000;
+   cmp AX,0			       ;; If esc byte is valid			;AN000;
+   jne else_l_8
 	  PUSH AX		       ;;					;AN000;
 	  MOV	AX,1		       ;; Add a byte to the sequence		;AN000;
 	  CALL	GROW_SHARED_DATA       ;; Update block end			;AN000;
-	 .IF <BUILD_STATE EQ YES>      ;;					;AN000;
+	 cmp BUILD_STATE,YES           ;;					;AN000;
+	 jne @F
 	     PUSH DI		       ;;					;AN000;
 	     MOV  DI,BLOCK_START       ;;					;AN000;
 	     INC  [BP+DI].NUM_RESTORE_ESC   ;; Bump number of bytes in sequence ;AN000;
@@ -565,16 +609,19 @@ PARSE_RESTORE  PROC			 ;;					;AN000;
 	     MOV  AL,RESULT_VAL  ;; Get esc byte from result buffer		;AN000;
 	     MOV  [BP+DI-1],AL	       ;; Store at end of sequence		;AN000;
 	     POP  DI		       ;;					;AN000;
-	 .ENDIF 		       ;;					;AN000;
+	 @@:	 		       ;;					;AN000;
 	  POP  AX		       ;;					;AN000;
-   .ELSE			       ;;					;AN000;
-      .IF <AX NE -1>		       ;;					;AN000;
+   jmp endif_l_8
+   else_l_8:			       ;;					;AN000;
+      cmp AX,-1			       ;;					;AN000;
+      je @F
 	  OR   STMT_ERROR,INVALID      ;; parm is invalid			;AN000;
 	  MOV  PARSE_ERROR,YES	       ;;					;AN000;
 	  MOV  BUILD_STATE,NO	       ;;					;AN000;
-      .ENDIF			       ;;					;AN000;
-   .ENDIF			       ;;					;AN000;
- .UNTIL <AX EQ -1> NEAR 	       ;;					;AN000;
+      @@:			       ;;					;AN000;
+   endif_l_8:			       ;;					;AN000;
+ cmp AX,-1		 	       ;;					;AN000;
+ jne repeat_l_4
   RET				       ;;					;AN000;
 				       ;;					;AN000;
 PARSE_RESTORE  ENDP		      ;;					;AN000;
@@ -653,11 +700,12 @@ PARSE_PRINTBOX	PROC		       ;;					;AN000;
   MOV  PROF_BOX_W,0		       ;;  does not match the one requested	;AN000;
   MOV  PROF_BOX_H,0		       ;;					;AN000;
   MOV  CUR_STMT,BOX		       ;;					;AN000;
- .IF <BIT STMTS_DONE NAND DISP>        ;; DISPLAYMODE must preceed PRINTBOX	;AN000;
+ test STMTS_DONE,DISP                  ;; DISPLAYMODE must preceed PRINTBOX	;AN000;
+ jnz @F
      OR  STMT_ERROR,MISSING	       ;;					;AN000;
 	MOV  PARSE_ERROR,YES	       ;;					;AN000;
 	MOV  BUILD_STATE,NO	       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
 				       ;; Multiple PRINTBOX stmts may be coded	;AN000;
 				       ;;  We must decide if this one		;AN000;
 				       ;;   matches the requested display type	;AN000;
@@ -670,74 +718,91 @@ PARSE_PRINTBOX	PROC		       ;;					;AN000;
   MOV  AX,PRINTBOX_ID_PTR	       ;; Insert requested display type in	;AN000;
   MOV  PRINTBOX_P0V1,AX 	       ;;  parser value list			;AN000;
   CALL SYSPARSE 		       ;; PARSE display type			;AN000;
- .IF <AX EQ 0>			       ;; If ID matches then set this flag.	;AN000;
+ cmp AX,0			       ;; If ID matches then set this flag.	;AN000;
+ jne @F
      MOV  PRINTBOX_MATCH,YES	       ;;					;AN000;
      OR   STMTS_DONE,BOX	       ;; Indicate PRINTBOX found		;AN000;
      MOV  AX,PREV_STMT		       ;; Terminate any preceeding groups	;AN000;
      OR   GROUPS_DONE,AX	       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
 				       ;;					;AN000;
 				       ;;					;AN000;
 				       ;;					;AN000;
   CALL SYSPARSE 		       ;; PARSE horizontal dimension		;AN000;
- .IF <AX EQ 0>			       ;;					;AN000;
+ cmp AX,0			       ;;					;AN000;
+ jne else_l_10
      MOV  BL,RESULT_VAL 	       ;;					;AN000;
      MOV  PROF_BOX_W,BL 	       ;; Save in local var			;AN000;
- .ELSE				       ;;					;AN000;
-    .IF <AX EQ -1>		       ;;					;AN000;
+ jmp endif_l_10
+ else_l_10:			       ;;					;AN000;
+    cmp AX,-1			       ;;					;AN000;
+    jne else_l_9
 	JMP  PRINTBOX_DONE	       ;;					;AN000;
-    .ELSE			       ;;					;AN000;
+    jmp endif_l_9
+    else_l_9:			       ;;					;AN000;
 	OR  STMT_ERROR,INVALID	       ;;					;AN000;
 	MOV PARSE_ERROR,YES	       ;;					;AN000;
 	MOV BUILD_STATE,NO	       ;;					;AN000;
-    .ENDIF			       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+    endif_l_9:			       ;;					;AN000;
+ endif_l_10: 			       ;;					;AN000;
 				       ;;					;AN000;
   CALL SYSPARSE 		       ;; PARSE vertical dimension		;AN000;
- .IF <AX EQ 0>			       ;;					;AN000;
+ cmp AX,0			       ;;					;AN000;
+ jne else_l_12
      MOV  BL,RESULT_VAL 	       ;;					;AN000;
      MOV  PROF_BOX_H,BL 	       ;; Save in local var			;AN000;
- .ELSE				       ;;					;AN000;
-    .IF <AX EQ -1>		       ;;					;AN000;
+ jmp endif_l_12
+ else_l_12:			       ;;					;AN000;
+    cmp AX,-1			       ;;					;AN000;
+    jne else_l_11
 	JMP  PRINTBOX_DONE	       ;;					;AN000;
-    .ELSE			       ;;					;AN000;
+    jmp endif_l_11
+    else_l_11:			       ;;					;AN000;
 	OR  STMT_ERROR,INVALID	       ;;					;AN000;
 	MOV PARSE_ERROR,YES	       ;;					;AN000;
 	MOV BUILD_STATE,NO	       ;;					;AN000;
-    .ENDIF			       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+    endif_l_11:			       ;;					;AN000;
+ endif_l_12: 			       ;;					;AN000;
 				       ;;					;AN000;
   CALL SYSPARSE 		       ;; Parse ROTATE parm			;AN000;
- .IF <AX EQ 0>			       ;;					;AN000;
-    .IF <BUILD_STATE EQ YES> AND       ;;					;AN000;
-    .IF <PRINTBOX_MATCH EQ YES>        ;;					;AN000;
+ cmp AX,0			       ;;					;AN000;
+ jne else_l_14
+    cmp BUILD_STATE,YES                ;;					;AN000;
+    jne endif_l_14
+    cmp PRINTBOX_MATCH,YES             ;;					;AN000;
+    jne endif_l_14
 	PUSH DI 		       ;;					;AN000;
 	MOV  DI,BLOCK_START	       ;;					;AN000;
 	OR   [BP+DI].PRINT_OPTIONS,ROTATE ;;					;AN000;
 	POP  DI 		       ;;					;AN000;
-    .ENDIF			       ;;					;AN000;
- .ELSE				       ;;					;AN000;
-    .IF <AX EQ -1>		       ;;					;AN000;
+ jmp endif_l_14			       ;;					;AN000;
+ else_l_14:			       ;;					;AN000;
+    cmp AX,-1			       ;;					;AN000;
+    jne else_l_13
 	JMP  PRINTBOX_DONE	       ;;					;AN000;
-    .ELSE			       ;;					;AN000;
+    jmp endif_l_13
+    else_l_13:			       ;;					;AN000;
 	OR  STMT_ERROR,INVALID	       ;;					;AN000;
 	MOV PARSE_ERROR,YES	       ;;					;AN000;
 	MOV BUILD_STATE,NO	       ;;					;AN000;
-    .ENDIF			       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+    endif_l_13:			       ;;					;AN000;
+ endif_l_14: 			       ;;					;AN000;
 				       ;;					;AN000;
   CALL SYSPARSE 		       ;; CHECK FOR EXTRA PARMS 		;AN000;
- .IF <AX NE -1> 		    ;;						;AN000;
+ cmp AX,-1			    ;;						;AN000;
+ je @F
     OR	STMT_ERROR,INVALID	   ;;						;AN000;
     MOV PARSE_ERROR,YES 	   ;;						;AN000;
     MOV BUILD_STATE,NO		   ;;						;AN000;
- .ENDIF 			       ;;					;AN000;
+ @@:	 			       ;;					;AN000;
 				       ;;					;AN000;
 				       ;;					;AN000;
 PRINTBOX_DONE:			       ;;					;AN000;
 				       ;;					;AN000;
- .IF <BUILD_STATE EQ YES> AND	    ;; Store the PRINTBOX dimensions		;AN000;
- .IF <PRINTBOX_MATCH EQ YES>	    ;;						;AN000;
+ cmp BUILD_STATE,YES		    ;; Store the PRINTBOX dimensions		;AN000;
+ jne @F
+ cmp PRINTBOX_MATCH,YES		    ;;						;AN000;
+ jne @F
      PUSH DI			    ;;	in the DISPLAYMODE block		;AN000;
      MOV  DI,BLOCK_START	    ;;						;AN000;
      MOV  AL,PROF_BOX_W 	    ;;						;AN000;
@@ -745,14 +810,17 @@ PRINTBOX_DONE:			       ;;					;AN000;
      MOV  AL,PROF_BOX_H 	    ;;						;AN000;
      MOV  [BP+DI].BOX_HEIGHT,AL     ;;						;AN000;
      POP  DI			    ;;						;AN000;
- .ENDIF 			    ;;						;AN000;
+ @@:	 			    ;;						;AN000;
 				       ;; If we have a B&W printer then 	;AN000;
 				       ;;   load the grey patterns for the	;AN000;
 				       ;;    requested print box size.		;AN000;
- .IF <CUR_PRINTER_TYPE EQ BLACK_WHITE> NEAR					;AN000;
+ cmp CUR_PRINTER_TYPE,BLACK_WHITE						;AN000;
+ jne endif_l_20
 				       ;;					;AN000;
-    .IF <PROF_BOX_W NE 0> AND NEAR	  ;; Dimensions could also be 0 if the	;AN000;
-    .IF <PROF_BOX_H NE 0> NEAR		  ;;  printbox ID does not apply to this;AN000;
+    cmp PROF_BOX_W,0			  ;; Dimensions could also be 0 if the	;AN000;
+    je endif_l_19
+    cmp PROF_BOX_H,0			  ;;  printbox ID does not apply to this;AN000;
+    je endif_l_19
 					  ;;   displaymode, so don't try for    ;AN000;
 					  ;;	a pattern!			;AN000;
 	MOV  BX,OFFSET TAB_DIRECTORY	  ;;					;AN000;
@@ -761,29 +829,38 @@ PRINTBOX_DONE:			       ;;					;AN000;
 	MOV  DI,BLOCK_START		  ;;					;AN000;
 	MOV  AL,PROF_BOX_W		  ;; Requested box width		;AN000;
 	MOV  AH,PROF_BOX_H		  ;; Requested box height		;AN000;
-       .REPEAT				  ;;					;AN000;
-	  .IF <[BX].BOX_W_PAT EQ AL> AND  ;;					;AN000;
-	  .IF <[BX].BOX_H_PAT EQ AH>	  ;;					;AN000;
-	     .LEAVE			  ;;					;AN000;
-	  .ELSE 			  ;;					;AN000;
+       repeat_l_5:			  ;;					;AN000;
+	  cmp [BX].BOX_W_PAT,AL		  ;;					;AN000;
+	  jne else_l_15
+	  cmp [BX].BOX_H_PAT,AH		  ;;					;AN000;
+	  jne else_l_15
+	     jmp endrepeat_l_5		  ;;					;AN000;
+	  jmp endif_l_15
+	  else_l_15: 			  ;;					;AN000;
 	      ADD  BX,SIZE TAB_ENTRY	  ;;					;AN000;
-	  .ENDIF			  ;;					;AN000;
-       .LOOP				  ;;					;AN000;
-       .IF <ZERO CX>			  ;;					;AN000;
+	  endif_l_15:			  ;;					;AN000;
+       LOOP repeat_l_5			  ;;					;AN000;
+       endrepeat_l_5:
+       or CX,CX				  ;;					;AN000;
+       jne else_l_18
 	   OR  STMT_ERROR,INVALID	  ;; Unsupported box size		;AN000;
 	   MOV PARSE_ERROR,YES		  ;;					;AN000;
 	   MOV BUILD_STATE,NO		  ;;					;AN000;
-       .ELSE NEAR			  ;; Box size OK - pattern tab found	;AN000;
-	  .IF <[BX].TAB_COPY NE -1>	  ;; Pointer is NOT null if the table	;AN000;
+       jmp endif_l_18
+       else_l_18:			  ;; Box size OK - pattern tab found	;AN000;
+	  cmp [BX].TAB_COPY,-1		  ;; Pointer is NOT null if the table	;AN000;
+	  je else_l_17
 	      MOV  AX,[BX].TAB_COPY	  ;;  has already been copied to	;AN000;
 					  ;;   the shared data area.		;AN000;
-	     .IF <BUILD_STATE EQ YES> AND ;;	Point to the copy.		;AN000;
-	     .IF <PRINTBOX_MATCH EQ YES>  ;; Establish pointer to table ONLY	;AN000;
+	     cmp BUILD_STATE,YES	  ;;	Point to the copy.		;AN000;
+	     jne endif_l_17
+	     cmp PRINTBOX_MATCH,YES	  ;; Establish pointer to table ONLY	;AN000;
+	     jne endif_l_17
 		 MOV  [BP+DI].PATTERN_TAB_PTR,AX ;; if the PB ID matched.	;AN000;
 		 MOV  AL,[BX].NB_INT	  ;; Number of table entries (intensitie;AN000;
 		 MOV  [BP+DI].NUM_PATTERNS,AL ;;				;AN000;
-	     .ENDIF			  ;;					;AN000;
-	  .ELSE 			  ;; Otherwise we have to copy it.	;AN000;
+	  jmp endif_l_17		  ;;					;AN000;
+	  else_l_17: 			  ;; Otherwise we have to copy it.	;AN000;
 	   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;					;AN000;
 	   ;; Copy the table even if the printbox ID didn't match!              ;AN000;
 	   ;; This is a simple way to reserve enough space to allow reloading	;AN000;
@@ -802,24 +879,26 @@ PRINTBOX_DONE:			       ;;					;AN000;
 	      MOV  [BX].TAB_COPY,DX	  ;; Store ptr to copy in the directory ;AN000;
 	      MOV  AX,[BX].TAB_SIZE	  ;;					;AN000;
 	      CALL GROW_SHARED_DATA	  ;; Allocate room for the table	;AN000;
-	     .IF <BUILD_STATE EQ YES>	  ;;					;AN000;
+	     cmp BUILD_STATE,YES	  ;;					;AN000;
+	     jne endif_l_16
 		 MOV  CX,AX		  ;; Number of bytes to copy		;AN000;
 		 PUSH SI		  ;; Save parse pointer 		;AN000;
 		 MOV  SI,[BX].TAB_OFFSET  ;; Source pointer			;AN000;
 		 ADD  DI,BP		  ;; make DI an absolute pointer (dest) ;AN000;
 		 REP  MOVSB		  ;; Move it!				;AN000;
 		 POP  SI		  ;;					;AN000;
-		.IF <PRINTBOX_MATCH EQ YES>  ;; Establish pointer to table ONLY ;AN000;
+		cmp PRINTBOX_MATCH,YES    ;; Establish pointer to table ONLY	;AN000;
+		jne @F
 		    MOV  DI,BLOCK_START      ;; Establish pointer in DISPLAYMODE;AN000;
 		    MOV  [BP+DI].PATTERN_TAB_PTR,DX  ;;  info			;AN000;
 		    MOV  AL,[BX].NB_INT      ;; Number of table entries (intens);AN000;
 		    MOV  [BP+DI].NUM_PATTERNS,AL ;;				;AN000;
-		.ENDIF			     ;; 				;AN000;
-	     .ENDIF			  ;;					;AN000;
-	  .ENDIF			   ;;					;AN000;
-       .ENDIF			       ;;					;AN000;
-    .ENDIF			       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+		@@:			     ;; 				;AN000;
+	     endif_l_16:		  ;;					;AN000;
+	  endif_l_17:			   ;;					;AN000;
+       endif_l_18:		       ;;					;AN000;
+    endif_l_19:			       ;;					;AN000;
+ endif_l_20: 			       ;;					;AN000;
   RET				       ;;					;AN000;
 				       ;;					;AN000;
 				       ;;					;AN000;
@@ -891,14 +970,17 @@ PARSE_VERB     PROC		       ;;					;AN000;
   XOR  DX,DX			       ;;					;AN000;
   XOR  CX,CX			       ;;					;AN000;
   CALL SYSPARSE 		       ;;					;AN000;
- .IF <AX EQ 0>			       ;;					;AN000;
+ cmp AX,0			       ;;					;AN000;
+ jne else_l_21
     MOV  BL,RESULT_TAG		       ;;					;AN000;
     XOR  BH,BH			       ;; return tag in BX			;AN000;
- .ELSE				       ;;					;AN000;
-   .IF <AX NE -1>		       ;; syntax error				;AN000;
+ jmp endif_l_21
+ else_l_21:			       ;;					;AN000;
+   cmp AX,-1			       ;; syntax error				;AN000;
+   je @F
       OR  STMT_ERROR,INVALID	       ;; set error flag for caller		;AN000;
-   .ENDIF			       ;;					;AN000;
- .ENDIF 			       ;;					;AN000;
+   @@:				       ;;					;AN000;
+ endif_l_21: 			       ;;					;AN000;
   RET										;AN000;
 PARSE_VERB     ENDP								;AN000;
 				       ;;					;AN000;
