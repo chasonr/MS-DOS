@@ -4,6 +4,8 @@
 *.OBJ
 *.CPI
 *.cpi
+*.lst
+*.err
 ANSI/ansi.sys
 ANSI/ANSI.SYS
 COUNTRY/country.sys
