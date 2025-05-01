@@ -946,7 +946,7 @@ MAC_Build_Stack_And_Map:
 	mul	bx					;get total byte count	;an000; dms;
 	cli						;ints off		;an000; dms;
 	mov	bx,offset MAC_M_C_Log			;Ptr in struc		;an000; dms;
-	add	bx,size MAC_M_C_Log/2			;next entry		;an000; dms;
+	add	bx,(MAC_Map_Table-MAC_M_C_Log)/2	;next entry		;an000; dms;
 	sti						;ints on		;an000; dms;
 	add	bx,bp					;offset BP relative	;an000; dms;
 	call	MAC_Expand_Stack_And_Copy		;set up stack for	;an000; dms;
@@ -1099,7 +1099,7 @@ MAC_Strip_Stack_And_Map:							;an000; dms;
 	cli						;ints off		;an000; dms;
 	mov	bx,offset MAC_M_C_Log
 	sti						;ints on		;an000; dms;
-	add	bx,size MAC_M_C_Log/2
+	add	bx,(MAC_Map_Table-MAC_M_C_Log)/2
 	add	bx,bp					;offset BP relative	;an000; dms;
 	call	MAC_Shrink_Stack_And_Copy		;restore new page data	;an000; dms;
 

@@ -6,7 +6,7 @@
 RESR_EXT_PGS   DW    0			;Ext mem reserved here after EMS taken	;an002; dms;
 
 MACH_MODEL_PTR	DD   0F000FFFEh 	;Byte in upper BIOS that indicates @RH1
-MODEL_BYTE	DB   (?)		; which system you are on.	   @RH1
+MODEL_BYTE	DB   ?			; which system you are on.	   @RH1
 PC1		EQU  0FFh		;Values returned for:  PC 1	   @RH1
 PC_XT		EQU  0FEh		;   PC XT			   @RH1
 XT_AQUARIUS	EQU  0FBH		;   PC Aquarius 		   @RH1
@@ -519,7 +519,7 @@ VIRT2REAL ENDP
 
 
 include romscan.inc			; code to do romscan for hole location/verification
-INCLUDE PARMPARS.INC			;Routines to parse the parameters
+INCLUDE parmpars.inc			;Routines to parse the parameters
 					; on the CONFIG.SYS line
 
 ;旼컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴커

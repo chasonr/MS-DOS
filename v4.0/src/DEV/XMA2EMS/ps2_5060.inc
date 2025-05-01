@@ -37,7 +37,7 @@
 ;�								      �
 ;읕컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴켸
 
-include SYSVAR.INC			;system variables structure		;an007; dms;
+include sysvar.inc			;system variables structure		;an007; dms;
 
 
 			     ;旼컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴커
@@ -731,5 +731,3 @@ CMOS_HI EQU  71h
 CMOS_RET:
 	RET				;				   @RH4
 ADJUST_CMOS	ENDP
-
-

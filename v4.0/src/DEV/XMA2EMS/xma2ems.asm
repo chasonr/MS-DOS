@@ -95,7 +95,7 @@ PREV_EXT	   EQU 'EP'             ;  Previously loaded drivers
 WARM_MASK	   EQU	 1			;ISOLATE WARM START BIT
 OFFSET_IN_XREF	   EQU BYTE PTR[BX+SI]
 LENGTH_IN_XREF	   EQU BYTE PTR[BX+SI+1]
-PAGE_LIST_ENTRY    EQU WORD PTR[SI + OFFSET PAGE_ALLOC_LIST]	    ;	   @RH8
+PAGE_LIST_ENTRY    EQU ds:WORD PTR[SI + OFFSET PAGE_ALLOC_LIST]	    ;	   @RH8
 page_table_entry    EQU byte PTR[SI + OFFSET PAGE_ALLOC_table] ;temp for assembl
 XREF_TABLE_ENTRY   EQU word PTR[DI + OFFSET HANDLE_XREF_TABLE]	    ;	   @RH1
 NUM_PHYSICAL_PAGES EQU 4
@@ -754,7 +754,7 @@ XMA_INT15_Exit: 								;an000; dms;
 
 XMA_INT15   ENDP								;an000; dms;
 
-include I13HOOK.INC								;an004; dms;
+include i13hook.inc								;an004; dms;
 
 
 ;浜様様様様様様様様様様様様様様様様様様様様様様様様様様様様様様様様様様融
@@ -2573,13 +2573,13 @@ RESIDENT:				;last address that must stay resident
 PAGE
 PAGE
 
-INCLUDE EMSINIT.INC			;Main file for throwaway
+INCLUDE emsinit.inc			;Main file for throwaway
 					; initialization code
-INCLUDE XMA1DIAG.INC			;XMA 1 diagnostics and routines
-INCLUDE PS2_5060.INC			;Diagnostics for PS/2 models 50    @RH2
+INCLUDE xma1diag.inc			;XMA 1 diagnostics and routines
+INCLUDE ps2_5060.inc			;Diagnostics for PS/2 models 50    @RH2
 					; and 60.  Support for XMA/A and   @RH2
 					; MXO cards	 		   @RH2
-INCLUDE XMA2EMS.CL1
+INCLUDE xma2ems.cl1
 
 
 TEMP_STACK DB	STACK_SIZE DUP(0)	;RESERVE FOR TEMP STACK

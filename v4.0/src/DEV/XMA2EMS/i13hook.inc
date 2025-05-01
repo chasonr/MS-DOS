@@ -1,5 +1,5 @@
 
-include MSBDS.INC				;include BDS struc		;an000; dms;
+include msbds.inc				;include BDS struc		;an000; dms;
 
 
 
