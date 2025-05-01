@@ -128,11 +128,11 @@ COMMENT #
 	.286P		      ; Enable recognition of 286 privileged instructs.
 
 	.XLIST		      ; Turn off the listing
-	INCLUDE INDEDAT.INC
+	INCLUDE indedat.inc
 
 	IF1		      ; Only include the macros in the first pass
-	INCLUDE INDEOVP.MAC   ;   of the assembler
-	INCLUDE INDEINS.MAC
+	INCLUDE indeovp.mac   ;   of the assembler
+	INCLUDE indeins.mac
 	ENDIF
 	.LIST		      ; Turn on the listing
 

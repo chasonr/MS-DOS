@@ -761,7 +761,7 @@ LJCOND  MACRO   OP,DISPL
 TEMP    =       $ + 4
          DB      0FH
          DB      &OP
-         DW      (OFFSET &DISPL)-(&TEMP)
+         DW      (OFFSET &DISPL)-(TEMP)
         ENDM
 
 ;       LJO     DISPL  (Long Jump on Overflow)

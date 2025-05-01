@@ -13,49 +13,57 @@ COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
 #######################	dependencies begin here. #########################
 #
 
+.SUFFIXES: .asm .obj
+
+AS = jwasm
+AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.asm.obj:
+	$(AS) $(AFLAGS) -Fo$@ $<
+
 all: xmaem.sys
 
 xmaem.cl1: XMAEM.SKL $(msg)/$(COUNTRY).MSG
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg1.bat src\dev\xmaem $(subst /,\,$<) $(country)"
 
-indeini.obj:   INDEINI.ASM
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\xmaem $(subst /,\,$<) $(subst /,\,$@)"
+indeini.obj:   indeini.asm indedat.inc indeovp.mac indeins.mac
 
-indeemu.obj:   INDEEMU.ASM
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\xmaem $(subst /,\,$<) $(subst /,\,$@)"
+indeemu.obj:   indeemu.asm indedat.inc indeovp.mac indeins.mac
 
-indeexc.obj:   INDEEXC.ASM
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\xmaem $(subst /,\,$<) $(subst /,\,$@)"
+indeexc.obj:   indeexc.asm indedat.inc indeovp.mac
 
-indexma.obj:   INDEXMA.ASM
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\xmaem $(subst /,\,$<) $(subst /,\,$@)"
+indexma.obj:   indexma.asm indedat.inc indeovp.mac indeins.mac
 
-indedma.obj:   INDEDMA.ASM
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\xmaem $(subst /,\,$<) $(subst /,\,$@)"
+indedma.obj:   indedma.asm indedat.inc indeovp.mac indeins.mac
 
-indeidt.obj:   INDEIDT.ASM
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\xmaem $(subst /,\,$<) $(subst /,\,$@)"
+indeidt.obj:   indeidt.asm indedat.inc indeovp.mac
 
-indegdt.obj:   INDEGDT.ASM
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\xmaem $(subst /,\,$<) $(subst /,\,$@)"
+indegdt.obj:   indegdt.asm indedat.inc indeacc.inc indedes.mac
 
-indei15.obj:   INDEI15.ASM
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\xmaem $(subst /,\,$<) $(subst /,\,$@)"
+indei15.obj:   indei15.asm indedat.inc indeovp.mac
 
-indemsg.obj:   INDEMSG.ASM xmaem.cl1
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\xmaem $(subst /,\,$<) $(subst /,\,$@)"
+indemsg.obj:   indemsg.asm xmaem.cl1
 
-indepat.obj:   INDEPAT.ASM
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\xmaem $(subst /,\,$<) $(subst /,\,$@)"
+indepat.obj:   indepat.asm
 
 OBJS = indeini.obj indeexc.obj indeemu.obj indexma.obj indedma.obj \
        indei15.obj indeidt.obj indegdt.obj indemsg.obj indepat.obj
 
 xmaem.sys:  $(OBJS) XMAEM.LNK
-	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\dev\xmaem @xmaem.lnk"
+	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
+	echo 'option map=xmaem.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name xmaem.sys' >>resp.txt
+	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
+	wlink @resp.txt
 
 clean:
 	rm -f *.obj
+	rm -f *.err
+	rm -f *.lst
 	rm -f xmaem.cl1
 	rm -f xmaem.sys
+	rm -f xmaem.map
 	rm -f resp.txt

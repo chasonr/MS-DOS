@@ -103,11 +103,11 @@ COMMENT #
         .286P                 ; Enable recognition of 286 privileged instructs.
 
         .XLIST                ; Turn off the listing
-        INCLUDE INDEDAT.INC
+        INCLUDE indedat.inc
 
         IF1                   ; Only include macros on the first pass
-        INCLUDE INDEOVP.MAC
-        INCLUDE INDEINS.MAC
+        INCLUDE indeovp.mac
+        INCLUDE indeins.mac
         ENDIF
         .LIST                 ; Turn on the listing
 
@@ -154,7 +154,7 @@ PAGE
 TABLE:
         .XLIST
         REPT    256             ; Initialize the table so that all instructions
-        JMP     UNEXPECTED      ;   jump to UNEXPECTED
+        JMP     near ptr UNEXPECTED ;   jump to UNEXPECTED
         ENDM
         .LIST
 

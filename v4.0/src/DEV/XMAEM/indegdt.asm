@@ -66,11 +66,11 @@ COMMENT #
         .286P                 ; Enable recognition of 286 privileged instructs.
 
         .XLIST                ; Turn off the listing
-        INCLUDE INDEDAT.INC   ; Include system data structures
-        INCLUDE INDEACC.INC   ; Include access byte definitions
+        INCLUDE indedat.inc   ; Include system data structures
+        INCLUDE indeacc.inc   ; Include access byte definitions
 
         IF1                   ; Only include macros on the first pass
-        INCLUDE INDEDES.MAC   ; Descriptor macros
+        INCLUDE indedes.mac   ; Descriptor macros
         ENDIF
         .LIST                 ; Turn on the listing
 

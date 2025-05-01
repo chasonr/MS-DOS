@@ -98,11 +98,11 @@ COMMENT #
         .286P                 ; Enable recognition of 286 privileged instructs.
 
         .XLIST                ; Turn off the listing
-        INCLUDE INDEDAT.INC   ; Include system data structures and equates
+        INCLUDE indedat.inc   ; Include system data structures and equates
 
         IF1                   ; Only include macros on the first pass
-        INCLUDE INDEOVP.MAC   ; Override prefix macros
-        INCLUDE INDEINS.MAC   ; 386 instruction macros
+        INCLUDE indeovp.mac   ; Override prefix macros
+        INCLUDE indeins.mac   ; 386 instruction macros
         ENDIF
         .LIST                 ; Turn the listing back on
 
@@ -283,7 +283,9 @@ DMAOUT:
         MOV     AX,SYS_PATCH_DS         ; Load DS with the selector for our data
         MOV     DS,AX                   ;   segment
         CMP     WORD_FLAG,0             ; Is this a word operation?
-       LJNE     DISPLAY                 ; No?  Sorry.  We don't support word DMA
+.386P
+        JNE     DISPLAY                 ; No?  Sorry.  We don't support word DMA
+.286P
                                         ;   yet.  We'll just have to signal an
                                         ;   error.
         LEA     BX,DMATABLE             ; Point BX to the base of our channel
@@ -309,7 +311,9 @@ CHK_CHN_0:
         CMP     DX,0083H                ; Is it the page port for channel 1?
         JB      SET_CHN_3               ; No.  It's below that.  Then it must
                                         ;   be the page port for channel 3!
-       LJA      DISPLAY                 ; No.  It's above it.  We don't know any
+.386P
+        JA      DISPLAY                 ; No.  It's above it.  We don't know any
+.286P
                                         ;   ports between 83H and 87H.  Go
                                         ;   signal an error.
         ADD     BX,DMAENTRYLEN*1        ; Yes.  It's the page port for channel 1
