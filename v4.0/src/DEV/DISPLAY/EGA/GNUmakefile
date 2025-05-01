@@ -9,52 +9,64 @@ hinc	=../../../H
 ######################## Dependencies begin here #########################
 #
 
+.SUFFIXES: .asm .obj
+
+AS = jwasm
+AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.asm.obj:
+	$(AS) $(AFLAGS) -Fo$@ $<
+
 all: ega.cpi
 
-cpi-head.obj: CPI-HEAD.ASM
-	dosemu -t --Fdrive_c ../../../.. -E "src\domasm.bat src\dev\display\ega $(subst /,\,$<) $(subst /,\,$@)"
+cpi-head.obj: cpi-head.asm
 
-437-cpi.obj: 437-CPI.ASM \
-             437-8X16.ASM \
-             437-8X14.ASM \
-             437-8X8.ASM
-	dosemu -t --Fdrive_c ../../../.. -E "src\domasm.bat src\dev\display\ega $(subst /,\,$<) $(subst /,\,$@)"
+437-cpi.obj: 437-cpi.asm \
+             437-8x16.asm \
+             437-8x14.asm \
+             437-8x8.asm
 
-850-cpi.obj: 850-CPI.ASM \
-             850-8X16.ASM \
-             850-8X14.ASM \
-             850-8X8.ASM
-	dosemu -t --Fdrive_c ../../../.. -E "src\domasm.bat src\dev\display\ega $(subst /,\,$<) $(subst /,\,$@)"
+850-cpi.obj: 850-cpi.asm \
+             850-8x16.asm \
+             850-8x14.asm \
+             850-8x8.asm
 
-860-cpi.obj: 860-CPI.ASM \
-             860-8X16.ASM \
-             860-8X14.ASM \
-             860-8X8.ASM
-	dosemu -t --Fdrive_c ../../../.. -E "src\domasm.bat src\dev\display\ega $(subst /,\,$<) $(subst /,\,$@)"
+860-cpi.obj: 860-cpi.asm \
+             860-8x16.asm \
+             860-8x14.asm \
+             860-8x8.asm
 
-863-cpi.obj: 863-CPI.ASM \
-             863-8X16.ASM \
-             863-8X14.ASM \
-             863-8X8.ASM
-	dosemu -t --Fdrive_c ../../../.. -E "src\domasm.bat src\dev\display\ega $(subst /,\,$<) $(subst /,\,$@)"
+863-cpi.obj: 863-cpi.asm \
+             863-8x16.asm \
+             863-8x14.asm \
+             863-8x8.asm
 
-865-cpi.obj: 865-CPI.ASM \
-             865-8X16.ASM \
-             865-8X14.ASM \
-             865-8X8.ASM
-	dosemu -t --Fdrive_c ../../../.. -E "src\domasm.bat src\dev\display\ega $(subst /,\,$<) $(subst /,\,$@)"
+865-cpi.obj: 865-cpi.asm \
+             865-8x16.asm \
+             865-8x14.asm \
+             865-8x8.asm
 
-copyrigh.obj: COPYRIGH.ASM  $(inc)/copyrigh.inc
-	dosemu -t --Fdrive_c ../../../.. -E "src\domasm.bat src\dev\display\ega $(subst /,\,$<) $(subst /,\,$@)"
+copyrigh.obj: copyrigh.asm  $(inc)/copyrigh.inc
 
 OBJS = cpi-head.obj 437-cpi.obj 850-cpi.obj 860-cpi.obj 863-cpi.obj \
        865-cpi.obj copyrigh.obj
 
 ega.cpi: $(OBJS) EGA.LNK
-	dosemu -t --Fdrive_c ../../../.. -E "src\dolink src\dev\display\ega @ega.lnk"
+	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
+	echo 'option map=cpi-head.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name cpi-head.exe' >>resp.txt
+	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
+	wlink @resp.txt
 	exe2bin -q cpi-head.exe ega.cpi
-	rm cpi-head.exe
 
 clean:
 	rm -f *.obj
+	rm -f *.err
+	rm -f *.lst
 	rm -f ega.cpi
+	rm -f cpi-head.exe
+	rm -f cpi-head.map
+	rm -f resp.txt

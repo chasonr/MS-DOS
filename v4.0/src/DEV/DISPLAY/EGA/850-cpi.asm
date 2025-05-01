@@ -6,43 +6,43 @@ IF1
         %OUT    .
         %OUT    CP SRC files:
         %OUT    .
-        %OUT    .       CODE PAGE:  437
+        %OUT    .       CODE PAGE:  850
 ENDIF
 
-EGA437: DW     LEN_437                  ; SIZE OF ENTRY HEADER
-        DW     POST_EGA437,0            ; POINTER TO NEXT HEADER
+EGA850: DW     LEN_850                  ; SIZE OF ENTRY HEADER
+        DW     POST_EGA850,0            ; POINTER TO NEXT HEADER
         DW     1                        ; DEVICE TYPE
         DB     "EGA     "               ; DEVICE SUBTYPE ID
-        DW     437                      ; CODE PAGE ID
+        DW     850                      ; CODE PAGE ID
         DW     3 DUP(0)                 ; RESERVED
-        DW     OFFSET DATA437,0         ; POINTER TO FONTS
-LEN_437 EQU    ($-EGA437)               ;
+        DW     OFFSET DATA850,0         ; POINTER TO FONTS
+LEN_850 EQU    ($-EGA850)               ;
                                         ;
-DATA437:DW     1                        ; CART/NON-CART
+DATA850:DW     1                        ; CART/NON-CART
         DW     3                        ; # OF FONTS
-        DW     LEN_D437                 ; LENGTH OF DATA
-D437:                                   ;
+        DW     LEN_D850                 ; LENGTH OF DATA
+D850:                                   ;
         DB     16,8                     ; CHARACTER BOX SIZE
         DB     0,0                      ; ASPECT RATIO (UNUSED)
         DW     256                      ; NUMBER OF CHARACTERS
                                         ;
-        INCLUDE 437-8X16.ASM            ;
+        INCLUDE 850-8x16.asm            ;
                                         ;
         DB     14,8                     ; CHARACTER BOX SIZE
         DB     0,0                      ; ASPECT RATIO (UNUSED)
         DW     256                      ; NUMBER OF CHARACTERS
                                         ;
-        INCLUDE 437-8X14.ASM            ;
+        INCLUDE 850-8x14.asm            ;
                                         ;
         DB     8,8                      ; CHARACTER BOX SIZE
         DB     0,0                      ; ASPECT RATIO (UNUSED)
         DW     256                      ; NUMBER OF CHARACTERS
                                         ;
-        INCLUDE 437-8X8.ASM             ;
+        INCLUDE 850-8x8.asm             ;
                                         ;
-LEN_D437        EQU ($-D437)            ;
+LEN_D850        EQU ($-D850)            ;
                                         ;
-POST_EGA437     EQU     $               ;
+POST_EGA850     EQU     $               ;
                                         ;
 CODE    ENDS                            ;
         END                             ;
