@@ -31,9 +31,9 @@ assume cs:code,ds:code,es:code
 
 ;AN000;
 .xlist
-include SYSMSG.INC			;equates and macros
+include sysmsg.inc			;equates and macros
 .list
-MSG_UTILNAME <DRIVER>
+MSG_UTILNAME <driver>
 
 iTEST = 0
 ;---------------------------------------------------
@@ -197,7 +197,7 @@ QusSW	equ	0	; Support quoted string format
 ;.xlist
 assume ds:nothing				;AN007;!!!Parse.ASM sometimes assumes DS
 						;      to access its own variable!!!
-	include PARSE.ASM			;together with PSDATA.INC
+	include parse.asm			;together with PSDATA.INC
 assume ds:code					;AN007;
 ;.list
 ;Control block definitions for PARSER.
@@ -319,7 +319,7 @@ F_Choices	label	byte	;AN000;
 MSG_SERVICES <MSGDATA>
 
 ;AN000;Place the messages here
-MSG_SERVICES <DRIVER.CL1, DRIVER.CL2, DRIVER.CLA>
+MSG_SERVICES <driver.cl1, driver.cl2, driver.cla>
 
 ;AN000;Put messages handler code here.
 MSG_SERVICES <LOADmsg,DISPLAYmsg,CHARmsg>
@@ -1052,7 +1052,7 @@ Set_RecBPB:
 	add	di,RBytePerSec		; es:di -> Recommended BPB
 	mov	cx,BPBSIZ
 	cld
-	repe	movsb			; move BPBSIZ bytes
+	rep	movsb			; move BPBSIZ bytes
 
 	call	Handle_Switches 	; replace with 'new' values as
 					; specified in switches.
