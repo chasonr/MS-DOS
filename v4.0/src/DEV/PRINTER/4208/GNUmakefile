@@ -9,19 +9,36 @@ msg	=../../../MESSAGE
 ######################### Dependencies Begin Here ##########################
 #
 
+.SUFFIXES: .asm .obj
+
+AS = jwasm
+AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.asm.obj:
+	$(AS) $(AFLAGS) -Fo$@ $<
+
 all: 4208.cpi
 
-4208.obj:  4208.ASM  $(inc)/copyrigh.inc
-	dosemu -t --Fdrive_c ../../../.. -E "src\domasm.bat src\dev\printer\4208 $(subst /,\,$<) $(subst /,\,$@)"
+4208.obj:  4208.asm  $(inc)/copyrigh.inc
 
 OBJS = 4208.obj
 
 4208.cpi:  $(OBJS)
-	dosemu -t --Fdrive_c ../../../.. -E "src\dolink src\dev\printer\4208 4208.obj,4208.exe,,,"
+	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
+	echo 'option map=4208.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name 4208.exe' >>resp.txt
+	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
+	wlink @resp.txt
 	exe2bin -q 4208 4208.cpi
-	rm 4208.exe
 
 clean:
 	rm -f *.obj
+	rm -f *.err
+	rm -f *.lst
 	rm -f 4208.cpi
 	rm -f 4208.map
+	rm -f 4208.exe
+	rm -f resp.txt
