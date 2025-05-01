@@ -431,10 +431,11 @@ DE_0:   MOV     DESG_SEMAPHORE,ZERO     ;
         RET                             ;
                                         ;
 DE_1:   OR      BUF.STATUS,TWELVE       ; Error>> NO DESGINATE START
+de_0_l_1:
         JUMP    DE_0                    ;
 DE_2:   CALL    HANDLE_WRITE_ERROR      ; RESET ALL DESIGNATED INFORMATION
         OR      BUF.STATUS,FAIL         ; Error>> FONT DATA IS BAD
-        JUMP    DE_0                    ;
+        JMP	de_0_l_1                ;
 DESIGNATE_END   ENDP                    ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
@@ -710,7 +711,7 @@ VFP_4:  MOV     AX,[DI].FTB_STATUS      ; GET STATUS OF PARSING TABLE #n
                                         ;
         CMP     AX,FSTAT_FONT           ; CHECK IF AT LEAST THE FONT DATA FOUND
         JNE     VFP_8                   ; IF NOT, THEN AN ERROR OCCURRED....
-        CMP     [DI].FTB_DLEFT,ZERO     ; IF SO, THEN NO DATA CAN BE LEFT....
+        CMP     word ptr [DI].FTB_DLEFT,ZERO ; IF SO, THEN NO DATA CAN BE LEFT....
         JNE     VFP_8                   ; OTHERWISE ANOTHER ERROR ?
 VFP_6:  ADD     DI,TYPE FTBLK           ; MOVE POINTERS TO NEXT PARSING TABLE
         LOOP    VFP_4                   ;
@@ -725,4 +726,3 @@ VFP_9:  POP     DI                      ;
         RET                             ;
 VERIFY_FPARSER  ENDP                    ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-

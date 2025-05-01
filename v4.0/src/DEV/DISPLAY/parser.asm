@@ -182,11 +182,7 @@ TITLE	    PARSE CODE AND CONTROL BLOCKS FOR DISPLAY.SYS
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-INCLUDE     DEF-EQU.INC      ; structures and equates					 ;AN000;
-
-.XLIST
-INCLUDE     STRUC.INC	     ; Structured macros					 ;AN000;
-.LIST
+INCLUDE     def-equ.inc      ; structures and equates					 ;AN000;
 
 PUBLIC	    PARSER	     ; near procedure for parsing DEVICE= statement		 ;AN000;
 PUBLIC	    TABLE	     ; table for variable storage used by INIT module.		 ;AN000;
@@ -210,8 +206,8 @@ CODE	      SEGMENT  PUBLIC BYTE 'CODE'
 	      ASSUME CS:CODE
 
 
-.XLIST
-INCLUDE     PARSE.ASM	    ; Parsing code						 ;AN000;
+;.XLIST
+INCLUDE     parse.asm	    ; Parsing code						 ;AN000;
 .LIST
 
 
@@ -446,32 +442,45 @@ PARSER	PROC	 NEAR									 ;AN000;
 	XOR	 DX,DX			  ;  SYSPARSE					 ;AN000;
 	CALL	 SYSPARSE		  ; move pointer past file spec 		 ;AN000;
 	CALL	 SYSPARSE		  ; do first parse				 ;AN000;
-	.WHILE <AX NE RC_EOL> AND	  ; EOL?...then end parse...and..		 ;AN000;
-	.WHILE <OK_FLAG EQ ON>		  ; make sure that flag still ok..		 ;AN000;
-	  .IF <AX NE RC_NO_ERROR>	  ; parse error?				 ;AN000;
+	while_l_1:
+	cmp AX,RC_EOL			  ; EOL?...then end parse...and..		 ;AN000;
+	je endwhile_l_1
+	cmp OK_FLAG,ON			  ; make sure that flag still ok..		 ;AN000;
+	jne endwhile_l_1
+	  cmp AX,RC_NO_ERROR		  ; parse error?				 ;AN000;
+	  je else_l_2
 	    MOV     OK_FLAG,OFF 	  ; yes...reset flag				 ;AN000;
-	  .ELSE 			  ; no...process..				 ;AN000;
-	    .SELECT			  ;						 ;AN000;
-	    .WHEN <RESULT_TYPE EQ COMPLEX> ; complex string found?			 ;AN000;
+	  jmp while_l_1
+	  else_l_2: 			  ; no...process..				 ;AN000;
+	    cmp RESULT_TYPE,COMPLEX	  ; complex string found?			 ;AN000;
+	    jne otherwise_l_1
 	      INC    LOOP1		  ; increment count				 ;AN000;
-	      .IF <LOOP1 GT ONE>	  ; more than one?				 ;AN000;
+	      cmp LOOP1,ONE		  ; more than one?				 ;AN000;
+	      jle else_l_1
 		MOV    OK_FLAG,OFF	  ; yes....we have an error			 ;AN000;
-	      .ELSE			  ; no ..					 ;AN000;
+	      jmp endselect_l_1
+	      else_l_1:			  ; no ..					 ;AN000;
 		CALL   PARSE_MAIN	  ; process complex string..			 ;AN000;
-	      .ENDIF			  ;						 ;AN000;
-	    .OTHERWISE			  ; not a complex string so..			 ;AN000;
+	      endif_l_1:		  ;						 ;AN000;
+	    jmp endselect_l_1
+	    otherwise_l_1:		  ; not a complex string so..			 ;AN000;
 	      MOV    OK_FLAG,OFF	  ; we have a problem...reset flag		 ;AN000;
-	    .ENDSELECT			  ;						 ;AN000;
+	    endselect_l_1:		  ;						 ;AN000;
 	    CALL   SYSPARSE		  ; continue parsing..				 ;AN000;
-	  .ENDIF			  ;						 ;AN000;
-	.ENDWHILE			  ;						 ;AN000;
-	.IF <OK_FLAG EQ OFF> OR 	  ; flag indicating error?			 ;AN000;
-	.IF <LOOP1 EQ ZERO>		  ; or no parameters specified? 		 ;AN000;
+	  endif_l_2:			  ;						 ;AN000;
+	jmp while_l_1
+	endwhile_l_1:			  ;						 ;AN000;
+	cmp OK_FLAG,OFF		 	  ; flag indicating error?			 ;AN000;
+	je @F
+	cmp LOOP1,ZERO			  ; or no parameters specified? 		 ;AN000;
+	jne else_l_3
+	@@:
 	  MOV	DEVICE_NUM,ZERO 	  ; yes...set device number to 0		 ;AN000;
 	  STC				  ;						 ;AN000;
-	.ELSE				  ;						 ;AN000;
+	jmp endif_l_3
+	else_l_3:			  ;						 ;AN000;
 	  CLC				  ;						 ;AN000;
-	.ENDIF				  ;						 ;AN000;
+	endif_l_3:			  ;						 ;AN000;
 	POP    SI			  ;						 ;AN000;
 	POP    DS			  ;						 ;AN000;
 	POP    BX			  ;						 ;AN000;
@@ -506,25 +515,38 @@ PARSE_MAIN  PROC   NEAR 								 ;AN000;
 	    LEA    DI,PARMS2		  ; next control block..			 ;AN000;
 	    LDS    SI,RESULT_VAL	  ; point to stored string			 ;AN000;
 	    CALL   SYSPARSE		  ;						 ;AN000;
-	    .WHILE <AX NE RC_EOL> AND	  ; not EOL?   and..				 ;AN000;
-	    .WHILE <OK_FLAG EQ ON>	  ; error flag still ok?			 ;AN000;
-	      .IF <AX NE RC_NO_ERROR>	  ; check for parse errors			 ;AN000;
+	    while_l_2:
+	    cmp AX,RC_EOL		  ; not EOL?   and..				 ;AN000;
+	    je endwhile_l_2
+	    cmp OK_FLAG,ON		  ; error flag still ok?			 ;AN000;
+	    jne endwhile_l_2
+	      cmp AX,RC_NO_ERROR	  ; check for parse errors			 ;AN000;
+	      je else_l_4
 		MOV    OK_FLAG,OFF	  ; yes....reset error flag			 ;AN000;
-	      .ELSE			  ; no...process				 ;AN000;
+	      jmp while_l_2
+	      else_l_4:			  ; no...process				 ;AN000;
 		INC    LOOP2		  ;						 ;AN000;
-		.SELECT 		  ;						 ;AN000;
-		.WHEN <RESULT_TYPE EQ STRING> ; simple string				 ;AN000;
+		cmp RESULT_TYPE,STRING	  ; simple string				 ;AN000;
+		jne select_l_1_1
 		  CALL	 PARSE_STR	  ; yes...process				 ;AN000;
-		.WHEN <RESULT_TYPE EQ NUMBER> ; number?..				 ;AN000;
+		jmp endselect_l_2
+		select_l_1_1:
+		cmp RESULT_TYPE,NUMBER	  ; number?..				 ;AN000;
+		jne select_l_1_2
 		  CALL	 PARSE_NUM	  ; yes...process				 ;AN000;
-		.WHEN <RESULT_TYPE EQ COMPLEX> ; complex string?			 ;AN000;
+		jmp endselect_l_2
+		select_l_1_2:
+		cmp RESULT_TYPE,COMPLEX   ; complex string?			 ;AN000;
+		jne otherwise_l_2
 		  CALL	 PARSE_COMPLEX	  ;AN002;
-		.OTHERWISE		  ; anything else is..				 ;AN000;
+		jmp endselect_l_2
+		otherwise_l_2:		  ; anything else is..				 ;AN000;
 		  MOV	 OK_FLAG,OFF	  ; an error...reset flag.			 ;AN000;
-		.ENDSELECT		  ;						 ;AN000;
+		endselect_l_2:		  ;						 ;AN000;
 		CALL   SYSPARSE 	  ; continue parsing				 ;AN000;
-	      .ENDIF			  ;						 ;AN000;
-	    .ENDWHILE			  ;						 ;AN000;
+	      endif_l_4:		  ;						 ;AN000;
+	    jmp while_l_2
+	    endwhile_l_2:		  ;						 ;AN000;
 	    POP    CX			  ; restore original parse..			 ;AN000;
 	    POP    SI			  ; registers.					 ;AN000;
 	    POP    DS			  ;						 ;AN000;
@@ -534,11 +556,13 @@ PARSE_MAIN  ENDP
 
 ;
 PARSE_COMPLEX	PROC		 ;AN002;
-	.IF  <LOOP2 EQ TWO>	 ;AN002; Should be for HWCP
+	cmp LOOP2,TWO		 ;AN002; Should be for HWCP
+	jne else_l_5
 	     CALL  PARSE_COMP_X  ;AN002; for (hwcp)
-	.ELSE			 ;AN002;
+	jmp endif_l_5
+	else_l_5:		 ;AN002;
 	     CALL   PARSE_COMP	 ; yes...process for (n,m)				 ;AN000;
-	.ENDIF			 ;AN002;
+	endif_l_5:		 ;AN002;
 	ret			 ;AN002;
 PARSE_COMPLEX	ENDP
 
@@ -568,18 +592,26 @@ PARSE_COMP_X PROC   NEAR		  ;AN002;
 	     LEA    DI,PARMS3_X 	  ;AN002; next control block
 	     LDS    SI,RESULT_VAL	  ;AN002; point to stored string.
 	     CALL   SYSPARSE		  ;AN002;
-	     .WHILE <AX NE RC_EOL> AND	  ;AN002; not EOL?...and..
-	     .WHILE <OK_FLAG EQ ON>	  ;AN002; error flag still okay?
-	       .IF <AX NE RC_NO_ERROR> OR ;AN002; parse error?...or..
-	       .IF <RESULT_TYPE NE NUMBER> ;AN002; something other than a number..
+	     while_l_3:
+	     cmp AX,RC_EOL		  ;AN002; not EOL?...and..
+	     je endwhile_l_3
+	     cmp OK_FLAG,ON		  ;AN002; error flag still okay?
+	     jne endwhile_l_3
+	       cmp AX,RC_NO_ERROR	  ;AN002; parse error?...or..
+	       jne @F
+	       cmp RESULT_TYPE,NUMBER	  ;AN002; something other than a number..
+	       je else_l_6
+	       @@:
 		 MOV	OK_FLAG,OFF	  ;AN002; found?....yes..reset flag.
-	       .ELSE			  ;AN002; no...process..
+	       jmp while_l_3
+	       else_l_6:		  ;AN002; no...process..
 		 INC	T5_NUM		  ;AN002; increment counter
 		 MOV	AX,WORD PTR RESULT_VAL ;AN002; get numeric value into word
 		 MOV	T5_VALUE,AX	  ;AN002; yes...number of designates.
 		 CALL	SYSPARSE	  ;AN002; continue parsing
-	       .ENDIF			  ;AN002;
-	     .ENDWHILE			  ;AN002;
+	       endif_l_6:		  ;AN002;
+	     jmp while_l_3
+	     endwhile_l_3:		  ;AN002;
 	     POP    CX			  ;AN002; restore previous parse..
 	     POP    SI			  ;AN002; registers.
 	     POP    DS			  ;AN002;
@@ -614,22 +646,32 @@ PARSE_COMP   PROC   NEAR								 ;AN000;
 	     LEA    DI,PARMS3		  ; next control block				 ;AN000;
 	     LDS    SI,RESULT_VAL	  ; point to stored string.			 ;AN000;
 	     CALL   SYSPARSE		  ;						 ;AN000;
-	     .WHILE <AX NE RC_EOL> AND	  ; not EOL?...and..				 ;AN000;
-	     .WHILE <OK_FLAG EQ ON>	  ; error flag still okay?			 ;AN000;
-	       .IF <AX NE RC_NO_ERROR> OR ; parse error?...or.. 			 ;AN000;
-	       .IF <RESULT_TYPE NE NUMBER> ; something other than a number..		 ;AN000;
+	     while_l_4:
+	     cmp AX,RC_EOL		  ; not EOL?...and..				 ;AN000;
+	     je endwhile_l_4
+	     cmp OK_FLAG,ON		  ; error flag still okay?			 ;AN000;
+	     jne endwhile_l_4
+	       cmp AX,RC_NO_ERROR	  ; parse error?...or.. 			 ;AN000;
+	       jne @F
+	       cmp RESULT_TYPE,NUMBER	  ; something other than a number..		 ;AN000;
+	       je else_l_8
+	       @@:
 		 MOV	OK_FLAG,OFF	  ; found?....yes..reset flag.			 ;AN000;
-	       .ELSE			  ; no...process..				 ;AN000;
+	       jmp while_l_4
+	       else_l_8:		  ; no...process..				 ;AN000;
 		 INC	T6_NUM		  ; increment counter				 ;AN000;
 		 MOV	AX,WORD PTR RESULT_VAL ; get numeric value into word		 ;AN000;
-		 .IF <T6_NUM EQ ONE>	  ; first value found?				 ;AN000;
+		 cmp T6_NUM,ONE		  ; first value found?				 ;AN000;
+		 jne else_l_7
 		   MOV	  T6_DESG,AX	  ; yes...number of designates. 		 ;AN000;
-		 .ELSE			  ; else..					 ;AN000;
+		 jmp endif_l_7
+		 else_l_7:		  ; else..					 ;AN000;
 		   MOV	  T6_FONT,AX	  ; second number...number of fonts.		 ;AN000;
-		 .ENDIF 		  ;						 ;AN000;
+		 endif_l_7: 		  ;						 ;AN000;
 		 CALL	SYSPARSE	  ; continue parsing				 ;AN000;
-	       .ENDIF			  ;						 ;AN000;
-	     .ENDWHILE			  ;						 ;AN000;
+	       endif_l_8:		  ;						 ;AN000;
+	     jmp while_l_4
+	     endwhile_l_4:		  ;						 ;AN000;
 	     POP    CX			  ; restore previous parse..			 ;AN000;
 	     POP    SI			  ; registers.					 ;AN000;
 	     POP    DS			  ;						 ;AN000;
@@ -659,15 +701,19 @@ PARSE_STR    PROC   NEAR								 ;AN000;
 	     PUSH   DS			  ; destination registers..			 ;AN000;
 	     PUSH   SI			  ; setup.					 ;AN000;
 	     LDS    SI,RESULT_VAL	  ;						 ;AN000;
-	     .IF <<BYTE PTR DS:[SI]> NE ZERO> ; check for null string			 ;AN000;
+	     cmp BYTE PTR DS:[SI],ZERO	  ; check for null string			 ;AN000;
+	     je endif_l_9
 	       LEA    DI,T4_NAME	  ;						 ;AN000;
 	       LODSB			  ; load first character.			 ;AN000;
-	       .WHILE <AL NE ZERO>	  ; while not at end of ASCIIZ do..		 ;AN000;
+	       while_l_5:
+	       cmp AL,ZERO		  ; while not at end of ASCIIZ do..		 ;AN000;
+	       je endwhile_l_5
 		 STOSB			  ; store..					 ;AN000;
 		 LODSB			  ; load next character..			 ;AN000;
-	       .ENDWHILE		  ;						 ;AN000;
+	       jmp while_l_5
+	       endwhile_l_5:		  ;						 ;AN000;
 	       MOV    T4_LENGTH,EIGHT	  ; value found.				 ;AN000;
-	     .ENDIF			  ;						 ;AN000;
+	     endif_l_9:			  ;						 ;AN000;
 	     POP    SI			  ; restore registers.				 ;AN000;
 	     POP    DS			  ;						 ;AN000;
 	     POP    DI			  ;						 ;AN000;
@@ -694,13 +740,17 @@ PARSE_STR    ENDP
 
 PARSE_NUM    PROC   NEAR								 ;AN000;
 	     MOV    AX,WORD PTR RESULT_VAL   ; get value into word form 		 ;AN000;
-	     .IF <LOOP2 EQ TWO> 	     ; if this is the code page then..		 ;AN000;
+	     cmp LOOP2,TWO	 	     ; if this is the code page then..		 ;AN000;
+	     jne elseif_l_10
 		MOV   T5_VALUE,AX	     ; load that value. 			 ;AN000;
 		INC   T5_NUM		     ;						 ;AN000;
-	     .ELSEIF <LOOP2 EQ THREE>	     ;						 ;AN000;
+	     jmp endif_l_10
+	     elseif_l_10:
+	     cmp LOOP2,THREE		     ;						 ;AN000;
+	     jne endif_l_10
 		MOV   T6_DESG,AX	     ; must be number of designates..		 ;AN000;
 		INC   T6_NUM		     ; load and increment count 		 ;AN000;
-	     .ENDIF			     ;						 ;AN000;
+	     endif_l_10:		     ;						 ;AN000;
 	     RET			     ;						 ;AN000;
 PARSE_NUM    ENDP									 ;AN000;
 
@@ -756,32 +806,41 @@ GET_DEVICE_ID  PROC   NEAR								 ;AN000;
 	       LEA    DI,FUNC_INFO		  ;					 ;AN000;
 	       XOR    BX,BX			  ;					 ;AN000;
 	       INT    10H			  ; try VGA functionality call		 ;AN000;
-	       .IF <AL EQ FUNC_CALL>		  ; worked?....then			 ;AN000;
+	       cmp AL,FUNC_CALL			  ; worked?....then			 ;AN000;
+	       jne else_l_12
 		 OR	DEVICE_FLAG,VGA_FOUND	  ; VGA found.				 ;AN000;
-	       .ELSE				  ; no VGA...try EGA			 ;AN000;
+	       jmp endif_l_12
+	       else_l_12:			  ; no VGA...try EGA			 ;AN000;
 		 MOV	AH,ALT_SELECT		  ;					 ;AN000;
 		 MOV	BL,EGA_INFO_CALL	  ;					 ;AN000;
 		 INT	10H			  ;					 ;AN000;
-		 .IF <BL NE EGA_INFO_CALL>	  ; if changed then EGA present..	 ;AN000;
+		 cmp BL,EGA_INFO_CALL		  ; if changed then EGA present..	 ;AN000;
+		 je else_l_11
 		   OR	  DEVICE_FLAG,EGA_FOUND   ; mark as found.			 ;AN000;
-		 .ELSE				  ; no EGA...try LCD.			 ;AN000;
+		 jmp endif_l_11
+		 else_l_11:			  ; no EGA...try LCD.			 ;AN000;
 		   MOV	  AH,GET_SYS_ID 	  ; get system id..			 ;AN000;
 		   INT	  15H			  ; yup....its a convertible..so	 ;AN000;
-		   .IF <ES:[BX].MODEL_BYTE EQ LCD_MODEL> AND				 ;AN000;
+		   cmp ES:[BX].MODEL_BYTE,LCD_MODEL					 ;AN000;
+		   jne @F
 		   MOV	  AH,GET_STATUS 	  ; check for LCD..			 ;AN000;
 		   INT	  15H			  ;					 ;AN000;
-		   .IF <BIT AL NAND ON> 	  ; yes....bit says LCD..so..		 ;AN000;
+		   test AL,ON		 	  ; yes....bit says LCD..so..		 ;AN000;
+		   jnz @F
 		     OR     DEVICE_FLAG,LCD_FOUND ; mark as LCD.			 ;AN000;
-		   .ENDIF			  ;					 ;AN000;
-		 .ENDIF 			  ;					 ;AN000;
-	       .ENDIF				  ;					 ;AN000;
-	       .IF <DEVICE_FLAG NE ZERO>	  ; nothing found?..then exit (eg. MONO) ;AN000;
+		   @@:				  ;					 ;AN000;
+		 endif_l_11: 			  ;					 ;AN000;
+	       endif_l_12:			  ;					 ;AN000;
+	       cmp DEVICE_FLAG,ZERO		  ; nothing found?..then exit (eg. MONO) ;AN000;
+	       je else_l_13
 		 LEA	SI,DEVICE_TYPES 	  ; start of new id's                    ;AN000;
 		 SAR	DEVICE_FLAG,ONE 	  ; shift flag into carry bit		 ;AN000;
-		 .WHILE NC			  ; carry not set yet.. 		 ;AN000;
+		 while_l_6:
+		 jc endwhile_l_6		  ; carry not set yet.. 		 ;AN000;
 		   ADD	  SI,DEVICE_N_LENGTH	  ; next id				 ;AN000;
 		   SAR	  DEVICE_FLAG,ONE	  ; next flag...			 ;AN000;
-		 .ENDWHILE			  ;					 ;AN000;
+		 jmp while_l_6
+		 endwhile_l_6:			  ;					 ;AN000;
 		 PUSH	CS			  ; found....transfer id..		 ;AN000;
 		 POP	ES			  ; into the table..			 ;AN000;
 		 LEA	DI,T4_NAME		  ;					 ;AN000;
@@ -789,9 +848,10 @@ GET_DEVICE_ID  PROC   NEAR								 ;AN000;
 		 REP	MOVSB			  ;					 ;AN000;
 		 MOV	T4_LENGTH,EIGHT 	  ;					 ;AN000;
 		 CLC				  ; clear error flag			 ;AN000;
-	       .ELSE				  ;					 ;AN000;
+	       jmp endif_l_13
+	       else_l_13:			  ;					 ;AN000;
 		 STC				  ; set error (ie. MONO or CGA found)	 ;AN000;
-	       .ENDIF				  ;					 ;AN000;
+	       endif_l_13:			  ;					 ;AN000;
 	       POP    DS			  ; r					 ;AN000;
 	       POP    ES			  ;  e	  r				 ;AN000;
 	       POP    SI			  ;   s    e				 ;AN000;

@@ -45,8 +45,8 @@ ENDIF					;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 					;
 .XLIST					;
-INCLUDE SYSMSG.INC			; WGR				       ;AN000;
-MSG_UTILNAME <DISPLAY>			; WGR				       ;AN000;
+INCLUDE sysmsg.inc			; WGR				       ;AN000;
+MSG_UTILNAME <display>			; WGR				       ;AN000;
 .LIST					;
 					;
 					;
@@ -104,9 +104,9 @@ DEVICE_ID_INDEX DW	0		; INDEX VALUE FOR DEVICE SUB-TYPE
 ;	INCLUDE FILES
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	INCLUDE MACROS.INC		; GENERAL PURPOSE 'MACROs'
-	INCLUDE DEF-EQU.INC		; CPS DRIVER STRUCTURES AND EQUATES
-	INCLUDE TABLES.INC		; DEVICE SUB-TYPE CONFIGURATION TABLES
+	INCLUDE macros.inc		; GENERAL PURPOSE 'MACROs'
+	INCLUDE def-equ.inc		; CPS DRIVER STRUCTURES AND EQUATES
+	INCLUDE tables.inc		; DEVICE SUB-TYPE CONFIGURATION TABLES
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
 ;	INITIALIZATION ROUTINE
@@ -952,9 +952,9 @@ MODIFY_ID_NAME	ENDP			;
 .XLIST
 MSG_SERVICES <MSGDATA>			; WGR				       ;AN000;
 MSG_SERVICES <DISPLAYmsg,LOADmsg,CHARmsg> ; WGR 			       ;AN000;
-MSG_SERVICES <DISPLAY.CL1>		; WGR				       ;AN000;
-MSG_SERVICES <DISPLAY.CL2>		; WGR				       ;AN000;
-MSG_SERVICES <DISPLAY.CLA>		; WGR				       ;AN000;
+MSG_SERVICES <display.cl1>		; WGR				       ;AN000;
+MSG_SERVICES <display.cl2>		; WGR				       ;AN000;
+MSG_SERVICES <display.cla>		; WGR				       ;AN000;
 .LIST					;
 					;
 include msgdcl.inc			;

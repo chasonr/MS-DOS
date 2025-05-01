@@ -269,6 +269,7 @@ HDW_P0: AND     AX,7FFFH                ; STRIP OFF FIRST BIT...
 HDW_00: MOV     CX,CS:NUM_DATA_FONTS    ;
 HDW_0:  CMP     CS:LEN_DATA,0           ; TEST IF THERE IS ANY DATA LEFT?
         JNE     HDW_0A                  ;
+hdw_6_l_1:
         JUMP    HDW_6                   ; IF 0 LEFT...THEN END...
                                         ;
 HDW_0A: MOV     AL,[SI]                 ; GET #ROWS FROM DATA
@@ -305,7 +306,7 @@ HDW_3B: SUB     CS:LEN_DATA,CX          ;
                                         ;
 HDW_4:  POP     CX                      ; RESTORE #FONTS IN DATA
         LOOP    HDW_0                   ;
-        JUMP    HDW_6                   ;
+        JMP     hdw_6_l_1               ;
                                         ;
 HDW_5:  XOR     AH,AH                   ; FONT SIZE NEEDED...GET IT!
         MOV     CX,[SI+4]               ; GET THE #CHARACTERS IN TABLE
@@ -370,4 +371,3 @@ SET_CPD_FONT_DATA       PROC            ;
         RET                             ;
 SET_CPD_FONT_DATA       ENDP            ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
