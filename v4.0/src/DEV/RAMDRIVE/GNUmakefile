@@ -2,42 +2,45 @@
 
 DEST	= ramdrive
 MSG	= messages
+inc = ../../inc
 
 #       Definitions for assembler
 
-ASM	= masm
-AFLAGS	= -Mx -t
-AINC	= -I../../INC
+.SUFFIXES: .asm .obj
 
-#       Definitions for C compiler
+AS = jwasm
+AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
-CC	= cl
-CFLAGS	= -Ox -X -Zlp
-CINC	= -I../../H
-
-#	Definitions for linker
-
-LINK	= link
+.asm.obj:
+	$(AS) $(AFLAGS) -Fo$@ $<
 
 # Dependencies follow
 
 all: ramdrive.sys
 
-ramdrive.obj: RAMDRIVE.ASM ABOVE.INC LOADALL.INC EMM.INC MI.INC \
-	 DIRENT.INC SYSCALL.INC DEVSYM.INC
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\ramdrive $(subst /,\,$<) $(subst /,\,$@)"
+ramdrive.obj: ramdrive.asm above.inc loadall.inc emm.inc mi.inc \
+	 dirent.inc syscall.inc devsym.inc ab_macro.inc
 
-messages.obj:  MESSAGES.ASM
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\ramdrive $(subst /,\,$<) $(subst /,\,$@)"
+messages.obj:  messages.asm
 
-ramdrive.sys: ramdrive.obj messages.obj
-	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\dev\ramdrive @ramdrive.lnk"
+OBJS = ramdrive.obj messages.obj
+
+ramdrive.sys: $(OBJS)
+	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
+	echo 'option map=ramdrive.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name ramdrive.exe' >>resp.txt
+	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
+	wlink @resp.txt
 	exe2bin -q ramdrive.exe ramdrive.sys
-	rm ramdrive.exe
 
 clean:
-	rm -f messages.obj
-	rm -f ramdrive.obj
+	rm -f *.obj
+	rm -f *.err
+	rm -f *.lst
 	rm -f ramdrive.sys
+	rm -f ramdrive.exe
 	rm -f ramdrive.map
 	rm -f resp.txt

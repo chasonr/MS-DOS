@@ -356,7 +356,8 @@ BREAK	<BPB and boot sector for installed device>
 ;
 
 BOOT_SECTOR	LABEL	BYTE
-	JMP	BOOT_START
+	JMP	SHORT BOOT_START
+	NOP
 	DB	"RDV 1.20"
 
 RDRIVEBPB:
@@ -2816,7 +2817,7 @@ VER_OK:
 	push	es				;; Olivetti Machine?
 	mov	ax,0fc00h			;; Look for 'OL' at fc00:50
 	mov	es,ax
-	cmp	es:[0050h],'LO'
+	cmp	word ptr es:[0050h],'LO'
 	jnz	notS5				;; not found
 	mov	ax,0f000h
 	mov	es,ax
@@ -2829,7 +2830,7 @@ notS5:
 ;;
 	mov	ax,0f000H
 	mov	es,ax
-	cmp	es:[0f8H],'PH'
+	cmp	word ptr es:[0f8H],'PH'
 	jnz	notHP
 	mov	[S5_FLAG],S_VECTRA
 notHP:
@@ -4637,28 +4638,6 @@ BREAK	<Drive code for /A driver. Swapped in at BLKMOV>
 ;
 ABOVE_CODE	LABEL	WORD
 
-;
-; WARNING DANGER!!!!!!!
-;
-; This code is tranfered over the /E driver code at DRIVE_CODE
-;
-; ALL jmps etc. must be IP relative.
-; ALL data references must be to cells at the FINAL, TRUE location
-;	(no data cells may be named HERE, must be named up at BLKMOV).
-; OFFSET of ABOVE_BLKMOV relative to ABOVE_CODE MUST be the same as
-;	the OFFSET of BLKMOV relative to DRIVE_CODE.
-; SIZE of stuff between ABOVE_CODE and ABOVE_END MUST be less than
-;	or equal to size of stuff between DRIVE_CODE and DRIVE_END.
-
-IF2
-  IF((OFFSET ABOVE_BLKMOV - OFFSET ABOVE_CODE) NE (OFFSET BLKMOV - OFFSET DRIVE_CODE))
-	  %out ERROR BLKMOV, ABOVE_BLKMOV NOT ALIGNED
-  ENDIF
-  IF((OFFSET ABOVE_END - OFFSET ABOVE_CODE) GT (OFFSET DRIVE_END - OFFSET DRIVE_CODE))
-	  %out ERROR ABOVE CODE TOO BIG
-  ENDIF
-ENDIF
-
 		DD	?	; 24 bit address of start of this RAMDRV
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;**	ABOVE_BLKMOV - Perform transfer for TYPE 2 driver
@@ -5336,30 +5315,30 @@ restore_mp:
 ;
 ABOVE_END	LABEL	WORD
 
-BREAK	<Drive code for /A driver. Swapped in at RESET_SYSTEM>
-
-
 ;
 ; WARNING DANGER!!!!!!!
 ;
-; This code is tranfered over the /E driver code at RESET_SYSTEM
+; This code is tranfered over the /E driver code at DRIVE_CODE
 ;
 ; ALL jmps etc. must be IP relative.
 ; ALL data references must be to cells at the FINAL, TRUE location
-;	(no data cells may be named HERE, must be named up at RESET_SYSTEM).
-; SIZE of stuff between ABOVE_RESET and ABOVE_RESET_END MUST be less than
-;	or equal to size of stuff between RESET_SYSTEM and RESET_INCLUDE.
-;
-; NOTE: EACH ABOVE BOARD driver has an INT 19 and 9 handler. This is
-;	different from /E and RESMEM in which only the first
-;	driver has an INT 19 and 9 handler.
-;
+;	(no data cells may be named HERE, must be named up at BLKMOV).
+; OFFSET of ABOVE_BLKMOV relative to ABOVE_CODE MUST be the same as
+;	the OFFSET of BLKMOV relative to DRIVE_CODE.
+; SIZE of stuff between ABOVE_CODE and ABOVE_END MUST be less than
+;	or equal to size of stuff between DRIVE_CODE and DRIVE_END.
 
 IF2
-  IF((OFFSET ABOVE_RESET_END - OFFSET ABOVE_RESET) GT (OFFSET RESET_INCLUDE - OFFSET RESET_SYSTEM))
-	  %out ERROR ABOVE_RESET CODE TOO BIG
+  IF((OFFSET ABOVE_BLKMOV - OFFSET ABOVE_CODE) NE (OFFSET BLKMOV - OFFSET DRIVE_CODE))
+	  %out ERROR BLKMOV, ABOVE_BLKMOV NOT ALIGNED
+  ENDIF
+  IF((OFFSET ABOVE_END - OFFSET ABOVE_CODE) GT (OFFSET DRIVE_END - OFFSET DRIVE_CODE))
+	  %out ERROR ABOVE CODE TOO BIG
   ENDIF
 ENDIF
+
+BREAK	<Drive code for /A driver. Swapped in at RESET_SYSTEM>
+
 
 ;**	ABOVE_RESET perform TYPE 2 (/A) driver specific reboot code
 ;
@@ -5395,6 +5374,28 @@ AGAIN_RESET:
 ; This label defines the end of the code swapped in at RESET_SYSTEM
 ;
 ABOVE_RESET_END    LABEL   BYTE
+
+;
+; WARNING DANGER!!!!!!!
+;
+; This code is tranfered over the /E driver code at RESET_SYSTEM
+;
+; ALL jmps etc. must be IP relative.
+; ALL data references must be to cells at the FINAL, TRUE location
+;	(no data cells may be named HERE, must be named up at RESET_SYSTEM).
+; SIZE of stuff between ABOVE_RESET and ABOVE_RESET_END MUST be less than
+;	or equal to size of stuff between RESET_SYSTEM and RESET_INCLUDE.
+;
+; NOTE: EACH ABOVE BOARD driver has an INT 19 and 9 handler. This is
+;	different from /E and RESMEM in which only the first
+;	driver has an INT 19 and 9 handler.
+;
+
+IF2
+  IF((OFFSET ABOVE_RESET_END - OFFSET ABOVE_RESET) GT (OFFSET RESET_INCLUDE - OFFSET RESET_SYSTEM))
+	  %out ERROR ABOVE_RESET CODE TOO BIG
+  ENDIF
+ENDIF
 
 BREAK	<RESMEM INIT Code>
 
@@ -5993,28 +5994,6 @@ BREAK	<Drive code for resmem driver. Swapped in at BLKMOV>
 ;
 RESMEM_CODE	 LABEL	 WORD
 
-;
-; WARNING DANGER!!!!!!!
-;
-; This code is tranfered over the /E driver code at DRIVE_CODE
-;
-; ALL jmps etc. must be IP relative.
-; ALL data references must be to cells at the FINAL, TRUE location
-;	(no data cells may be named HERE, must be named up at BLKMOV).
-; OFFSET of RESMEM_BLKMOV relative to RESMEM_CODE MUST be the same as
-;	the OFFSET of BLKMOV relative to DRIVE_CODE.
-; SIZE of stuff between RESMEM_CODE and RESMEM_END MUST be less than
-;	or equal to size of stuff between DRIVE_CODE and DRIVE_END.
-
-IF2
-  IF((OFFSET RESMEM_BLKMOV - OFFSET RESMEM_CODE) NE (OFFSET BLKMOV - OFFSET DRIVE_CODE))
-	  %out ERROR BLKMOV, RESMEM_BLKMOV NOT ALIGNED
-  ENDIF
-  IF((OFFSET RESMEM_END - OFFSET RESMEM_CODE) GT (OFFSET DRIVE_END - OFFSET DRIVE_CODE))
-	  %out ERROR RESMEM CODE TOO BIG
-  ENDIF
-ENDIF
-
 		DD	?	; 24 bit address of start of this RAMDRV
 
 ;**	RESMEM_BLKMOV - Perform transfer for TYPE 3 and 4 driver
@@ -6086,25 +6065,29 @@ ASSUME	DS:NOTHING
 ;
 RESMEM_END	 LABEL	 WORD
 
-BREAK	<Drive code for resmem driver. Swapped in at RESET_SYSTEM>
-
-
 ;
 ; WARNING DANGER!!!!!!!
 ;
-; This code is tranfered over the /E driver code at RESET_SYSTEM
+; This code is tranfered over the /E driver code at DRIVE_CODE
 ;
 ; ALL jmps etc. must be IP relative.
 ; ALL data references must be to cells at the FINAL, TRUE location
-;	(no data cells may be named HERE, must be named up at RESET_SYSTEM).
-; SIZE of stuff between RESMEM_RESET and RESMEM_RESET_END MUST be less than
-;	or equal to size of stuff between RESET_SYSTEM and RESET_INCLUDE.
+;	(no data cells may be named HERE, must be named up at BLKMOV).
+; OFFSET of RESMEM_BLKMOV relative to RESMEM_CODE MUST be the same as
+;	the OFFSET of BLKMOV relative to DRIVE_CODE.
+; SIZE of stuff between RESMEM_CODE and RESMEM_END MUST be less than
+;	or equal to size of stuff between DRIVE_CODE and DRIVE_END.
 
 IF2
-  IF((OFFSET RESMEM_RESET_END - OFFSET RESMEM_RESET) GT (OFFSET RESET_INCLUDE - OFFSET RESET_SYSTEM))
-	  %out ERROR RESMEM_RESET CODE TOO BIG
+  IF((OFFSET RESMEM_BLKMOV - OFFSET RESMEM_CODE) NE (OFFSET BLKMOV - OFFSET DRIVE_CODE))
+	  %out ERROR BLKMOV, RESMEM_BLKMOV NOT ALIGNED
+  ENDIF
+  IF((OFFSET RESMEM_END - OFFSET RESMEM_CODE) GT (OFFSET DRIVE_END - OFFSET DRIVE_CODE))
+	  %out ERROR RESMEM CODE TOO BIG
   ENDIF
 ENDIF
+
+BREAK	<Drive code for resmem driver. Swapped in at RESET_SYSTEM>
 
 ;**	RESMEM_RESET perform TYPE 3 (RESMEM) driver specific reboot code
 ;
@@ -6183,6 +6166,24 @@ ASSUME	DS:NOTHING
 ;
 RESMEM_RESET_END    LABEL   BYTE
 
+;
+; WARNING DANGER!!!!!!!
+;
+; This code is tranfered over the /E driver code at RESET_SYSTEM
+;
+; ALL jmps etc. must be IP relative.
+; ALL data references must be to cells at the FINAL, TRUE location
+;	(no data cells may be named HERE, must be named up at RESET_SYSTEM).
+; SIZE of stuff between RESMEM_RESET and RESMEM_RESET_END MUST be less than
+;	or equal to size of stuff between RESET_SYSTEM and RESET_INCLUDE.
+
+IF2
+  IF((OFFSET RESMEM_RESET_END - OFFSET RESMEM_RESET) GT (OFFSET RESET_INCLUDE - OFFSET RESET_SYSTEM))
+	  %out ERROR RESMEM_RESET CODE TOO BIG
+  ENDIF
+ENDIF
+
+
 BREAK <messages and common data>
 
 ;**	Message texts and common data
@@ -6215,4 +6216,3 @@ RAMDrive_END	   LABEL   BYTE
 
 RAMCODE ENDS
 	END
-
