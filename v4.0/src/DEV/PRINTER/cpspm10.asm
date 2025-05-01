@@ -40,12 +40,12 @@ TITLE	DOS - Code Page Switching - Printer Device Driver
 ;AN001; p2685  Long delay on CHCP before failure message	   12/10/87 J.K.
 ;******************************************************************************
 					;;
-INCLUDE CPSPEQU.INC			;;
+INCLUDE cpspequ.inc			;;
 					;;
 PUBLIC	PRINTER_DESC_NUM		;;
 PUBLIC	PRINTER_DESC_TBL		;;
 PUBLIC	INIT_CHK,TABLE,DEVICE_NUM	;; WGR						 ;AN000;
-PUBLIC	INVOKE				;; WGR						 ;AN000;
+PUBLIC	INVOKE_				;; WGR						 ;AN000;
 PUBLIC	BUF0,BUF1,BUF2,BUF3		;; WGR						 ;AN000;
 PUBLIC	HARD_SL1,RAM_SL1		;;
 PUBLIC	HARD_SL2,RAM_SL2		;;
@@ -857,7 +857,7 @@ CASES	LABEL	WORD			;;  in CMD_CODES order
 					;;
 	DW	OFFSET DESIGNATE_START	;;
 	DW	OFFSET DESIGNATE_END	;;
-	DW	OFFSET INVOKE		;;
+	DW	OFFSET INVOKE_		;;
 	DW	OFFSET Q_INVOKED	;;
 	DW	OFFSET Q_LIST		;;
 					;;
@@ -2815,7 +2815,7 @@ DST_IVK_CP :				;;
 	push	cs			;;
 	pop	ds			;;
 					;;
-	JMP	INVOKE			;;
+	JMP	INVOKE_			;;
 					;;
 DESIGNATE_START ENDP			;;
 					;;
@@ -3081,7 +3081,7 @@ DESIGNATE_END ENDP			;;
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 					;;
-INVOKE	PROC				;; ALSO JUMP FROM REFRESH
+INVOKE_	PROC				;; ALSO JUMP FROM REFRESH
 					;;
 	MOV	AX,BUF.STATE		;;
 	CMP	AX,CPSW 		;;
@@ -3557,7 +3557,7 @@ IVK_RET :				;;
 					;;
 	RET				;;
 					;;
-INVOKE	ENDP				;;
+INVOKE_	ENDP				;;
 					;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 Prt_Status_Check	proc	near		;AN001;

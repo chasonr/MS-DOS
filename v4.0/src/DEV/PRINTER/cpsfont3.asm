@@ -15,7 +15,7 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 					;;
-INCLUDE CPSPEQU.INC			;;
+INCLUDE cpspequ.inc			;;
 					;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 					;;
@@ -814,7 +814,7 @@ SCAN_DONE :				;;
 	JNE	NOT_FFFF_HIT		;;
 	CMP	DX,0FFFFH		;;
 	JNE	NOT_FFFF_HIT		;;
-	JMP	SCAN_MORE		;; stage remained as SCAN, discard data
+	JMP	SCAN_MORE 		;; stage remained as SCAN, discard data
 					;;
 NOT_FFFF_HIT :				;;
 					;; DX:AX = HIT_HI:HIT_LO (normalised)

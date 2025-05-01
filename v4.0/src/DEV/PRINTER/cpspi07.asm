@@ -22,15 +22,15 @@
 ;;			  ++++++++++++++++++++++++
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 					;;
-INCLUDE CPSPEQU.INC			;;
+INCLUDE cpspequ.inc			;;
 INT2F_LOW	EQU	(4*2FH) 	;; WGR interrupt 2F vector location	    ;AN000;
 INT2F_HI	EQU	(4*2FH)+2	;; WGR					    ;AN000;
 					;;
 .XLIST					;;
-INCLUDE SYSMSG.INC			;; WGR					    ;AN000;
+INCLUDE sysmsg.inc			;; WGR					    ;AN000;
 .LIST					;;
 					;;
-MSG_UTILNAME <PRINTER>			;; WGR					    ;AN000;
+MSG_UTILNAME <printer>			;; WGR					    ;AN000;
 					;;
 PUBLIC	INIT				;;
 PUBLIC	CODE_END			;; for MAP listing only
@@ -1405,9 +1405,9 @@ LOAD_INT2F ENDP
 .XLIST
 MSG_SERVICES <MSGDATA>			  ; WGR 				    ;AN000;
 MSG_SERVICES <DISPLAYmsg,LOADmsg,CHARmsg> ; WGR 				    ;AN000;
-MSG_SERVICES <PRINTER.CL1>		  ; WGR 				    ;AN000;
-MSG_SERVICES <PRINTER.CL2>		  ; WGR 				    ;AN000;
-MSG_SERVICES <PRINTER.CLA>		  ; WGR 				    ;AN000;
+MSG_SERVICES <printer.cl1>		  ; WGR 				    ;AN000;
+MSG_SERVICES <printer.cl2>		  ; WGR 				    ;AN000;
+MSG_SERVICES <printer.cla>		  ; WGR 				    ;AN000;
 .LIST
 
 include msgdcl.inc
