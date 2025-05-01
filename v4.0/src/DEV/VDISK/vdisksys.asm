@@ -90,9 +90,9 @@
 
 ;Message text for VDISK is in module VDISKMSG.
 .xlist
-	INCLUDE VDISKSYS.INC
-	INCLUDE SYSMSG.INC
-	MSG_UTILNAME<VDISK>
+	INCLUDE vdisksys.inc
+	INCLUDE sysmsg.inc
+	MSG_UTILNAME<vdisk>
 .list
 	SUBTTL	Structure Definitions
 	PAGE
@@ -3015,10 +3015,9 @@ INIT_P1 ENDP				;end of INIT part one
 MSG_SERVICES <MSGDATA>			;AN000:
 MSG_SERVICES <LOADmsg>			;AN000;
 MSG_SERVICES <DISPLAYmsg,CHARmsg,NUMmsg> ;AN000;
-MSG_SERVICES <VDISK.CL1,VDISK.CL2,VDISK.CLA> ;AN000;
+MSG_SERVICES <vdisk.cl1,vdisk.cl2,vdisk.cla> ;AN000;
 .list
 MSGEND	LABEL	BYTE			;AN000;
 
 CSEG	ENDS
 	END
-

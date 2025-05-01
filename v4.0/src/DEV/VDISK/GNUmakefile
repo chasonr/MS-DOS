@@ -13,6 +13,14 @@ COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
 ####################### Dependencies begin here. #######################
 #
 
+.SUFFIXES: .asm .obj
+
+AS = jwasm
+AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.asm.obj:
+	$(AS) $(AFLAGS) -Fo$@ $<
+
 all: vdisk.sys
 
 vdisk.ctl vdisk.cl1 vdisk.cl2 vdisk.cla: VDISK.SKL    \
@@ -20,26 +28,36 @@ vdisk.ctl vdisk.cl1 vdisk.cl2 vdisk.cla: VDISK.SKL    \
 	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\dev\vdisk $(subst /,\,$<) $(country)"
 
 
-vdisksys.obj: VDISKSYS.ASM       \
-           VDISKSYS.INC          \
+vdisksys.obj: vdisksys.asm       \
+              $(inc)/sysmsg.inc \
+              $(inc)/msgserv.asm \
+              $(inc)/copyrigh.inc \
+              $(inc)/versiona.inc \
            vdisk.ctl             \
            vdisk.cl2             \
            vdisk.cla             \
-           vdisk.cl1             \
-           $(inc)/msgserv.asm \
-           $(inc)/sysmsg.inc
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\dev\vdisk $(subst /,\,$<) $(subst /,\,$@)"
+           vdisk.cl1
 
 OBJS = vdisksys.obj
 
 vdisk.sys: $(OBJS) VDISK.LNK
-	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\dev\vdisk @vdisk.lnk"
+	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
+	echo 'option map=vdisk.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name vdisk.exe' >>resp.txt
+	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
+	wlink @resp.txt
 	exe2bin -q vdisk.exe vdisk.sys
-	rm vdisk.exe
 
 clean:
 	rm -f *.obj
+	rm -f *.err
+	rm -f *.lst
 	rm -f vdisk.sys
+	rm -f vdisk.exe
+	rm -f vdisk.map
 	rm -f vdisk.cl[12a]
 	rm -f vdisk.ctl
 	rm -f resp.txt
