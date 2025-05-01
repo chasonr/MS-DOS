@@ -9,37 +9,49 @@ hinc	=../../../H
 ######################### Dependencies Begin Here #########################
 #
 
+.SUFFIXES: .asm .obj
+
+AS = jwasm
+AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.asm.obj:
+	$(AS) $(AFLAGS) -Fo$@ $<
+
 all: lcd.cpi
 
-865-cpi.obj:  865-CPI.ASM
-	dosemu -t --Fdrive_c ../../../.. -E "src\domasm.bat src\dev\display\lcd $(subst /,\,$<) $(subst /,\,$@)"
+865-cpi.obj:  865-cpi.asm
 
-860-cpi.obj:  860-CPI.ASM
-	dosemu -t --Fdrive_c ../../../.. -E "src\domasm.bat src\dev\display\lcd $(subst /,\,$<) $(subst /,\,$@)"
+860-cpi.obj:  860-cpi.asm
 
-437-cpi.obj:  437-CPI.ASM
-	dosemu -t --Fdrive_c ../../../.. -E "src\domasm.bat src\dev\display\lcd $(subst /,\,$<) $(subst /,\,$@)"
+437-cpi.obj:  437-cpi.asm
 
-863-cpi.obj:  863-CPI.ASM
-	dosemu -t --Fdrive_c ../../../.. -E "src\domasm.bat src\dev\display\lcd $(subst /,\,$<) $(subst /,\,$@)"
+863-cpi.obj:  863-cpi.asm
 
-850-cpi.obj:  850-CPI.ASM
-	dosemu -t --Fdrive_c ../../../.. -E "src\domasm.bat src\dev\display\lcd $(subst /,\,$<) $(subst /,\,$@)"
+850-cpi.obj:  850-cpi.asm
 
-copyrigh.obj: COPYRIGH.ASM $(inc)/copyrigh.inc
-	dosemu -t --Fdrive_c ../../../.. -E "src\domasm.bat src\dev\display\lcd $(subst /,\,$<) $(subst /,\,$@)"
+copyrigh.obj: copyrigh.asm $(inc)/copyrigh.inc
 
-font-r3.obj:  FONT-R3.ASM
-	dosemu -t --Fdrive_c ../../../.. -E "src\domasm.bat src\dev\display\lcd $(subst /,\,$<) $(subst /,\,$@)"
+font-r3.obj:  font-r3.asm
 
 OBJS = font-r3.obj 437-cpi.obj 850-cpi.obj 860-cpi.obj 863-cpi.obj \
        865-cpi.obj copyrigh.obj
 
 lcd.cpi:  $(OBJS) LCD.LNK
-	dosemu -t --Fdrive_c ../../../.. -E "src\dolink src\dev\display\lcd @lcd.lnk"
+	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
+	echo 'option map=font-r3.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name font-r3.exe' >>resp.txt
+	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
+	wlink @resp.txt
 	exe2bin -q font-r3.exe lcd.cpi
-	rm font-r3.exe
 
 clean:
 	rm -f *.obj
+	rm -f *.err
+	rm -f *.lst
 	rm -f lcd.cpi
+	rm -f font-r3.exe
+	rm -f font-r3.map
+	rm -f resp.txt
