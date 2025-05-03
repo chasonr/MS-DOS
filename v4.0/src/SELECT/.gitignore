@@ -4,6 +4,9 @@
 *.EXE
 *.obj
 *.OBJ
+*.err
+*.lst
+resp.txt
 panel.inf
 PANEL.INF
 sel-pan.dat
