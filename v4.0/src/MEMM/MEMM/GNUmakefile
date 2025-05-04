@@ -46,6 +46,8 @@
 .SUFFIXES:
 .SUFFIXES:	.c .asm .obj .lst .def .lnk .lrf .exe .com
 
+# EMM library is in this directory
+EMM = ../EMM
 
 #	Definition for turning OFF high memory allocation
 #		HIFLAG = -DNOHIMEM => turns it off
@@ -56,10 +58,10 @@ HIFLAG        = -DNOHIMEM
 #	Definitions for assembler
 #ASM = c:/bin/masm400
 #ASM	   = masm400
-ASM		= masm
-AFLAGS		= -Mx -t -DI386 -DNoBugMode $(HIFLAG)
-ADFLAGS 	= -Mx -t -DI386 $(HIFLAG)
-AINC		= -i../emm
+ASM		= jwasm
+ADFLAGS 	= -q -Zm -Zg $(HIFLAG) -Fl
+AFLAGS      = -DNoBugMode $(ADFLAGS)
+AINC		= -I$(EMM)
 
 #	Defines for C Compiler
 C	= cl
@@ -77,18 +79,7 @@ CONVERT = c:/dos/exe2bin
 
 #	Rules for generating object and linker response and definition files
 .asm.obj:
-	$(ASM) $(AFLAGS) $(AINC) -p $*.asm;
-
-.asm.lst:
-	$(ASM) -l -n $(AFLAGS) $(AINC) -p $*.asm;
-
-#******************************************************************************
-#	List of include files required
-#******************************************************************************
-MEMMINC = ASCII_SM.EQU DRIVER.EQU PIC_DEF.EQU ROMSTRUC.EQU ROMXBIOS.EQU \
-		DESC.INC ELIM.INC EMM386.INC INSTR386.INC KBD.INC LOADALL.INC \
-		OEMDEP.INC PAGE.INC VDMSEG.INC VDMSEL.INC VM386.INC MACH_ID.INC
-
+	$(ASM) $(AFLAGS) $(AINC) -Fo$@ $<
 
 #******************************************************************************
 #	List of object files required
@@ -117,9 +108,9 @@ BUGOBJ = memm386.obj elimfunc.obj init.obj allocmem.obj ppage.obj emmmes.obj \
 #	List of libraries required
 #******************************************************************************
 
-MEMMLIBS	= ../EMM/emmlib.lib
+MEMMLIBS	= $(EMM)/emmlib.lib
 
-BUGLIBS 	= ../deb386/buglib.lib ../EMM/emmlib.lib
+BUGLIBS 	= ../deb386/buglib.lib $(EMM)/emmlib.lib
 
 #******************************************************************************
 #	Listing files
@@ -147,15 +138,18 @@ BUGLST = memm386.lst elimfunc.lst init.lst allocmem.lst ppage.lst emmmes.lst \
 #******************************************************************************
 #	MEMM targets
 #******************************************************************************
-#emm386: emm386.exe emm386.com emm386d.exe
-emm386: emm386.exe
+#emm386: emm386.sys emm386.com emm386d.exe
+emm386: emm386.sys
 
 #	production version of EMM386 device driver
 #
-emm386.exe: $(MEMMOBJ) $(MEMMLIBS) EMM386.LNK
+emm386.sys: $(MEMMOBJ) $(MEMMLIBS) EMM386.LNK
 	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\memm\memm @emm386.lnk"
 	rm -f emm386.sys
 	mv emm386.exe emm386.sys
+
+$(EMM)/emmlib.lib:
+	$(MAKE) -C $(EMM) emmlib.lib
 
 #	EMM386.COM utility
 #
@@ -172,144 +166,100 @@ emm386.exe: $(MEMMOBJ) $(MEMMLIBS) EMM386.LNK
 # EMM386 driver i/f modules
 #******************************************************************************
 
-memm386.obj: MEMM386.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
-memm386.lst:  MEMM386.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+memm386.obj: memm386.asm driver.equ driver.str vdmseg.inc
 
-elimfunc.obj: ELIMFUNC.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
-elimfunc.lst:  ELIMFUNC.ASM  $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+elimfunc.obj: elimfunc.asm vdmseg.inc
 
-init.obj: INIT.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
-init.lst: INIT.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+init.obj: init.asm vdmseg.inc vdmsel.inc desc.inc emm386.inc driver.equ \
+          driver.str ascii_sm.equ
 
-allocmem.obj: ALLOCMEM.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
-allocmem.lst: ALLOCMEM.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+allocmem.obj: allocmem.asm vdmseg.inc vdmsel.inc emm386.inc driver.equ \
+              driver.str romxbios.equ desc.inc ascii_sm.equ oemdep.inc \
+              $(EMM)/emmdef.inc
 
-rom_srch.obj: ROM_SRCH.ASM  $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
-rom_srch.lst: ROM_SRCH.ASM  $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+rom_srch.obj: rom_srch.asm $(EMM)/emmdef.inc vdmseg.inc romstruc.equ
 
-inittab.obj inittab.lst: INITTAB.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+inittab.obj: inittab.asm vdmseg.inc vdmsel.inc desc.inc page.inc \
+             instr386.inc oemdep.inc
 
-emmmes.obj emmmes.lst: EMMMES.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+emmmes.obj: emmmes.asm ascii_sm.equ vdmseg.inc
 
-extpool.obj extpool.lst: EXTPOOL.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+extpool.obj: extpool.asm vdmseg.inc
 
-shiphi.obj shiphi.lst: SHIPHI.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+shiphi.obj: shiphi.asm vdmseg.inc desc.inc page.inc
 
-m_state.obj m_state.lst: M_STATE.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+m_state.obj: m_state.asm vdmseg.inc
 
-ppage.obj ppage.lst: PPAGE.ASM $(MEMMINC) ../EMM/EMMDEF.INC
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+ppage.obj: ppage.asm vdmseg.inc emm386.inc $(EMM)/emmdef.inc
 
 #******************************************************************************
 # VDM modules
 #******************************************************************************
 
-vdminit.obj vdminit.lst: VDMINIT.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+vdminit.obj: vdminit.asm vdmseg.inc vdmsel.inc desc.inc instr386.inc page.inc
 
-i286.obj i286.lst: I286.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+i286.obj: i286.asm vdmseg.inc vdmsel.inc desc.inc
 
-i386.obj i386.lst: I386.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+i386.obj: i386.asm vdmseg.inc vdmsel.inc desc.inc page.inc
 
-trapdef.obj trapdef.lst: TRAPDEF.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+trapdef.obj: trapdef.asm vdmseg.inc vdmsel.inc desc.inc elim.inc page.inc \
+             oemdep.inc instr386.inc vm386.inc
 
-tabdef.obj tabdef.lst: TABDEF.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+tabdef.obj: tabdef.asm vdmseg.inc vdmsel.inc desc.inc page.inc
 
-vmtrap.obj vmtrap.lst: VMTRAP.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+vmtrap.obj: vmtrap.asm vdmseg.inc vdmsel.inc vm386.inc pic_def.equ \
+            instr386.inc oemdep.inc
 
-vminst.obj vminst.lst: VMINST.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+vminst.obj: vminst.asm vdmseg.inc desc.inc vdmsel.inc vm386.inc loadall.inc \
+            instr386.inc oemdep.inc
 
-elimtrap.obj: ELIMTRAP.ASM $(MEMMINC) ../EMM/EMMDEF.INC
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
-elimtrap.lst: ELIMTRAP.ASM $(MEMMINC) ../EMM/EMMDEF.INC
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+elimtrap.obj: elimtrap.asm vdmseg.inc vdmsel.inc desc.inc elim.inc \
+              mach_id.inc page.inc oemdep.inc instr386.inc vm386.inc \
+              $(EMM)/emmdef.inc
 
-iotrap.obj iotrap.lst: IOTRAP.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+iotrap.obj: iotrap.asm vdmseg.inc vdmsel.inc
 
-initepg.obj: INITEPG.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
-initepg.lst: INITEPG.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+initepg.obj: initepg.asm vdmseg.inc vdmsel.inc desc.inc page.inc \
+             instr386.inc $(EMM)/emmdef.inc
 
-vminit.obj vminit.lst: VMINIT.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+vminit.obj: vminit.asm vdmseg.inc vdmsel.inc desc.inc elim.inc
 
-em286ll.obj em286ll.lst: EM286LL.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+em286ll.obj: em286ll.asm loadall.inc vdmseg.inc desc.inc vdmsel.inc \
+             instr386.inc vm386.inc oemdep.inc
 
-em386ll.obj em386ll.lst: EM386LL.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+em386ll.obj: em386ll.asm loadall.inc vdmseg.inc desc.inc vdmsel.inc \
+             instr386.inc vm386.inc oemdep.inc
 
-moveb.obj: MOVEB.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
-moveb.lst: MOVEB.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+moveb.obj: moveb.asm vdmseg.inc vdmsel.inc desc.inc instr386.inc oemdep.inc \
+           vm386.inc
 
-util.obj: UTIL.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
-util.lst: UTIL.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+util.obj: util.asm vdmseg.inc vdmsel.inc desc.inc instr386.inc oemdep.inc
 
-maplin.obj maplin.lst: MAPLIN.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+maplin.obj: maplin.asm vdmseg.inc vdmsel.inc instr386.inc oemdep.inc
 
-a20trap.obj a20trap.lst: A20TRAP.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+a20trap.obj: a20trap.asm vdmseg.inc vdmsel.inc
 
-oemproc.obj oemproc.lst: OEMPROC.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+oemproc.obj: oemproc.asm page.inc vdmseg.inc vdmsel.inc desc.inc \
+             instr386.inc romxbios.equ
 
-rrtrap.obj rrtrap.lst: RRTRAP.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+rrtrap.obj: rrtrap.asm vdmseg.inc vdmsel.inc desc.inc instr386.inc vm386.inc
 
-retreal.obj retreal.lst: RETREAL.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+retreal.obj: retreal.asm vdmseg.inc vdmsel.inc instr386.inc oemdep.inc
 
-errhndlr.obj errhndlr.lst: ERRHNDLR.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+errhndlr.obj: errhndlr.asm vdmseg.inc vdmsel.inc vm386.inc kbd.inc
 
-ekbd.obj ekbd.lst: EKBD.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+ekbd.obj: ekbd.asm vdmseg.inc kbd.inc
 
-initdeb.obj initdeb.lst: INITDEB.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+initdeb.obj: initdeb.asm vdmseg.inc vdmsel.inc
 
-emminit.obj emminit.lst: EMMINIT.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+emminit.obj: emminit.asm vdmseg.inc $(EMM)/emmdef.inc
 
-memmonf.obj memmonf.lst: MEMMONF.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+memmonf.obj: memmonf.asm ascii_sm.equ memm_msg.inc
 
-emm.obj emm.lst: EMM.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
+emm.obj: emm.asm vdmseg.inc vdmsel.inc vm386.inc oemdep.inc $(EMM)/emmdef.inc
 
-mapdma.obj mapdma.lst: MAPDMA.C
+mapdma.obj: MAPDMA.C
 	dosemu -t --Fdrive_c ../../.. -E "src\domsc3.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@)"
-
-memminc.lst: MEMMINC.ASM $(MEMMINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@) -l -n -DI386 -DNoBugMode -DNOHIMEM -i..\EMM"
 
 #******************************************************************************
 # debug modules
@@ -370,6 +320,7 @@ memminc.lst: MEMMINC.ASM $(MEMMINC)
 
 clean:
 	rm -f *.obj
+	rm -f *.err
 	rm -f *.lst
 	rm -f emm386.sys
 	rm -f emm386.map

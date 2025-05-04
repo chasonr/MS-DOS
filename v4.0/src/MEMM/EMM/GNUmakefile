@@ -35,7 +35,7 @@
 #	Definition for turning OFF high memory allocation
 #		HIFLAG = -DNOHIMEM => turns it off
 #		HIFLAG =	   => turns on high memory allocation
-HIFLAG	      = /DNOHIMEM
+HIFLAG	      = -DNOHIMEM
 #HIFLAG	=
 
 #	Definitions for assembler
@@ -43,8 +43,16 @@ HIFLAG	      = /DNOHIMEM
 MASM	= masm
 #MASM	= /bin/masm400
 #MASM	 = masm400
-AFLAGS	= /Mx /t /DI386  /i../memm $(HIFLAG)
-AINC	= ../MEMM/VDMSEG.INC ../MEMM/VDMSEL.INC EMMDEF.INC
+MEMM = ../MEMM
+AINC	= $(MEMM)/vdmseg.inc $(MEMM)/vdmsel.inc emmdef.inc
+
+.SUFFIXES: .asm .obj
+
+AS = jwasm
+AFLAGS = -q -Zm -Zg -I$(MEMM) -Fl $(HIFLAG) -DI386
+
+.asm.obj:
+	$(AS) $(AFLAGS) -Fo$@ $<
 
 #	Definitions for linker for old style .exe files
 #LINK	= /bin/link
@@ -77,20 +85,17 @@ emmfunct.obj:	EMMFUNCT.C EMM.H
 emm40.obj:	EMM40.C EMM.H
 	dosemu -t --Fdrive_c ../../.. -E "src\domsc3.bat src\memm\emm $(subst /,\,$<) $(subst /,\,$@)"
 
-emmp.obj:	EMMP.ASM $(AINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\emm $(subst /,\,$<) $(subst /,\,$@) -I..\memm -DI386 -DNOHIMEM"
+emmp.obj:	emmp.asm $(AINC) $(MEMM)/page.inc $(MEMM)/vm386.inc \
+            $(MEMM)/desc.inc
 
-emmsup.obj:	EMMSUP.ASM $(AINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\emm $(subst /,\,$<) $(subst /,\,$@) -I..\memm -DI386 -DNOHIMEM"
+emmsup.obj:	emmsup.asm $(AINC) $(MEMM)/desc.inc $(MEMM)/page.inc
 
-emmdisp.obj:	EMMDISP.ASM $(AINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\emm $(subst /,\,$<) $(subst /,\,$@) -I..\memm -DI386 -DNOHIMEM"
+emmdisp.obj:	emmdisp.asm $(AINC)
 
-emmdata.obj:	EMMDATA.ASM $(AINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\emm $(subst /,\,$<) $(subst /,\,$@) -I..\memm -DI386 -DNOHIMEM"
+emmdata.obj:	emmdata.asm $(AINC) $(MEMM)/page.inc
 
-emminc.obj:	EMMINC.ASM $(AINC)
-	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\memm\emm $(subst /,\,$<) $(subst /,\,$@) -I..\memm -DI386 -DNOHIMEM"
+emminc.obj:	emminc.asm $(AINC) $(MEMM)/desc.inc $(MEMM)/oemdep.inc \
+            $(MEMM)/page.inc
 
 clean:
 	rm -f *.obj
