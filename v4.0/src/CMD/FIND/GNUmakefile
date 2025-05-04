@@ -23,9 +23,9 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 all: find.exe
 
-find.ctl find.cl1 find.cl2 find.cla: FIND.SKL              \
+find.ctl find.cl1 find.cl2 find.cla: find.skl              \
           $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\find $(subst /,\,$<) $(country)"
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG find.skl
 
 find.obj: find.asm              \
           find.ctl              \

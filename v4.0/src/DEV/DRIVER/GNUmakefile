@@ -23,8 +23,8 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 all: driver.sys
 
-driver.ctl driver.cl1 driver.cl2 driver.cla: DRIVER.SKL  $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\dev\driver $(subst /,\,$<) $(country)"
+driver.ctl driver.cl1 driver.cl2 driver.cla: driver.skl  $(msg)/$(COUNTRY).MSG
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG driver.skl
 
 driver.obj: driver.asm  $(inc)/msbds.inc $(inc)/versiona.inc \
             $(inc)/parse.asm $(inc)/psdata.inc \

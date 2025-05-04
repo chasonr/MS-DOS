@@ -23,9 +23,9 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 all: attrib.exe
 
-attrib.ctl attrib.cl1 attrib.cl2 attrib.cla attrib.clb: ATTRIB.SKL \
+attrib.ctl attrib.cl1 attrib.cl2 attrib.cla attrib.clb: attrib.skl \
 	$(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\attrib $(subst /,\,$<) $(country)"
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG attrib.skl
 
 _parse.obj: _parse.asm \
 	$(inc)/parse.asm \

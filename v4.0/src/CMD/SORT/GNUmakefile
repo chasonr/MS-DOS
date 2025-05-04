@@ -23,9 +23,9 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 all: sort.exe
 
-sort.ctl sort.cl1 sort.cl2 sort.cla: SORT.SKL              \
+sort.ctl sort.cl1 sort.cl2 sort.cla: sort.skl              \
         $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\sort $(subst /,\,$<) $(country)"
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG sort.skl
 
 sort.obj: sort.asm              \
           sort.ctl              \

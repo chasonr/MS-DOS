@@ -40,9 +40,9 @@ $(inc)/dpb.obj:
 $(map)/mapper.lib:
 	$(MAKE) -C $(map) mapper.lib
 
-subst.ctl subst.cl1 subst.cl2 subst.cla: SUBST.SKL    \
+subst.ctl subst.cl1 subst.cl2 subst.cla: subst.skl    \
   $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\subst $(subst /,\,$<) $(country)"
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG subst.skl
 
 _msgret.obj: _msgret.asm \
   $(inc)/msgserv.asm    \
@@ -53,8 +53,7 @@ _msgret.obj: _msgret.asm \
   subst.ctl             \
   subst.cla             \
   subst.cl1             \
-  subst.cl2             \
-  SUBST.SKL
+  subst.cl2
 
 _parse.obj: _parse.asm  \
   $(inc)/parse.asm      \

@@ -32,9 +32,9 @@ DOSSYM_INC = $(inc)/dossym.inc $(inc)/arena.inc $(inc)/bpb.inc \
              $(inc)/syscall.inc $(inc)/sysvar.inc $(inc)/vector.inc \
              $(inc)/versiona.inc $(inc)/version.inc
 
-edlin.ctl edlin.cl1 edlin.cl2 edlin.cla edlin.clb edlin.clc: EDLIN.SKL   \
+edlin.ctl edlin.cl1 edlin.cl2 edlin.cla edlin.clb edlin.clc: edlin.skl   \
                 $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\edlin $(subst /,\,$<) $(country)"
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG edlin.skl
 
 edlin.obj:      edlin.asm edlequ.asm edlstdsw.inc $(DOSSYM_INC)
 

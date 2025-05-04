@@ -22,9 +22,9 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 all: display.sys ega.cpi lcd.cpi
 
-display.ctl display.cl1 display.cl2 display.cla: DISPLAY.SKL \
+display.ctl display.cl1 display.cl2 display.cla: display.skl \
         $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\dev\display $(subst /,\,$<) $(country)"
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG display.skl
 
 display.obj: display.asm \
         macros.inc  \

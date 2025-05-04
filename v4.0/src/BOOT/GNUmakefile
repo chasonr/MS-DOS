@@ -23,9 +23,9 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 all: msboot.bin
 
-boot.cl1: BOOT.SKL \
+boot.cl1: boot.skl \
 	$(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../.. -E "src\domsg1.bat src\boot $(subst /,\,$<) $(country);"
+	../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG boot.skl
 
 msboot.obj: msboot.asm boot.cl1
 

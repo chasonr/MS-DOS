@@ -25,9 +25,9 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 all: mem.exe
 
 
-mem.ctl mem.cl1 mem.cl2 mem.cla mem.clb:        MEM.SKL                         \
+mem.ctl mem.cl1 mem.cl2 mem.cla mem.clb:        mem.skl                         \
                 $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\mem $(subst /,\,$<) $(country)"
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG mem.skl
 
 _parse.obj:     _parse.asm                      \
                 $(inc)/parse.asm                \

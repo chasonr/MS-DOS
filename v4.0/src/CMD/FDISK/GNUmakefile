@@ -31,11 +31,11 @@ all: fdisk.exe
 fdiskm.c  : FDISK.MSG $(msg)/$(COUNTRY).MSG
 	dosemu -t --Fdrive_c ../../.. -E "src\domenu.bat src\cmd\fdisk $(subst /,\,$<) $(country)"
 
-fdisk5.cl1 : FDISK5.SKL $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg1.bat src\cmd\fdisk $(subst /,\,$<) $(country)"
+fdisk5.cl1 : fdisk5.skl $(msg)/$(COUNTRY).MSG
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG fdisk5.skl
 
-fdisk.ctl fdisk.cl1 fdisk.cl2 fdisk.cla fdisk.clb: FDISK.SKL $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\fdisk $(subst /,\,$<) $(country)"
+fdisk.ctl fdisk.cl1 fdisk.cl2 fdisk.cla fdisk.clb: fdisk.skl $(msg)/$(COUNTRY).MSG
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG fdisk.skl
 
 main.obj : MAIN.C \
            FDISK.H SUBTYPE.H EXTERN.H FDISKMSG.H MSGRET.H DOSCALL.H 

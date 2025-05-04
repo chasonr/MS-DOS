@@ -23,9 +23,9 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 all: assign.com
 
-assign.ctl assign.cl1 assign.cl2 assign.cla: ASSIGN.SKL \
+assign.ctl assign.cl1 assign.cl2 assign.cla: assign.skl \
 	$(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\assign $(subst /,\,$<) $(country)"
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG assign.skl
 
 assgparm.obj: assgparm.asm \
 	$(inc)/psdata.inc \

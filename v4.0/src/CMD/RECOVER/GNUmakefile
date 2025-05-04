@@ -32,9 +32,9 @@ DOSSYM_INC = $(inc)/dossym.inc $(inc)/arena.inc $(inc)/bpb.inc \
              $(inc)/syscall.inc $(inc)/sysvar.inc $(inc)/vector.inc \
              $(inc)/versiona.inc $(inc)/version.inc
 
-recover.ctl : RECOVER.SKL    \
+recover.ctl : recover.skl    \
 	     $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\recover $(subst /,\,$<) $(country)"
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG recover.skl
 
 recover.obj: recover.asm recchng.inc recseg.inc $(DOSSYM_INC) recequ.inc \
              recdata.inc recmacro.inc $(inc)/sysmsg.inc $(inc)/versiona.inc \

@@ -30,9 +30,9 @@ SMDOSSYM_INC = $(inc)/smdossym.inc $(inc)/arena.inc $(inc)/bpb.inc \
 
 all: $(dest).sys
 
-msbio.cl1 msbio.cl2 msbio.cl3 msbio.cl4 msbio.cl5: MSBIO.SKL \
+msbio.cl1 msbio.cl2 msbio.cl3 msbio.cl4 msbio.cl5: msbio.skl \
 	$(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../.. -E "src\domsg1.bat src\bios $(subst /,\,$<) $(country);"
+	../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG msbio.skl
 
 msload.obj: msload.asm \
 	msbio.cl1 \

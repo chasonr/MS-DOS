@@ -23,9 +23,9 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 all: comp.com
 
-comp.ctl comp.ct1 comp.ct2 comp.cta: COMP.SKL \
+comp.ctl comp.ct1 comp.ct2 comp.cta: comp.skl \
     $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\comp $(subst /,\,$<) $(country)"
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG comp.skl
 
 comp1.obj: comp1.asm
 

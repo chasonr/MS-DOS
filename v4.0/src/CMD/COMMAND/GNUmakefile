@@ -33,8 +33,8 @@ DOSSYM_INC = $(inc)/dossym.inc $(inc)/arena.inc $(inc)/bpb.inc \
              $(inc)/versiona.inc $(inc)/version.inc
 
 command.ctl command.cl1 command.cl2 command.cl3 command.cl4 command.cl5 command.cla command.clb command.clc command.cld command.cle command.clf: \
-        COMMAND.SKL $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\command $(subst /,\,$<) $(country)"
+        command.skl $(msg)/$(COUNTRY).MSG
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG command.skl
 
 command1.obj:  command1.asm $(DOSSYM_INC) \
     $(inc)/devsym.inc comsw.asm comequ.asm resmsg.equ \

@@ -23,9 +23,9 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 all: vdisk.sys
 
-vdisk.ctl vdisk.cl1 vdisk.cl2 vdisk.cla: VDISK.SKL    \
+vdisk.ctl vdisk.cl1 vdisk.cl2 vdisk.cla: vdisk.skl    \
            $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\dev\vdisk $(subst /,\,$<) $(country)"
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG vdisk.skl
 
 
 vdisksys.obj: vdisksys.asm       \

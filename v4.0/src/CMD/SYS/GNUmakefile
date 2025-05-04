@@ -37,8 +37,8 @@ DOSSYM_INC = $(inc)/dossym.inc $(inc)/arena.inc $(inc)/bpb.inc \
 $(inc)/boot.inc: $(boot)/msboot.asm $(msg)/$(COUNTRY).MSG
 	$(MAKE) -C $(boot)
 
-sys.ctl sys.cl1 sys.cl2 sys.cla sys.clb sys.clc sys.cld: SYS.SKL $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\sys $(subst /,\,$<) $(country)"
+sys.ctl sys.cl1 sys.cl2 sys.cla sys.clb sys.clc sys.cld: sys.skl $(msg)/$(COUNTRY).MSG
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG sys.skl
 
 sys1.obj: sys1.asm syshdr.inc $(DOSSYM_INC) $(inc)/bootform.inc \
           $(inc)/boot.inc $(inc)/copyrigh.inc $(inc)/ioctl.inc \

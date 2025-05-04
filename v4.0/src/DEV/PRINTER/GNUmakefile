@@ -23,8 +23,8 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 all: printer.sys 4201.cpi 4208.cpi 5202.cpi
 
-printer.ctl printer.cl1 printer.cl2 printer.cla: PRINTER.SKL $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\dev\printer $(subst /,\,$<) $(country)"
+printer.ctl printer.cl1 printer.cl2 printer.cla: printer.skl $(msg)/$(COUNTRY).MSG
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG printer.skl
 
 cpspm10.obj:	cpspm10.asm cpspequ.inc
 

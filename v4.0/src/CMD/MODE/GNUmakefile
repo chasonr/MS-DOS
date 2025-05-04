@@ -23,9 +23,9 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 all: mode.com
 
-mode.ctl mode.cl1 mode.cl2 mode.cla mode.clb: MODE.SKL \
+mode.ctl mode.cl1 mode.cl2 mode.cla mode.clb: mode.skl \
       $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\mode $(subst /,\,$<) $(country)"
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG mode.skl
 
 main.obj: main.asm \
   $(inc)/copyrigh.inc \

@@ -23,9 +23,9 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 all: label.com
 
-labl.ctl labl.cl1 labl.cl2 labl.cla: LABL.SKL     \
+labl.ctl labl.cl1 labl.cl2 labl.cla: labl.skl     \
   $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\label $(subst /,\,$<) $(country)"
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG labl.skl
 
 label.obj: label.asm
 

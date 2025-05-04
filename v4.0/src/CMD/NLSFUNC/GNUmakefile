@@ -23,9 +23,9 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 all: nlsfunc.exe
 
-nlsfunc.ctl nlsfunc.cl1 nlsfunc.cl2 nlsfunc.cla: NLSFUNC.SKL	\
+nlsfunc.ctl nlsfunc.cl1 nlsfunc.cl2 nlsfunc.cla: nlsfunc.skl	\
 	     $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\nlsfunc $(subst /,\,$<) $(country)"
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG nlsfunc.skl
 
 nlsfunc.obj: nlsfunc.asm	  \
 	     funcdbcs.inc	  \

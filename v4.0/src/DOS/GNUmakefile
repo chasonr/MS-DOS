@@ -23,9 +23,9 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl -Sa
 
 all: msdos.sys
 
-msdos.cl1: MSDOS.SKL \
+msdos.cl1: msdos.skl \
 	$(msg)/$(COUNTRY).MSG 
-	dosemu -t --Fdrive_c ../.. -E "src\domsg1.bat src\dos $(subst /,\,$<) $(country);"
+	../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG msdos.skl
 
 DOSSYM_INC = $(inc)/dossym.inc $(inc)/arena.inc $(inc)/bpb.inc \
              $(inc)/buffer.inc $(inc)/cpmfcb.inc $(inc)/curdir.inc \

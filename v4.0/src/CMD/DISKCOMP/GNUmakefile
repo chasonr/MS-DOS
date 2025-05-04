@@ -23,9 +23,9 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 all: diskcomp.com
 
-diskcomp.ctl diskcomp.cl1 diskcomp.cl2 diskcomp.cla: DISKCOMP.SKL \
+diskcomp.ctl diskcomp.cl1 diskcomp.cl2 diskcomp.cla: diskcomp.skl \
    $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\diskcomp $(subst /,\,$<) $(country)"
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG diskcomp.skl
 
 diskcomp.obj: diskcomp.asm \
    dcmpmacr.inc \

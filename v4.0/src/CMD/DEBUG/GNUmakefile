@@ -32,9 +32,9 @@ DOSSYM_INC = $(inc)/dossym.inc $(inc)/arena.inc $(inc)/bpb.inc \
              $(inc)/syscall.inc $(inc)/sysvar.inc $(inc)/vector.inc \
              $(inc)/versiona.inc $(inc)/version.inc
 
-debug.ctl debug.cl1 debug.cl2 debug.cla debug.clb debug.clc debug.cld: DEBUG.SKL   \
+debug.ctl debug.cl1 debug.cl2 debug.cla debug.clb debug.clc debug.cld: debug.skl   \
                 $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\debug $(subst /,\,$<) $(country)"
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG debug.skl
 
 debug.obj:      debug.asm $(DOSSYM_INC) $(inc)/dosmac.inc \
                 $(inc)/bpb.inc $(inc)/buffer.inc $(inc)/sysvar.inc \

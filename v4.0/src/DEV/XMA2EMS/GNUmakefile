@@ -23,8 +23,8 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 all: xma2ems.sys
 
-xma2ems.ctl xma2ems.cl1: XMA2EMS.SKL $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg1.bat src\dev\xma2ems $(subst /,\,$<) $(country)"
+xma2ems.ctl xma2ems.cl1: xma2ems.skl $(msg)/$(COUNTRY).MSG
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG xma2ems.skl
 
 xma2ems.obj:	xma2ems.asm emsinit.inc genioctl.inc i13hook.inc lim40b.inc \
 		lim40.inc parmpars.inc ps2_5060.inc romscan.inc xma1diag.inc \

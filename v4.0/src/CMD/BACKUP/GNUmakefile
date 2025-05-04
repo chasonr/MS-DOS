@@ -28,9 +28,9 @@ all: backup.com
 $(map)/mapper.lib:
 	$(MAKE) -C $(map)/mapper.lib:
 
-backup.ctl backup.cl1 backup.cl2 backup.cla:	BACKUP.SKL			\
+backup.ctl backup.cl1 backup.cl2 backup.cla:	backup.skl			\
 		$(msg)/$(COUNTRY).MSG		
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\backup $(subst /,\,$<) $(country)"
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG backup.skl
 
 _parse.obj:	_parse.asm			\
 		$(inc)/parse.asm		\

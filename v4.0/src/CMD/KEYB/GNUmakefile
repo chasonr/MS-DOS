@@ -23,8 +23,8 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 all: keyb.com
 
-keyb.ctl keyb.cl1 keyb.cl2 keyb.cla: KEYB.SKL $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\keyb $(subst /,\,$<) $(country)"
+keyb.ctl keyb.cl1 keyb.cl2 keyb.cla: keyb.skl $(msg)/$(COUNTRY).MSG
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG keyb.skl
 
 keybcmd.obj: keybcmd.asm \
              $(inc)/sysmsg.inc \

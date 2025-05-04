@@ -23,9 +23,9 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 all: xcopy.exe
 
-xcopy.ctl xcopy.cl1 xcopy.cl2 xcopy.cla: XCOPY.SKL \
+xcopy.ctl xcopy.cl1 xcopy.cl2 xcopy.cla: xcopy.skl \
    $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\xcopy $(subst /,\,$<) $(country)"
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG xcopy.skl
 
 xcopy.obj: xcopy.asm \
    $(inc)/versiona.inc \

@@ -23,9 +23,9 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 all: diskcopy.com
 
-diskcopy.ctl diskcopy.cl1 diskcopy.cl2 diskcopy.cla: DISKCOPY.SKL \
+diskcopy.ctl diskcopy.cl1 diskcopy.cl2 diskcopy.cla: diskcopy.skl \
    $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\diskcopy $(subst /,\,$<) $(country)"
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG diskcopy.skl
 
 diskcopy.obj: diskcopy.asm \
    dcpymacr.inc \

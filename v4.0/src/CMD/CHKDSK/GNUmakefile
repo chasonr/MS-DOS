@@ -24,8 +24,8 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 all: chkdsk.com
 
 chkdsk.ctl chkdsk.cl1 chkdsk.cl2 chkdsk.cla chkdsk.clb chkdsk.clc chkdsk.cld: \
-        CHKDSK.SKL $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\chkdsk $(subst /,\,$<) $(country)"
+        chkdsk.skl $(msg)/$(COUNTRY).MSG
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG chkdsk.skl
 
 chkinit.obj: chkinit.asm   \
 	     chkequ.inc chkmacro.inc chkparse.inc chkchng.inc \

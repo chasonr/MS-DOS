@@ -25,8 +25,8 @@ all: graphics.com
 
 
 graphics.ctl graphics.cl1 graphics.cl2 graphics.cla graphics.clb graphics.clc: \
-        GRAPHICS.SKL $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\graphics $(subst /,\,$<) $(country)"
+        graphics.skl $(msg)/$(COUNTRY).MSG
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG graphics.skl
 
 graphics.obj: graphics.asm  grinst.ext
 

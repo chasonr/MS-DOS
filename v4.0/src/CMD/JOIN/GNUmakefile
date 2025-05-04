@@ -44,9 +44,9 @@ $(inc)/comsubs.lib:
 $(map)/mapper.lib:
 	$(MAKE) -C $(map) mapper.lib
 
-join.ctl join.cl1 join.cl2 join.cla: JOIN.SKL      \
+join.ctl join.cl1 join.cl2 join.cla: join.skl      \
   $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\join $(subst /,\,$<) $(country)"
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG join.skl
 
 _msgret.obj: _msgret.asm \
   $(inc)/msgserv.asm    \

@@ -25,9 +25,9 @@ map	=../../MAPPER
 
 all: replace.exe
 
-replace.ctl replace.cl1 replace.cl2 replace.cla: REPLACE.SKL \
+replace.ctl replace.cl1 replace.cl2 replace.cla: replace.skl \
   $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\replace $(subst /,\,$<) $(country)"
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG replace.skl
 
 _msgret.obj: _msgret.asm \
   $(inc)/msgserv.asm    \

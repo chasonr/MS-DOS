@@ -23,8 +23,8 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 all: fastopen.exe
 
-fastopen.ctl fastopen.cl1 fastopen.cl2 fastopen.cla: FASTOPEN.SKL  $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\fastopen $(subst /,\,$<) $(country)"
+fastopen.ctl fastopen.cl1 fastopen.cl2 fastopen.cla: fastopen.skl  $(msg)/$(COUNTRY).MSG
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG fastopen.skl
 
 fastopen.obj: fastopen.asm \
 	$(inc)/fastopen.inc \

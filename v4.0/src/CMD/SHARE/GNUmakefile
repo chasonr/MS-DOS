@@ -32,8 +32,8 @@ DOSSYM_INC = $(inc)/dossym.inc $(inc)/arena.inc $(inc)/bpb.inc \
              $(inc)/syscall.inc $(inc)/sysvar.inc $(inc)/vector.inc \
              $(inc)/versiona.inc $(inc)/version.inc
 
-share.ctl share.cl1 share.cl2 share.cla: SHARE.SKL $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\share $(subst /,\,$<) $(country)"
+share.ctl share.cl1 share.cl2 share.cla: share.skl $(msg)/$(COUNTRY).MSG
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG share.skl
 
 gshare.obj: gshare.asm sharehdr.inc $(DOSSYM_INC) $(inc)/dpl.asm \
             $(inc)/dosseg.asm $(inc)/bugtyp.asm $(inc)/mft.inc

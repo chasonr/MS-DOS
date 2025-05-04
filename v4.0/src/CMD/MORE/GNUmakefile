@@ -23,9 +23,9 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 all: more.com
 
-more.ctl more.cl1 more.cl2 more.cla:       MORE.SKL \
+more.ctl more.cl1 more.cl2 more.cla:       more.skl \
                 $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\more $(subst /,\,$<) $(country)"
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG more.skl
 
 more.obj: more.asm             \
           more.inc             \

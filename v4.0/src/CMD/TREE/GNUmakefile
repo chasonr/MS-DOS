@@ -23,9 +23,9 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 all: tree.com
 
-tree.ctl tree.cl1 tree.cl2 tree.cla: TREE.SKL \
+tree.ctl tree.cl1 tree.cl2 tree.cla: tree.skl \
     $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\tree $(subst /,\,$<) $(country)"
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG tree.skl
 
 tree.obj: tree.asm \
     treequ.inc \

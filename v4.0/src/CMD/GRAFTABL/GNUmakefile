@@ -23,9 +23,9 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 all: graftabl.com
 
-graftabl.ctl graftabl.cl1 graftabl.cl2 graftabl.cla: GRAFTABL.SKL \
+graftabl.ctl graftabl.cl1 graftabl.cl2 graftabl.cla: graftabl.skl \
     $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\graftabl $(subst /,\,$<) $(country)"
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG graftabl.skl
 
 grtab.obj: grtab.asm $(inc)/pathmac.inc
 

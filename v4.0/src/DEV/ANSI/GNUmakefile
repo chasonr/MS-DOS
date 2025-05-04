@@ -22,8 +22,8 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 all: ansi.sys
 
-ansi.ctl ansi.cl1 ansi.cl2 ansi.cla: ANSI.SKL $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\dev\ansi $(subst /,\,$<) $(country)"
+ansi.ctl ansi.cl1 ansi.cl2 ansi.cla: ansi.skl $(msg)/$(COUNTRY).MSG
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG ansi.skl
 
 ansi.obj:       ansi.asm ansi.inc \
                 $(inc)/vector.inc \

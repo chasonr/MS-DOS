@@ -36,7 +36,6 @@ AS = jwasm
 AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 .asm.obj:
-#	dosemu -t --Fdrive_c ../../.. -E "src\domasm.bat src\cmd\fc $(subst /,\,$<) $(subst /,\,$@) -l"
 	$(AS) $(AFLAGS) -Fo$@ $<
 
 all:	fc.exe

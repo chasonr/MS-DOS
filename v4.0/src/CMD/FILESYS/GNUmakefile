@@ -23,9 +23,9 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 all: filesys.exe
 
-filesys.ctl filesys.cl1 filesys.cl2 filesys.cla: FILESYS.SKL \
+filesys.ctl filesys.cl1 filesys.cl2 filesys.cla: filesys.skl \
                 $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\filesys $(subst /,\,$<) $(country)"
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG filesys.skl
 
 _parse.obj:     _parse.asm              \
                 $(inc)/parse.asm        \

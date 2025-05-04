@@ -29,9 +29,9 @@ all: restore.com
 $(map)/mapper.lib:
 	$(MAKE) -C $(map) mapper.lib
 
-restore.ctl restore.cl1 restore.cl2 restore.cla:	RESTORE.SKL			\
+restore.ctl restore.cl1 restore.cl2 restore.cla:	restore.skl			\
 		$(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domsg2.bat src\cmd\restore $(subst /,\,$<) $(country)"
+	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG restore.skl
 
 _parse.obj :	_parse.asm			\
 		$(inc)/parse.asm		\
