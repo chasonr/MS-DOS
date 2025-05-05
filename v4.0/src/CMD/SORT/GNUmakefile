@@ -51,7 +51,7 @@ sort.exe: $(OBJS)
 	echo 'name sort.exe' >>resp.txt
 	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
-	dosemu -t --Fdrive_c ../../.. -E "src\tools\exefix src\cmd\sort\sort.exe 1 1 "
+	../../bldtools/exefix.rb sort.exe 1 1
 
 clean:
 	rm -f *.obj
