@@ -21,7 +21,7 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 .asm.obj:
 	$(AS) $(AFLAGS) -Fo$@ $<
 
-all: msboot.bin
+all: $(inc)/boot.inc
 
 boot.cl1: boot.skl \
 	$(msg)/$(COUNTRY).MSG
@@ -32,20 +32,19 @@ msboot.obj: msboot.asm boot.cl1
 OBJS = msboot.obj
 
 msboot.bin: msboot.obj
-	echo 'system dos' >resp.txt
+	echo 'system dos com' >resp.txt
 	echo 'option map=msboot.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
-	echo 'name msboot.exe' >>resp.txt
+	echo 'name msboot.bin' >>resp.txt
 	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
-	exe2bin -q msboot.exe msboot.bin
-	dosemu -t --Fdrive_c ../.. -E "src\tools\dbof src\boot\msboot.bin src\boot\boot.inc 7c00 200"
-	mv boot.inc $(inc)
+
+$(inc)/boot.inc: msboot.bin
+	../bldtools/hexify.rb msboot.bin $(inc)/boot.inc 7c00 200
 
 clean:
 	rm -f *.obj
 	rm -f *.lst
-	rm -f msboot.exe
 	rm -f msboot.map
 	rm -f boot.cl1
 	rm -f msboot.bin

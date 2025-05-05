@@ -108,17 +108,18 @@ fdboot.obj : fdboot.asm fdisk5.cl1
 
 BOOT_OBJS = fdboot.obj
 
-fdboot.inc: $(BOOT_OBJS)
-	echo 'system dos' >resp.txt
+fdboot.bin: $(BOOT_OBJS)
+	echo 'system dos com' >resp.txt
 	echo 'option packcode=0' >>resp.txt
 	echo 'option packdata=0' >>resp.txt
 	echo 'option map=fdboot.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
-	echo 'name fdboot.exe' >>resp.txt
+	echo 'name fdboot.bin' >>resp.txt
 	for x in $(BOOT_OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
-	exe2bin -q fdboot.exe fdboot.bin
-	dosemu -t --Fdrive_c ../../.. -E "src\tools\dbof src\cmd\fdisk\fdboot.bin src\cmd\fdisk\fdboot.inc 600 200"
+
+fdboot.inc: fdboot.bin
+	../../bldtools/hexify.rb fdboot.bin fdboot.inc 600 200
 
 _parse.obj : _parse.asm $(inc)/psdata.inc $(inc)/parse.asm
 
@@ -152,7 +153,6 @@ clean:
 	rm -f fdboot.bin
 	rm -f fdboot.map
 	rm -f fdboot.inc
-	rm -f fdboot.exe
 	rm -f fdisk5.cl1
 	rm -f fdiskm.c
 	rm -f fdisk.cl[12ab]
