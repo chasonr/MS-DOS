@@ -39,22 +39,20 @@ vdisksys.obj: vdisksys.asm       \
 OBJS = vdisksys.obj
 
 vdisk.sys: $(OBJS) VDISK.LNK
-	echo 'system dos' >resp.txt
+	echo 'system dos com' >resp.txt
 	echo 'option packcode=0' >>resp.txt
 	echo 'option packdata=0' >>resp.txt
 	echo 'option map=vdisk.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
-	echo 'name vdisk.exe' >>resp.txt
+	echo 'name vdisk.sys' >>resp.txt
 	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
-	exe2bin -q vdisk.exe vdisk.sys
 
 clean:
 	rm -f *.obj
 	rm -f *.err
 	rm -f *.lst
 	rm -f vdisk.sys
-	rm -f vdisk.exe
 	rm -f vdisk.map
 	rm -f vdisk.cl[12a]
 	rm -f vdisk.ctl

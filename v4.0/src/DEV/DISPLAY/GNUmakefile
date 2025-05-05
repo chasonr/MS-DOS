@@ -52,15 +52,14 @@ parser.obj: parser.asm \
 OBJS = display.obj init.obj parser.obj
 
 display.sys: $(OBJS) DISPLAY.LNK
-	echo 'system dos' >resp.txt
+	echo 'system dos com' >resp.txt
 	echo 'option packcode=0' >>resp.txt
 	echo 'option packdata=0' >>resp.txt
 	echo 'option map=display.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
-	echo 'name display.exe' >>resp.txt
+	echo 'name display.sys' >>resp.txt
 	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
-	exe2bin -q -l=0 display.exe display.sys
 
 ega.cpi:
 	$(MAKE) -C EGA
@@ -73,7 +72,6 @@ clean:
 	rm -f *.err
 	rm -f *.lst
 	rm -f display.sys
-	rm -f display.exe
 	rm -f display.map
 	rm -f display.cl[12a]
 	rm -f display.ctl

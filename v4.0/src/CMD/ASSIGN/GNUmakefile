@@ -47,16 +47,14 @@ assgmain.obj: assgmain.asm \
 
 OBJS = assgmain.obj assgparm.obj
 assign.com: $(OBJS)
-	echo 'system dos' >resp.txt
+	echo 'system dos com' >resp.txt
 	echo 'option packcode=0' >>resp.txt
 	echo 'option packdata=0' >>resp.txt
 	echo 'option map=assign.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
-	echo 'name assign.exe' >>resp.txt
+	echo 'name assign.com' >>resp.txt
 	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
-	exe2bin -q assign.exe  assign.com
-	rm assign.exe
 
 clean:
 	rm -f *.obj

@@ -79,22 +79,20 @@ OBJS = keyb.obj keybi9.obj keybi9c.obj keybi2f.obj keybi48.obj keybcpsd.obj \
        commsubs.obj keybtbbl.obj parser.obj keybcmd.obj
 
 keyb.com: $(OBJS)
-	echo 'system dos' >resp.txt
+	echo 'system dos com' >resp.txt
 	echo 'option packcode=0' >>resp.txt
 	echo 'option packdata=0' >>resp.txt
 	echo 'option map=keyb.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
-	echo 'name keyb.exe' >>resp.txt
+	echo 'name keyb.com' >>resp.txt
 	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
-	exe2bin -q keyb.exe keyb.com
 
 clean:
 	rm -f *.obj
 	rm -f *.err
 	rm -f *.lst
 	rm -f keyb.com
-	rm -f keyb.exe
 	rm -f keyb.map
 	rm -f keyb.cl[12a]
 	rm -f keyb.ctl

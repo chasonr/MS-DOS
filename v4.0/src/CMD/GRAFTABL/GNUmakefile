@@ -64,22 +64,20 @@ OBJS = grtabhan.obj grtabus.obj grtabml.obj grtabpo.obj grtabcf.obj \
        grtabno.obj grtabsm.obj grtabpar.obj grtabp.obj grtab.obj
 
 graftabl.com: $(OBJS) GRAFTABL.LNK
-	echo 'system dos' >resp.txt
+	echo 'system dos com' >resp.txt
 	echo 'option packcode=0' >>resp.txt
 	echo 'option packdata=0' >>resp.txt
 	echo 'option map=graftabl.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
-	echo 'name graftabl.exe' >>resp.txt
+	echo 'name graftabl.com' >>resp.txt
 	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
-	exe2bin -q graftabl.exe graftabl.com
 
 clean:
 	rm -f *.obj
 	rm -f *.err
 	rm -f *.lst
 	rm -f graftabl.com
-	rm -f graftabl.exe
 	rm -f graftabl.map
 	rm -f graftabl.cl[12a]
 	rm -f graftabl.ctl

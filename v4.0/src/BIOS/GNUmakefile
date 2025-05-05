@@ -41,13 +41,12 @@ msload.obj: msload.asm \
 MSLOAD_OBJS = msload.obj
 
 msload.com: $(MSLOAD_OBJS)
-	echo 'system dos' >resp.txt
+	echo 'system dos com' >resp.txt
 	echo 'option map=msload.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
-	echo 'name msload.exe' >>resp.txt
+	echo 'name msload.com' >>resp.txt
 	for x in $(MSLOAD_OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
-	exe2bin -q msload.exe msload.com
 
 msbio1.obj: msbio1.asm \
    	msbdata.inc \
@@ -180,6 +179,5 @@ clean:
 	rm -f msbio.exe
 	rm -f msbio.bin
 	rm -f msload.map
-	rm -f msload.exe
 	rm -f msload.com
 	rm -f resp.txt

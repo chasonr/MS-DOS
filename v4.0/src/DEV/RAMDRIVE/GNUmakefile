@@ -26,21 +26,19 @@ messages.obj:  messages.asm
 OBJS = ramdrive.obj messages.obj
 
 ramdrive.sys: $(OBJS)
-	echo 'system dos' >resp.txt
+	echo 'system dos com' >resp.txt
 	echo 'option packcode=0' >>resp.txt
 	echo 'option packdata=0' >>resp.txt
 	echo 'option map=ramdrive.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
-	echo 'name ramdrive.exe' >>resp.txt
+	echo 'name ramdrive.sys' >>resp.txt
 	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
-	exe2bin -q ramdrive.exe ramdrive.sys
 
 clean:
 	rm -f *.obj
 	rm -f *.err
 	rm -f *.lst
 	rm -f ramdrive.sys
-	rm -f ramdrive.exe
 	rm -f ramdrive.map
 	rm -f resp.txt

@@ -37,21 +37,19 @@ OBJS = font-r3.obj 437-cpi.obj 850-cpi.obj 860-cpi.obj 863-cpi.obj \
        865-cpi.obj copyrigh.obj
 
 lcd.cpi:  $(OBJS) LCD.LNK
-	echo 'system dos' >resp.txt
+	echo 'system dos com' >resp.txt
 	echo 'option packcode=0' >>resp.txt
 	echo 'option packdata=0' >>resp.txt
-	echo 'option map=font-r3.map' >>resp.txt
+	echo 'option map=lcd.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
-	echo 'name font-r3.exe' >>resp.txt
+	echo 'name lcd.cpi' >>resp.txt
 	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
-	exe2bin -q font-r3.exe lcd.cpi
 
 clean:
 	rm -f *.obj
 	rm -f *.err
 	rm -f *.lst
 	rm -f lcd.cpi
-	rm -f font-r3.exe
-	rm -f font-r3.map
+	rm -f lcd.map
 	rm -f resp.txt

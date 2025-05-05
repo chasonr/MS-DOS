@@ -52,21 +52,19 @@ OBJS = cpi-head.obj 437-cpi.obj 850-cpi.obj 860-cpi.obj 863-cpi.obj \
        865-cpi.obj copyrigh.obj
 
 ega.cpi: $(OBJS) EGA.LNK
-	echo 'system dos' >resp.txt
+	echo 'system dos com' >resp.txt
 	echo 'option packcode=0' >>resp.txt
 	echo 'option packdata=0' >>resp.txt
-	echo 'option map=cpi-head.map' >>resp.txt
+	echo 'option map=ega.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
-	echo 'name cpi-head.exe' >>resp.txt
+	echo 'name ega.cpi' >>resp.txt
 	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
-	exe2bin -q cpi-head.exe ega.cpi
 
 clean:
 	rm -f *.obj
 	rm -f *.err
 	rm -f *.lst
 	rm -f ega.cpi
-	rm -f cpi-head.exe
-	rm -f cpi-head.map
+	rm -f ega.map
 	rm -f resp.txt

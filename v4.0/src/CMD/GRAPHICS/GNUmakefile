@@ -70,22 +70,20 @@ OBJS = graphics.obj grint2fh.obj grpattrn.obj grctrl.obj grcpsd.obj \
        grload.obj grload2.obj grload3.obj
 
 graphics.com: $(OBJS) GRAPHICS.LNK
-	echo 'system dos' >resp.txt
+	echo 'system dos com' >resp.txt
 	echo 'option packcode=0' >>resp.txt
 	echo 'option packdata=0' >>resp.txt
 	echo 'option map=graphics.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
-	echo 'name graphics.exe' >>resp.txt
+	echo 'name graphics.com' >>resp.txt
 	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
-	exe2bin -q graphics.exe graphics.com
 
 clean:
 	rm -f *.obj
 	rm -f *.err
 	rm -f *.lst
 	rm -f graphics.com
-	rm -f graphics.exe
 	rm -f graphics.map
 	rm -f graphics.cl[12a-c]
 	rm -f graphics.ctl

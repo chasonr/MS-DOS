@@ -96,22 +96,20 @@ OBJS = rescode.obj modeecho.obj modeleng.obj modemes.obj modescrn.obj \
        display.obj typamat.obj invoke.obj parshell.obj modepars.obj
 
 mode.com: $(OBJS)
-	echo 'system dos' >resp.txt
+	echo 'system dos com' >resp.txt
 	echo 'option packcode=0' >>resp.txt
 	echo 'option packdata=0' >>resp.txt
 	echo 'option map=mode.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
-	echo 'name mode.exe' >>resp.txt
+	echo 'name mode.com' >>resp.txt
 	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
-	exe2bin -q mode.exe mode.com
 
 clean:
 	rm -f *.obj
 	rm -f *.err
 	rm -f *.lst
 	rm -f mode.com
-	rm -f mode.exe
 	rm -f mode.map
 	rm -f mode.cl[12ab]
 	rm -f mode.ctl

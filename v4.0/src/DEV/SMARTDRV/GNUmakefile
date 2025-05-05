@@ -21,24 +21,20 @@ smartdrv.obj: smartdrv.asm ab_macro.asm mi.asm loadall.asm \
 
 OBJS = smartdrv.obj
 
-smartdrv.exe: $(OBJS)
-	echo 'system dos' >resp.txt
+smartdrv.sys: $(OBJS)
+	echo 'system dos com' >resp.txt
 	echo 'option packcode=0' >>resp.txt
 	echo 'option packdata=0' >>resp.txt
 	echo 'option map=smartdrv.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
-	echo 'name smartdrv.exe' >>resp.txt
+	echo 'name smartdrv.sys' >>resp.txt
 	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
-
-smartdrv.sys: smartdrv.exe
-	exe2bin -q smartdrv.exe smartdrv.sys
 
 clean:
 	rm -f *.obj
 	rm -f *.err
 	rm -f *.lst
 	rm -f smartdrv.sys
-	rm -f smartdrv.exe
 	rm -f smartdrv.map
 	rm -f resp.txt

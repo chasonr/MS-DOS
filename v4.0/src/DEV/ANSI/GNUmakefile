@@ -39,22 +39,20 @@ parser.obj:     parser.asm ansi.inc $(inc)/sysmsg.inc $(inc)/msgserv.asm \
 OBJS = ansi.obj ioctl.obj ansiinit.obj parser.obj
 
 ansi.sys: $(OBJS) ANSI.LNK
-	echo 'system dos' >resp.txt
+	echo 'system dos com' >resp.txt
 	echo 'option packcode=0' >>resp.txt
 	echo 'option packdata=0' >>resp.txt
 	echo 'option map=ansi.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
-	echo 'name ansi.exe' >>resp.txt
+	echo 'name ansi.sys' >>resp.txt
 	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
-	exe2bin -q ansi.exe ansi.sys
 
 clean:
 	rm -f *.obj
 	rm -f *.err
 	rm -f *.lst
 	rm -f ansi.sys
-	rm -f ansi.exe
 	rm -f ansi.cl[12a]
 	rm -f ansi.ctl
 	rm -f ansi.map

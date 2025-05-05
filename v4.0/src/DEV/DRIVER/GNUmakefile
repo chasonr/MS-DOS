@@ -32,22 +32,20 @@ driver.obj: driver.asm  $(inc)/msbds.inc $(inc)/versiona.inc \
 OBJS = driver.obj
 
 driver.sys: $(OBJS) DRIVER.LNK
-	echo 'system dos' >resp.txt
+	echo 'system dos com' >resp.txt
 	echo 'option packcode=0' >>resp.txt
 	echo 'option packdata=0' >>resp.txt
 	echo 'option map=driver.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
-	echo 'name driver.exe' >>resp.txt
+	echo 'name driver.sys' >>resp.txt
 	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
-	exe2bin -q driver.exe driver.sys
 
 clean:
 	rm -f *.obj
 	rm -f *.err
 	rm -f *.lst
 	rm -f driver.sys
-	rm -f driver.exe
 	rm -f driver.map
 	rm -f driver.cl[12a]
 	rm -f driver.ctl

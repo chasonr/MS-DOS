@@ -53,22 +53,20 @@ treepar.obj: treepar.asm $(inc)/pathmac.inc
 OBJS = tree.obj treepar.obj treesysp.obj treesysm.obj
 
 tree.com: $(OBJS) TREE.LNK
-	echo 'system dos' >resp.txt
+	echo 'system dos com' >resp.txt
 	echo 'option packcode=0' >>resp.txt
 	echo 'option packdata=0' >>resp.txt
 	echo 'option map=tree.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
-	echo 'name tree.exe' >>resp.txt
+	echo 'name tree.com' >>resp.txt
 	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
-	exe2bin -q tree.exe tree.com
 
 clean:
 	rm -f *.obj
 	rm -f *.err
 	rm -f *.lst
 	rm -f tree.com
-	rm -f tree.exe
 	rm -f tree.map
 	rm -f tree.cl[12a]
 	rm -f tree.ctl

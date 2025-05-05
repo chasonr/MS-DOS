@@ -61,22 +61,20 @@ dcomppar.obj: dcomppar.asm $(inc)/pathmac.inc
 OBJS = diskcomp.obj dcompsm.obj dcompp.obj dcomppar.obj compinit.obj
 
 diskcomp.com: $(OBJS) DISKCOMP.LNK
-	echo 'system dos' >resp.txt
+	echo 'system dos com' >resp.txt
 	echo 'option packcode=0' >>resp.txt
 	echo 'option packdata=0' >>resp.txt
 	echo 'option map=diskcomp.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
-	echo 'name diskcomp.exe' >>resp.txt
+	echo 'name diskcomp.com' >>resp.txt
 	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
-	exe2bin -q diskcomp.exe diskcomp.com
 
 clean:
 	rm -f *.obj
 	rm -f *.err
 	rm -f *.lst
 	rm -f diskcomp.com
-	rm -f diskcomp.exe
 	rm -f diskcomp.map
 	rm -f diskcomp.cl[12a]
 	rm -f diskcomp.ctl

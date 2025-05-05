@@ -24,15 +24,14 @@ all: 4208.cpi
 OBJS = 4208.obj
 
 4208.cpi:  $(OBJS)
-	echo 'system dos' >resp.txt
+	echo 'system dos com' >resp.txt
 	echo 'option packcode=0' >>resp.txt
 	echo 'option packdata=0' >>resp.txt
 	echo 'option map=4208.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
-	echo 'name 4208.exe' >>resp.txt
+	echo 'name 4208.cpi' >>resp.txt
 	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
-	exe2bin -q 4208 4208.cpi
 
 clean:
 	rm -f *.obj
@@ -40,5 +39,4 @@ clean:
 	rm -f *.lst
 	rm -f 4208.cpi
 	rm -f 4208.map
-	rm -f 4208.exe
 	rm -f resp.txt

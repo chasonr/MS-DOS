@@ -38,22 +38,20 @@ labelm.obj: labelm.asm  \
 OBJS = label.obj labelm.obj
 
 label.com: $(OBJS) LABEL.LNK
-	echo 'system dos' >resp.txt
+	echo 'system dos com' >resp.txt
 	echo 'option packcode=0' >>resp.txt
 	echo 'option packdata=0' >>resp.txt
 	echo 'option map=label.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
-	echo 'name label.exe' >>resp.txt
+	echo 'name label.com' >>resp.txt
 	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
-	exe2bin -q label.exe label.com
 
 clean:
 	rm -f *.obj
 	rm -f *.err
 	rm -f *.lst
 	rm -f label.com
-	rm -f label.exe
 	rm -f label.map
 	rm -f labl.cl[12a]
 	rm -f labl.ctl

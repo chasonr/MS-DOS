@@ -194,15 +194,14 @@ sstub.obj    : sstub.asm $(inc)/sysmsg.inc $(inc)/msgserv.asm \
 STUB_OBJS = sstub.obj
 
 select.com: $(STUB_OBJS)
-	echo 'system dos' >resp.txt
+	echo 'system dos com' >resp.txt
 	echo 'option packcode=0' >>resp.txt
 	echo 'option packdata=0' >>resp.txt
 	echo 'option map=sstub.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
-	echo 'name sstub.exe' >>resp.txt
+	echo 'name select.com' >>resp.txt
 	for x in $(STUB_OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
-	exe2bin -q sstub.exe select.com
 
 #
 #######################  make select.dat ####################
@@ -222,18 +221,17 @@ sel-pan.obj: sel-pan.asm
 
 SELPAN_OBJS = sel-pan.obj panels.obj colors.obj scroll.obj
 
-sel-pan.exe: $(SELPAN_OBJS) SEL-PAN.LNK
-	echo 'system dos' >resp.txt
+sel-pan.dat: $(SELPAN_OBJS) SEL-PAN.LNK
+	echo 'system dos com' >resp.txt
 	echo 'option packcode=0' >>resp.txt
 	echo 'option packdata=0' >>resp.txt
 	echo 'option map=sel-pan.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
-	echo 'name sel-pan.exe' >>resp.txt
+	echo 'name sel-pan.dat' >>resp.txt
 	for x in $(SELPAN_OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
 
-select.dat: sel-pan.exe
-	exe2bin -q sel-pan.exe sel-pan.dat
+select.dat: sel-pan.dat
 	../bldtools/rlencode.rb sel-pan.dat select.dat
 
 #
@@ -259,13 +257,12 @@ clean:
 	rm -f select.hlp
 	rm -f services.bak
 	rm -f services.lib
-	rm -f sel-pan.exe
+	rm -f sel-pan.dat
 	rm -f sel-pan.map
 	rm -f select.cl[12ab]
 	rm -f select.ctl
 	rm -f select.dat
 	rm -f select.exe
 	rm -f select.map
-	rm -f sstub.exe
 	rm -f sstub.map
 	rm -f resp.txt

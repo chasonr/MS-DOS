@@ -40,23 +40,20 @@ more.obj: more.asm             \
 OBJS = more.obj
 
 more.com: $(OBJS) MORE.LNK
-	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\more @more.lnk"
-	echo 'system dos' >resp.txt
+	echo 'system dos com' >resp.txt
 	echo 'option packcode=0' >>resp.txt
 	echo 'option packdata=0' >>resp.txt
 	echo 'option map=more.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
-	echo 'name more.exe' >>resp.txt
+	echo 'name more.com' >>resp.txt
 	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
-	exe2bin -q more.exe more.com
 
 clean:
 	rm -f *.obj
 	rm -f *.err
 	rm -f *.lst
 	rm -f more.com
-	rm -f more.exe
 	rm -f more.map
 	rm -f more.cl[12a]
 	rm -f more.ctl

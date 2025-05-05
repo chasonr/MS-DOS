@@ -64,21 +64,19 @@ OBJS = kdfnow.obj kdfsp.obj kdfpo.obj kdffr120.obj kdffr189.obj kdfdk.obj \
        kdfsv.obj kdfla.obj kdfeof.obj
 
 keyboard.sys: $(OBJS)
-	echo 'system dos' >resp.txt
+	echo 'system dos com' >resp.txt
 	echo 'option packcode=0' >>resp.txt
 	echo 'option packdata=0' >>resp.txt
 	echo 'option map=keyboard.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
-	echo 'name keyboard.exe' >>resp.txt
+	echo 'name keyboard.sys' >>resp.txt
 	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
-	exe2bin -q keyboard.exe keyboard.sys
 
 clean:
 	rm -f *.obj
 	rm -f *.err
 	rm -f *.lst
 	rm -f keyboard.sys
-	rm -f keyboard.exe
 	rm -f keyboard.map
 	rm -f resp.txt

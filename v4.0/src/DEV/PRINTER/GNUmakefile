@@ -39,15 +39,14 @@ parser.obj:	parser.asm cpspequ.inc $(inc)/parse.asm $(inc)/psdata.inc
 OBJS = cpspm10.obj cpsfont3.obj prtint2f.obj cpspi07.obj parser.obj
 
 printer.sys: $(OBJS) PRINTER.LNK
-	echo 'system dos' >resp.txt
+	echo 'system dos com' >resp.txt
 	echo 'option packcode=0' >>resp.txt
 	echo 'option packdata=0' >>resp.txt
 	echo 'option map=printer.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
-	echo 'name printer.exe' >>resp.txt
+	echo 'name printer.sys' >>resp.txt
 	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
-	exe2bin -q -l=0 printer.exe printer.sys
 
 4201.cpi:
 	$(MAKE) -C 4201
@@ -63,7 +62,6 @@ clean:
 	rm -f *.err
 	rm -f *.lst
 	rm -f printer.sys
-	rm -f printer.exe
 	rm -f printer.cl[12a]
 	rm -f printer.ctl
 	rm -f printer.map
