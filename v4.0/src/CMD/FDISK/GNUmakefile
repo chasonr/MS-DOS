@@ -28,8 +28,8 @@ all: fdisk.exe
 
 # Handle the FDISK 'C' source compilations first
 
-fdiskm.c  : FDISK.MSG $(msg)/$(COUNTRY).MSG
-	dosemu -t --Fdrive_c ../../.. -E "src\domenu.bat src\cmd\fdisk $(subst /,\,$<) $(country)"
+fdiskm.c  : fdisk.msg $(msg)/$(COUNTRY).MSG
+	../../bldtools/menubld.rb $< $(msg)/$(COUNTRY).MSG $@
 
 fdisk5.cl1 : fdisk5.skl $(msg)/$(COUNTRY).MSG
 	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG fdisk5.skl
