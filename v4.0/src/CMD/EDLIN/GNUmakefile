@@ -64,7 +64,7 @@ edlin.com: $(OBJS) EDLIN.LNK
 	echo 'name edlin.exe' >>resp.txt
 	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
-	dosemu -t --Fdrive_c ../../.. -E "src\tools\convert src\cmd\edlin\edlin.exe"
+	../../bldtools/make-com.rb edlin.exe edlin.com
 
 clean:
 	rm -f *.obj

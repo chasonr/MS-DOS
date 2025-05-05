@@ -53,7 +53,7 @@ OBJS = backup.obj _parse.obj _msgret.obj
 
 backup.com: $(OBJS) $(map)/mapper.lib $(inc)/COMSUBS.LIB
 	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\backup /NOE /MAP $(subst /,\,backup+_parse+_msgret,,,$(map)/mapper+$(inc)/COMSUBS)"
-	dosemu -t --Fdrive_c ../../.. -E "src\tools\convert src\cmd\backup\backup.exe"
+	../../bldtools/make-com.rb backup.exe backup.com
 
 clean:
 	rm -f *.obj

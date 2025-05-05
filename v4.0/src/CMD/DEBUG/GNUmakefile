@@ -132,7 +132,7 @@ debug.com: $(OBJS) DEBUG.LNK
 	echo 'name debug.exe' >>resp.txt
 	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
-	dosemu -t --Fdrive_c ../../.. -E "src\tools\convert src\cmd\debug\debug.exe"
+	../../bldtools/make-com.rb debug.exe debug.com
 
 clean:
 	rm -f *.obj

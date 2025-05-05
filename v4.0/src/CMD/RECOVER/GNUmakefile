@@ -64,7 +64,7 @@ recover.com: $(OBJS) RECOVER.LNK
 	echo 'name recover.exe' >>resp.txt
 	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
-	dosemu -t --Fdrive_c ../../.. -E "src\tools\convert src\cmd\recover\recover.exe"
+	../../bldtools/make-com.rb recover.exe recover.com
 
 clean:
 	rm -f *.obj

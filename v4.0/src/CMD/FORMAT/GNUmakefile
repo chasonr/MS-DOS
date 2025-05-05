@@ -78,7 +78,7 @@ format.com: $(OBJS)
 	echo 'name format.exe' >>resp.txt
 	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
-	dosemu -t --Fdrive_c ../../.. -E "src\tools\convert src\cmd\format\format.exe"
+	../../bldtools/make-com.rb format.exe format.com
 
 clean:
 	rm -f *.obj

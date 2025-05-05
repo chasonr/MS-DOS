@@ -55,7 +55,7 @@ print.com: $(OBJS) print.cla
 	echo 'name print.exe' >>resp.txt
 	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
-	dosemu -t --Fdrive_c ../../.. -E "src\tools\convert src\cmd\print\print.exe"
+	../../bldtools/make-com.rb print.exe print.com
 
 clean:
 	rm -f *.obj

@@ -113,7 +113,7 @@ OBJS = restore.obj restpars.obj rtt1.obj rtt3.obj rtdo.obj rtdo1.obj \
 
 restore.com: $(OBJS) RESTORE.LNK $(map)/mapper.lib
 	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\restore /map @restore.lnk"
-	dosemu -t --Fdrive_c ../../.. -E "src\tools\convert src\cmd\restore\restore.exe"
+	../../bldtools/make-com.rb restore.exe restore.com
 
 clean:
 	rm -f *.obj

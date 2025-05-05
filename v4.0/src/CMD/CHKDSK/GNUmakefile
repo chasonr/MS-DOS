@@ -103,7 +103,7 @@ chkdsk.com: $(OBJS) CHKDSK.LNK
 	echo 'name chkdsk.exe' >>resp.txt
 	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
-	dosemu -t --Fdrive_c ../../.. -E "src\tools\convert src\cmd\chkdsk\chkdsk.exe"
+	../../bldtools/make-com.rb chkdsk.exe chkdsk.com
 
 clean:
 	rm -f *.obj

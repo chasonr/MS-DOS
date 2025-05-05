@@ -3,6 +3,7 @@
 make	=nmake
 
 all:
+	$(MAKE) -C bldtools
 	$(MAKE) -C MESSAGES
 	$(MAKE) -C MAPPER
 	$(MAKE) -C BOOT
@@ -14,6 +15,7 @@ all:
 	$(MAKE) -C MEMM
 
 clean:
+	$(MAKE) -C bldtools clean
 	$(MAKE) -C MESSAGES clean
 	$(MAKE) -C MAPPER clean
 	$(MAKE) -C BOOT clean
