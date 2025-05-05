@@ -7,8 +7,6 @@ hinc	=../H
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 #################### dependencies begin here ############################
 #
@@ -24,8 +22,8 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 all: $(inc)/boot.inc
 
 boot.cl1: boot.skl \
-	$(msg)/$(COUNTRY).MSG
-	../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG boot.skl
+	$(msg)/$(country).msg
+	../bldtools/buildmsg.rb $(msg)/$(country).msg boot.skl
 
 msboot.obj: msboot.asm boot.cl1
 

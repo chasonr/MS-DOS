@@ -7,8 +7,6 @@ hinc	=../../H
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 #######################	dependencies begin here. #########################
 #
@@ -24,8 +22,8 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 all: diskcopy.com
 
 diskcopy.ctl diskcopy.cl1 diskcopy.cl2 diskcopy.cla: diskcopy.skl \
-   $(msg)/$(COUNTRY).MSG
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG diskcopy.skl
+   $(msg)/$(country).msg
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg diskcopy.skl
 
 diskcopy.obj: diskcopy.asm \
    dcpymacr.inc \

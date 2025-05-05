@@ -9,8 +9,6 @@ map	=../../MAPPER
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 #######################	dependencies begin here. #########################
 #
@@ -29,8 +27,8 @@ $(map)/mapper.lib:
 	$(MAKE) -C $(map)/mapper.lib:
 
 backup.ctl backup.cl1 backup.cl2 backup.cla:	backup.skl			\
-		$(msg)/$(COUNTRY).MSG		
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG backup.skl
+		$(msg)/$(country).msg		
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg backup.skl
 
 _parse.obj:	_parse.asm			\
 		$(inc)/parse.asm		\

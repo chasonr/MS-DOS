@@ -7,8 +7,6 @@ hinc	=../../H
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 #######################	dependencies begin here. #########################
 #
@@ -23,8 +21,8 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 all: driver.sys
 
-driver.ctl driver.cl1 driver.cl2 driver.cla: driver.skl  $(msg)/$(COUNTRY).MSG
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG driver.skl
+driver.ctl driver.cl1 driver.cl2 driver.cla: driver.skl  $(msg)/$(country).msg
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg driver.skl
 
 driver.obj: driver.asm  $(inc)/msbds.inc $(inc)/versiona.inc \
             $(inc)/parse.asm $(inc)/psdata.inc \

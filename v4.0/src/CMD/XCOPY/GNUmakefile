@@ -7,8 +7,6 @@ hinc	=../../H
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 #######################	dependencies begin here. #########################
 #
@@ -24,8 +22,8 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 all: xcopy.exe
 
 xcopy.ctl xcopy.cl1 xcopy.cl2 xcopy.cla: xcopy.skl \
-   $(msg)/$(COUNTRY).MSG
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG xcopy.skl
+   $(msg)/$(country).msg
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg xcopy.skl
 
 xcopy.obj: xcopy.asm \
    $(inc)/versiona.inc \

@@ -9,8 +9,6 @@ here	=../CMD/SUBST	  # This is the path from INC or MAP dir's to here.
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 #######################	dependencies begin here. #########################
 #
@@ -41,8 +39,8 @@ $(map)/mapper.lib:
 	$(MAKE) -C $(map) mapper.lib
 
 subst.ctl subst.cl1 subst.cl2 subst.cla: subst.skl    \
-  $(msg)/$(COUNTRY).MSG
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG subst.skl
+  $(msg)/$(country).msg
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg subst.skl
 
 _msgret.obj: _msgret.asm \
   $(inc)/msgserv.asm    \

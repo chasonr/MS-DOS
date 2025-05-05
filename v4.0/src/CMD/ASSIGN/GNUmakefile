@@ -7,8 +7,6 @@ hinc	=../../H
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 #######################	dependencies begin here. #########################
 #
@@ -24,8 +22,8 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 all: assign.com
 
 assign.ctl assign.cl1 assign.cl2 assign.cla: assign.skl \
-	$(msg)/$(COUNTRY).MSG
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG assign.skl
+	$(msg)/$(country).msg
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg assign.skl
 
 assgparm.obj: assgparm.asm \
 	$(inc)/psdata.inc \

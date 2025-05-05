@@ -7,8 +7,6 @@ hinc	=../../H
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 #######################	dependencies begin here. #########################
 #
@@ -24,8 +22,8 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 all: nlsfunc.exe
 
 nlsfunc.ctl nlsfunc.cl1 nlsfunc.cl2 nlsfunc.cla: nlsfunc.skl	\
-	     $(msg)/$(COUNTRY).MSG
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG nlsfunc.skl
+	     $(msg)/$(country).msg
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg nlsfunc.skl
 
 nlsfunc.obj: nlsfunc.asm	  \
 	     funcdbcs.inc	  \

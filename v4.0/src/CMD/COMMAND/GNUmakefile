@@ -7,8 +7,6 @@ hinc	=../../H
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 #######################	dependencies begin here. #########################
 #
@@ -33,8 +31,8 @@ DOSSYM_INC = $(inc)/dossym.inc $(inc)/arena.inc $(inc)/bpb.inc \
              $(inc)/versiona.inc $(inc)/version.inc
 
 command.ctl command.cl1 command.cl2 command.cl3 command.cl4 command.cl5 command.cla command.clb command.clc command.cld command.cle command.clf: \
-        command.skl $(msg)/$(COUNTRY).MSG
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG command.skl
+        command.skl $(msg)/$(country).msg
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg command.skl
 
 command1.obj:  command1.asm $(DOSSYM_INC) \
     $(inc)/devsym.inc comsw.asm comequ.asm resmsg.equ \

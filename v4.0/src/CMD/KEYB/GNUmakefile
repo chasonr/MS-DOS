@@ -7,8 +7,6 @@ hinc	=../../H
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 ###################### Dependencies begin here. ######################
 #
@@ -23,8 +21,8 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 all: keyb.com
 
-keyb.ctl keyb.cl1 keyb.cl2 keyb.cla: keyb.skl $(msg)/$(COUNTRY).MSG
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG keyb.skl
+keyb.ctl keyb.cl1 keyb.cl2 keyb.cla: keyb.skl $(msg)/$(country).msg
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg keyb.skl
 
 keybcmd.obj: keybcmd.asm \
              $(inc)/sysmsg.inc \

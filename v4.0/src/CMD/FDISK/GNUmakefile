@@ -7,8 +7,6 @@ hinc	=../../H
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 #######################	dependencies begin here. #########################
 #
@@ -28,14 +26,14 @@ all: fdisk.exe
 
 # Handle the FDISK 'C' source compilations first
 
-fdiskm.c  : fdisk.msg $(msg)/$(COUNTRY).MSG
-	../../bldtools/menubld.rb $< $(msg)/$(COUNTRY).MSG $@
+fdiskm.c  : fdisk.msg $(msg)/$(country).msg
+	../../bldtools/menubld.rb $< $(msg)/$(country).msg $@
 
-fdisk5.cl1 : fdisk5.skl $(msg)/$(COUNTRY).MSG
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG fdisk5.skl
+fdisk5.cl1 : fdisk5.skl $(msg)/$(country).msg
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg fdisk5.skl
 
-fdisk.ctl fdisk.cl1 fdisk.cl2 fdisk.cla fdisk.clb: fdisk.skl $(msg)/$(COUNTRY).MSG
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG fdisk.skl
+fdisk.ctl fdisk.cl1 fdisk.cl2 fdisk.cla fdisk.clb: fdisk.skl $(msg)/$(country).msg
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg fdisk.skl
 
 main.obj : MAIN.C \
            FDISK.H SUBTYPE.H EXTERN.H FDISKMSG.H MSGRET.H DOSCALL.H 

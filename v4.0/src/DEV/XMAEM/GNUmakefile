@@ -7,8 +7,6 @@ hinc	=../../H
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 #######################	dependencies begin here. #########################
 #
@@ -23,8 +21,8 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 all: xmaem.sys
 
-xmaem.cl1: xmaem.skl $(msg)/$(COUNTRY).MSG
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG xmaem.skl
+xmaem.cl1: xmaem.skl $(msg)/$(country).msg
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg xmaem.skl
 
 indeini.obj:   indeini.asm indedat.inc indeovp.mac indeins.mac
 

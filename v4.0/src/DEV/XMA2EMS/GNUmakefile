@@ -7,8 +7,6 @@ hinc	=../../H
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 #######################	dependencies begin here. #########################
 #
@@ -23,8 +21,8 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 all: xma2ems.sys
 
-xma2ems.ctl xma2ems.cl1: xma2ems.skl $(msg)/$(COUNTRY).MSG
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG xma2ems.skl
+xma2ems.ctl xma2ems.cl1: xma2ems.skl $(msg)/$(country).msg
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg xma2ems.skl
 
 xma2ems.obj:	xma2ems.asm emsinit.inc genioctl.inc i13hook.inc lim40b.inc \
 		lim40.inc parmpars.inc ps2_5060.inc romscan.inc xma1diag.inc \

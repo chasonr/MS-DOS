@@ -7,8 +7,6 @@ hinc	=../../H
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 #######################	dependencies begin here. #########################
 #
@@ -24,8 +22,8 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 all: append.exe
 
 append.ctl append.cl1 append.cl2 append.cla append.clb: \
-        append.skl $(msg)/$(COUNTRY).MSG
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG append.skl
+        append.skl $(msg)/$(country).msg
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg append.skl
 
 append.obj: append.asm appendp.inc sysmac.lib $(inc)/copyrigh.inc \
             $(inc)/msgdcl.inc $(inc)/msgserv.asm $(inc)/parse.asm \

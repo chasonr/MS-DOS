@@ -7,8 +7,6 @@ hinc	=../../H
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 #######################	dependencies begin here. #########################
 #
@@ -24,8 +22,8 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 all: sort.exe
 
 sort.ctl sort.cl1 sort.cl2 sort.cla: sort.skl              \
-        $(msg)/$(COUNTRY).MSG
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG sort.skl
+        $(msg)/$(country).msg
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg sort.skl
 
 sort.obj: sort.asm              \
           sort.ctl              \

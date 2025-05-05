@@ -7,8 +7,6 @@ hinc	=../../H
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 ######################## Dependencies Begin Here ##########################
 
@@ -23,8 +21,8 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 all: display.sys ega.cpi lcd.cpi
 
 display.ctl display.cl1 display.cl2 display.cla: display.skl \
-        $(msg)/$(COUNTRY).MSG
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG display.skl
+        $(msg)/$(country).msg
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg display.skl
 
 display.obj: display.asm \
         macros.inc  \

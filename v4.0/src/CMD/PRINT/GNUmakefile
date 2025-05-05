@@ -7,8 +7,6 @@ hinc	=../../H
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 #######################	dependencies begin here. #########################
 #
@@ -31,8 +29,8 @@ PRIDEFS_INC = pridefs.inc print.ctl $(inc)/sysvar.inc $(inc)/devsym.inc \
               $(inc)/copyrigh.inc
 
 print.ctl print.cl1 print.cl2 print.cla print.clb print.clc print.cld: \
-        print.skl $(msg)/$(COUNTRY).MSG
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG print.skl
+        print.skl $(msg)/$(country).msg
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg print.skl
 
 print_r.obj: print_r.asm $(PRIDEFS_INC) $(inc)/ea.inc $(inc)/copyrigh.inc
 

@@ -7,8 +7,6 @@ dos	=.
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 ###################### Dependencies begin here ##########################
 #
@@ -24,8 +22,8 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl -Sa
 all: msdos.sys
 
 msdos.cl1: msdos.skl \
-	$(msg)/$(COUNTRY).MSG 
-	../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG msdos.skl
+	$(msg)/$(country).msg 
+	../bldtools/buildmsg.rb $(msg)/$(country).msg msdos.skl
 
 DOSSYM_INC = $(inc)/dossym.inc $(inc)/arena.inc $(inc)/bpb.inc \
              $(inc)/buffer.inc $(inc)/cpmfcb.inc $(inc)/curdir.inc \

@@ -7,8 +7,6 @@ hinc	=../../H
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 #######################	dependencies begin here. #########################
 #
@@ -26,8 +24,8 @@ map	=../../MAPPER
 all: replace.exe
 
 replace.ctl replace.cl1 replace.cl2 replace.cla: replace.skl \
-  $(msg)/$(COUNTRY).MSG
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG replace.skl
+  $(msg)/$(country).msg
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg replace.skl
 
 _msgret.obj: _msgret.asm \
   $(inc)/msgserv.asm    \

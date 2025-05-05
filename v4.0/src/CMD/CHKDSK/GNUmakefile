@@ -7,8 +7,6 @@ hinc	=../../H
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 #######################	dependencies begin here. #########################
 #
@@ -24,8 +22,8 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 all: chkdsk.com
 
 chkdsk.ctl chkdsk.cl1 chkdsk.cl2 chkdsk.cla chkdsk.clb chkdsk.clc chkdsk.cld: \
-        chkdsk.skl $(msg)/$(COUNTRY).MSG
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG chkdsk.skl
+        chkdsk.skl $(msg)/$(country).msg
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg chkdsk.skl
 
 chkinit.obj: chkinit.asm   \
 	     chkequ.inc chkmacro.inc chkparse.inc chkchng.inc \

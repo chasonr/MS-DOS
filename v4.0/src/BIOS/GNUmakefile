@@ -7,8 +7,6 @@ dos = ../DOS
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 #######################	dependencies begin here. #########################
 #
@@ -31,8 +29,8 @@ SMDOSSYM_INC = $(inc)/smdossym.inc $(inc)/arena.inc $(inc)/bpb.inc \
 all: $(dest).sys
 
 msbio.cl1 msbio.cl2 msbio.cl3 msbio.cl4 msbio.cl5: msbio.skl \
-	$(msg)/$(COUNTRY).MSG
-	../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG msbio.skl
+	$(msg)/$(country).msg
+	../bldtools/buildmsg.rb $(msg)/$(country).msg msbio.skl
 
 msload.obj: msload.asm \
 	msbio.cl1 \

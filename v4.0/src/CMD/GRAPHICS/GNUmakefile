@@ -7,8 +7,6 @@ hinc	=../../H
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 #######################	dependencies begin here. #########################
 #
@@ -25,8 +23,8 @@ all: graphics.com
 
 
 graphics.ctl graphics.cl1 graphics.cl2 graphics.cla graphics.clb graphics.clc: \
-        graphics.skl $(msg)/$(COUNTRY).MSG
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG graphics.skl
+        graphics.skl $(msg)/$(country).msg
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg graphics.skl
 
 graphics.obj: graphics.asm  grinst.ext
 

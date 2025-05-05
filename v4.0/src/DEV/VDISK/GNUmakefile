@@ -7,8 +7,6 @@ hinc	=../../HINC
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 ####################### Dependencies begin here. #######################
 #
@@ -24,8 +22,8 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 all: vdisk.sys
 
 vdisk.ctl vdisk.cl1 vdisk.cl2 vdisk.cla: vdisk.skl    \
-           $(msg)/$(COUNTRY).MSG
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG vdisk.skl
+           $(msg)/$(country).msg
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg vdisk.skl
 
 
 vdisksys.obj: vdisksys.asm       \

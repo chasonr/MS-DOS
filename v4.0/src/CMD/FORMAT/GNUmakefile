@@ -8,8 +8,6 @@ boot	=../../BOOT
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 #######################	dependencies begin here. #########################
 #
@@ -31,8 +29,8 @@ $(boot)/boot.cl1:
 	$(MAKE) -C $(boot)
 
 format.ctl format.cl1 format.cl2 format.cla format.clb format.clc: \
-        format.skl $(msg)/$(COUNTRY).MSG
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG format.skl
+        format.skl $(msg)/$(country).msg
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg format.skl
 
 display.obj:    display.asm forchng.inc forequ.inc formsg.inc format.ctl \
                 format.cl1 format.cl2 format.cla format.clb format.clc \

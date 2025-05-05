@@ -9,8 +9,6 @@ here	=../CMD/SYS
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 #######################	dependencies begin here. #########################
 #
@@ -34,11 +32,11 @@ DOSSYM_INC = $(inc)/dossym.inc $(inc)/arena.inc $(inc)/bpb.inc \
              $(inc)/syscall.inc $(inc)/sysvar.inc $(inc)/vector.inc \
              $(inc)/versiona.inc $(inc)/version.inc
 
-$(inc)/boot.inc: $(boot)/msboot.asm $(msg)/$(COUNTRY).MSG
+$(inc)/boot.inc: $(boot)/msboot.asm $(msg)/$(country).msg
 	$(MAKE) -C $(boot)
 
-sys.ctl sys.cl1 sys.cl2 sys.cla sys.clb sys.clc sys.cld: sys.skl $(msg)/$(COUNTRY).MSG
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG sys.skl
+sys.ctl sys.cl1 sys.cl2 sys.cla sys.clb sys.clc sys.cld: sys.skl $(msg)/$(country).msg
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg sys.skl
 
 sys1.obj: sys1.asm syshdr.inc $(DOSSYM_INC) $(inc)/bootform.inc \
           $(inc)/boot.inc $(inc)/copyrigh.inc $(inc)/ioctl.inc \

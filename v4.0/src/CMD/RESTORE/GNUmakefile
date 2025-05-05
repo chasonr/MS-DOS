@@ -7,8 +7,6 @@ hinc	=../../H
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 #######################	dependencies begin here. #########################
 #
@@ -30,8 +28,8 @@ $(map)/mapper.lib:
 	$(MAKE) -C $(map) mapper.lib
 
 restore.ctl restore.cl1 restore.cl2 restore.cla:	restore.skl			\
-		$(msg)/$(COUNTRY).MSG
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG restore.skl
+		$(msg)/$(country).msg
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg restore.skl
 
 _parse.obj :	_parse.asm			\
 		$(inc)/parse.asm		\

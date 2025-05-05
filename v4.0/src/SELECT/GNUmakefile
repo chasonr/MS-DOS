@@ -11,8 +11,6 @@ cas	=../SHELL/CASSFAR
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 #######################	dependencies begin here. #########################
 #
@@ -31,8 +29,8 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl -zlc -zld
 ############################ Make SELECT.EXE #############################
 #
 
-select.ctl select.cl1 select.cl2 select.cla select.clb: select.skl $(msg)/$(COUNTRY).MSG
-	../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG select.skl
+select.ctl select.cl1 select.cl2 select.cla select.clb: select.skl $(msg)/$(country).msg
+	../bldtools/buildmsg.rb $(msg)/$(country).msg select.skl
 
 MACROS_INC = macros.inc macros2.inc macros3.inc macros4.inc macros5.inc \
              macros6.inc macros7.inc macros8.inc mac_equ.inc \

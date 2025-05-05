@@ -7,8 +7,6 @@ hinc	=../../H
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 #######################	dependencies begin here. #########################
 #
@@ -24,8 +22,8 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 all: tree.com
 
 tree.ctl tree.cl1 tree.cl2 tree.cla: tree.skl \
-    $(msg)/$(COUNTRY).MSG
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG tree.skl
+    $(msg)/$(country).msg
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg tree.skl
 
 tree.obj: tree.asm \
     treequ.inc \

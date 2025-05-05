@@ -7,8 +7,6 @@ hinc	=../../H
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 #######################	dependencies begin here. #########################
 #
@@ -24,8 +22,8 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 all: comp.com
 
 comp.ctl comp.ct1 comp.ct2 comp.cta: comp.skl \
-    $(msg)/$(COUNTRY).MSG
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG comp.skl
+    $(msg)/$(country).msg
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg comp.skl
 
 comp1.obj: comp1.asm
 

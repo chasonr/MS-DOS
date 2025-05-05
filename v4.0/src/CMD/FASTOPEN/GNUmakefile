@@ -7,8 +7,6 @@ hinc	=../../H
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 #######################	dependencies begin here. #########################
 #
@@ -23,8 +21,8 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 all: fastopen.exe
 
-fastopen.ctl fastopen.cl1 fastopen.cl2 fastopen.cla: fastopen.skl  $(msg)/$(COUNTRY).MSG
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG fastopen.skl
+fastopen.ctl fastopen.cl1 fastopen.cl2 fastopen.cla: fastopen.skl  $(msg)/$(country).msg
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg fastopen.skl
 
 fastopen.obj: fastopen.asm \
 	$(inc)/fastopen.inc \

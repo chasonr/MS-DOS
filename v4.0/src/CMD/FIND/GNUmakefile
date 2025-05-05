@@ -7,8 +7,6 @@ hinc	=../../H
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 #######################	dependencies begin here. #########################
 #
@@ -24,8 +22,8 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 all: find.exe
 
 find.ctl find.cl1 find.cl2 find.cla: find.skl              \
-          $(msg)/$(COUNTRY).MSG
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG find.skl
+          $(msg)/$(country).msg
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg find.skl
 
 find.obj: find.asm              \
           find.ctl              \

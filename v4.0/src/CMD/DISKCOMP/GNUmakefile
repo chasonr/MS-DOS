@@ -7,8 +7,6 @@ hinc	=../../H
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 #######################	dependencies begin here. #########################
 #
@@ -24,8 +22,8 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 all: diskcomp.com
 
 diskcomp.ctl diskcomp.cl1 diskcomp.cl2 diskcomp.cla: diskcomp.skl \
-   $(msg)/$(COUNTRY).MSG
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG diskcomp.skl
+   $(msg)/$(country).msg
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg diskcomp.skl
 
 diskcomp.obj: diskcomp.asm \
    dcmpmacr.inc \

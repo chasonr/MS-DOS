@@ -10,8 +10,6 @@ here	=../CMD/JOIN
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 #######################	dependencies begin here. #########################
 #
@@ -45,8 +43,8 @@ $(map)/mapper.lib:
 	$(MAKE) -C $(map) mapper.lib
 
 join.ctl join.cl1 join.cl2 join.cla: join.skl      \
-  $(msg)/$(COUNTRY).MSG
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG join.skl
+  $(msg)/$(country).msg
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg join.skl
 
 _msgret.obj: _msgret.asm \
   $(inc)/msgserv.asm    \

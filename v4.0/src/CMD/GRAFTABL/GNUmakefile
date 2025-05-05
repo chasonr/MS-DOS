@@ -7,8 +7,6 @@ hinc	=../../H
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 #######################	dependencies begin here. #########################
 #
@@ -24,8 +22,8 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 all: graftabl.com
 
 graftabl.ctl graftabl.cl1 graftabl.cl2 graftabl.cla: graftabl.skl \
-    $(msg)/$(COUNTRY).MSG
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG graftabl.skl
+    $(msg)/$(country).msg
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg graftabl.skl
 
 grtab.obj: grtab.asm $(inc)/pathmac.inc
 

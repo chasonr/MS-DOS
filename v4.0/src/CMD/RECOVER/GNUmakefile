@@ -7,8 +7,6 @@ hinc	=../../H
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 #######################	dependencies begin here. #########################
 #
@@ -33,8 +31,8 @@ DOSSYM_INC = $(inc)/dossym.inc $(inc)/arena.inc $(inc)/bpb.inc \
              $(inc)/versiona.inc $(inc)/version.inc
 
 recover.ctl : recover.skl    \
-	     $(msg)/$(COUNTRY).MSG
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG recover.skl
+	     $(msg)/$(country).msg
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg recover.skl
 
 recover.obj: recover.asm recchng.inc recseg.inc $(DOSSYM_INC) recequ.inc \
              recdata.inc recmacro.inc $(inc)/sysmsg.inc $(inc)/versiona.inc \

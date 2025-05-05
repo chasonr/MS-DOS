@@ -8,8 +8,6 @@ lib     =../../LIB
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 #######################	dependencies begin here. #########################
 #
@@ -26,8 +24,8 @@ all: mem.exe
 
 
 mem.ctl mem.cl1 mem.cl2 mem.cla mem.clb:        mem.skl                         \
-                $(msg)/$(COUNTRY).MSG
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG mem.skl
+                $(msg)/$(country).msg
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg mem.skl
 
 _parse.obj:     _parse.asm                      \
                 $(inc)/parse.asm                \

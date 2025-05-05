@@ -6,8 +6,6 @@ msg	=../../MESSAGES
 
 country = usa-ms
 
-COUNTRY = $(shell echo $(country) | tr '[a-z]' '[A-Z]')
-
 #
 ####################### Dependencies Begin Here ##########################
 #
@@ -22,8 +20,8 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 all: ansi.sys
 
-ansi.ctl ansi.cl1 ansi.cl2 ansi.cla: ansi.skl $(msg)/$(COUNTRY).MSG
-	../../bldtools/buildmsg.rb $(msg)/$(COUNTRY).MSG ansi.skl
+ansi.ctl ansi.cl1 ansi.cl2 ansi.cla: ansi.skl $(msg)/$(country).msg
+	../../bldtools/buildmsg.rb $(msg)/$(country).msg ansi.skl
 
 ansi.obj:       ansi.asm ansi.inc \
                 $(inc)/vector.inc \
