@@ -236,8 +236,7 @@ sel-pan.exe: $(SELPAN_OBJS) SEL-PAN.LNK
 
 select.dat: sel-pan.exe
 	exe2bin -q sel-pan.exe sel-pan.dat
-	ln -sf ../TOOLS/COMPRESS.COM compress.com
-	dosemu -t --Fdrive_c . -E "compress"
+	../bldtools/rlencode.rb sel-pan.dat select.dat
 
 #
 ######################  make select.hlp #####################
@@ -272,4 +271,3 @@ clean:
 	rm -f sstub.exe
 	rm -f sstub.map
 	rm -f resp.txt
-	rm -f compress.com
