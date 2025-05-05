@@ -244,8 +244,7 @@ select.dat: sel-pan.dat
 #				cd $(here)
 
 select.hlp: usa.txt
-	rm -f select.hlp
-	dosemu -t --Fdrive_c ../.. -E 'src\dohelp.bat src\select usa.txt select.hlp'
+	../bldtools/asc2hlp.rb usa.txt select.hlp
 
 clean:
 	rm -f *.obj
