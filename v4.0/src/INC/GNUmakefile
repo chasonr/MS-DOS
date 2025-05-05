@@ -23,7 +23,7 @@ DOSSYM_INC = dossym.inc arena.inc bpb.inc buffer.inc cpmfcb.inc curdir.inc \
              syscall.inc sysvar.inc vector.inc versiona.inc version.inc
 
 all: 		errtst.obj sysvar.obj cds.obj dpb.obj nibdos.obj \
-		const2.obj msdata.obj msdosme.obj mstable.obj printf.obj \
+		const2.obj msdata.obj msdosme.obj mstable.obj \
 		string.obj msgserv.asm
 
 msdos.cl1 msdos.cl3:
@@ -75,12 +75,11 @@ mstable.obj: mstable.asm $(dos)/mssw.asm	      \
              $(dos)/ms_table.asm $(DOSSYM_INC) dosseg.asm     \
              ea.inc fastopen.inc
 
-printf.obj:	PRINTF.ASM arena.inc bpb.inc buffer.inc cpmfcb.inc \
-        	curdir.inc dbcs.sw dirent.inc dosmac.inc dpb.inc error.inc \
-        	exe.inc filemode.inc find.inc intnat.inc mi.inc mult.inc \
-        	pdb.inc sf.inc syscall.inc sysvar.inc vector.inc versiona.inc \
-        	version.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domasm.bat src\inc $(subst /,\,$<) $(subst /,\,$@);"
+#printf.obj:	printf.asm arena.inc bpb.inc buffer.inc cpmfcb.inc \
+#        	curdir.inc dbcs.sw dirent.inc dosmac.inc dpb.inc error.inc \
+#        	exe.inc filemode.inc find.inc intnat.inc mi.inc mult.inc \
+#        	pdb.inc sf.inc syscall.inc sysvar.inc vector.inc versiona.inc \
+#        	version.inc
 
 clean:
 	rm -f *.obj
