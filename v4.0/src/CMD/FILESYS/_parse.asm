@@ -106,6 +106,8 @@ _parse	proc	near
 	mov	bp,sp		; set bp to current sp
 	push	di		; save some registers
 	push	si
+	push	ds
+	pop	es
 
 ;	copy C inregs into proper registers
 

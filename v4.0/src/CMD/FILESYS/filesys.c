@@ -22,15 +22,14 @@
 |                                                                       |
 +----------------------------------------------------------------------*/
 
-#include "stdio.h"                                                                                                               /* ;an000; */
-#include "stdlib.h"                                                                                                              /* ;an000; */
-#include "dos.h"                /* allows use of intdos calls */                                                                 /* ;an000; */
-#include "string.h"             /* allows use of str* calls */                                                                   /* ;an000; */
+#include <stdio.h>                                                                                                               /* ;an000; */
+#include <stdlib.h>                                                                                                              /* ;an000; */
+#include <dos.h>                /* allows use of intdos calls */                                                                 /* ;an000; */
+#include <string.h>             /* allows use of str* calls */                                                                   /* ;an000; */
 #include "parse.h"              /* allows use of parser */                                                                       /* ;an000; */
 #include "msgret.h"             /* allows use of msg ret */                                                                      /* ;an000; */
                                                                                                                                  /* ;an000; */
 #define ZERO                    0                                                                                                /* ;an002; */
-#define NULL                    0                                                                                                /* ;an000; */
 #define FALSE                   0                                                                                                /* ;an000; */
 #define TRUE                    1                                                                                                /* ;an000; */
                                                                                                                                  /* ;an000; */
@@ -66,9 +65,9 @@
 /*      Define subroutines                                              */                                                       /* ;an000; */
 /*                                                                      */                                                       /* ;an000; */
 /************************************************************************/                                                       /* ;an000; */
-void    main(int, char *[]);                                                                                                     /* ;an000; */
+void    main(void);                                                                                                              /* ;an000; */
 void    parse_init(void);                                                                                                        /* ;an000; */
-void    device_attach(int, char *, char *, char *);                                                                              /* ;an000; */
+void    device_attach(int, char *, char *);                                                                                      /* ;an000; */
 void    device_detach(char *);                                                                                                   /* ;an000; */
 void    fs_status(char *);                                                                                                       /* ;an000; */
 int     get_pause_stat(unsigned char);                                                                                           /* ;an000; */
@@ -81,9 +80,9 @@ void    Sub0_Message(int,int,unsigned char);                                    
 void    fs_strcpy(char *, char far *);                                                                                           /* ;an000; */
 int     fs_strlen(char far *);                                                                                                   /* ;an000; */
                                                                                                                                  /* ;an000; */
-extern  void    sysloadmsg(union REGS *, union REGS *);                                                                          /* ;an000; */
-extern  void    sysdispmsg(union REGS *, union REGS *);                                                                          /* ;an000; */
-extern  void    parse(union REGS *, union REGS *);                                                                               /* ;an000; */
+extern  void __cdecl   sysloadmsg(union REGS *, union REGS *);                                                                   /* ;an000; */
+extern  void __cdecl   sysdispmsg(union REGS *, union REGS *);                                                                   /* ;an000; */
+extern  void __cdecl   parse(union REGS *, union REGS *);                                                                        /* ;an000; */
                                                                                                                                  /* ;an000; */
                                                                                                                                  /* ;an000; */
 struct p_parms  p_p;                                                                                                             /* ;an000; */
@@ -121,6 +120,7 @@ char    far *cmdline;                                                           
     unsigned char max_width;                                                    /* max width of replaceable field       */       /* ;an000; */
     unsigned char min_width;                                                    /* min width of replaceable field       */       /* ;an000; */
     unsigned char pad_char;                                                     /* pad character for replaceable field  */       /* ;an000; */
+    unsigned char reserved2;
   } sublist[4];                                                                 /* end of sublis                        */       /* ;an000; */
                                                                                                                                  /* ;an000; */
                                                                                                                                  /* ;an000; */
@@ -161,17 +161,11 @@ struct   SREGS   segregs;                                                       
 |                                                                       |
 +----------------------------------------------------------------------*/
                                                                                                                                  /* ;an000; */
-void main(argc,argv)                                                                                                             /* ;an000; */
-                                                                                                                                 /* ;an000; */
-int     argc;                   /* number of arguments passed on command line */                                                 /* ;an000; */
-char    *argv[];                /* array of pointer to arguments */                                                              /* ;an000; */
-                                                                                                                                 /* ;an000; */
+void main(void)                                                                                                                  /* ;an000; */
   {                                                                                                                              /* ;an000; */
 /*----------------------------------------------------------------------+
 |       define some local variables                                     |
 +----------------------------------------------------------------------*/
-  int   arg_index;              /* index used for stepping through args */                                                       /* ;an000; */
-  int   more_arguments;         /* flag used while looping calls to parser */                                                    /* ;an000; */
   int   i;                      /* loop counter                         */                                                       /* ;an000; */
   int   detach_flag;            /* signal to detach device              */                                                       /* ;an000; */
   int   good_parse;             /* signal a good parse occurred         */                                                       /* ;an000; */
@@ -179,7 +173,6 @@ char    *argv[];                /* array of pointer to arguments */             
   char  *string_ptr;             /* pointer to a string                  */                                                      /* ;an000; */
   char  file_spec_buf[64];      /* buffer to hold drive or device name  */                                                       /* ;an000; */
   char  fs_name_buf[64];        /* buffer to hold file system name      */                                                       /* ;an000; */
-  char  string_buf[128];        /* buffer to hold device parms          */                                                       /* ;an000; */
   char  drive_letter;           /* drive letter to attach/detach        */                                                       /* ;an000; */
                                                                                                                                  /* ;an000; */
 /*----------------------------------------------------------------------+
@@ -194,8 +187,7 @@ char    *argv[];                /* array of pointer to arguments */             
         inregs.h.ah = (unsigned char) 0x62;                                                                                      /* ;an000; */
         intdosx(&inregs, &inregs, &segregs);                                                                                     /* ;an000; */
                                                                                                                                  /* ;an000; */
-        FP_OFF(cmdline) = 0x81;                                                                                                  /* ;an000; */
-        FP_SEG(cmdline) = inregs.x.bx;                                                                                           /* ;an000; */
+        cmdline = MK_FP(inregs.x.bx, 0x81);                                                                                      /* ;an000; */
                                                                                                                                  /* ;an000; */
         i = 0;                                                                                                                   /* ;an000; */
         while ( *cmdline != (char) '\x0d' ) cmd_line[i++] = *cmdline++;                                                          /* ;an000; */
@@ -203,7 +195,7 @@ char    *argv[];                /* array of pointer to arguments */             
         cmd_line[i++] = (char) '\0';                                                                                             /* ;an000; */
                                                                                                                                  /* ;an000; */
                                                                                                                                  /* ;an000; */
-        file_spec_buf[0] = NULL;                                                                                                 /* ;an000; */
+        file_spec_buf[0] = '\0';                                                                                                 /* ;an000; */
         string_ptr = Attach_block.attach_addl_parms;                                                                             /* ;an000; */
         detach_flag = FALSE;                                                                                                     /* ;an000; */
         good_parse  = TRUE;                                                                                                      /* ;an000; */
@@ -278,7 +270,7 @@ char    *argv[];                /* array of pointer to arguments */             
                 default  : if ((i == 2) && (detach_flag == TRUE))               /* an000; dms; detach request?          */       /* ;an000; */
                                 device_detach(file_spec_buf);                   /* an000; dms; yes                      */       /* ;an000; */
                            else                                                                                                  /* ;an000; */
-                                device_attach(i,file_spec_buf,fs_name_buf,string_buf);  /*an000; dms; attach request     */      /* ;an000; */
+                                device_attach(i,file_spec_buf,fs_name_buf);     /*an000; dms; attach request     */      /* ;an000; */
                            break;                                                                                                /* ;an000; */
                 }                                                                                                                /* ;an000; */
                                                                                                                                  /* ;an000; */
@@ -303,7 +295,7 @@ char    *argv[];                /* array of pointer to arguments */             
 |       properly initialized parser control blocks                      |
 |                                                                       |
 +----------------------------------------------------------------------*/
-void parse_init()                                                                                                                /* ;an000; */
+void parse_init(void)                                                                                                            /* ;an000; */
   {                                                                                                                              /* ;an000; */
   p_p.p_parmsx_address    = &p_px;      /* address of extended parm list */                                                      /* ;an000; */
   p_p.p_num_extra         = 0;                                                                                                   /* ;an000; */
@@ -371,7 +363,7 @@ void parse_init()                                                               
   p_swt1.p_result_buf     = (unsigned int)&p_result1;                                                                            /* ;an000; */
   p_swt1.p_value_list     = (unsigned int)&p_noval;                                                                              /* ;an000; */
   p_swt1.p_nid            = 1;                                                                                                   /* ;an000; */
-  strcpy(p_swt1.p_keyorsw,"/D"+NULL);                                                                                            /* ;an000; */
+  strcpy(p_swt1.p_keyorsw,"/D");                                                                                            /* ;an000; */
                                                                                                                                  /* ;an000; */
   p_noval.p_val_num       = 0;                                                                                                   /* ;an000; */
                                                                                                                                  /* ;an000; */
@@ -407,12 +399,10 @@ void parse_init()                                                               
 |       None                                                            |
 |                                                                       |
 +----------------------------------------------------------------------*/
-void device_attach(parm_cnt, drive_ptr, fs_name_ptr, parm_ptr)                                                                   /* ;an000; */
-                                                                                                                                 /* ;an000; */
-        int     parm_cnt;                                                                                                        /* ;an000; */
-        char    *drive_ptr;                                                                                                      /* ;an000; */
-        char    *fs_name_ptr;                                                                                                    /* ;an000; */
-        char    *parm_ptr;                                                                                                       /* ;an000; */
+void device_attach(                                                                                                              /* ;an000; */
+        int     parm_cnt,                                                                                                        /* ;an000; */
+        char    *drive_ptr,                                                                                                      /* ;an000; */
+        char    *fs_name_ptr)                                                                                                    /* ;an000; */
                                                                                                                                  /* ;an000; */
   {                                                                                                                              /* ;an000; */
                                                                                                                                  /* ;an000; */
@@ -594,7 +584,7 @@ void fs_status(char *name)                                                      
 |       redirection.                                                    |
 |                                                                       |
 +----------------------------------------------------------------------*/
-get_pause_stat (unsigned char type)                                                                                              /* ;an000; */
+int get_pause_stat (unsigned char type)                                                                                              /* ;an000; */
   {                                                                                                                              /* ;an000; */
   int   return_flag;                 /* flag to return paused status */                                                          /* ;an000; */
                                                                                                                                  /* ;an000; */
@@ -630,10 +620,10 @@ void fs_error(int error_ax)                                                     
                                                                                                                                  /* ;an000; */
   {                                                                                                                              /* ;an000; */
         inregs.x.ax = GET_EXTENDED_ERROR;                                       /* get the extended error               */       /* ;an000; */
-        inregs.x.bx = NULL;                                                     /* clear bx to signal > DOS 3.0         */       /* ;an000; */
+        inregs.x.bx = 0;                                                        /* clear bx to signal > DOS 3.0         */       /* ;an000; */
         intdos(&inregs, &outregs);                                              /* INT 21h call                         */       /* ;an000; */
                                                                                                                                  /* ;an000; */
-        inregs.x.ax = outregs.x.ax;                                             /* get extended error in AX             */       /* ;an000; */
+        inregs.x.ax = error_ax;                                                 /* get extended error in AX             */       /* ;an000; */
         inregs.x.bx = STDERR;                                                   /* output to standard error             */       /* ;an000; */
         inregs.x.cx = SubCnt0;                                                  /* no replaceables                      */       /* ;an000; */
         inregs.h.dl = No_Input;                                                 /* no keyboard input                    */       /* ;an000; */
@@ -653,14 +643,13 @@ void fs_error(int error_ax)                                                     
 /*                                                                       */                                                      /* ;an000; */
 /*=======================================================================*/                                                      /* ;an000; */
                                                                                                                                  /* ;an000; */
-void fs_build_print_message(msg_num, outline1, outline2, outline3)                                                               /* ;an000; */
-int             msg_num;                                                                                                         /* ;an000; */
-char            *outline1;                                                                                                       /* ;an000; */
-char            *outline2;                                                                                                       /* ;an000; */
-char            *outline3;                                                                                                       /* ;an000; */
+void fs_build_print_message(                                                                                                     /* ;an000; */
+int             msg_num,                                                                                                         /* ;an000; */
+char            *outline1,                                                                                                       /* ;an000; */
+char            *outline2,                                                                                                       /* ;an000; */
+char            *outline3)                                                                                                       /* ;an000; */
                                                                                                                                  /* ;an000; */
 {                                                                                                                                /* ;an000; */
-  unsigned status;                                                                                                               /* ;an000; */
   unsigned char function;                                                       /* type of input function               */       /* ;an000; */
   unsigned char msg_class;                                                                                                       /* ;an000; */
   unsigned int message,                                                         /* message number                       */       /* ;an000; */
@@ -750,7 +739,7 @@ char            *outline3;                                                      
 /*                                                                      */                                                       /* ;an000; */
 /************************************************************************/                                                       /* ;an000; */
                                                                                                                                  /* ;an000; */
-void string_build()                                                                                                              /* ;an000; */
+void string_build(void)                                                                                                          /* ;an000; */
                                                                                                                                  /* ;an000; */
 {                                                                                                                                /* ;an000; */
         int     x;                                                                                                               /* ;an000; */
@@ -766,7 +755,7 @@ void string_build()                                                             
                 x++;                                                            /* an000; dms;increment pointer         */       /* ;an000; */
                 i++;                                                            /* an000; dms;next string               */       /* ;an000; */
         }                                                                                                                        /* ;an000; */
-        GAL_Target.target_string[x] = NULL;                                     /* an000; null terminate buffer         */       /* ;an000; */
+        GAL_Target.target_string[x] = '\0';                                     /* an000; null terminate buffer         */       /* ;an000; */
         return;                                                                                                                  /* ;an000; */
 }                                                                                                                                /* ;an000; */
                                                                                                                                  /* ;an000; */
@@ -786,12 +775,11 @@ void string_build()                                                             
 /*                                                                      */                                                       /* ;an000; */
 /************************************************************************/                                                       /* ;an000; */
                                                                                                                                  /* ;an000; */
-void check_pause_status(regbl, pr_pause, dr_pause, net_flag)                                                                     /* ;an001; */
-                                                                                                                                 /* ;an000; */
-        unsigned char   regbl;                                                                                                   /* ;an000; */
-        int             *dr_pause;                                                                                               /* ;an000; */
-        int             *pr_pause;                                                                                               /* ;an000; */
-        int             *net_flag;                                                                                               /* ;an000; */
+void check_pause_status(                                                                                                         /* ;an001; */
+        unsigned char   regbl,                                                                                                   /* ;an000; */
+        int             *pr_pause,                                                                                               /* ;an000; */
+        int             *dr_pause,                                                                                               /* ;an000; */
+        int             *net_flag)                                                                                               /* ;an000; */
 {                                                                                                                                /* ;an000; */
         if (((regbl == NET_PRINTER) ||                                          /* an000; dms; if net drive or printer  */       /* ;an000; */
            (regbl == NET_DRIVE)) &&                                                                                              /* ;an001; */
@@ -818,12 +806,11 @@ void check_pause_status(regbl, pr_pause, dr_pause, net_flag)                    
 /*                                                                      */                                                       /* ;an000; */
 /************************************************************************/                                                       /* ;an000; */
                                                                                                                                  /* ;an000; */
-void print_status(entry_type, np_paused, nd_paused, message_type)                                                                /* ;an000; */
-                                                                                                                                 /* ;an000; */
-        int     entry_type;                                                                                                      /* ;an000; */
-        int     np_paused;                                                                                                       /* ;an000; */
-        int     nd_paused;                                                                                                       /* ;an000; */
-        int     *message_type;                                                                                                   /* ;an000; */
+void print_status(                                                                                                               /* ;an000; */
+        int     entry_type,                                                                                                      /* ;an000; */
+        int     np_paused,                                                                                                       /* ;an000; */
+        int     nd_paused,                                                                                                       /* ;an000; */
+        int     *message_type)                                                                                                   /* ;an000; */
 {                                                                                                                                /* ;an000; */
         if ((entry_type == NET_PRINTER) && (np_paused == TRUE))                                                                  /* ;an000; */
                 *message_type = PAUSE_RDR_MSG;                                                                                   /* ;an000; */
@@ -855,11 +842,10 @@ void print_status(entry_type, np_paused, nd_paused, message_type)               
 /*                                                                      */                                                       /* ;an000; */
 /************************************************************************/                                                       /* ;an000; */
                                                                                                                                  /* ;an000; */
-void Sub0_Message(Msg_Num,Handle,Message_Type)                                       /* print messages with no subs          */  /* ;an000; */
-                                                                                                                                 /* ;an000; */
-int             Msg_Num;                                                                                                         /* ;an000; */
-int             Handle;                                                                                                          /* ;an000; */
-unsigned char   Message_Type;                                                                                                    /* ;an000; */
+void Sub0_Message(                                                                   /* print messages with no subs          */  /* ;an000; */
+int             Msg_Num,                                                                                                         /* ;an000; */
+int             Handle,                                                                                                          /* ;an000; */
+unsigned char   Message_Type)                                                                                                    /* ;an000; */
                                                                                 /*     extended, parse, or utility      */       /* ;an000; */
         {                                                                                                                        /* ;an000; */
         inregs.x.ax = Msg_Num;                                                  /* put message number in AX             */       /* ;an000; */
@@ -883,10 +869,9 @@ unsigned char   Message_Type;                                                   
 /*                                                                      */                                                       /* ;an000; */
 /************************************************************************/                                                       /* ;an000; */
                                                                                                                                  /* ;an000; */
-void fs_strcpy(buffer, parse_ptr)                                                                                                /* ;an000; */
-                                                                                                                                 /* ;an000; */
-        char            *buffer;                                                                                                 /* ;an000; */
-        char far        *parse_ptr;                                                                                              /* ;an000; */
+void fs_strcpy(                                                                                                                  /* ;an000; */
+        char            *buffer,                                                                                                 /* ;an000; */
+        char far        *parse_ptr)                                                                                              /* ;an000; */
                                                                                                                                  /* ;an000; */
         {                                                                                                                        /* ;an000; */
                                                                                                                                  /* ;an000; */
@@ -908,10 +893,7 @@ void fs_strcpy(buffer, parse_ptr)                                               
 /*                                                                      */                                                       /* ;an000; */
 /************************************************************************/                                                       /* ;an000; */
                                                                                                                                  /* ;an000; */
-int  fs_strlen(parse_ptr)                                                                                                        /* ;an000; */
-                                                                                                                                 /* ;an000; */
-        char far        *parse_ptr;                                                                                              /* ;an000; */
-                                                                                                                                 /* ;an000; */
+int  fs_strlen(char far *parse_ptr)                                                                                              /* ;an000; */
         {                                                                                                                        /* ;an000; */
         int     i;                                                                                                               /* ;an000; */
                                                                                                                                  /* ;an000; */

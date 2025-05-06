@@ -11,10 +11,16 @@ country = usa-ms
 #######################	dependencies begin here. #########################
 #
 
-.SUFFIXES: .asm .obj
+.SUFFIXES: .c .asm .obj
+
+CC = wcl
+CFLAGS = -q -ms -os -zp=1 -I. -wx
 
 AS = jwasm
 AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.c.obj:
+	$(CC) $(CFLAGS) -c -fo=$@ $<
 
 .asm.obj:
 	$(AS) $(AFLAGS) -Fo$@ $<
@@ -37,13 +43,19 @@ _msgret.obj:    _msgret.asm             \
                 $(inc)/versiona.inc     \
                 $(inc)/msgdcl.inc
 
-filesys.obj:    FILESYS.C PARSE.H
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\filesys $(subst /,\,$<) $(subst /,\,$@)"
+filesys.obj:    filesys.c parse.h msgret.h
 
 OBJS = filesys.obj _parse.obj _msgret.obj
 
 filesys.exe: $(OBJS)
-	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\filesys filesys+_parse+_msgret,filesys,, /NOI"
+	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
+	echo 'option map=attrib.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name filesys.exe' >>resp.txt
+	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
+	wlink @resp.txt
 
 clean:
 	rm -f *.obj

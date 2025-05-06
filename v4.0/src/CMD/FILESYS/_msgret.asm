@@ -52,6 +52,8 @@ data_sysloadmsg proc far
 	mov	bp,sp			; set bp to current sp
 	push	di			; save some registers
 	push	si
+	push	ds
+	pop	es
 
 ;	copy C inregs into proper registers
 
@@ -111,6 +113,8 @@ data_sysdispmsg proc far
 	mov	bp,sp			; set bp to current sp
 	push	di			; save some registers
 	push	si
+	push	ds
+	pop	es
 
 ;	copy C inregs into proper registers
 
