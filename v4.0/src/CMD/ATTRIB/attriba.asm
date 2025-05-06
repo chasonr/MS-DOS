@@ -372,12 +372,14 @@ _GETPSPBYTE PROC NEAR			;AN000;
 	   CENTER			;AN000;
 
 	   PUSH  DS			;AN000;
+	   PUSH  SI
 
 	   MOV	 DS,_PSP		;AN000; get save PSP segment
 	   MOV	 SI,[BP].MOFFSET	;AN000; get offset into PSP
 	   LODSB			;AN000; get PSP byte
 	   MOV	 AH,0			;AN000; zero high byte
 
+	   POP	 SI
 	   POP	 DS			;AN000;
 
 	   CEXIT			;AN000;
@@ -420,12 +422,14 @@ _PUTPSPBYTE PROC NEAR			;AN000;
 	   CENTER			;AN000;
 
 	   PUSH  ES			;AN000;
+	   PUSH  DI
 
 	   MOV	 AX,[BP].MVALUE 	;AN000; get byte to store in PSP
 	   MOV	 ES,_PSP		;AN000; get saved PSP segment
 	   MOV	 DI,[BP].MOFFSET	;AN000; get offset in PSP
 	   STOSB			;AN000; store the byte
 
+	   POP	 DI
 	   POP	 ES			;AN000;
 
 	   CEXIT			;AN000;
@@ -477,4 +481,3 @@ retry:								       ;AN000;
 _crit_err_handler endp						       ;AN000;
 _text	   ends 						       ;AN000;
 	   end	 XCMAIN 					       ;AN000;
-

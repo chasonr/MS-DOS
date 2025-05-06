@@ -179,6 +179,8 @@ _sysdispmsg proc near							 ;AN000;
 	mov	bp,sp			; set bp to current sp		 ;AN000;
 	push	di			; save some registers		 ;AN000;
 	push	si							 ;AN000;
+	push	ds
+	pop	es
 ;									 ;AN000;
 ;	copy C inregs into proper registers				 ;AN000;
 ;									 ;AN000;

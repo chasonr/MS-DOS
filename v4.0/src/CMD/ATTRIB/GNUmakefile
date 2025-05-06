@@ -11,10 +11,16 @@ country = usa-ms
 #######################	dependencies begin here. #########################
 #
 
-.SUFFIXES: .asm .obj
+.SUFFIXES: .c .asm .obj
+
+CC = wcl
+CFLAGS = -q -ms -os -zp=1 -I. -wx
 
 AS = jwasm
 AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.c.obj:
+	$(CC) $(CFLAGS) -c -fo=$@ $<
 
 .asm.obj:
 	$(AS) $(AFLAGS) -Fo$@ $<
@@ -41,24 +47,21 @@ _msgret.obj: _msgret.asm \
 
 attriba.obj: attriba.asm
 
-attrib.obj: ATTRIB.C \
-	ATTRIB.H \
-	PARSE.H \
-	MSGRET.H
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\attrib $(subst /,\,$<) $(subst /,\,$@)"
+attrib.obj: attrib.c \
+	attrib.h \
+	parse.h \
+	msgret.h
 
 OBJS = attriba.obj attrib.obj _parse.obj _msgret.obj
 
 attrib.exe: $(OBJS)
-	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\attrib /map @attrib.lnk"
-#	ln -sf ../../TOOLS/BLD/LIB/SLIBCE.LIB SLIBCE.lib
-#	echo 'system dos' >resp.txt
-#	echo 'option map=attrib.map' >>resp.txt
-#	echo 'option nocaseexact' >>resp.txt
-#	echo 'name attrib.exe' >>resp.txt
-#	echo 'libpath .' >>resp.txt
-#	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
-#	wlink @resp.txt
+	echo 'system dos' >resp.txt
+	echo 'option map=attrib.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name attrib.exe' >>resp.txt
+	echo 'libpath .' >>resp.txt
+	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
+	wlink @resp.txt
 
 clean:
 	rm -f *.obj
