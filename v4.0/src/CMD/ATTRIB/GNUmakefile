@@ -56,10 +56,11 @@ OBJS = attriba.obj attrib.obj _parse.obj _msgret.obj
 
 attrib.exe: $(OBJS)
 	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
 	echo 'option map=attrib.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
 	echo 'name attrib.exe' >>resp.txt
-	echo 'libpath .' >>resp.txt
 	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
 	wlink @resp.txt
 
