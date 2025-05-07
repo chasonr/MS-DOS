@@ -44,12 +44,12 @@
 
 /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
 
-#include "ctype.h"                                                                                           /* ;an000; */
-#include "conio.h"                      /* need for kbhit prototype */                                       /* ;an000; */
-#include "stdio.h"                                                                                           /* ;an000; */
-#include "dos.h"                                                                                             /* ;an000; */
-#include "string.h"                                                                                          /* ;an000; */
-#include "stdlib.h"                                                                                          /* ;an000; */
+#include <ctype.h>                                                                                           /* ;an000; */
+#include <conio.h>                      /* need for kbhit prototype */                                       /* ;an000; */
+#include <stdio.h>                                                                                           /* ;an000; */
+#include <dos.h>                                                                                             /* ;an000; */
+#include <string.h>                                                                                          /* ;an000; */
+#include <stdlib.h>                                                                                          /* ;an000; */
 #include "msgdef.h"                                                                                          /* ;an000; */
 #include "parse.h"                                                                                           /* ;an000; */
 
@@ -176,7 +176,7 @@ struct p_value_blk p_noval;                                                     
 #define TAB      '\x09'                                                                                                          /* ;an000; */
 #define BLANK   ' '                                                                                                              /* ;an000; */
                                                                                                                                  /* ;an000; */
-extern  unsigned DOS_TopOfMemory;         /* PSP Top of memory from 'C' init code  */                                            /* ;an005; */
+unsigned DOS_TopOfMemory;         /* PSP Top of memory */                                                                        /* ;an005; */
 
 /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/                                                  /* ;an000; */
                                                                                                                                  /* ;an000; */
@@ -204,6 +204,7 @@ extern  unsigned DOS_TopOfMemory;         /* PSP Top of memory from 'C' init cod
 /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/                                                  /* ;an000; */
                                                                                                                                  /* ;an000; */
 void     main(int, char *[]);                                                                                                    /* ;an000; */
+unsigned TopOfMemory(void);
                                                                                                                                  /* ;an000; */
 int      printf();
 int      sprintf();
@@ -261,6 +262,9 @@ extern void sysloadmsg(union REGS *, union REGS *);                             
 extern void sysdispmsg(union REGS *, union REGS *);                                                                              /* ;an000; */
 extern void sysgetmsg(union REGS *, struct SREGS *, union REGS *);                                                               /* ;an000; */
 extern void parse(union REGS *, union REGS *);                                                                                   /* ;an000; */
+#ifndef MK_FP
+# define MK_FP(seg, off) ((void far *)(((unsigned long)(seg) << 16) | off))
+#endif
                                                                                                                                  /* ;an000; */
                                                                                                                                 /* ;an000; */
 /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/                                                  /* ;an000; */
@@ -269,6 +273,9 @@ void     main(argc,argv)                                                        
 int      argc;                                                                                                                   /* ;an000; */
 char     *argv[];                                                                                                                /* ;an000; */
 {                                                                                                                                /* ;an000; */
+        /* Derive the top of memory as early as possible, before any memory
+           allocations complicate things */
+        DOS_TopOfMemory = TopOfMemory();
                                                                                                                                  /* ;an000; */
                                                                                                                                  /* ;an000; */
                                                                                                                                  /* ;an000; */
@@ -341,6 +348,34 @@ char     *argv[];                                                               
         return;                         /* end of MEM main routine */                                                            /* ;an000; */
                                                                                                                                  /* ;an000; */
         }                                                                                                                        /* ;an000; */
+
+/*ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/
+
+/* Return the segment at which available memory ends */
+unsigned TopOfMemory(void)
+{
+        unsigned arena_seg;
+        struct ARENA far *arena_ptr;
+        unsigned top;
+
+        /* Start from the block in which MEM resides */
+        arena_seg = _psp - 1;
+        arena_ptr = MK_FP(arena_seg, 0);
+
+        /* Chase pointers until we find a free block or one that does not
+           belong to MEM */
+        while (arena_ptr->Signature == 'M' && arena_ptr->Owner == _psp) {
+            arena_seg += arena_ptr->Paragraphs + 1;
+            arena_ptr = MK_FP(arena_seg, 0);
+        }
+
+        /* Include the free block, if any, in the memory size report */
+        if (arena_ptr->Signature == 'Z') {
+            arena_seg += arena_ptr->Paragraphs + 1;
+        }
+
+        return arena_seg;
+}
                                                                                                                                  /* ;an000; */
 /*ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ*/                                                  /* ;an000; */
                                                                                                                                  /* ;an000; */

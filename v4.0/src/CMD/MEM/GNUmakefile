@@ -39,15 +39,15 @@ _msgret.obj:    _msgret.asm                     \
                 $(inc)/versiona.inc             \
                 $(inc)/msgdcl.inc
 
-mem.obj:        MEM.C                           \
-                MSGDEF.H                        \
-                $(hinc)/COPYRIGH.H
+mem.obj:        mem.c                           \
+                msgdef.h                        \
+                parse.h
 	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\mem $(subst /,\,$<) $(subst /,\,$@)"
 
 OBJS = mem.obj _msgret.obj _parse.obj
 
 mem.exe: $(OBJS)
-	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\mem mem+_msgret+_parse,,,$(subst /,\,$(lib))\mem.lib"
+	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\mem mem+_msgret+_parse,mem.exe,,,;"
 
 clean:
 	rm -f *.obj
