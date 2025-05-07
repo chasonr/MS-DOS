@@ -9,6 +9,7 @@
  *
  */
 
+#include <string.h>
 #include "tools.h"
 
 int upd (def, update, dst)
@@ -60,7 +61,7 @@ char *src, *dst;
 /*  copy an extention from source to dest if present.  include the period.
     Return TRUE if one found.
  */
-extention (src, dst)
+int extention (src, dst)
 char *src, *dst;
 {
     register char *p, *p1;
@@ -78,7 +79,7 @@ char *src, *dst;
 /*  copy a filename part from source to dest if present.  return true if one
     is found
  */
-filename (src, dst)
+int filename (src, dst)
 char *src, *dst;
 {
     register char *p, *p1;
@@ -96,7 +97,7 @@ char *src, *dst;
 /*  copy a filename.ext part from source to dest if present.  return true if one
     is found
  */
-fileext  (src, dst)
+int fileext  (src, dst)
 char *src, *dst;
 {
     *dst = '\0';
@@ -110,7 +111,7 @@ char *src, *dst;
 
 /*  copy the paths part of the file description.  return true if found
  */
-path (src, dst)
+int path (src, dst)
 char *src, *dst;
 {
     register char *p, *p1;

@@ -1,8 +1,10 @@
 /* fgetl.c - expand tabs and return lines w/o separators */
 
+#include <stdlib.h>
 #include "tools.h"
 
 /* returns line from file (no CRLFs); returns NULL if EOF */
+char *__watcall
 fgetl (buf, len, fh)
 char *buf;
 int len;
@@ -33,13 +35,13 @@ FILE *fh;
 		}
 	}
     *p = 0;
-    return ! ( (c == EOF) && (p == buf) );
+    return ( (c == EOF) && (p == buf) ) ? NULL : buf;
 }
 
 /* writes a line to file (with trailing CRLFs) from buf, return <> 0 if
  * writes fail
  */
-fputl (buf, len, fh)
+int fputl (buf, len, fh)
 char *buf;
 int len;
 FILE *fh;

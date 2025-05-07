@@ -9,10 +9,16 @@ hinc	=../H
 #######################	dependencies begin here. #########################
 #
 
-.SUFFIXES: .asm .obj
+.SUFFIXES: .c .asm .obj
+
+CC = wcl
+CFLAGS = -q -ms -os -zp=1 -I. -wx -ecc
 
 AS = jwasm
 AFLAGS = -q -Zm -Zg -I$(dos) -Fl -Sa
+
+.c.obj:
+	$(CC) $(CFLAGS) -c -fo=$@ $<
 
 .asm.obj:
 	$(AS) $(AFLAGS) -Fo$@ $<
@@ -30,18 +36,18 @@ msdos.cl1 msdos.cl3:
 	$(MAKE) -C $(dos) msdos.cl1
 
 errtst.obj: 	ERRTST.C \
-  		$(hinc)/TYPES.H  \
+  		$(hinc)/types.h  \
   		$(hinc)/COMSUB.H  \
   		$(hinc)/DPB.H
 	dosemu -t --Fdrive_c ../.. -E "src\domsc.bat src\inc $(subst /,\,$<) $(subst /,\,$@)"
 
 sysvar.obj: 	SYSVAR.C \
-  		$(hinc)/TYPES.H  \
+  		$(hinc)/types.h  \
   		$(hinc)/SYSVAR.H
 	dosemu -t --Fdrive_c ../.. -E "src\domsc.bat src\inc $(subst /,\,$<) $(subst /,\,$@)"
 
 cds.obj: 	CDS.C \
-  		$(hinc)/TYPES.H  \
+  		$(hinc)/types.h  \
   		$(hinc)/SYSVAR.H  \
   		$(hinc)/CDS.H  \
   		$(hinc)/DPB.H
@@ -52,10 +58,9 @@ dpb.obj: 	DPB.C \
   		dpb.inc
 	dosemu -t --Fdrive_c ../.. -E "src\domsc.bat src\inc $(subst /,\,$<) $(subst /,\,$@)"
 
-string.obj:	STRING.C \
-		$(hinc)/TYPES.H  \
-		$(hinc)/INTERNAT.H
-	dosemu -t --Fdrive_c ../.. -E "src\domsc.bat src\inc $(subst /,\,$<) $(subst /,\,$@)"
+string.obj:	string.c \
+		$(hinc)/types.h  \
+		$(hinc)/internat.h
 
 nibdos.obj:	 nibdos.asm $(dos)/mssw.asm $(dos)/msconst.asm \
            	 $(DOSSYM_INC) dosseg.asm mshead.asm bugtyp.asm devsym.inc

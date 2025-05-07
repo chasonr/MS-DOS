@@ -30,18 +30,23 @@ OBJ	= fc.obj \
 
 #       Rules and Dependencies follow
 
-.SUFFIXES: .asm .obj
+.SUFFIXES: .c .asm .obj
+
+CC = wcl
+CFLAGS = -q -ms -os -zp=1 -I. -I$(hinc) -wx
 
 AS = jwasm
 AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.c.obj:
+	$(CC) $(CFLAGS) -c -fo=$@ $<
 
 .asm.obj:
 	$(AS) $(AFLAGS) -Fo$@ $<
 
 all:	fc.exe
 
-$(inc)/kstring.obj: $(inc)/KSTRING.C $(hinc)/INTERNAT.H
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\fc $(subst /,\,$<) $(subst /,\,$@)"
+$(inc)/kstring.obj: $(inc)/kstring.c $(hinc)/internat.h
 
 getl.obj: getl.asm $(inc)/cmacros.inc $(inc)/version.inc
 
@@ -57,29 +62,25 @@ string.obj: string.asm $(inc)/cmacros.inc $(inc)/version.inc
 
 xtab.obj: xtab.asm $(inc)/cmacros.inc $(inc)/version.inc
 
-error.obj: ERROR.C TOOLS.H TTYPES.H
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\fc $(subst /,\,$<) $(subst /,\,$@)"
+error.obj: error.c tools.h ttypes.h
 
-fc.obj: FC.C FC.H TOOLS.H TTYPES.H
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\fc $(subst /,\,$<) $(subst /,\,$@)"
+fc.obj: fc.c fc.h tools.h ttypes.h
 
-fgetl.obj: FGETL.C TOOLS.H TTYPES.H
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\fc $(subst /,\,$<) $(subst /,\,$@)"
+fgetl.obj: fgetl.c tools.h ttypes.h
 
-ntoi.obj: NTOI.C TOOLS.H TTYPES.H
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\fc $(subst /,\,$<) $(subst /,\,$@)"
+ntoi.obj: ntoi.c tools.h ttypes.h
 
-update.obj: UPDATE.C TOOLS.H TTYPES.H
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\fc $(subst /,\,$<) $(subst /,\,$@)"
+update.obj: update.c tools.h ttypes.h
 
-fc.exe: $(OBJ) FC.LNK
-	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\fc /map @fc.lnk,"
-#	echo 'system dos' >resp.txt
-#	echo 'option map=fc.map' >>resp.txt
-#	echo 'option nocaseexact' >>resp.txt
-#	echo 'name fc.exe' >>resp.txt
-#	for x in $(OBJ); do echo "file $$x" >>resp.txt; done
-#	wlink @resp.txt
+fc.exe: $(OBJ)
+	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
+	echo 'option map=fc.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name fc.exe' >>resp.txt
+	for x in $(OBJ); do echo "file $$x" >>resp.txt; done
+	wlink @resp.txt
 
 clean:
 	rm -f *.obj

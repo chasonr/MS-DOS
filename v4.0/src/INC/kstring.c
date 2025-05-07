@@ -15,11 +15,18 @@ char	haveinttab = FALSE;
  * be replaced by the table in the DOS.  The lbtbl_ptr is the far ptr to
  * which ever table is in use.
 */
-long  lbtbl_ptr;
+void far *lbtbl_ptr;
 char  *default_tab="\201\237\340\374\000\000";
 char	have_lbtbl = FALSE;
 
 struct	InterTbl Currtab;
+
+#ifdef KANJI
+int testkanj(unsigned char c);
+#endif
+extern void __cdecl get_lbtbl(long *);
+extern int __cdecl test_ecs(unsigned, void far *);
+extern int __cdecl IToupper(int, long);
 
 int toupper(c)
 int c;
@@ -31,7 +38,7 @@ int c;
 	    regs.x.dx = (unsigned) &Currtab ;
 	    intdos (&regs, &regs) ;		/* INIT the table */
 
-	    haveinttab = TRUE;
+	    haveinttab = (char)TRUE;
 	}
 
 	return(IToupper(c,Currtab.casecall));
@@ -96,18 +103,15 @@ char *string2;
 }
 
 #ifdef KANJI
-testkanj(c)
-unsigned char c;
+int testkanj(unsigned char c)
 {
 	long *p1;
-        union REGS regs ;
-        int	i;
 
         p1 = (long *)&lbtbl_ptr ;			
 	if (!have_lbtbl ) {
-      (char far *)lbtbl_ptr = (char far *)default_tab	;	/* Load offset in pointer */
+           lbtbl_ptr = default_tab	;	/* Load offset in pointer */
            get_lbtbl( p1 );
-	   have_lbtbl=TRUE;
+	   have_lbtbl=(char)TRUE;
 	}
                           
 	   if ( test_ecs( c, lbtbl_ptr )) 

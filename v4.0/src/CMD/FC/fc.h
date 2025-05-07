@@ -9,6 +9,4 @@ struct lineType {
 #define LOWVERSION   0x0300 + 10
 #define HIGHVERSION  0x0400 + 00
 
-extern unsigned char _ctype_[];
-#define _SPACE        0x8       /* tab, carriage return, new line, */
-#define ISSPACE(c)     ( (_ctype_+1)[c] & _SPACE )
+#define ISSPACE(c)     isspace((c) & 0xFF)

@@ -207,18 +207,17 @@ WARNING:
  */
 
 
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "tools.h"
 #include "fc.h"
 
 /* #define  DEBUG  FALSE */
 
-extern int  fgetl(),
-            strcmp ();
-
-extern byte toupper ();
-
-int (*funcRead) (),                     /* function to use to read lines     */
-    (*fCmp) ();                         /* function to use to compare lines  */
+char * __watcall (*funcRead) (char *, int, FILE *);    /* function to use to read lines     */
+int __watcall (*fCmp) (char const *, char const *); /* function to use to compare lines  */
 
 extern byte BadSw[],
             Bad_ver[],
@@ -252,8 +251,15 @@ byte line[MAXARG];             /* single line buffer                */
 byte *extBin[] = { ".EXE", ".OBJ", ".LIB",
                             ".COM", ".BIN", ".SYS", NULL };
 
+void usage (const char *p, int erc);
+int BinaryCompare (const char *f1, const char *f2);
+int LineCompare (const char *f1, const char *f2);
+int xfill (struct lineType *pl, FILE *fh, int ct, int *plnum);
+int adjust (struct lineType *pl, int ml, int lt);
+void dump (struct lineType const *pl, int start, int end);
+void pline (struct lineType const *pl);
 
-main (c, v)
+int main (c, v)
 int c;
 byte *v[];
 {
@@ -281,7 +287,7 @@ byte *v[];
             usage (Bad_ver, 1);
         }
 
-        funcRead = (int (*) ())FNADDR(fgetl);
+        funcRead = FNADDR(fgetl);
 
         fileargs=0;
 
@@ -343,7 +349,7 @@ byte *v[];
                                              fNumb = TRUE;
                                          break;
                                      case 'T' :
-                                             funcRead =(int (*) ())FNADDR(fgets);
+                                             funcRead = FNADDR(fgets);
                                          break;
                                      default:
                                              if (*strbskip((v[i]+j+1),"0123456789") == 0)
@@ -407,10 +413,10 @@ byte *v[];
     else
         LineCompare (n[0], n[1]);
 
+    return 0;
 }
 
-usage (p, erc)
-unsigned char *p;
+void usage (const char *p, int erc)
 {
     if (p)
         printf ("fc: %s\n", p);
@@ -420,8 +426,7 @@ unsigned char *p;
     exit (erc);
 }
 
-BinaryCompare (f1, f2)
-unsigned char *f1, *f2;
+int BinaryCompare (const char *f1, const char *f2)
 {
     register int c1, c2;
     long pos;
@@ -523,8 +528,7 @@ register int s1, s2;
     return TRUE;
 }
 
-LineCompare (f1, f2)
-unsigned char *f1, *f2;
+int LineCompare (const char *f1, const char *f2)
 {
     FILE *fh1, *fh2;
     int l1, l2, i, xp, yp, xc, yc;
@@ -547,7 +551,7 @@ unsigned char *f1, *f2;
 
     if ((buffer1 = (struct lineType *)malloc (cLine * (sizeof *buffer1))) == NULL ||
         (buffer2 = (struct lineType *)malloc (cLine * (sizeof *buffer1))) == NULL)
-        usage (NoMem);
+        usage (NoMem, 0);
 
     l1 = l2 = 0;
     line1 = line2 = 0;
@@ -679,11 +683,11 @@ l6:
 
 
 /* return number of lines read in */
-xfill (pl, fh, ct, plnum)
-struct lineType *pl;
-FILE *fh;
-int ct;
-int *plnum;
+int xfill (
+        struct lineType *pl,
+        FILE *fh,
+        int ct,
+        int *plnum)
 {
     int i;
 
@@ -695,7 +699,7 @@ int *plnum;
     i = 0;
     while (ct-- && (*funcRead) (pl->text, MAXARG, fh) != NULL)
     {
-        if (funcRead == (int (*) ())FNADDR(fgets))
+        if (funcRead == FNADDR(fgets))
             pl->text[strlen(pl->text)-1] = 0;
         if (fIgnore && !strcmps (pl->text, ""))
             pl->text[0] = 0;
@@ -717,10 +721,10 @@ int *plnum;
 
 
 /* adjust returns number of lines in buffer */
-adjust (pl, ml, lt)
-struct lineType *pl;
-int ml;
-int lt;
+int adjust (
+        struct lineType *pl,
+        int ml,
+        int lt)
 {
 
 #ifdef  DEBUG
@@ -755,9 +759,7 @@ int lt;
  *          pline, printf
  *
  */
-dump (pl, start, end)
-struct lineType *pl;
-int start, end;
+void dump (struct lineType const *pl, int start, int end)
 {
     if (fAbbrev && end-start > 2)
     {
@@ -782,8 +784,7 @@ int start, end;
  *          fNumb   TRUE if /n specified
  *
  */
-pline (pl)
-struct lineType *pl;
+void pline (struct lineType const *pl)
 {
     if (fNumb)
         printf ("%5d:  ", pl->line);
@@ -803,8 +804,7 @@ struct lineType *pl;
  *  This version relies on a version of toupper which uses IToupper.
  */
 
-int strcmpi(str1, str2)
-unsigned char *str1, *str2;
+int __watcall strcmpi(char const *str1, char const *str2)
 {
    unsigned char c1, c2;
 
@@ -823,8 +823,7 @@ unsigned char *str1, *str2;
 /* compare two strings, ignoring white space, case is significant, return
  * 0 if identical, <>0 otherwise
  */
-strcmps (p1, p2)
-unsigned char *p1, *p2;
+int __watcall strcmps (char const *p1, char const *p2)
 {
     while (TRUE) {
 	while (ISSPACE(*p1))
@@ -845,8 +844,7 @@ unsigned char *p1, *p2;
 /* compare two strings, ignoring white space, case is not significant, return
  * 0 if identical, <>0 otherwise
  */
-int strcmpis (p1, p2)
-unsigned char *p1, *p2;
+int __watcall strcmpis (char const *p1, char const *p2)
 {
     while (TRUE) {
 	while (ISSPACE(*p1))

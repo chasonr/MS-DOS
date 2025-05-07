@@ -1,10 +1,8 @@
 /* error.c - return text of error corresponding to the most recent DOS error */
 
+#include <stdlib.h>
 #include "tools.h"
 
-extern int errno;
-extern sys_nerr;
-extern char *sys_errlist[];
 extern char UnKnown[];
 
 char *error ()
