@@ -1665,22 +1665,23 @@ WORD Print_ext_attrib(
          break;                                                        /*;AN000;*/
       case EAISBINARY:                                                 /*;AN000;*/
          if (length == 1) {                                            /*;AN000;*/
-            msg_num.sub_flags = sf_unsbin2d | sf_byte | sf_right;      /*;AN000;*/
+            msg_num[0].sub_flags = sf_unsbin2d | sf_byte | sf_right;      /*;AN000;*/
             value = (BYTE)*(BYTE far *)value_ptr;                      /*;AN000;*/
             }                                                          /*;AN000;*/
          else if (length == 2) {                                       /*;AN000;*/
-            msg_num.sub_flags = sf_unsbin2d | sf_word | sf_right;      /*;AN000;*/
+            msg_num[0].sub_flags = sf_unsbin2d | sf_word | sf_right;      /*;AN000;*/
             value = (WORD)*(WORD far *)value_ptr;                      /*;AN000;*/
             }                                                          /*;AN000;*/
          else if (length == 4) {                                       /*;AN000;*/
-            msg_num.sub_flags = sf_unsbin2d | sf_dword | sf_right;     /*;AN000;*/
+            msg_num[0].sub_flags = sf_unsbin2d | sf_dword | sf_right;     /*;AN000;*/
             value = (DWORD)*(DWORD far *)value_ptr;                    /*;AN000;*/
             }                                                          /*;AN000;*/
-         msg_num.sub_value_seg = segregs.ds;                           /*;AN000;*/
-         msg_num.sub_value = (WORD)&value;                             /*;AN000;*/
-         msg_str[1].sub_value_seg = segregs.ds;                        /*;AN000;*/
-         msg_str[1].sub_value = (WORD)fspec;                           /*;AN000;*/
-         Display_msg(9,STDOUT,TWOPARM,&msg_num,NOINPUT);               /*;AN000;*/
+         msg_num[0].sub_value_seg = segregs.ds;                        /*;AN000;*/
+         msg_num[0].sub_value = (WORD)&value;                          /*;AN000;*/
+         msg_num[1] = msg_str[1];
+         msg_num[1].sub_value_seg = segregs.ds;                        /*;AN000;*/
+         msg_num[1].sub_value = (WORD)fspec;                           /*;AN000;*/
+         Display_msg(9,STDOUT,TWOPARM,msg_num,NOINPUT);                /*;AN000;*/
          break;                                                        /*;AN000;*/
       case EAISASCII:                                                  /*;AN000;*/
          msg_str2.sub_value_seg = segregs.ds;                          /*;AN000;*/
@@ -1691,18 +1692,20 @@ WORD Print_ext_attrib(
          Display_msg(8,STDOUT,ONEPARM,&msg_str2,NOINPUT);              /*;AN000;*/
          break;                                                        /*;AN000;*/
       case EAISDATE:                                                   /*;AN000;*/
-         msg_str[1].sub_value_seg = segregs.ds;                        /*;AN000;*/
-         msg_str[1].sub_value = (WORD)fspec;                           /*;AN000;*/
+         msg_date[1] = msg_str[1];
+         msg_date[1].sub_value_seg = segregs.ds;                       /*;AN000;*/
+         msg_date[1].sub_value = (WORD)fspec;                          /*;AN000;*/
          value = (WORD)*(WORD far *)value_ptr;                         /*;AN000;*/
-         Convert_date(value,&msg_date.sub_value,&msg_date.sub_value_seg); /*;AN000;*/
-         Display_msg(9,STDOUT,TWOPARM,&msg_date,NOINPUT);              /*;AN000;*/
+         Convert_date(value,&msg_date[0].sub_value,&msg_date[0].sub_value_seg); /*;AN000;*/
+         Display_msg(9,STDOUT,TWOPARM,msg_date,NOINPUT);               /*;AN000;*/
          break;                                                        /*;AN000;*/
       case EAISTIME:                                                   /*;AN000;*/
-         msg_str[1].sub_value_seg = segregs.ds;                        /*;AN000;*/
-         msg_str[1].sub_value = (WORD)fspec;                           /*;AN000;*/
+         msg_time[1] = msg_str[1];
+         msg_time[1].sub_value_seg = segregs.ds;                       /*;AN000;*/
+         msg_time[1].sub_value = (WORD)fspec;                          /*;AN000;*/
          value = (WORD)*(WORD far *)value_ptr;                         /*;AN000;*/
-         Convert_time(value,&msg_time.sub_value,&msg_time.sub_value_seg); /*;AN000;*/
-         Display_msg(9,STDOUT,TWOPARM,&msg_time,NOINPUT);              /*;AN000;*/
+         Convert_time(value,&msg_time[0].sub_value,&msg_time[0].sub_value_seg); /*;AN000;*/
+         Display_msg(9,STDOUT,TWOPARM,msg_time,NOINPUT);               /*;AN000;*/
          break;                                                        /*;AN000;*/
       case EANAMES:                                                    /*;AN000;*/
          msg_str2.sub_value_seg = segregs.ds;                          /*;AN000;*/
@@ -1964,9 +1967,10 @@ WORD Special_attrib(
          return(FILENOTFOUND);                                         /*;AN000;*/
          }                                                             /*;AN000;*/
       filesize = (DWORD)size;                                          /*;AN000;*/
-      msg_dword.sub_value = (WORD)&filesize;                           /*;AN000;*/
-      msg_dword.sub_value_seg = (WORD)segregs.ds;                      /*;AN000;*/
-      Display_msg(9,STDOUT,TWOPARM,&msg_dword,NOINPUT);                /*;AN000;*/
+      msg_dword[0].sub_value = (WORD)&filesize;                        /*;AN000;*/
+      msg_dword[0].sub_value_seg = (WORD)segregs.ds;                   /*;AN000;*/
+      msg_dword[1] = msg_str[1];
+      Display_msg(9,STDOUT,TWOPARM,msg_dword,NOINPUT);                 /*;AN000;*/
       }                                                                /*;AN000;*/
 
    else if (id == A_DATE) {                                            /*;AN000;*/
@@ -1977,8 +1981,9 @@ WORD Special_attrib(
       if (outregs.x.cflag & CARRY)                                     /*;AN000;*/
          return(status);                                               /*;AN000;*/
 
-      Convert_date(outregs.x.dx,&msg_date.sub_value,&msg_date.sub_value_seg); /*;AN000;*/
-      Display_msg(9,STDOUT,TWOPARM,&msg_date,NOINPUT);                 /*;AN000;*/
+      Convert_date(outregs.x.dx,&msg_date[0].sub_value,&msg_date[0].sub_value_seg); /*;AN000;*/
+      msg_date[1] = msg_str[1];
+      Display_msg(9,STDOUT,TWOPARM,msg_date,NOINPUT);                  /*;AN000;*/
       }                                                                /*;AN000;*/
 
    else if (id == A_TIME) {                                            /*;AN000;*/
@@ -1989,8 +1994,9 @@ WORD Special_attrib(
       if (outregs.x.cflag & CARRY)                                     /*;AN000;*/
          return(status);                                               /*;AN000;*/
 
-      Convert_time(outregs.x.cx,&msg_time.sub_value,&msg_time.sub_value_seg); /*;AN000;*/
-      Display_msg(9,STDOUT,TWOPARM,&msg_time,NOINPUT);                 /*;AN000;*/
+      Convert_time(outregs.x.cx,&msg_time[0].sub_value,&msg_time[0].sub_value_seg); /*;AN000;*/
+      msg_time[1] = msg_str[1];
+      Display_msg(9,STDOUT,TWOPARM,msg_time,NOINPUT);                  /*;AN000;*/
       }                                                                /*;AN000;*/
 
    did_attrib_ok = TRUE;                                               /*;AN000;*/

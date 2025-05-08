@@ -330,8 +330,8 @@ struct parm_list plist =               /*;AN000;  Extended open parm list */
        2 };                            /*;AN000;   iomode               */
 
 /* messgages */
-struct m_sublist msg_num =             /*;AN000; describes substitutions   */
-     { 72,                             /*;AN000;   for parm one of message */
+struct m_sublist msg_num[2] = {        /*;AN000; describes substitutions   */
+     { sizeof(struct m_sublist),       /*;AN000;   for parm one of message */
        0,                              /*;AN000;                           */
        0,                              /*;AN000;                           */
        0,                              /*;AN000;                           */
@@ -339,9 +339,9 @@ struct m_sublist msg_num =             /*;AN000; describes substitutions   */
        sf_unsbin2d | sf_right,         /*;AN000;  unsigned binary to decimal*/
        9,                              /*;AN000;                           */
        9,                              /*;AN000;                           */
-       0 };                            /*;AN000;                           */
+       0 } };                          /*;AN000;                           */
 struct m_sublist msg_str2 =            /*;AN000; describes substitutions   */
-     { 60,                             /*;AN000;   for parm one of message */
+     { sizeof(struct m_sublist),       /*;AN000;   for parm one of message */
        0,                              /*;AN000;                           */
        0,                              /*;AN000;                           */
        0,                              /*;AN000;                           */
@@ -350,8 +350,8 @@ struct m_sublist msg_str2 =            /*;AN000; describes substitutions   */
        0,                              /*;AN000;  null string              */
        0,                              /*;AN000;                           */
        (BYTE)' ' };                    /*;AN000;                           */
-struct m_sublist msg_dword =           /*;AN000; describes substitutions   */
-     { 48,                             /*;AN000;   for parm one of message */
+struct m_sublist msg_dword[2] = {      /*;AN000; describes substitutions   */
+     { sizeof(struct m_sublist),       /*;AN000;   for parm one of message */
        0,                              /*;AN000;                           */
        0,                              /*;AN000;                           */
        0,                              /*;AN000;                           */
@@ -359,9 +359,9 @@ struct m_sublist msg_dword =           /*;AN000; describes substitutions   */
        sf_unsbin2d | sf_dword | sf_right, /*;AN000;  unsigned binary to decimal*/
        10,                             /*;AN000;                           */
        9,                              /*;AN000;                           */
-       0 };                            /*;AN000;                           */
-struct m_sublist msg_date =            /*;AN000; describes substitutions   */
-     { 36,                             /*;AN000;   for parm one of message */
+       0 } };                          /*;AN000;                           */
+struct m_sublist msg_date[2] = {       /*;AN000; describes substitutions   */
+     { sizeof(struct m_sublist),       /*;AN000;   for parm one of message */
        0,                              /*;AN000;                           */
        0,                              /*;AN000;                           */
        0,                              /*;AN000;                           */
@@ -369,9 +369,9 @@ struct m_sublist msg_date =            /*;AN000; describes substitutions   */
        sf_date | sf_mdy2,              /*;AN000;  unsigned binary to decimal*/
        9,                              /*;AN000;                           */
        9,                              /*;AN000;                           */
-       0 };                            /*;AN000;                           */
-struct m_sublist msg_time =            /*;AN000; describes substitutions   */
-     { 24,                             /*;AN000;   for parm one of message */
+       0 } };                          /*;AN000;                           */
+struct m_sublist msg_time[2] = {       /*;AN000; describes substitutions   */
+     { sizeof(struct m_sublist),       /*;AN000;   for parm one of message */
        0,                              /*;AN000;                           */
        0,                              /*;AN000;                           */
        0,                              /*;AN000;                           */
@@ -379,9 +379,9 @@ struct m_sublist msg_time =            /*;AN000; describes substitutions   */
        sf_time12 | sf_hhmm | sf_right, /*;AN000;  unsigned binary to decimal*/
        9,                              /*;AN000;  NN-NN-NNa (9 characters) */
        9,                              /*;AN000;                           */
-       0 };                            /*;AN000;                           */
+       0 } };                          /*;AN000;                           */
 struct m_sublist msg_str[2] = {        /*;AN000; describes substitutions   */
-     { 12,                             /*;AN000;   for parm one of message */
+     { sizeof(struct m_sublist),       /*;AN000;   for parm one of message */
        0,                              /*;AN000;                           */
        0,                              /*;AN000;                           */
        0,                              /*;AN000;                           */
@@ -391,7 +391,7 @@ struct m_sublist msg_str[2] = {        /*;AN000; describes substitutions   */
        9,                              /*;AN000;                           */
        (BYTE)' ' },                    /*;AN000;                           */
                                        /*;AN000; describes substitutions   */
-     { 12,                             /*;AN000;   for parm two of message */
+     { sizeof(struct m_sublist),       /*;AN000;   for parm two of message */
        0,                              /*;AN000;                           */
        0,                              /*;AN000;                           */
        0,                              /*;AN000;                           */
@@ -401,7 +401,7 @@ struct m_sublist msg_str[2] = {        /*;AN000; describes substitutions   */
        0,                              /*;AN000;                           */
        (BYTE)' ' } };                  /*;AN000;                           */
 struct m_sublist msg_error =           /*;AN000; describes substitutions   */
-     { 12,                             /*;AN000;   for extended error messages*/
+     { sizeof(struct m_sublist),       /*;AN000;   for extended error messages*/
        0,                              /*;AN000;                           */
        0,                              /*;AN000;                           */
        0,                              /*;AN000;                           */

@@ -74,7 +74,6 @@
     unsigned char max_width;                                                    /* max width of replaceable field       */       /* ;an000; */
     unsigned char min_width;                                                    /* min width of replaceable field       */       /* ;an000; */
     unsigned char pad_char;                                                     /* pad character for replaceable field  */       /* ;an000; */
-    unsigned char reserved2;
   } sublist[5];                                                                                                                  /* ;an000; */
                                                                                                                                  /* ;an000; */
 /*----------------------------------------------------------------------+

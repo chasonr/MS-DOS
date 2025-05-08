@@ -57,5 +57,4 @@ struct m_sublist		    /*;AN000;				 */
        BYTE   sub_max_width;	    /*;AN000;				 */
        BYTE   sub_min_width;	    /*;AN000;				 */
        BYTE   sub_pad_char;	    /*;AN000;				 */
-       BYTE   sub_reserved;
        };			    /*;AN000;				 */
