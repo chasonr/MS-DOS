@@ -62,7 +62,7 @@
 #define Utility_Msg_Class		0x00ff
 #define No_Handle			0xffff
 #define No_Replace			0x0000
-#define Sublist_Length			0x000b
+#define Sublist_Length			sizeof(struct sublistx)
 #define Reserved			0x0000
 #define Left_Align			0x0000
 #define Right_Align			0x0080

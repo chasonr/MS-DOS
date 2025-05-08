@@ -74,7 +74,8 @@
     unsigned char max_width;                                                    /* max width of replaceable field       */       /* ;an000; */
     unsigned char min_width;                                                    /* min width of replaceable field       */       /* ;an000; */
     unsigned char pad_char;                                                     /* pad character for replaceable field  */       /* ;an000; */
-  } sublist[4];                                                                                                                  /* ;an000; */
+    unsigned char reserved2;
+  } sublist[5];                                                                                                                  /* ;an000; */
                                                                                                                                  /* ;an000; */
 /*----------------------------------------------------------------------+
 |       define structure used by parser                                 |
@@ -203,7 +204,7 @@ unsigned DOS_TopOfMemory;         /* PSP Top of memory */                       
                                                                                                                                  /* ;an000; */
 /*컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�*/                                                  /* ;an000; */
                                                                                                                                  /* ;an000; */
-void     main(int, char *[]);                                                                                                    /* ;an000; */
+void     main(void);                                                                                                             /* ;an000; */
 unsigned TopOfMemory(void);
                                                                                                                                  /* ;an000; */
 int      printf();
@@ -226,7 +227,7 @@ void     DisplayExpandedSummary(void);                                          
                                                                                                                                  /* ;an000; */
 void     DisplayBaseDetail(void);                                                                                                /* ;an000; */
                                                                                                                                  /* ;an000; */
-void     GetFromArgvZero(unsigned,unsigned far *);                                                                               /* ;an000; */
+void     GetFromArgvZero(unsigned);                                                                                              /* ;an000; */
                                                                                                                                  /* ;an000; */
 void     DisplayDeviceDriver(struct   DEVICEHEADER far *,int);                                                                   /* ;an000; */
                                                                                                                                  /* ;an000; */
@@ -258,20 +259,15 @@ void    EMSPrint(int,int,unsigned char,                                         
                  char *,                                                                                                         /* ;an000; */
                  unsigned long int *);                                                                                           /* ;an000; */
                                                                                                                                  /* ;an000; */
-extern void sysloadmsg(union REGS *, union REGS *);                                                                              /* ;an000; */
-extern void sysdispmsg(union REGS *, union REGS *);                                                                              /* ;an000; */
-extern void sysgetmsg(union REGS *, struct SREGS *, union REGS *);                                                               /* ;an000; */
-extern void parse(union REGS *, union REGS *);                                                                                   /* ;an000; */
-#ifndef MK_FP
-# define MK_FP(seg, off) ((void far *)(((unsigned long)(seg) << 16) | off))
-#endif
+extern void __cdecl sysloadmsg(union REGS *, union REGS *);                                                                      /* ;an000; */
+extern void __cdecl sysdispmsg(union REGS *, union REGS *);                                                                      /* ;an000; */
+extern void __cdecl sysgetmsg(union REGS *, struct SREGS *, union REGS *);                                                       /* ;an000; */
+extern void __cdecl parse(union REGS *, union REGS *);                                                                           /* ;an000; */
                                                                                                                                  /* ;an000; */
                                                                                                                                 /* ;an000; */
 /*컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�*/                                                  /* ;an000; */
                                                                                                                                  /* ;an000; */
-void     main(argc,argv)                                                                                                         /* ;an000; */
-int      argc;                                                                                                                   /* ;an000; */
-char     *argv[];                                                                                                                /* ;an000; */
+void     main(void)                                                                                                              /* ;an000; */
 {                                                                                                                                /* ;an000; */
         /* Derive the top of memory as early as possible, before any memory
            allocations complicate things */
@@ -290,8 +286,7 @@ char     *argv[];                                                               
         InRegs.h.ah = (unsigned char) 0x62;                                     /* an000; dms; get the PSP              */       /* ;an000; */
         intdosx(&InRegs, &InRegs, &SegRegs);                                    /* an000; dms; invoke the INT 21        */       /* ;an000; */
                                                                                                                                  /* ;an000; */
-        FP_OFF(cmdline) = 0x81;                                                 /* an000; dms; offset of command line   */       /* ;an000; */
-        FP_SEG(cmdline) = InRegs.x.bx;                                          /* an000; dms; segment of command line  */       /* ;an000; */
+        cmdline = MK_FP(InRegs.x.bx, 0x81);                                     /* command line in PSP */
                                                                                                                                  /* ;an000; */
         i = 0;                                                                  /* an000; dms; init index               */       /* ;an000; */
         while ( *cmdline != (char) '\x0d' ) cmd_line[i++] = *cmdline++;         /* an000; dms; while no CR              */       /* ;an000; */
@@ -356,7 +351,6 @@ unsigned TopOfMemory(void)
 {
         unsigned arena_seg;
         struct ARENA far *arena_ptr;
-        unsigned top;
 
         /* Start from the block in which MEM resides */
         arena_seg = _psp - 1;
@@ -379,7 +373,7 @@ unsigned TopOfMemory(void)
                                                                                                                                  /* ;an000; */
 /*컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�*/                                                  /* ;an000; */
                                                                                                                                  /* ;an000; */
-void    DisplayBaseDetail()                                                                                                      /* ;an000; */
+void    DisplayBaseDetail(void)                                                                                                  /* ;an000; */
 {                                                                                                                                /* ;an000; */
                                                                                                                                  /* ;an000; */
         struct   ARENA far *ThisArenaPtr;                                                                                        /* ;an000; */
@@ -392,7 +386,6 @@ void    DisplayBaseDetail()                                                     
         int      SystemDataType;                                                                                                 /* ;an000; */
         char     SystemDataOwner[64];                                                                                            /* ;an000; */
                                                                                                                                  /* ;an000; */
-        int     i;                                                                                                               /* ;an000; */
         unsigned int long       Out_Var1;                                                                                        /* ;an000; */
         unsigned int long       Out_Var2;                                                                                        /* ;an000; */
         char                    Out_Str1[64];                                                                                    /* ;an000; */
@@ -449,8 +442,7 @@ void    DisplayBaseDetail()                                                     
         InRegs.h.ah = (unsigned char) 0x52;                                                                                      /* ;an000; */
         intdosx(&InRegs,&OutRegs,&SegRegs);                                                                                      /* ;an000; */
                                                                                                                                  /* ;an000; */
-        FP_SEG(SysVarsPtr) = SegRegs.es;                                                                                         /* ;an000; */
-        FP_OFF(SysVarsPtr) = OutRegs.x.bx;                                                                                       /* ;an000; */
+        SysVarsPtr = MK_FP(SegRegs.es, OutRegs.x.bx);
                                                                                                                                  /* ;an000; */
         /* Display the BIO location and size */                                                                                  /* ;an000; */
                                                                                                                                  /* ;an000; */
@@ -481,11 +473,9 @@ void    DisplayBaseDetail()                                                     
                                                                                                                                  /* ;an000; */
         /* Display the DOS location and size */                                                                                  /* ;an000; */
 
-        FP_SEG(ArenaHeadPtr) = FP_SEG(SysVarsPtr);                                                                               /* ;an004; */
-        FP_OFF(ArenaHeadPtr) = FP_OFF(SysVarsPtr) - 2;                                                                           /* ;an004; */
+        ArenaHeadPtr = (unsigned far *)SysVarsPtr - 1;
                                                                                                                                  /* ;an004; */
-        FP_SEG(ThisArenaPtr) = *ArenaHeadPtr;                                                                                    /* ;an004; */
-        FP_OFF(ThisArenaPtr) = 0;                                                                                                /* ;an004; */
+        ThisArenaPtr = MK_FP(*ArenaHeadPtr, 0);
                                                                                                                                  /* ;an000; */
         Sub0_Message(NewLineMsg,STDOUT,Utility_Msg_Class);                                                                       /* ;an000; */
                                                                                                                                  /* ;an000; */
@@ -520,11 +510,9 @@ void    DisplayBaseDetail()                                                     
                                      &Out_Var2,                                                                                  /* ;an000; */
                                      SystemDataMsg);                                                                             /* ;an000; */
                                                                                                                                  /* ;an000; */
-                        FP_SEG(NextArenaPtr) = FP_SEG(ThisArenaPtr) + ThisArenaPtr -> Paragraphs + 1;                            /* ;an000; */
-                        FP_OFF(NextArenaPtr) = 0;                                                                                /* ;an000; */
+                        NextArenaPtr = MK_FP(FP_SEG(ThisArenaPtr) + ThisArenaPtr -> Paragraphs + 1, 0);
                                                                                                                                  /* ;an000; */
-                        FP_SEG(ThisConfigArenaPtr) = FP_SEG(ThisArenaPtr) + 1;                                                   /* ;an000; */
-                        FP_OFF(ThisConfigArenaPtr) = 0;                                                                          /* ;an000; */
+                        ThisConfigArenaPtr = MK_FP(FP_SEG(ThisArenaPtr) + 1, 0);
                                                                                                                                  /* ;an000; */
                                                                                                                                  /* ;an000; */
                         while ( (FP_SEG(ThisConfigArenaPtr) > FP_SEG(ThisArenaPtr)) &&                                           /* ;an000; */
@@ -572,18 +560,21 @@ void    DisplayBaseDetail()                                                     
                                              SystemDataType );                                                                   /* ;an000; */
                                                                                                                                  /* ;an000; */
                                 NextConfigArenaPtr = ThisConfigArenaPtr;                                                         /* ;an000; */
-                                FP_SEG(NextConfigArenaPtr) += NextConfigArenaPtr -> Paragraphs + 1;                              /* ;an000; */
+                                NextConfigArenaPtr = MK_FP(
+                                            FP_SEG(NextConfigArenaPtr) + NextConfigArenaPtr -> Paragraphs + 1,
+                                            FP_OFF(NextConfigArenaPtr));
                                 if (ThisConfigArenaPtr -> Signature == (char) 'D')                                               /* ;an000; */
                                       {                                                                                          /* ;an000; */
                                                                                                                                  /* ;an000; */
-                                        FP_SEG(ThisDeviceDriver) = FP_SEG(ThisConfigArenaPtr) + 1;                               /* ;an000; */
-                                        FP_OFF(ThisDeviceDriver) = 0;                                                            /* ;an000; */
+                                        ThisDeviceDriver = MK_FP(FP_SEG(ThisConfigArenaPtr) + 1, 0);
                                         while ( (a(ThisDeviceDriver) > a(ThisConfigArenaPtr)) &&                                 /* ;an000; */
                                                 (a(ThisDeviceDriver) < a(NextConfigArenaPtr))    )                               /* ;an000; */
                                                 DisplayDeviceDriver(ThisDeviceDriver,InstalledDeviceDriverMsg);                  /* ;an000; */
                                         }                                                                                        /* ;an000; */
                                                                                                                                  /* ;an000; */
-                                FP_SEG(ThisConfigArenaPtr) += ThisConfigArenaPtr -> Paragraphs + 1;                              /* ;an000; */
+                                       ThisConfigArenaPtr = MK_FP(
+                                                FP_SEG(ThisConfigArenaPtr) + ThisConfigArenaPtr -> Paragraphs + 1,
+                                                FP_OFF(ThisConfigArenaPtr));
                                                                                                                                  /* ;an000; */
                                 }                                                                                                /* ;an000; */
                                                                                                                                  /* ;an000; */
@@ -603,7 +594,9 @@ void    DisplayBaseDetail()                                                     
                                    Out_Str2);                                                                                    /* ;an000; */
                         }                                                                                                        /* ;an000; */
                                                                                                                                  /* ;an000; */
-                FP_SEG(ThisArenaPtr) += ThisArenaPtr -> Paragraphs + 1;                                                          /* ;an000; */
+                       ThisArenaPtr = MK_FP(
+                                FP_SEG(ThisArenaPtr) + ThisArenaPtr -> Paragraphs + 1,
+                                FP_OFF(ThisArenaPtr));
                                                                                                                                  /* ;an000; */
                 }                                                                                                                /* ;an000; */
         Out_Var1 = AddressOf((char far *)ThisArenaPtr);                                                                          /* ;an000; */
@@ -627,9 +620,9 @@ void    DisplayBaseDetail()                                                     
                                                                                                                                 /* ;an000; */
 /*컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�*/                                                  /* ;an000; */
                                                                                                                                  /* ;an000; */
-void     DisplayDeviceDriver(ThisDeviceDriver,DeviceDriverType)                                                                  /* ;an000; */
-struct   DEVICEHEADER far *ThisDeviceDriver;                                                                                     /* ;an000; */
-int      DeviceDriverType;                                                                                                       /* ;an000; */
+void     DisplayDeviceDriver(
+struct   DEVICEHEADER far *ThisDeviceDriver,                                                                                     /* ;an000; */
+int      DeviceDriverType)                                                                                                       /* ;an000; */
 {                                                                                                                                /* ;an000; */
         char     LocalDeviceName[16];                                                                                            /* ;an000; */
         int      i;                                                                                                              /* ;an000; */
@@ -672,7 +665,7 @@ int      DeviceDriverType;                                                      
                                                                                                                                 /* ;an000; */
 /*컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�*/                                                  /* ;an000; */
                                                                                                                                  /* ;an000; */
-void DisplayBaseSummary()                                                                                                        /* ;an000; */
+void DisplayBaseSummary(void)                                                                                                    /* ;an000; */
         {                                                                                                                        /* ;an000; */
                                                                                                                                  /* ;an000; */
         struct  PSP_STRUC                                                                                                        /* ;an000; */
@@ -695,8 +688,7 @@ void DisplayBaseSummary()                                                       
         InRegs.h.ah = GET_PSP;                  /* get PSP function call */                                                      /* ;an000; */
         intdos(&InRegs,&OutRegs);                                                                                                /* ;an000; */
                                                                                                                                  /* ;an000; */
-        FP_SEG(PSPptr) = OutRegs.x.bx;          /* PSP segment */                                                                /* ;an000; */
-        FP_OFF(PSPptr) = 0;                     /* offset 0 */                                                                   /* ;an000; */
+        PSPptr = MK_FP(OutRegs.x.bx, 0);        /* PSP segment */                                                                /* ;an000; */
 
 /* Get total memory in system */                                                                                                 /* ;an000; */
         int86(MEMORY_DET,&InRegs,&OutRegs);                                                                                      /* ;an000; */
@@ -709,8 +701,7 @@ void DisplayBaseSummary()                                                       
         int86x(0x15, &InRegs, &OutRegs, &SegRegs);                                                                               /* ;an000; */
         if (OutRegs.x.cflag == 0)                                                                                                /* ;an000; */
               {                                                                                                                  /* ;an000; */
-                FP_SEG(CarvedPtr) = SegRegs.es;                                                                                  /* ;an000; */
-                FP_OFF(CarvedPtr) = 0;                                                                                           /* ;an000; */
+                CarvedPtr = MK_FP(SegRegs.es, 0);
                 total_mem = total_mem + ( (unsigned long int) (*CarvedPtr) * 1024l) ;   /* ;an002; dms;adjust total for */
                 }                                                                       /*             RAM carve value  */
                                                                                                                                  /* ;an000; */
@@ -732,7 +723,7 @@ void DisplayBaseSummary()                                                       
                                                                                                                                 /* ;an000; */
 /*컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�*/                                                  /* ;an000; */
                                                                                                                                  /* ;an000; */
-void DisplayEMSDetail()                                                                                                          /* ;an000; */
+void DisplayEMSDetail(void)                                                                                                      /* ;an000; */
   {                                                                                                                              /* ;an000; */
                                                                                                                                  /* ;an000; */
 #define EMSGetHandleName 0x5300         /* get handle name function */                                                           /* ;an000; */
@@ -797,7 +788,7 @@ void DisplayEMSDetail()                                                         
                                                                                                                                 /* ;an000; */
 /*컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�*/                                                  /* ;an000; */
                                                                                                                                  /* ;an000; */
-void DisplayExtendedSummary()                                                                                                    /* ;an000; */
+void DisplayExtendedSummary(void)                                                                                                /* ;an000; */
   {                                                                                                                              /* ;an000; */
                                                                                                                                  /* ;an000; */
   unsigned long int       EXTMemoryTot;                                                                                          /* ;an000; */
@@ -805,8 +796,7 @@ void DisplayExtendedSummary()                                                   
   InRegs.h.ah = (unsigned char) 0x52;                                           /* Get SysVar Pointer   ;an001; dms;*/
   intdosx(&InRegs,&OutRegs,&SegRegs);                                           /* Invoke interrupt     ;an001; dms;*/
                                                                                                                                                          /* ;an000; */
-  FP_SEG(SysVarsPtr) = SegRegs.es;                                              /* put pointer in var   ;an001; dms;*/
-  FP_OFF(SysVarsPtr) = OutRegs.x.bx;                                            /*                      ;an001; dms;*/
+  SysVarsPtr = MK_FP(SegRegs.es, OutRegs.x.bx);                                 /* put pointer in var   ;an001; dms;*/
   if ((SysVarsPtr) -> ExtendedMemory != 0)                                      /* extended memory?     ;an001; dms;*/
   {                                                                             /* yes                  ;an001; dms;*/
       EXTMemoryTot = (long) (SysVarsPtr) -> ExtendedMemory;                     /* get total EM size    ;an001; dms;*/
@@ -836,7 +826,7 @@ void DisplayExtendedSummary()                                                   
                                                                                                                                 /* ;an000; */
 /*컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�*/                                                  /* ;an000; */
                                                                                                                                  /* ;an000; */
-void DisplayEMSSummary()                                                                                                         /* ;an000; */
+void DisplayEMSSummary(void)                                                                                                     /* ;an000; */
   {                                                                                                                              /* ;an000; */
                                                                                                                                  /* ;an000; */
   unsigned long int       EMSFreeMemoryTot;                                                                                      /* ;an000; */
@@ -864,12 +854,11 @@ void DisplayEMSSummary()                                                        
 /*컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�*/                                                  /* ;an000; */
                                                                                                                                  /* ;an000; */
                                                                                                                                  /* ;an000; */
-char EMSInstalled()                                                                                                              /* ;an000; */
+char EMSInstalled(void)                                                                                                          /* ;an000; */
   {                                                                                                                              /* ;an000; */
                                                                                                                                  /* ;an000; */
   unsigned int  EMSStatus;                                                                                                       /* ;an000; */
   unsigned int  EMSVersion;                                                                                                      /* ;an000; */
-  char          ReturnFlag;                                                                                                      /* ;an000; */
                                                                                                                                  /* ;an000; */
   if (EMSInstalledFlag == 2)                                                                                                     /* ;an000; */
     {                                                                                                                            /* ;an000; */
@@ -910,14 +899,11 @@ char EMSInstalled()                                                             
 /*컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�*/                                                  /* ;an000; */
                                                                                                                                  /* ;an000; */
                                                                                                                                  /* ;an000; */
-char *OwnerOf(ArenaPtr)                                                                                                          /* ;an000; */
-struct ARENA far *ArenaPtr;                                                                                                      /* ;an000; */
+char *OwnerOf(struct ARENA far *ArenaPtr)                                                                                        /* ;an000; */
 {                                                                                                                                /* ;an000; */
                                                                                                                                  /* ;an000; */
         char     far *StringPtr;                                                                                                 /* ;an000; */
-        unsigned far *WordPtr;                                                                                                   /* ;an000; */
         char         *o;                                                                                                         /* ;an000; */
-        unsigned far *EnvironmentSegmentPtr;                                                                                     /* ;an000; */
         unsigned     PspSegment;                                                                                                 /* ;an000; */
         int          i;                                                                                                          /* ;an000; */
                                                                                                                                  /* ;an000; */
@@ -931,13 +917,13 @@ struct ARENA far *ArenaPtr;                                                     
         if (PspSegment == 0) sprintf(o,Ibmdos);                                                                                  /* ;an000; */
          else if (PspSegment == 8) sprintf(o,Ibmbio);                                                                            /* ;an000; */
           else {                                                                                                                 /* ;an000; */
-                FP_SEG(ArenaPtr) = PspSegment-1;        /* -1 'cause Arena is 16 bytes before PSP */                             /* ;an000; */
+                ArenaPtr = MK_FP(PspSegment-1, 0);      /* -1 'cause Arena is 16 bytes before PSP */                             /* ;an000; */
                 StringPtr = (char far *) &(ArenaPtr -> OwnerName[0]);                                                            /* ;an000; */
                 for (i = 0; i < 8; i++) *o++ = *StringPtr++;                                                                     /* ;an000; */
                 *o = (char) '\0';                                                                                                /* ;an000; */
                 }                                                                                                                /* ;an000; */
                                                                                                                                  /* ;an000; */
-        if (UseArgvZero) GetFromArgvZero(PspSegment,EnvironmentSegmentPtr);                                                      /* ;an000; */
+        if (UseArgvZero) GetFromArgvZero(PspSegment);                                                                            /* ;an000; */
                                                                                                                                  /* ;an000; */
         return(&OwnerName[0]);                                                                                                   /* ;an000; */
                                                                                                                                  /* ;an000; */
@@ -946,14 +932,13 @@ struct ARENA far *ArenaPtr;                                                     
                                                                                                                                 /* ;an000; */
 /*컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�*/                                                  /* ;an000; */
                                                                                                                                  /* ;an000; */
-void         GetFromArgvZero(PspSegment,EnvironmentSegmentPtr)                                                                   /* ;an000; */
-unsigned     PspSegment;                                                                                                         /* ;an000; */
-unsigned far *EnvironmentSegmentPtr;                                                                                             /* ;an000; */
+void         GetFromArgvZero(unsigned PspSegment)                                                                                /* ;an000; */
 {                                                                                                                                /* ;an000; */
                                                                                                                                  /* ;an000; */
         char    far *StringPtr;                                                                                                  /* ;an000; */
         char    *OutputPtr;                                                                                                      /* ;an000; */
         unsigned far *WordPtr;                                                                                                   /* ;an000; */
+        unsigned far *EnvironmentSegmentPtr;                                                                                     /* ;an000; */
                                                                                                                                  /* ;an000; */
         OutputPtr = &OwnerName[0];                                                                                               /* ;an000; */
                                                                                                                                  /* ;an000; */
@@ -964,12 +949,10 @@ unsigned far *EnvironmentSegmentPtr;                                            
                         if (*OutputPtr == NUL) sprintf(OutputPtr,Ibmdos);                                                        /* ;an000; */
                         }                                                                                                        /* ;an000; */
                  else {                                                                                                          /* ;an000; */
-                        FP_SEG(EnvironmentSegmentPtr) = PspSegment;                                                              /* ;an000; */
-                        FP_OFF(EnvironmentSegmentPtr) = 44;                                                                      /* ;an000; */
+                        EnvironmentSegmentPtr = MK_FP(PspSegment, 44);
                                                                                                                                  /* ;an000; */
 /*                         FP_SEG(StringPtr) = *EnvironmentSegmentPtr;  */                                                          /* ;an000; */
-                        FP_SEG(StringPtr) = FP_SEG(EnvironmentSegmentPtr);                                                              /* ;an000; */
-                        FP_OFF(StringPtr) = 0;                                                                                   /* ;an000; */
+                        StringPtr = MK_FP(FP_SEG(EnvironmentSegmentPtr), 0);
                                                                                                                                  /* ;an000; */
                         while ( (*StringPtr != NUL) || (*(StringPtr+1) != NUL) ) StringPtr++;                                    /* ;an000; */
                                                                                                                                  /* ;an000; */
@@ -1007,8 +990,7 @@ unsigned far *EnvironmentSegmentPtr;                                            
 /*컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�*/                                                  /* ;an000; */
                                                                                                                                  /* ;an000; */
 
-char *TypeOf(Header)                                                                                                             /* ;an000; */
-struct ARENA far *Header;                                                                                                        /* ;an000; */
+char *TypeOf(struct ARENA far *Header)                                                                                           /* ;an000; */
 {                                                                                                                                /* ;an000; */
                                                                                                                                  /* ;an000; */
         char         *t;                                                                                                         /* ;an000; */
@@ -1031,8 +1013,7 @@ struct ARENA far *Header;                                                       
                 if (Message_Number == 0xff) Message_Number = BlankMsg;
                 }                                                                            /* ;an000; */
         else {                                                                              /* ;an000; */
-                FP_SEG(EnvironmentSegmentPtr) = PspSegment;                                  /* ;an000; */
-                FP_OFF(EnvironmentSegmentPtr) = 44;                                          /* ;an000; */
+                EnvironmentSegmentPtr = MK_FP(PspSegment, 44);
                                                                                                                                  /* ;an000; */
                                                                                                                                  /* ;an000; */
                 if (PspSegment == FP_SEG(Header)+1)
@@ -1048,8 +1029,7 @@ struct ARENA far *Header;                                                       
         InRegs.h.dh = Utility_Msg_Class;                             /* ;an000; */
         sysgetmsg(&InRegs,&SegRegs,&OutRegs);                        /* ;an000; */
 
-        FP_OFF(Message_Buf)    = OutRegs.x.si;                                                      /* ;an000; */
-        FP_SEG(Message_Buf)    = SegRegs.ds;                                                        /* ;an000; */
+        Message_Buf = MK_FP(SegRegs.ds, OutRegs.x.si);
 
         i = 0;
         while ( *Message_Buf != (char) '\x0' )
@@ -1064,8 +1044,7 @@ struct ARENA far *Header;                                                       
                                                                                                                                  /* ;an000; */
 /*컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�*/                                                  /* ;an000; */
                                                                                                                                  /* ;an000; */
-unsigned long AddressOf(Pointer)                                                                                                 /* ;an000; */
-char far *Pointer;                                                                                                               /* ;an000; */
+unsigned long AddressOf(char far *Pointer)                                                                                       /* ;an000; */
 {                                                                                                                                /* ;an000; */
                                                                                                                                  /* ;an000; */
         unsigned long SegmentAddress,OffsetAddress;                                                                              /* ;an000; */
@@ -1093,11 +1072,11 @@ char far *Pointer;                                                              
 /*                                                                      */                                                       /* ;an000; */
 /************************************************************************/                                                       /* ;an000; */
                                                                                                                                  /* ;an000; */
-void Sub0_Message(Msg_Num,Handle,Message_Type)                                       /* print messages with no subs          */  /* ;an000; */
+void Sub0_Message(                                                                   /* print messages with no subs          */  /* ;an000; */
                                                                                                                                  /* ;an000; */
-int             Msg_Num;                                                                                                         /* ;an000; */
-int             Handle;                                                                                                          /* ;an000; */
-unsigned char   Message_Type;                                                                                                    /* ;an000; */
+        int             Msg_Num,                                                                                                 /* ;an000; */
+        int             Handle,                                                                                                  /* ;an000; */
+        unsigned char   Message_Type)                                                                                            /* ;an000; */
                                                                                 /*     extended, parse, or utility      */       /* ;an000; */
         {                                                                                                                        /* ;an000; */
         InRegs.x.ax = Msg_Num;                                                  /* put message number in AX             */       /* ;an000; */
@@ -1125,13 +1104,13 @@ unsigned char   Message_Type;                                                   
 /*                                                                      */                                                       /* ;an000; */
 /************************************************************************/                                                       /* ;an000; */
                                                                                                                                  /* ;an000; */
-void Sub1_Message(Msg_Num,Handle,Message_Type,Replace_Parm)                                                                      /* ;an000; */
+void Sub1_Message(                                                                                                               /* ;an000; */
                                                                                                                                  /* ;an000; */
-int             Msg_Num;                                                                                                         /* ;an000; */
-int             Handle;                                                                                                          /* ;an000; */
-unsigned char   Message_Type;                                                                                                    /* ;an000; */
+        int             Msg_Num,                                                                                                 /* ;an000; */
+        int             Handle,                                                                                                  /* ;an000; */
+        unsigned char   Message_Type,                                                                                            /* ;an000; */
                                                                                 /*     extended, parse, or utility      */       /* ;an000; */
-unsigned long int    *Replace_Parm;                                             /* pointer to message to print          */       /* ;an000; */
+        unsigned long int    *Replace_Parm)                                     /* pointer to message to print          */       /* ;an000; */
                                                                                                                                  /* ;an000; */
 {                                                                                                                                /* ;an000; */
                                                                                                                                  /* ;an000; */
@@ -1175,16 +1154,14 @@ unsigned long int    *Replace_Parm;                                             
 /*                                                                      */                                                       /* ;an000; */
 /************************************************************************/                                                       /* ;an000; */
                                                                                                                                  /* ;an000; */
-void Sub2_Message(Msg_Num,Handle,Message_Type,                                                                                   /* ;an000; */
-             Replace_Parm1,                                                                                                      /* ;an000; */
-             Replace_Message1)                                                                                                   /* ;an000; */
+void Sub2_Message(                                                                                                               /* ;an000; */
                                                                                                                                  /* ;an000; */
-int             Msg_Num;                                                                                                         /* ;an000; */
-int             Handle;                                                                                                          /* ;an000; */
-unsigned char   Message_Type;                                                                                                    /* ;an000; */
-int             Replace_Message1;                                                                                                /* ;an000; */
+        int             Msg_Num,                                                                                                 /* ;an000; */
+        int             Handle,                                                                                                  /* ;an000; */
+        unsigned char   Message_Type,                                                                                            /* ;an000; */
                                                                                 /*     extended, parse, or utility      */       /* ;an000; */
-char    *Replace_Parm1;                                                         /* pointer to message to print          */       /* ;an000; */
+        char    *Replace_Parm1,                                                 /* pointer to message to print          */       /* ;an000; */
+        int             Replace_Message1)                                                                                        /* ;an000; */
 {                                                                                                                                /* ;an000; */
                                                                                                                                  /* ;an000; */
                                                                                                                                  /* ;an000; */
@@ -1206,8 +1183,7 @@ char    *Replace_Parm1;                                                         
                                 InRegs.h.dh = Message_Type;                                                                      /* ;an000; */
                                 sysgetmsg(&InRegs,&SegRegs,&OutRegs);                                                            /* ;an000; */
                                                                                                                                  /* ;an000; */
-                                FP_OFF(sublist[2].value)    = OutRegs.x.si;                                                      /* ;an000; */
-                                FP_SEG(sublist[2].value)    = SegRegs.ds;                                                        /* ;an000; */
+                                sublist[2].value     = MK_FP(SegRegs.ds, OutRegs.x.si);
                                 sublist[2].size      = Sublist_Length;                                                           /* ;an000; */
                                 sublist[2].reserved  = Reserved;                                                                 /* ;an000; */
                                 sublist[2].id        = 2;                                                                        /* ;an000; */
@@ -1245,17 +1221,14 @@ char    *Replace_Parm1;                                                         
 /*                                                                      */                                                       /* ;an000; */
 /************************************************************************/                                                       /* ;an000; */
                                                                                                                                  /* ;an000; */
-void Sub3_Message(Msg_Num,Handle,Message_Type,                                                                                   /* ;an000; */
-             Replace_Parm1,                                                                                                      /* ;an000; */
-             Replace_Parm2,                                                                                                      /* ;an000; */
-             Replace_Message1)                                                                                                   /* ;an000; */
+void Sub3_Message(                                                                                                               /* ;an000; */
                                                                                                                                  /* ;an000; */
-int               Msg_Num;                                                                                                       /* ;an000; */
-int               Handle;                                                                                                        /* ;an000; */
-unsigned char     Message_Type;                                                                                                  /* ;an000; */
-char              *Replace_Parm1;                                                                                                /* ;an000; */
-unsigned long int *Replace_Parm2;                                                                                                /* ;an000; */
-int               Replace_Message1;                                                                                              /* ;an000; */
+        int               Msg_Num,                                                                                               /* ;an000; */
+        int               Handle,                                                                                                /* ;an000; */
+        unsigned char     Message_Type,                                                                                          /* ;an000; */
+        char              *Replace_Parm1,                                                                                        /* ;an000; */
+        unsigned long int *Replace_Parm2,                                                                                        /* ;an000; */
+        int               Replace_Message1)                                                                                      /* ;an000; */
                                                                                 /*     extended, parse, or utility      */       /* ;an000; */
 {                                                                                                                                /* ;an000; */
                                                                                                                                  /* ;an000; */
@@ -1287,8 +1260,7 @@ int               Replace_Message1;                                             
                                 InRegs.h.dh = Message_Type;                                                                      /* ;an000; */
                                 sysgetmsg(&InRegs,&SegRegs,&OutRegs);                                                            /* ;an000; */
                                                                                                                                  /* ;an000; */
-                                FP_OFF(sublist[3].value)    = OutRegs.x.si;                                                      /* ;an000; */
-                                FP_SEG(sublist[3].value)    = SegRegs.ds;                                                        /* ;an000; */
+                                sublist[3].value     = MK_FP(SegRegs.ds, OutRegs.x.si);
                                 sublist[3].size      = Sublist_Length;                                                           /* ;an000; */
                                 sublist[3].reserved  = Reserved;                                                                 /* ;an000; */
                                 sublist[3].id        = 3;                                                                        /* ;an000; */
@@ -1321,8 +1293,7 @@ int               Replace_Message1;                                             
                                 InRegs.h.dh = Message_Type;                                                                      /* ;an000; */
                                 sysgetmsg(&InRegs,&SegRegs,&OutRegs);                                                            /* ;an000; */
                                                                                                                                  /* ;an000; */
-                                FP_OFF(sublist[3].value)    = OutRegs.x.si;                                                      /* ;an000; */
-                                FP_SEG(sublist[3].value)    = SegRegs.ds;                                                        /* ;an000; */
+                                sublist[3].value     = MK_FP(SegRegs.ds, OutRegs.x.si);
                                 sublist[3].size      = Sublist_Length;                                                           /* ;an000; */
                                 sublist[3].reserved  = Reserved;                                                                 /* ;an000; */
                                 sublist[3].id        = 3;                                                                        /* ;an000; */
@@ -1363,19 +1334,15 @@ int               Replace_Message1;                                             
 /*                                                                      */                                                       /* ;an000; */
 /************************************************************************/                                                       /* ;an000; */
                                                                                                                                  /* ;an000; */
-void Sub4_Message(Msg_Num,Handle,Message_Type,                                                                                   /* ;an000; */
-             Replace_Value1,                                                                                                     /* ;an000; */
-             Replace_Message1,                                                                                                   /* ;an000; */
-             Replace_Value2,                                                                                                     /* ;an000; */
-             Replace_Message2)                                                                                                   /* ;an000; */
+void Sub4_Message(                                                                                                               /* ;an000; */
                                                                                                                                  /* ;an000; */
-int                     Msg_Num;                                                                                                 /* ;an000; */
-int                     Handle;                                                                                                  /* ;an000; */
-unsigned char           Message_Type;                                                                                            /* ;an000; */
-unsigned long int       *Replace_Value1;                                                                                         /* ;an000; */
-int                     Replace_Message1;                                                                                        /* ;an000; */
-unsigned long int       *Replace_Value2;                                                                                         /* ;an000; */
-int                     Replace_Message2;                                                                                        /* ;an000; */
+        int                     Msg_Num,                                                                                         /* ;an000; */
+        int                     Handle,                                                                                          /* ;an000; */
+        unsigned char           Message_Type,                                                                                    /* ;an000; */
+        unsigned long int       *Replace_Value1,                                                                                 /* ;an000; */
+        int                     Replace_Message1,                                                                                /* ;an000; */
+        unsigned long int       *Replace_Value2,                                                                                 /* ;an000; */
+        int                     Replace_Message2)                                                                                /* ;an000; */
                                                                                 /*     extended, parse, or utility      */       /* ;an000; */
 {                                                                                                                                /* ;an000; */
                                                                                                                                  /* ;an000; */
@@ -1398,8 +1365,7 @@ int                     Replace_Message2;                                       
                                 InRegs.h.dh        = Message_Type;                                                               /* ;an000; */
                                 sysgetmsg(&InRegs,&SegRegs,&OutRegs);                                                            /* ;an000; */
                                                                                                                                  /* ;an000; */
-                                FP_OFF(sublist[2].value)    = OutRegs.x.si;                                                      /* ;an000; */
-                                FP_SEG(sublist[2].value)    = SegRegs.ds;                                                        /* ;an000; */
+                                sublist[2].value     = MK_FP(SegRegs.ds, OutRegs.x.si);
                                 sublist[2].size      = Sublist_Length;                                                           /* ;an000; */
                                 sublist[2].reserved  = Reserved;                                                                 /* ;an000; */
                                 sublist[2].id        = 2;                                                                        /* ;an000; */
@@ -1421,8 +1387,7 @@ int                     Replace_Message2;                                       
                                 InRegs.h.dh = Message_Type;                                                                      /* ;an000; */
                                 sysgetmsg(&InRegs,&SegRegs,&OutRegs);                                                            /* ;an000; */
                                                                                                                                  /* ;an000; */
-                                FP_OFF(sublist[4].value)    = OutRegs.x.si;                                                      /* ;an000; */
-                                FP_SEG(sublist[4].value)    = SegRegs.ds;                                                        /* ;an000; */
+                                sublist[4].value     = MK_FP(SegRegs.ds, OutRegs.x.si);
                                 sublist[4].size      = Sublist_Length;                                                           /* ;an000; */
                                 sublist[4].reserved  = Reserved;                                                                 /* ;an000; */
                                 sublist[4].id        = 4;                                                                        /* ;an000; */
@@ -1463,19 +1428,15 @@ int                     Replace_Message2;                                       
 /*                                                                      */                                                       /* ;an000; */
 /************************************************************************/                                                       /* ;an000; */
                                                                                                                                  /* ;an000; */
-void Sub4a_Message(Msg_Num,Handle,Message_Type,                                                                                  /* ;an000; */
-             Replace_Value1,                                                                                                     /* ;an000; */
-             Replace_Message1,                                                                                                   /* ;an000; */
-             Replace_Value2,                                                                                                     /* ;an000; */
-             Replace_Message2)                                                                                                   /* ;an000; */
+void Sub4a_Message(                                                                                                              /* ;an000; */
                                                                                                                                  /* ;an000; */
-int                     Msg_Num;                                                                                                 /* ;an000; */
-int                     Handle;                                                                                                  /* ;an000; */
-unsigned char           Message_Type;                                                                                            /* ;an000; */
-unsigned long int       *Replace_Value1;                                                                                         /* ;an000; */
-char                    *Replace_Message1;                                                                                       /* ;an000; */
-unsigned long int       *Replace_Value2;                                                                                         /* ;an000; */
-char                    *Replace_Message2;                                                                                       /* ;an000; */
+        int                     Msg_Num,                                                                                         /* ;an000; */
+        int                     Handle,                                                                                          /* ;an000; */
+        unsigned char           Message_Type,                                                                                    /* ;an000; */
+        unsigned long int       *Replace_Value1,                                                                                 /* ;an000; */
+        char                    *Replace_Message1,                                                                               /* ;an000; */
+        unsigned long int       *Replace_Value2,                                                                                 /* ;an000; */
+        char                    *Replace_Message2)                                                                               /* ;an000; */
                                                                                                                                  /* ;an000; */
 {                                                                                                                                /* ;an000; */
                                                                                                                                  /* ;an000; */
@@ -1543,17 +1504,14 @@ char                    *Replace_Message2;                                      
 /*                                                                      */                                                       /* ;an000; */
 /************************************************************************/                                                       /* ;an000; */
                                                                                                                                  /* ;an000; */
-void EMSPrint(Msg_Num,Handle,Message_Type,                                                                                       /* ;an000; */
-             Replace_Value1,                                                                                                     /* ;an000; */
-             Replace_Message1,                                                                                                   /* ;an000; */
-             Replace_Value2)                                                                                                     /* ;an000; */
+void EMSPrint(                                                                                                                   /* ;an000; */
                                                                                                                                  /* ;an000; */
-int                     Msg_Num;                                                                                                 /* ;an000; */
-int                     Handle;                                                                                                  /* ;an000; */
-unsigned char           Message_Type;                                                                                            /* ;an000; */
-int                     *Replace_Value1;                                                                                         /* ;an000; */
-char                    *Replace_Message1;                                                                                       /* ;an000; */
-unsigned long int       *Replace_Value2;                                                                                         /* ;an000; */
+        int                     Msg_Num,                                                                                         /* ;an000; */
+        int                     Handle,                                                                                          /* ;an000; */
+        unsigned char           Message_Type,                                                                                    /* ;an000; */
+        int                     *Replace_Value1,                                                                                 /* ;an000; */
+        char                    *Replace_Message1,                                                                               /* ;an000; */
+        unsigned long int       *Replace_Value2)                                                                                 /* ;an000; */
                                                                                 /*     extended, parse, or utility      */       /* ;an000; */
 {                                                                                                                                /* ;an000; */
                                                                                                                                  /* ;an000; */
@@ -1612,7 +1570,7 @@ unsigned long int       *Replace_Value2;                                        
 |       properly initialized parser control blocks                      |
 |                                                                       |
 +----------------------------------------------------------------------*/
-void parse_init()                                                                                                                /* ;an000; */
+void parse_init(void)                                                                                                            /* ;an000; */
   {                                                                                                                              /* ;an000; */
   p_p.p_parmsx_address    = &p_px;      /* address of extended parm list */                                                      /* ;an000; */
   p_p.p_num_extra         = 0;                                                                                                   /* ;an000; */
@@ -1669,11 +1627,11 @@ void parse_init()                                                               
 /*                                                                      */
 /************************************************************************/
 
-void Parse_Message(Msg_Num,Handle,Message_Type)                                 /*;an003; dms;                          */
+void Parse_Message(                                                             /*;an003; dms;                          */
                                                                                 /*;an003; dms;                          */
-int             Msg_Num;                                                        /*;an003; dms;                          */
-int             Handle;                                                         /*;an003; dms;                          */
-unsigned char   Message_Type;                                                   /*;an003; dms;                          */
+        int             Msg_Num,                                                /*;an003; dms;                          */
+        int             Handle,                                                 /*;an003; dms;                          */
+        unsigned char   Message_Type)                                           /*;an003; dms;                          */
                                                                                 /*;an003; dms;                          */
 {                                                                               /*;an003; dms;                          */
 char    far *Cmd_Ptr;                                                           /*;an003; dms;                          */
@@ -1681,12 +1639,10 @@ char    far *Cmd_Ptr;                                                           
                                                                                 /*;an003; dms;                          */
         {                                                                       /*;an003; dms;                          */
         segread(&SegRegs);                                                      /*;an003; dms;                          */
-        FP_SEG(Cmd_Ptr) = SegRegs.ds;                                           /*;an003; dms;                          */
-        FP_OFF(Cmd_Ptr) = OutRegs.x.si;                                         /*;an003; dms;                          */
+        Cmd_Ptr = MK_FP(SegRegs.ds, OutRegs.x.si);
         *Cmd_Ptr        = '\0';                                                 /*;an003; dms;                          */
                                                                                 /*;an003; dms;                          */
-        FP_SEG(sublist[1].value) = SegRegs.ds;                                  /*;an003; dms;                          */
-        FP_OFF(sublist[1].value) = Parse_Ptr;                                   /*;an003; dms;                          */
+        sublist[1].value     = MK_FP(SegRegs.ds, Parse_Ptr);
         sublist[1].size      = Sublist_Length;                                  /*;an003; dms;                          */
         sublist[1].reserved  = Reserved;                                        /*;an003; dms;                          */
         sublist[1].id        = 0;                                               /*;an003; dms;                          */
@@ -1705,5 +1661,3 @@ char    far *Cmd_Ptr;                                                           
         }                                                                       /*;an003; dms;                          */
         return;                                                                 /*;an003; dms;                          */
 }                                                                               /*;an003; dms;                          */
-
-
