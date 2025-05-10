@@ -23,6 +23,9 @@
  *
  ******************************************************************************/
 
+#ifndef EMM_H
+#define EMM_H
+
 #define OK			0
 #define EMM_SW_MALFUNCTION	0x80
 #define EMM_HW_MALFUNCTION	0x81
@@ -221,3 +224,86 @@ struct	PageBankMap {
 	unsigned short	pbm_window;
 	unsigned char	pbm_map[64];
 	};
+
+/* emm40.obj */
+extern void __cdecl ReallocatePages(void);
+extern void __cdecl GetHandleDirectory(void);
+
+/* emmfunct.c */
+extern unsigned short Avail_Pages(void);
+extern void free_pages(struct handle_ptr *hp);
+extern unsigned get_pages(unsigned num, unsigned pto);
+extern void __cdecl GetUnallocatedPageCount(void);
+
+/* emmdata.obj */
+extern unsigned short	total_pages;		/* number being managed */
+/*
+ * Current status of `HW'. The way this is handled is that
+ * when returning status to caller, normal status is reported 
+ * via EMMstatus being moved into AX. Persistant errors
+ * (such as internal datastructure inconsistancies, etc) are
+ * placed in `EMMstatus' as HW failures. All other errors are 
+ * transient in nature (out of memory, handles, ...) and are 
+ * thus reported by directly setting AX. The EMMstatus variable
+ * is provided for expansion and is not currently being
+ * set to any other value.
+ */
+extern unsigned short EMMstatus;
+extern unsigned short emm40_info[5];		/* hardware information */
+extern struct mappable_page mappable_pages[];	/* mappable segments
+					           and corresponding pages */
+extern short	mappable_page_count;		/* number of entries in above */
+extern unsigned short page_frame_pages;
+extern unsigned char EMM_MPindex[];
+/*
+ * save_map
+ *	This is an array of structures that save the 
+ *	current mapping state. Size is dynamically determined.
+ */
+extern struct save_map save_map[];
+/*
+ * handle_table
+ *	This is an array of handle pointers.
+ *	page_index of zero means free
+ */
+extern struct handle_ptr handle_table[];
+extern Handle_Name Handle_Name_Table[]; 	/* Handle names */
+extern unsigned short	handle_table_size;	/* number of entries */
+extern unsigned short	handle_count;		/* active handle count */
+extern unsigned	short emmpt_start;		/* next free entry in table */
+extern	unsigned short	free_top;
+extern unsigned	short	free_count;		/* current free count */
+/*
+ * EMM Page table
+ *	this array contains lists of indexes into the 386
+ *	Page Table.  Each list is pointed to by a handle
+ *	table entry and is sequential/contiguous.  This is
+ *	so that maphandlepage doesn't have to scan a list
+ *	for the specified entry.
+ */
+extern unsigned	short *emm_page;	/* _emm_page array */
+/*
+ * EMM free table
+ *	this array is a stack of available page table entries. 
+ *	each entry is an index into pft386[].
+ */
+extern unsigned short *emm_free;		/* ptr to _emm_free array */
+extern unsigned short PF_Base;
+extern long	OSEnabled;			/* OS/E function flag */
+extern long	OSKey;				/* Key for OS/E function */
+extern char cntxt_bytes;		/* bytes in context */
+
+/* emmp.obj */
+extern long __cdecl Get_Key_Val(void);
+
+/* emmsup.obj */
+extern	void far * __cdecl source_addr(void); /* get DS:SI far ptr */
+extern	void far * __cdecl dest_addr(void); /* get ES:DI far ptr */
+extern	unsigned __cdecl copyout(void far *destptr, const void *srcptr, unsigned count);
+extern  void __cdecl copyin(void *destptr, const void far *srcptr, unsigned count);
+extern  void __cdecl wcopy(const void *srcptr, void *destptr, unsigned count); /* copy forward */
+extern	unsigned __cdecl wcopyb(const void *srcptr, void *destprr, unsigned count); /* copy backward */
+extern	struct handle_ptr * __cdecl valid_handle(unsigned handle); /* validate handle */
+extern  int __cdecl Names_Match(const char *name1, const char *name2);
+
+#endif /* EMM_H */

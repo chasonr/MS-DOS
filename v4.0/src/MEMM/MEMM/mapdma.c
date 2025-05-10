@@ -39,7 +39,7 @@
  */
 
 #define PT(a)           (GetPteFromIndex((a)))
-#define INDEX(a)        ((((long)a)>>12) & 0x3FF)
+#define INDEX(a)        ((unsigned)(((long)a)>>12) & 0x3FF)
 #define OFFSET(a)       (((long)a) & 0xFFF)
 #define LIN2PHY(l)      ((PT(INDEX(l)) & ~0xFFFL)+(long)OFFSET(l))
 #define DOSPHYPAGE(a)   (((a)>>14)-16)
@@ -50,23 +50,33 @@ struct mappable_page {
 };
 
 /* Xlates DosPhyPage into an index in mappable_pages[]. */
-extern char EMM_MPindex[];    /* index from 4000H to 10000H in steps of 16K */
+extern unsigned char EMM_MPindex[];    /* index from 4000H to 10000H in steps of 16K */
 extern struct mappable_page mappable_pages[];
+/*
+ * Page frame table
+ *	This array contains addresses of physical page frames
+ *	for 386 pages. A page is refered to by an index into
+ *	this array
+ */
 extern long *pft386;
 extern unsigned DMA_Pages[];
-extern DMA_PAGE_COUNT;                 /* size of DMA_Pages[] */
+extern int DMA_PAGE_COUNT;             /* size of DMA_Pages[] */
 extern unsigned physical_page_count;
 
 /* routines imported from elimtrap.asm */
-extern long GetPte();                  /* get a PT entry given index */
-extern SetPte();                       /* set a PT entry */
-extern unsigned GetCRSEntry();   /* get CurRegSet entry for given EmmPhyPage */
-extern long GetDMALinAdr();      /* Get Linear Adr for the DMA buffer */
-extern Exchange16K();                  /* exchange page contents */
-extern FatalError();
+extern long __cdecl GetPte(unsigned PTIndex);                /* get a PT entry given index */
+extern int __cdecl SetPte(unsigned PTIndex, long pte);       /* set a PT entry */
+extern unsigned __cdecl GetCRSEntry(unsigned EmmPhyPage);    /* get CurRegSet entry for given EmmPhyPage */
+extern long __cdecl GetDMALinAdr(long DMAPhyAdr);            /* Get Linear Adr for the DMA buffer */
+extern void __cdecl Exchange16K(long LinAdr1, long LinAdr2); /* exchange page contents */
+extern void __cdecl FatalError(const char *);
 
 /* forward declarations */
-long GetPteFromIndex();
+long GetPteFromIndex(unsigned index);
+void SwapAPage(long LinAdr, unsigned k);
+void UpdateUserPTE(long LinAdr, unsigned UserPFTIndex);
+void ExchangePTEs(long LinAdr1, long LinAdr2);
+int SetPteFromIndex(unsigned index, long pte);
 
 /* 
  * SwapDMAPages()
@@ -79,9 +89,7 @@ long GetPteFromIndex();
  * with the DMA buffer.
  */
 
-long SwapDMAPages(FromAdr, Len, bXfer)
-long FromAdr, Len;
-unsigned bXfer;
+long __cdecl SwapDMAPages(long FromAdr, long Len, unsigned bXfer)
 {
 unsigned Index, Offset, /* components of a PTE */
       n4KPages,         /* # of 4K Pages involved in the DMA transfer */
@@ -260,9 +268,7 @@ FromAdr64_128k-|        |       DMAPage[0]  -->|        |
  * Update the Emm Data Structures to reflect this remapping.
  * Update the Page Table too.
  */
-SwapAPage(LinAdr, k)
-long LinAdr;
-unsigned k;
+void SwapAPage(long LinAdr, unsigned k)
 {
 unsigned DosPhyPage, /* each page 16K in size, page at 256K is Page 0 */
          EmmPhyPage, /* Phy page numbering according to Emm */
@@ -322,7 +328,7 @@ int i, j;
             break;
       }
       if (j == MAX_PHYS_PAGES)
-         FatalError(); /* invalid Phy page # - doesn't exist in mappable_pages[] */
+         FatalError("Invalid physical page"); /* invalid Phy page # - doesn't exist in mappable_pages[] */
       else
          DMALinAdr = ((long )mappable_pages[j].page_seg) << 4;
       
@@ -344,9 +350,7 @@ int i, j;
 }
 
 /* Update PT entry for LinAdr to map to pft386[UserPFTIndex] */
-UpdateUserPTE(LinAdr, UserPFTIndex)
-long LinAdr;
-unsigned UserPFTIndex;
+void UpdateUserPTE(long LinAdr, unsigned UserPFTIndex)
 {
 unsigned index;
 long pte;
@@ -362,8 +366,7 @@ long pte;
 }
 
 /* exchange 4 ptes at LinAdr1 and LinAdr2 */
-ExchangePTEs(LinAdr1, LinAdr2)
-long LinAdr1, LinAdr2;
+void ExchangePTEs(long LinAdr1, long LinAdr2)
 {
 unsigned index1, index2;
 long tPte;
@@ -380,8 +383,7 @@ int i;
 }
 
 /* sanity check on the index, and then call GetPte */
-long GetPteFromIndex(index)
-unsigned index;
+long GetPteFromIndex(unsigned index)
 {
 unsigned i;
 long PhyAdr;
@@ -400,9 +402,7 @@ long PhyAdr;
 }
 
 /* sanity check on the index and then call SetPte */
-SetPteFromIndex(index, pte)
-unsigned index;
-long pte;
+int SetPteFromIndex(unsigned index, long pte)
 {
 unsigned i;
 long PhyAdr;
@@ -410,16 +410,12 @@ long PhyAdr;
    PhyAdr = ((long) index) << 12;
    
    if (PhyAdr < HEX256K || PhyAdr >= HEX1MB)
-      return;
+      return 0;
    
    i = EMM_MPindex[DOSPHYPAGE(PhyAdr)];
 
    if (i != -1)
       return SetPte(index, pte);
    else  
-      return;
+      return 0;
 }
-
-
-
-

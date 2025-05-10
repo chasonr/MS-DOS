@@ -32,87 +32,6 @@
 
 
 /******************************************************************************
-	EXTERNAL DATA STRUCTURES
- ******************************************************************************/ 
-/*
- * handle_table
- *	This is an array of handle pointers.
- *	page_index of zero means free
- */
-extern struct handle_ptr handle_table[];
-extern Handle_Name Handle_Name_Table[]; 	/* Handle names */
-extern unsigned short	handle_table_size;	/* number of entries */
-extern unsigned short	handle_count;		/* active handle count */
-
-/*
- * EMM Page table
- *	this array contains lists of indexes into the 386
- *	Page Table.  Each list is pointed to by a handle
- *	table entry and is sequential/contiguous.  This is
- *	so that maphandlepage doesn't have to scan a list
- *	for the specified entry.
- */
-extern unsigned	short *emm_page;	/* _emm_page array */
-extern int	free_count;		/* current free count */
-extern int	total_pages;		/* number being managed */
-extern unsigned	emmpt_start;		/* next free entry in table */
-
-/*
- * EMM free table
- *	this array is a stack of available page table entries. 
- *	each entry is an index into the pseudo page table
- */
-/*extern	unsigned free_stack_count;	/* number of entries */
-
-/*
- * Current status of `HW'. The way this is handled is that
- * when returning status to caller, normal status is reported 
- * via EMMstatus being moved into AX. Persistant errors
- * (such as internal datastructure inconsistancies, etc) are
- * placed in `EMMstatus' as HW failures. All other errors are 
- * transient in nature (out of memory, handles, ...) and are 
- * thus reported by directly setting AX. The EMMstatus variable
- * is provided for expansion and is not currently being
- * set to any other value.
- */
-extern unsigned short EMMstatus;
-
-/*
- * 4.0 EXTRAS
- */
-
-extern unsigned short emm40_info[5];		/* hardware information */
-extern struct mappable_page mappable_pages[];	/* mappable segments
-					           and corresponding pages */
-extern short	mappable_page_count;		/* number of entries in above */
-extern short	page_frame_pages;		/* pages in the page frame */
-extern short	physical_page_count;		/* number of physical pages */
-/*extern char	VM1_cntxt_pages;		/* pages in a VM1 context */
-/*extern char	VMn_cntxt_pages;		/* pages in a VM context */
-/*extern char	VM1_cntxt_bytes;		/* bytes in a VM1 context */
-/*extern char	VMn_cntxt_bytes;		/* bytes in a VM context */
-extern char cntxt_pages;		/* pages in context */
-extern char cntxt_bytes;		/* bytes in context */
-extern unsigned short PF_Base;
-extern unsigned short VM1_EMM_Pages;
-/*extern unsigned short VM1_EMM_Offset;*/
-extern long	page_frame_base[];
-extern char	EMM_MPindex[];
-extern long	OSEnabled;			/* OS/E function flag */
-extern long	OSKey;				/* Key for OS/E function */
-
-/******************************************************************************
-	EXTERNAL FUNCTIONS
- ******************************************************************************/ 
-extern	struct handle_ptr	*valid_handle();	/* validate handle */
-extern	unsigned far	*source_addr(); 		/* get DS:SI far ptr */
-extern	unsigned far	*dest_addr();			/* get ES:DI far ptr */
-extern	unsigned	wcopyb();
-extern	unsigned	copyout();
-extern	unsigned short	Avail_Pages();
-
-
-/******************************************************************************
 	ROUTINES
  ******************************************************************************/ 
 
@@ -128,7 +47,7 @@ extern	unsigned short	Avail_Pages();
  *
  * ISP 5/23/88 Updated for MEMM
  */
-ReallocatePages() 
+void __cdecl ReallocatePages(void)
 {
 #define	handle	((unsigned short)regp->hregs.x.rdx)
 
@@ -207,7 +126,7 @@ ReallocatePages()
  *
  * 05/10/88  ISP  No update needed
  */
-UndefinedFunction() 
+void UndefinedFunction(void)
 {
 	setAH(INVALID_FUNCTION);
 }
@@ -230,9 +149,9 @@ UndefinedFunction()
  *
  * ISP	5/23/88 Updated for MEMM.  u_ptr made into a far pointer.
  */
-GetMappablePAddrArray() 
+void __cdecl GetMappablePAddrArray(void)
 {
-	unsigned far *u_ptr;
+	struct mappable_page far *u_ptr;
 	int	n_pages;
 	int	i;
 	struct mappable_page *mp = mappable_pages;
@@ -243,8 +162,8 @@ GetMappablePAddrArray()
 		if ( n_pages > 0 ) {
 			u_ptr = dest_addr();		/* ES:DI */
 			for (i=0 ; i < 48 ; i++)
-				if (EMM_MPindex[i] != -1)
-					copyout(((struct mappable_page far *)u_ptr)++,
+				if (EMM_MPindex[i] != (char)-1)
+					copyout(u_ptr++,
 						mp + EMM_MPindex[i],
 						sizeof(struct mappable_page) );
 		}
@@ -275,10 +194,9 @@ GetMappablePAddrArray()
  *		
  * ISP	5/23/88 Updated for MEMM. Made u_ptr into far ptr.
  */
-GetInformation() 
+void __cdecl GetInformation(void)
 {
 	unsigned far *u_ptr;
-	unsigned pages;
 
 	if ( OSEnabled >= OS_DISABLED ) {
 		setAH(ACCESS_DENIED);		/* Denied by operating system */
@@ -316,7 +234,7 @@ GetInformation()
  *
  * 05/09/88 ISP No update needed
  */
-GetSetHandleAttribute()
+void __cdecl GetSetHandleAttribute(void)
 {
 #define	handle	((unsigned short)regp->hregs.x.rdx)
 
@@ -360,7 +278,7 @@ GetSetHandleAttribute()
  * ISP 5/23/88 Updated for MEMM. Name made into far *. Copyin routine used
  *	       to copy name in into handle name table.
  */
-GetSetHandleName()
+void __cdecl GetSetHandleName(void)
 {
 	register unsigned short handle = ((unsigned short)regp->hregs.x.rdx);
 	register char far *Name;
@@ -433,7 +351,7 @@ GetSetHandleName()
  * ISP 5/23/88 Updated for MEMM.  nameaddress and dir_entry made into far *
  *	       copyin routine used to copy name into local area for search.
  */
-GetHandleDirectory()
+void __cdecl GetHandleDirectory(void)
 {
 	char far			*NameAddress;
 	register struct handle_ptr	*hp;
@@ -511,7 +429,7 @@ GetHandleDirectory()
  * 05/09/88 ISP No update needed.
  *
  */
-PrepareForWarmBoot()
+void __cdecl PrepareForWarmBoot(void)
 {
 	setAH((unsigned char)EMMstatus);
 }
@@ -533,7 +451,7 @@ PrepareForWarmBoot()
  * 05/09/88 ISP Updated for MEMM. Removed check for pCurVMID
  *
  */
-OSDisable()
+void __cdecl OSDisable(void)
 {
 	unsigned char function = regp->hregs.h.ral;
 
@@ -566,6 +484,3 @@ OSDisable()
 
 	setAH((unsigned char)EMMstatus);
 }
-
-
-

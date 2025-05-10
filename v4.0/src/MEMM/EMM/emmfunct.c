@@ -121,117 +121,9 @@
 #include "emm.h"
 
 
-/******************************************************************************
-	EXTERNAL DATA STRUCTURES
- ******************************************************************************/ 
-/*
- * I/O Map
- * map_size
- *	this is an array of port addresses, 4 ports per
- *	emulated board. Each emulated board has up to
- *	128 16Kb EMM pages assigned. The size of the table,
- *	the number of ports used, is map_size
- *		map_size = (<number of 386 pages>/(128*4))*4
- */
-/*extern unsigned short	iomap[]; */
-/*extern char		map_size;*/
+/* Forward declarations */
 
-/*
- *  map_known
- *	This flags is set whenever the user is given the I/O map
- */
-/*extern char		map_known; */
-
-/*
- * page frame base
- *	this is a map of the linear addresses of the
- *	4 16Kb EMM `physical' windows that the user
- *	accesses the EMM pages through. The entries
- *	of this array are far pointers into the page table.
- *	Thus, the address defined by page_frame_base[0]
- *	is the address of the long word that is the page
- *	table entry for the first EMM window. The reason for 
- *	this obscurity is in speed of mapping -- it is used
- *	to directly obtain access to the entry to be programmed
- */
-extern unsigned	long page_frame_base[];
-
-/*
- * save_map
- *	This is an array of structures that save the 
- *	current mapping state. Size is dynamically determined.
- */
-extern struct save_map save_map[];
-
-/*
- * handle_table
- *	This is an array of handle pointers.
- *	page_index of zero means free
- */
-extern struct handle_ptr handle_table[];
-extern Handle_Name Handle_Name_Table[];
-extern unsigned short	handle_table_size;	/* number of entries */
-extern unsigned short	handle_count;		/* active handle count */
-
-/*
- * EMM Page table
- *	this array contains lists of indexes into the 386
- *	Page Frame Addresses (pft386).  Each list is pointed to
- *	by a handle table entry and is sequential/contiguous.
- *	This is so that maphandlepage doesn't have to scan
- *	a list for the specified entry.
- */
-extern unsigned	short	*emm_page;		/* ptr to _emm_page array */
-extern unsigned	short	free_count;		/* current free count */
-extern unsigned	short	total_pages;		/* number being managed */
-extern unsigned	short	emmpt_start;		/* next free entry in table */
-
-/*
- * EMM free table
- *	this array is a stack of available page table entries. 
- *	each entry is an index into pft386[].
- */
-extern	unsigned short	*emm_free;		/* ptr to _emm_free array */
-extern	unsigned short	free_top;
-
-/*
- * Page frame table
- *	This array contains addresses of physical page frames
- *	for 386 pages. A page is refered to by an index into
- *	this array
- */
-extern union pft386 *pft386;		/* ptr to page frame table array */
-
-
-/*
- * Current status of `HW'. The way this is handled is that
- * when returning status to caller, normal status is reported 
- * via EMMstatus being moved into AX. Persistant errors
- * (such as internal datastructure inconsistancies, etc) are
- * placed in `EMMstatus' as HW failures. All other errors are 
- * transient in nature (out of memory, handles, ...) and are 
- * thus reported by directly setting AX. The EMMstatus variable
- * is provided for expansion and is not currently being
- * set to any other value.
- */
-extern unsigned short EMMstatus;
-
-/*
- * debug & such
- */
-/*unsigned null_count = 0;	/* number of attempts to map null pages */
-
-
-/******************************************************************************
-	EXTERNAL FUNCTIONS
- ******************************************************************************/ 
-extern	struct handle_ptr	*valid_handle();	/* validate handle */
-extern  unsigned far		*source_addr();		/* get DS:SI far ptr */
-extern  unsigned far		*dest_addr();		/* get ES:DI far ptr */
-/*extern	unsigned		AutoUpdate();		/* update auto mode */
-extern	unsigned		wcopy();
-extern	unsigned		copyout();
-extern	void			reallocate();
+void __cdecl AllocateRawPages(void);
 
 
 /******************************************************************************
@@ -245,7 +137,7 @@ extern	void			reallocate();
  *	06/09/88	PC	added the function
  */
 unsigned short
-Avail_Pages()
+Avail_Pages(void)
 {
 	return(free_count) ;
 }
@@ -261,9 +153,9 @@ Avail_Pages()
  * 	05/06/88  ISP	Updated for MEMM removed handle as a parameter 
  */
 unsigned
-get_pages(num,pto)
-register unsigned num;
-register unsigned pto;
+get_pages(
+        register unsigned num,
+        register unsigned pto)
 {
 	register unsigned pg;
 	unsigned	f_page;
@@ -295,8 +187,7 @@ register unsigned pto;
  *  05/09/88	ISP Pulled out from the deallocate page routine
  */
 void
-free_pages(hp)
-register struct handle_ptr *hp;
+free_pages(register struct handle_ptr *hp)
 {
 	register unsigned		next;
 	unsigned			new_start;
@@ -358,7 +249,7 @@ register struct handle_ptr *hp;
  *
  *  	05/06/88  ISP 	No Update needed for MEMM
  */
-GetStatus()
+void __cdecl GetStatus(void)
 {
 	setAH((unsigned char)EMMstatus);	/* if we got here, we're OK */
 }
@@ -373,11 +264,8 @@ GetStatus()
  *
  *	05/06/88  ISP	Updated this routine from WIN386 sources.
  */
-GetPageFrameAddress()
+void __cdecl GetPageFrameAddress(void)
 {
-	extern unsigned short PF_Base;
-	extern unsigned short page_frame_pages;
-
 	/*
 	 * return the 8086 style base address of
 	 * the page frame base. 
@@ -405,7 +293,7 @@ GetPageFrameAddress()
  *
  *	05/06/88  ISP	No update needed for MEMM
  */
-GetUnallocatedPageCount()
+void __cdecl GetUnallocatedPageCount(void)
 {
 	setBX(free_count);
 	setDX(total_pages);
@@ -426,7 +314,7 @@ GetUnallocatedPageCount()
  *		    value with high byte as not of handle value. call to get
  *		    pages also updated to remove handle parameter.
  */
-AllocatePages()
+void __cdecl AllocatePages(void)
 {
 #define	n_pages	((unsigned)regp->hregs.x.rbx)
 	if(handle_count == handle_table_size){	/* no more handles? */
@@ -454,7 +342,7 @@ AllocatePages()
  *
  * CREATED : 08/08/88 PLC
  */
-AllocateRawPages()
+void __cdecl AllocateRawPages(void)
 {
 #define	n_pages	((unsigned)regp->hregs.x.rbx)
 	register unsigned handle;	/* handle table index */
@@ -494,7 +382,7 @@ AllocateRawPages()
 	handle_count++;
 	setDX(handle);
 
-/*	AutoUpdate();	/* update status of Auto mode */
+/*	AutoUpdate();*/	/* update status of Auto mode */
 
 }
 #undef	n_pages
@@ -510,11 +398,10 @@ AllocateRawPages()
  * 05/09/88  ISP    Updated for MEMM. Pulled out free_page routine and
  *		    added support for handle name blanking.
  */
-DeallocatePages()
+void __cdecl DeallocatePages(void)
 {
 #define	handle ((unsigned)regp->hregs.x.rdx)
 	register struct handle_ptr	*hp;
-	struct save_map			*smp;	/* save map table ptr */
 	long	*Name ;		/* points to handle name entry to clear */
 
 	if ( handle == 0 ) {		/* Special handle, don't release */
@@ -543,7 +430,7 @@ DeallocatePages()
 	*(Name+1) = *(Name) = 0L;     /* zero the eight byte name */
 	handle_count--; 	      /* one less active handle */
 
-/*	AutoUpdate();	/* update status of Auto mode */
+/*	AutoUpdate();*/	/* update status of Auto mode */
 	setAH((unsigned char)EMMstatus);	/* done */
 }
 #undef	handle 
@@ -557,7 +444,7 @@ DeallocatePages()
  *
  * 	05/06/88  ISP	No update needed for MEMM
  */
-GetEMMVersion()
+void __cdecl GetEMMVersion(void)
 {
 	setAX( (EMMstatus<<8) | EMM_VERSION );
 }
@@ -570,7 +457,7 @@ GetEMMVersion()
  *
  * 	05/06/88  ISP 	No update needed for MEMM
  */
-GetEMMHandleCount()
+void __cdecl GetEMMHandleCount(void)
 {
 	setBX(handle_count);
 	setAH((unsigned char)EMMstatus);
@@ -585,7 +472,7 @@ GetEMMHandleCount()
  *
  *	05/09/88  ISP	No update needed for MEMM
  */
-GetEMMHandlePages()
+void __cdecl GetEMMHandlePages(void)
 {
 #define	handle	((unsigned)regp->hregs.x.rdx)
 	register struct handle_ptr *hp;
@@ -605,7 +492,7 @@ GetEMMHandlePages()
  *
  * 05/09/88  ISP    Updated for MEMM (just removed upper byte of handle)
  */
-GetAllEMMHandlePages()
+void __cdecl GetAllEMMHandlePages(void)
 {
 	unsigned far *u_ptr;
 	register struct handle_ptr *hp;
@@ -639,7 +526,7 @@ GetAllEMMHandlePages()
  *
  *  05/09/88  ISP   Function not supported
  */
-GetPageMappingRegisterIOArray() 
+void __cdecl GetPageMappingRegisterIOArray(void)
 {
 
 	setAH(INVALID_FUNCTION);
@@ -653,8 +540,7 @@ GetPageMappingRegisterIOArray()
  *
  *  05/09/88  ISP   Function not supported
  */
-GetLogicalToPhysicalPageTrans()
+void __cdecl GetLogicalToPhysicalPageTrans(void)
 {
 	setAH(INVALID_FUNCTION);
 }
-

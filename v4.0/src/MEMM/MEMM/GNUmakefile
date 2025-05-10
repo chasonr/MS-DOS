@@ -64,8 +64,8 @@ AFLAGS      = -DNoBugMode $(ADFLAGS)
 AINC		= -I$(EMM)
 
 #	Defines for C Compiler
-C	= cl
-CFLAGS	=/AS /G2 /Oat /Gs /Ze /Zl /Fc /c
+CC	= wcl
+CFLAGS = -ms -zu -2 -oat -s -ze -zl -wx
 
 #	Definitions for linker for old style .exe files
 #LINK = c:/bin/link
@@ -80,6 +80,9 @@ CONVERT = c:/dos/exe2bin
 #	Rules for generating object and linker response and definition files
 .asm.obj:
 	$(ASM) $(AFLAGS) $(AINC) -Fo$@ $<
+
+.c.obj:
+	$(CC) $(CFLAGS) -c -fo=$@ $<
 
 #******************************************************************************
 #	List of object files required
@@ -143,10 +146,16 @@ emm386: emm386.sys
 
 #	production version of EMM386 device driver
 #
-emm386.sys: $(MEMMOBJ) $(MEMMLIBS) EMM386.LNK
-	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\memm\memm @emm386.lnk"
-	rm -f emm386.sys
-	mv emm386.exe emm386.sys
+emm386.sys: $(MEMMOBJ) $(MEMMLIBS)
+	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
+	echo 'option map=emm386.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name emm386.sys' >>resp.txt
+	for x in $(MEMMOBJ); do echo "file $$x" >>resp.txt; done
+	for x in $(MEMMLIBS); do echo "library $$x" >>resp.txt; done
+	wlink @resp.txt
 
 $(EMM)/emmlib.lib:
 	$(MAKE) -C $(EMM) emmlib.lib
@@ -258,8 +267,7 @@ memmonf.obj: memmonf.asm ascii_sm.equ memm_msg.inc
 
 emm.obj: emm.asm vdmseg.inc vdmsel.inc vm386.inc oemdep.inc $(EMM)/emmdef.inc
 
-mapdma.obj: MAPDMA.C
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc3.bat src\memm\memm $(subst /,\,$<) $(subst /,\,$@)"
+mapdma.obj: mapdma.c
 
 #******************************************************************************
 # debug modules

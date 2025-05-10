@@ -54,6 +54,9 @@ AFLAGS = -q -Zm -Zg -I$(MEMM) -Fl $(HIFLAG) -DI386
 .asm.obj:
 	$(AS) $(AFLAGS) -Fo$@ $<
 
+.c.obj:
+	$(CC) $(CFLAGS) -c -fo=$@ $<
+
 #	Definitions for linker for old style .exe files
 #LINK	= /bin/link
 LINK	 = link
@@ -65,10 +68,8 @@ LIBS	=
 LIB	 = lib
 
 #	Defines for C Compiler
-C	= cl
-#C	= /bin/msc
-#C	 = msc
-CFLAGS	=/ASw /G2 /Oat /Gs /Ze /Zl /Fc /c
+CC	= wcl
+CFLAGS = -ms -zu -2 -oat -s -ze -zl -wx
 
 #
 # definition of objects
@@ -79,11 +80,9 @@ emmlib.lib:	$(OBJS)
 	rm -f emmlib.lib
 	for x in $(OBJS); do wlib emmlib.lib +$$x; done
 
-emmfunct.obj:	EMMFUNCT.C EMM.H
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc3.bat src\memm\emm $(subst /,\,$<) $(subst /,\,$@)"
+emmfunct.obj:	emmfunct.c emm.h
 
-emm40.obj:	EMM40.C EMM.H
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc3.bat src\memm\emm $(subst /,\,$<) $(subst /,\,$@)"
+emm40.obj:	emm40.c emm.h
 
 emmp.obj:	emmp.asm $(AINC) $(MEMM)/page.inc $(MEMM)/vm386.inc \
             $(MEMM)/desc.inc
