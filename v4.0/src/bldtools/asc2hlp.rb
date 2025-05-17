@@ -24,12 +24,13 @@ def pack16(num)
 end
 
 # Pack a 32 bit integer into bytes
+# The peculiar endian order is correct: the high word comes first
 def pack32(num)
     b = [ nil, nil, nil, nil ]
-    b[0] = num & 0xFF
-    b[1] = (num >> 8) & 0xFF
-    b[2] = (num >> 16) & 0xFF
-    b[3] = (num >> 24) & 0xFF
+    b[0] = (num >> 16) & 0xFF
+    b[1] = (num >> 24) & 0xFF
+    b[2] = (num >>  0) & 0xFF
+    b[3] = (num >>  8) & 0xFF
     (b.map {|c| c.chr('ASCII-8BIT')}).join('')
 end
 
@@ -88,13 +89,17 @@ pad = ' ' * topiclen
 # Write the output file
 File.open(out_path, 'wb', encoding: 'ASCII-8BIT') do |outfp|
 
+    # Original ASC2HLP sets this to 20. Only 1 is actually written.
+    num_objs = 20
+    help_offset = num_objs*8 + 4
+
     # Write a file header
-    outfp.write(pack16(0x1234))     # Appears to be a magic number
-    outfp.write(pack16(20))         # Verion number?
-    outfp.write(pack32(0x00FE))     # Unknown
-    outfp.write(pack16(0x00A4))     # Header size
-    outfp.write(pack16(maxnumhlp))
-    outfp.seek(0x00A8 + maxnumhlp*8)
+    outfp.write(pack16(0x1234))         # Magic number
+    outfp.write(pack16(num_objs))       # Number of objects
+    outfp.write(pack16(0x00FE))         # Indicates a help object
+    outfp.write(pack32(help_offset))    # Where to find topics
+    outfp.write(pack16(maxnumhlp))      # Number of topics
+    outfp.seek(help_offset + 4 + maxnumhlp*8)
 
     # Write the topic strings
     helpfile.each do |t|
@@ -110,15 +115,19 @@ File.open(out_path, 'wb', encoding: 'ASCII-8BIT') do |outfp|
     end
 
     # Write the index array
-    outfp.seek(0x00A4)
+    outfp.seek(help_offset)
     outfp.write(pack16(maxnumhlp))
     outfp.write(pack16(topiclen))
-    0.upto(helpfile.size) do |i|
+    0.upto(maxnumhlp-1) do |i|
         t = helpfile[i]
         if t then
-            outfp.write(pack32(i+1))
-            outfp.write(pack16(t.offset))
+            outfp.write(pack16(i+1))
+            outfp.write(pack32(t.offset))
             outfp.write(pack16(t.text.size))
+        else
+            outfp.write(pack16(0))
+            outfp.write(pack32(0))
+            outfp.write(pack16(0))
         end
     end
 end
