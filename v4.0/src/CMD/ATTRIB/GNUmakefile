@@ -72,4 +72,4 @@ clean:
 	rm -f attrib.ctl
 	rm -f attrib.exe
 	rm -f attrib.map
-	rm -f SLIBCE.lib
+	rm -f resp.txt

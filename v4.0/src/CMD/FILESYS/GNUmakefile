@@ -51,7 +51,7 @@ filesys.exe: $(OBJS)
 	echo 'system dos' >resp.txt
 	echo 'option packcode=0' >>resp.txt
 	echo 'option packdata=0' >>resp.txt
-	echo 'option map=attrib.map' >>resp.txt
+	echo 'option map=filesys.map' >>resp.txt
 	echo 'option nocaseexact' >>resp.txt
 	echo 'name filesys.exe' >>resp.txt
 	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
