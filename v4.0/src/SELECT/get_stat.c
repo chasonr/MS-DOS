@@ -45,7 +45,7 @@
 #include "extern.h"
 
 
-void      get_status(union REGS *, union REGS *, struct SREGS *);
+void __cdecl get_status(union REGS *, union REGS *, struct SREGS *);
 void      valid_stat(struct  DISK_STATUS far *, union   REGS *);
 void      init_partition_tables(void);
 char      read_boot_record(unsigned,unsigned char,unsigned char,unsigned char);     /* AC000 */
@@ -70,7 +70,7 @@ unsigned  char find_partition_system_type(void);
 
 #define DptrOf(ti)       ( Dptr + (sizeof(DSE) * (ti)) )
 
-void get_status(RinPtr, RoutPtr, SrPtr)
+void __cdecl get_status(RinPtr, RoutPtr, SrPtr)
         union   REGS  *RinPtr;
         union   REGS  *RoutPtr;
         struct  SREGS *SrPtr;

@@ -20,7 +20,7 @@ all: select.exe select.dat select.com select.hlp
 .SUFFIXES: .c .asm .obj
 
 CC = wcl
-CFLAGS = -q -ms -os -zp=1 -I. -wx -ecc
+CFLAGS = -q -ms -os -zp=1 -I. -wx
 
 AS = jwasm
 AFLAGS = -q -Zm -Zg -I$(inc) -Fl
