@@ -167,7 +167,7 @@ struct DISK_STATUS
     unsigned char   p_part_drive ;                                      /* AN000 */
     unsigned char   n_part_type  ;                                      /* AN000 */
     char            n_part_level[4];                                    /* AN000 */
-   END OneDiskStatusEntry;            /* TWO ARRAYS to be OUTPUT in ES:DI */
+   END /*OneDiskStatusEntry*/;            /* TWO ARRAYS to be OUTPUT in ES:DI */
 
 typedef struct DISK_STATUS DSE ;
 

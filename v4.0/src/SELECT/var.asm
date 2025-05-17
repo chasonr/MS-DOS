@@ -921,9 +921,6 @@ OLD_INT_23	   DD	     0			      ;AN074;SEH
 ; Area to save the old interrupt 24h vector for restoration when the program is done.
 PUBLIC	OLD_INT_24				      ;AN000;
 OLD_INT_24	   DD	     0			      ;AN000;
-; Area to save the old interrupt 2Fh vector for restoration when the program is done.
-PUBLIC	OLD_INT_2F				      ;AN000;
-OLD_INT_2F	   DD	     0			      ;AN000;
 						      ;
 PUBLIC MEM_SIZE 				      ;AN000;
 MEM_SIZE	   DW	     0			      ;AN000;DT installed memory in machine
@@ -943,4 +940,11 @@ SUB_ERROR	DB	?			      ;AN000;JW
 include msgdcl.inc
 						      ;
 DATA	ENDS					      ;AN000;
+
+CODE_FAR    SEGMENT PARA PUBLIC 'CODE'          ;AN000; Segment for far routine
+; Area to save the old interrupt 2Fh vector for restoration when the program is done.
+PUBLIC	OLD_INT_2F				      ;AN000;
+OLD_INT_2F	   DD	     0			      ;AN000;
+CODE_FAR    ENDS
+
 	END					      ;AN000;

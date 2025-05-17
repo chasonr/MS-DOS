@@ -17,10 +17,16 @@ country = usa-ms
 
 all: select.exe select.dat select.com select.hlp
 
-.SUFFIXES: .asm .obj
+.SUFFIXES: .c .asm .obj
+
+CC = wcl
+CFLAGS = -q -ms -os -zp=1 -I. -wx -ecc
 
 AS = jwasm
-AFLAGS = -q -Zm -Zg -I$(inc) -Fl -zlc -zld
+AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.c.obj:
+	$(CC) $(CFLAGS) -c -fo=$@ $<
 
 .asm.obj:
 	$(AS) $(AFLAGS) -Fo$@ $<
@@ -126,14 +132,11 @@ intvec.obj   : intvec.asm panel.mac $(MACROS_INC) varstruc.inc ext.inc \
 
 asm2c.obj    : asm2c.asm
 
-get_stat.obj : GET_STAT.C GET_STAT.H EXTERN.H
-	dosemu -t --Fdrive_c ../.. -E "src\domsc.bat src\select $(subst /,\,$<) $(subst /,\,$@);"
+get_stat.obj : get_stat.c get_stat.h extern.h
 
-int13.obj    : INT13.C
-	dosemu -t --Fdrive_c ../.. -E "src\domsc.bat src\select $(subst /,\,$<) $(subst /,\,$@);"
+int13.obj    : int13.c get_stat.h extern.h
 
-global.obj   : GLOBAL.C
-	dosemu -t --Fdrive_c ../.. -E "src\domsc.bat src\select $(subst /,\,$<) $(subst /,\,$@);"
+global.obj   : global.c get_stat.h
 
 ../CMD/FDISK/bootrec.obj:
 	$(MAKE) -C ../CMD/FDISK bootrec.obj
@@ -170,18 +173,16 @@ SELECT_OBJS = select0.obj select1.obj select2.obj select2a.obj select3.obj \
               int13.obj bootrec.obj
 
 select.exe: $(SELECT_OBJS) services.lib
-	dosemu -t --Fdrive_c ../.. -E "src\dolink src\select /noe @select.lnk"
-# The "/noe" is so symbols defined in source files supercede library routines
-
-#select.exe: $(SELECT_OBJS) services.lib
-#	echo 'system dos' >resp.txt
-#	echo 'option packcode=0' >>resp.txt
-#	echo 'option packdata=0' >>resp.txt
-#	echo 'option map=select.map' >>resp.txt
-#	echo 'option nocaseexact' >>resp.txt
-#	echo 'name select.exe' >>resp.txt
-#	for x in $(SELECT_OBJS); do echo "file $$x" >>resp.txt; done
-#	wlink @resp.txt
+	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
+	echo 'option map=select.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name select.exe' >>resp.txt
+	for x in $(SELECT_OBJS); do echo "file $$x" >>resp.txt; done
+	echo 'library services.lib' >>resp.txt
+	echo 'library CASSFAR.LIB' >>resp.txt
+	wlink @resp.txt
 
 #
 #######################  make select.com #####################

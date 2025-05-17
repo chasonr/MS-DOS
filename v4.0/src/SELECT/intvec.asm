@@ -70,6 +70,7 @@ DATA	       ENDS			  ;AN000; DATA
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 CODE_FAR    SEGMENT PARA PUBLIC 'CODE'  ;AN000; Segment for far routine
 	ASSUME	CS:CODE_FAR,DS:DATA	;AN000;
+	EXTRN	OLD_INT_2F:DWORD		;AN000;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
 ; The critical error handler.  This routine should be placed in the CODE segment.

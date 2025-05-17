@@ -38,7 +38,6 @@ DATA	SEGMENT BYTE PUBLIC 'DATA'                              ;AN000;
 	EXTRN	EXEC_DEALLOC:BYTE				;AN000;
 	EXTRN	EXEC_FDISK:BYTE 				;AN000;DT
 	EXTRN	EXEC_ERR:BYTE					;AN000;DT
-	EXTRN	BCHAR:BYTE					;AN000;DT
 DATA	       ENDS						;AN000;
 								;
 .XLIST								;AN000;
@@ -84,6 +83,8 @@ SELECT	SEGMENT PARA PUBLIC 'SELECT'                            ;AN000;segment fo
 	EXTRN	EXIT_DOS:near					;AN000;
 	EXTRN	INSTALL_ERROR:near				;AN000;
 	EXTRN	EXIT_SELECT:NEAR				;AN000;
+
+	EXTRN	BCHAR:BYTE					;AN000;DT
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
 ;  旼컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴커

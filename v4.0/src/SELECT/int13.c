@@ -1,8 +1,9 @@
 
-#include "stdio.h"                                                      /* ;AN000; */
-#include "stdlib.h"                                                     /* ;AN000; */
-#include "string.h"                                                     /* ;AN000; */
-#include "dos.h"                                                        /* ;AN000; */
+#include <stdio.h>                                                      /* ;AN000; */
+#include <stdlib.h>                                                     /* ;AN000; */
+#include <string.h>                                                     /* ;AN000; */
+#include <dos.h>                                                        /* ;AN000; */
+#include <i86.h>
 #include "get_stat.h"                                                   /* ;AN000; */
 #include "extern.h"                                                     /* ;AN000; */
 									/* ;AN000; */
@@ -148,9 +149,9 @@ struct	SREGS	*SegRegs;						/* ;AN000; */
 									/* ;AN000; */
 BEGIN									/* ;AN000; */
 									/* ;AN000; */
-	char	*WritePtr;						/* ;AN000; */
-									/* ;AN000; */
 #ifdef DEBUG								/* ;AN000; */
+									/* ;AN000; */
+	char	*WritePtr;						/* ;AN000; */
 									/* ;AN000; */
 	switch(InRegs->h.ah)						/* ;AN000; */
 	      { 							/* ;AN000; */
@@ -191,4 +192,3 @@ BEGIN									/* ;AN000; */
 									/* ;AN000; */
 END									/* ;AN000; */
 									/* ;AN000; */
-

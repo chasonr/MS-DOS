@@ -1,5 +1,5 @@
 
-#include "dos.h"                                                        /* ;AN000; */
+#include <dos.h>                                                        /* ;AN000; */
 #include "get_stat.h"                                                   /* ;AN000; */
 
 /*  */
@@ -11,13 +11,13 @@
 
 
 
-char	cur_disk;							/* ;AN000; */
+unsigned char	cur_disk;						/* ;AN000; */
 char	good_disk[2];							/* ;AN000; */
 unsigned char	 number_of_drives;					/* ;AN000; */
 char	reboot_flag;							/* ;AN000; */
 char	errorlevel;							/* ;AN000; */
 char	max_partition_size;						/* ;AN000; */
-char	sort[24];							/* ;AN000; */
+unsigned char	sort[24];						/* ;AN000; */
 char	no_fatal_error; 						/* ;AN000; */
 char	valid_input;							/* ;AN000; */
 unsigned char	video_mode;						/* ;AN000; */
@@ -76,4 +76,5 @@ char		*format_string = "NO FORMAT";                           /* ;AN000; */
 char far	*fat12_String = "FAT_12";                               /* ;AN000; */
 char far	*fat16_String = "FAT_12";                               /* ;AN000; */
 char far	*hilda_string = "HILDA";                                /* ;AN000; */
-
+
+int main() { return 0; }

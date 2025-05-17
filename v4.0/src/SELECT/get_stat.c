@@ -37,10 +37,10 @@
     /*************************************************************/
 /*****************************************************************************/
 
-#include "stdio.h"
-#include "stdlib.h"
-#include "string.h"
-#include "dos.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <dos.h>
 #include "get_stat.h"
 #include "extern.h"
 
@@ -54,15 +54,15 @@ void      sort_part_table(char);
 void      sort_ext_table(char);
 unsigned  find_part_free_space(void);
 unsigned  find_ext_free_space(void);
-void      load_logical_drive(char, unsigned char);
+void      load_logical_drive(unsigned char, unsigned char);
 char      find_logical_drive(void);
 unsigned  cylinders_to_mbytes(unsigned,unsigned char,unsigned char);   /* AN000 */
-char      find_partition_location(unsigned char);
+unsigned char find_partition_location(unsigned char);
 char      find_free_partition(void);
 char      find_partition_type(unsigned char);
 char      get_disk_info(void);
 unsigned  copy_fdisk2select(unsigned, DSE far * );
-char      get_num_logical_dos_drives(void);
+unsigned char get_num_logical_dos_drives(void);
 unsigned  get_partition_size(unsigned char);
 
 void      DiskIo(union REGS *,union REGS *, struct SREGS *);
@@ -82,8 +82,7 @@ BEGIN
     /*  Make drive zero based               */
     /* -------------   drive--;             */
 
-    FP_SEG(Dptr) = SrPtr->es;
-    FP_OFF(Dptr) = RinPtr->x.di;
+    Dptr = MK_FP(SrPtr->es, RinPtr->x.di);
 
     RoutPtr->x.bx = 0;
     RoutPtr->x.cx = 0;
@@ -93,7 +92,7 @@ BEGIN
 
         case uc(FST_DRV):               /* Is it a query for the first drive? */
         case uc(SEC_DRV):               /* Is it a query for the 2nd drive? */
-                 cur_disk = c(RinPtr ->x.ax - 1);
+                 cur_disk = uc(RinPtr ->x.ax - 1);
                  RoutPtr->x.ax = 0;
                  valid_stat(Dptr,RoutPtr); /* yes than go execute              */
                  break;
@@ -159,7 +158,7 @@ void valid_stat(Dptr,RoutPtr)
 BEGIN
 
 unsigned table_count;
-char     i;
+unsigned char i;
 unsigned m;
 unsigned temp;
 
@@ -205,7 +204,7 @@ unsigned temp;
                  (Dptr+table_count) -> n_part_name = E_PART_PRI_DOS;
                  (Dptr+table_count) -> n_part_size = get_partition_size(find_partition_system_type());
 
-                 for (i = c(0); i < c(4);i++)                                           /* AC000 */
+                 for (i = uc(0); i < uc(4);i++)                                           /* AC000 */
                      if ( (part_table[cur_disk][i].sys_id == DOS12) ||
                           (part_table[cur_disk][i].sys_id == DOS16) ||
                           (part_table[cur_disk][i].sys_id == DOSNEW)  )
@@ -299,17 +298,14 @@ BEGIN
 
 unsigned i;
 unsigned char j;
-unsigned k;
-unsigned l;
 unsigned m;
 unsigned n;
 unsigned partition_location;
-char temp;
+unsigned char temp;
 char more_drives_exist;
-char num_logical_drives;
-unsigned insert;
+unsigned char num_logical_drives;
 unsigned index;
-char     save_disk;
+unsigned char save_disk;
 
         save_disk = cur_disk;
 
@@ -322,7 +318,7 @@ char     save_disk;
 
             /* Initialize the cur_disk field to the drive in question so */
             /* that the calls to the partition information routines will work */
-            cur_disk = ((char)(j));
+            cur_disk = ((unsigned char)(j));
 
             /* Read in the master boot record and see if it was okay */
             if (read_boot_record(u(0),j,uc(0),uc(1)))                      /* AC000 */
@@ -339,7 +335,7 @@ char     save_disk;
                        END
                    END
                 /* We've now got a copy of the master boot record saved. Now we need */
-                /* to translate what in the boot record to the area that it's going
+                /* to translate what in the boot record to the area that it's going */
                 /* to be worked on (part_table) */
 
                 /* Read in the data from the master boot record partition entries*/
@@ -451,7 +447,7 @@ char     save_disk;
 
             /* Initialize the cur_disk field to the drive in question so */
             /* that the calls to the partition information routines will work */
-            cur_disk = ((char)(j));
+            cur_disk = ((unsigned char)(j));
                BEGIN
                 /* Read in the master boot record and see if it was okay */
                 if (read_boot_record(u(0),j,uc(0),uc(1)))                      /* AC000 */
@@ -488,7 +484,7 @@ char     save_disk;
                         more_drives_exist = TRUE;
 
                         /* Init the number of logical drives, for a array index */
-                        num_logical_drives = c(0);                           /* AC000 */
+                        num_logical_drives = uc(0);                          /* AC000 */
 
                         while (more_drives_exist)
                            BEGIN
@@ -537,11 +533,11 @@ unsigned  find_part_free_space()
 BEGIN
 
 
-char        i;
-char        partition_count;
-char        last_found_partition;
+unsigned char  i;
+unsigned char  partition_count;
+unsigned char  last_found_partition;
 unsigned    temp;
-char        freespace_count;
+unsigned char  freespace_count;
 char        any_partition;
 unsigned    temp_size;
 
@@ -550,7 +546,7 @@ unsigned    temp_size;
 
 
         /* Intialize free space to zero */
-        for (i = c(0); i < c(24); i++)                                   /* AC000 */
+        for (i = uc(0); i < uc(24); i++)                                   /* AC000 */
             BEGIN
             free_space[i].space = u(0);                                 /* AC000 */
             free_space[i].start = u(0);                                 /* AC000 */
@@ -559,10 +555,10 @@ unsigned    temp_size;
             END
 
         /* Find space between start of disk and first partition */
-        partition_count = c(0);                                         /* AC000 */
+        partition_count = uc(0);                                        /* AC000 */
 
         any_partition = FALSE;
-        for (i = c(0); i < c(4); i++)                                   /* AC000 */
+        for (i = uc(0); i < uc(4); i++)                                 /* AC000 */
             BEGIN
             if (part_table[cur_disk][sort[i]].sys_id != uc(0))          /* AC000 */
                 BEGIN
@@ -588,8 +584,8 @@ unsigned    temp_size;
         if (any_partition)
             BEGIN
             /* Look for space between the rest of the partitions */
-            freespace_count = c(1);                                     /* AC000 */
-            for (i = partition_count+1; i < c(4); i++)                  /* AC000 */
+            freespace_count = uc(1);                                    /* AC000 */
+            for (i = partition_count+1; i < uc(4); i++)                 /* AC000 */
                 BEGIN
                 if (part_table[cur_disk][sort[i]].sys_id != uc(0))      /* AC000 */
                     BEGIN
@@ -658,19 +654,19 @@ END
 /*  */
 unsigned find_ext_free_space()
 BEGIN
-char   i;
+unsigned char i;
 char   partition_count;
-char   last_found_partition;
+unsigned char   last_found_partition;
 unsigned    temp;
-char   freespace_count;
+unsigned char   freespace_count;
 char   any_partition;
-char   ext_location;
+unsigned char   ext_location;
 
         /* Sort the partition table */
         sort_ext_table(c(23));                                          /* AC000 */
 
         /* Initialize free space to zero */
-        for (i = c(0); i < c(24); i++)                                  /* AC000 */
+        for (i = uc(0); i < uc(24); i++)                                /* AC000 */
             BEGIN
             free_space[i].space = u(0);                                 /* AC000 */
             free_space[i].start = u(0);
@@ -680,14 +676,14 @@ char   ext_location;
 
         /* Find space between start of Extended partition and first volume */
         partition_count = c(0);                                         /* AC000 */
-        last_found_partition = c(0);
+        last_found_partition = uc(0);
         ext_location = find_partition_location(uc(EXTENDED));           /* AC000 */
 
-        if (ext_location != c(NOT_FOUND))
+        if (ext_location != uc(NOT_FOUND))
             BEGIN
 
             any_partition = FALSE;
-            for (i = c(0); i < c(24); i++)                                  /* AC000 */
+            for (i = uc(0); i < uc(24); i++)                                /* AC000 */
                BEGIN
                 if (ext_table[cur_disk][sort[i]].sys_id != uc(0))           /* AC000 */
                    BEGIN
@@ -708,8 +704,8 @@ char   ext_location;
             if (any_partition)
                 BEGIN
                 /* Look for space between the rest of the partitions */
-                freespace_count = c(1);                                     /* AC000 */
-                for (i = partition_count+1; i < c(24); i++)                 /* AC000 */
+                freespace_count = uc(1);                                    /* AC000 */
+                for (i = partition_count+1; i < uc(24); i++)                /* AC000 */
                    BEGIN
                     if (ext_table[cur_disk][sort[i]].sys_id != uc(0))       /* AC000 */
                        BEGIN
@@ -754,7 +750,7 @@ char   ext_location;
                  temp = u(0);                                               /* AC000 */
 
                  /* Zip thru the table */
-                 for (i = c(0); i < c(24); i++)                             /* AC000 */
+                 for (i = uc(0); i < uc(24); i++)                           /* AC000 */
                     BEGIN
                      /* Is this one bigger ? */
                      if (free_space[i].space > temp)
@@ -776,11 +772,11 @@ BEGIN
 
 char  changed;
 char  temp;
-char   i;
+unsigned char   i;
 
         /* Init the sorting parameters */
 
-        for (i=c(0); i < size; i++)                                     /* AC000 */
+        for (i=uc(0); i < size; i++)                                    /* AC000 */
            BEGIN
             sort[i] = i;
            END
@@ -837,11 +833,11 @@ BEGIN
 
 char  changed;
 char  temp;
-char i;
+unsigned char i;
 
         /* Init the sorting parameters */
 
-        for (i=c(0); i < size; i++)                                     /* AC000 */
+        for (i=uc(0); i < size; i++)                                    /* AC000 */
            BEGIN
             sort[i] = i;
            END
@@ -874,17 +870,15 @@ END
 /*  */
 void load_logical_drive(point,drive)
 
-char   point;
+unsigned char   point;
 unsigned char   drive;
 
 BEGIN
 
-char        volume_label[11];                                           /* AN000 */
 unsigned    i;
 unsigned    m;
 unsigned    n;
 unsigned    index;
-unsigned    dx_pointer;                                                 /* AN000 */
 unsigned    partition_location;                                         /* AN000 */
 
         /* Check to see if anything is there */
@@ -995,15 +989,15 @@ unsigned    partition_location;                                         /* AN000
 END
 
 /*  */
-char find_partition_location(type)
+unsigned char find_partition_location(type)
 
 unsigned char type;
 
 BEGIN
- char  i;
+ unsigned char  i;
 
 /*  Look at all four partition entries for system id byte that matches */
- for (i = c(0); i < c(4);i++)                                           /* AC000 */
+ for (i = uc(0); i < uc(4);i++)                                         /* AC000 */
     BEGIN
 
      /* if we find a match, do a TRUE return */
@@ -1022,10 +1016,10 @@ FLAG find_partition_type(type)
 unsigned char type;
 
 BEGIN
-char  i;
+unsigned char  i;
 
 /*  Look at all four partition entries for system id byte that matches */
- for (i = c(0); i < c(4);i++)                                           /* AC000 */
+ for (i = uc(0); i < uc(4);i++)                                         /* AC000 */
     BEGIN
 
      /* if we find a match, do a TRUE return */
@@ -1038,10 +1032,10 @@ END
 unsigned char   find_partition_system_type()
 
 BEGIN
-char  i;
+unsigned char  i;
 
 /*  Look at all four partition entries for system id byte that matches */
- for (i = c(0); i < c(4);i++)                                           /* AC000 */
+ for (i = uc(0); i < uc(4);i++)                                          /* AC000 */
     BEGIN
 
      /* if we find a match, do a TRUE return */
@@ -1056,10 +1050,10 @@ END
 char find_logical_drive()
 
 BEGIN
-char  i;
+unsigned char  i;
 
        /* See if there is a logical drive defined in Extended Partition */
- for (i = c(0); i < c(24); i++)                                  /* AC000 */
+ for (i = uc(0); i < uc(24); i++)                                  /* AC000 */
       BEGIN
       /* See if we find a sys id that is not 0 */
       if (ext_table[cur_disk][i].sys_id != uc(0)) return(TRUE);    /* AC000 */
@@ -1129,11 +1123,9 @@ BEGIN
 
 unsigned    i;
 unsigned    m;
-unsigned    x;
 FLAG        drive_found;
 char        drive_num;
-char        first_stuff;
-char        num_logical_drives ;
+unsigned char num_logical_drives ;
 
         /* loop thru the partitions, only load stuff if it is there */
         drive_num = c(0);                                               /* Current drive */
@@ -1169,11 +1161,11 @@ char        num_logical_drives ;
 END
 
 /*  */
-char get_num_logical_dos_drives()
+unsigned char get_num_logical_dos_drives()
 BEGIN
 
-char   i;
-char number;
+unsigned char   i;
+unsigned char number;
 
        number = c(0);                                                   /* AC000 */
        /* See if there is a logical drive defined in Extended Partition */
@@ -1198,10 +1190,10 @@ XFLOAT get_partition_size(type)                                   /* AC000 */
 unsigned char type;                                                     /* AC000 */
 
 BEGIN
- char  i;
+ unsigned char  i;
 
  /*  Look at all four partition entries for system id byte that matches */
- for (i = c(0); i < c(4);i++)                                           /* AC000 */
+ for (i = uc(0); i < uc(4);i++)                                         /* AC000 */
     BEGIN
 
      /* if we find a match, get the size */

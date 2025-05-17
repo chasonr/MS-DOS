@@ -7,13 +7,13 @@
 
 
 
-extern	char	cur_disk;						/* ;AN000; */
+extern	unsigned char	cur_disk;					/* ;AN000; */
 extern	FLAG	good_disk[2];						/* ;AN000; */
 extern	unsigned char	 number_of_drives;				/* ;AN000; */
 extern	FLAG	reboot_flag;						/* ;AN000; */
 extern	char	errorlevel;						/* ;AN000; */
 extern	char	max_partition_size;					/* ;AN000; */
-extern	char	sort[24];						/* ;AN000; */
+extern	unsigned char	sort[24];					/* ;AN000; */
 extern	FLAG	no_fatal_error; 					/* ;AC000; */
 extern	char	valid_input;						/* ;AN000; */
 extern	unsigned char	video_mode;					/* ;AN000; */
@@ -73,4 +73,3 @@ extern	char		*format_string; 				/* ;AN000; */
 extern	char far	*fat12_String;					/* ;AN000; */
 extern	char far	*fat16_String;					/* ;AN000; */
 extern	char far	*hilda_string;					/* ;AN000; */
-
