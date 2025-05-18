@@ -25,17 +25,17 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 
 all: join.exe
 
-$(inc)/errtst.obj:
-	$(MAKE) -C $(inc) errtst.obj
+$(inc)/errtstm.obj:
+	$(MAKE) -C $(inc) errtstm.obj
 
-$(inc)/sysvar.obj:
-	$(MAKE) -C $(inc) sysvar.obj
+$(inc)/sysvarm.obj:
+	$(MAKE) -C $(inc) sysvarm.obj
 
-$(inc)/cds.obj:
-	$(MAKE) -C $(inc) cds.obj
+$(inc)/cdsm.obj:
+	$(MAKE) -C $(inc) cdsm.obj
 
-$(inc)/dpb.obj:
-	$(MAKE) -C $(inc) dpb.obj
+$(inc)/dpbm.obj:
+	$(MAKE) -C $(inc) dpbm.obj
 
 $(inc)/comsubs.lib:
 	$(MAKE) -C $(inc) comsubs.lib
@@ -64,13 +64,13 @@ _parse.obj: _parse.asm  \
 
 join.obj: JOIN.C        \
   JOINPARS.H            \
-  $(hinc)/CDS.H          \
-  $(hinc)/JOINTYPE.H     \
-  $(hinc)/SYSVAR.H
+  $(hinc)/cds.h          \
+  $(hinc)/jointype.h     \
+  $(hinc)/sysvar.h
 	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\join $(subst /,\,$<) $(subst /,\,$@)"
 
-OBJS = join.obj $(inc)/errtst.obj $(inc)/sysvar.obj $(inc)/cds.obj \
-       $(inc)/dpb.obj _msgret.obj _parse.obj
+OBJS = join.obj $(inc)/errtstm.obj $(inc)/sysvarm.obj $(inc)/cdsm.obj \
+       $(inc)/dpbm.obj _msgret.obj _parse.obj
 
 join.exe: $(OBJS) $(map)/mapper.lib $(comsubs)/comsubsm.lib JOIN.LNK
 	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\join @join.lnk"

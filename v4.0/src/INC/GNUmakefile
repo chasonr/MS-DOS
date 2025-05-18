@@ -12,7 +12,7 @@ hinc	=../H
 .SUFFIXES: .c .asm .obj
 
 CC = wcl
-CFLAGS = -q -ms -os -zp=1 -I. -wx -ecc
+CFLAGS = -q -ms -os -zp=1 -I$(hinc) -wx -ecc
 
 AS = jwasm
 AFLAGS = -q -Zm -Zg -I$(dos) -Fl -Sa
@@ -35,28 +35,26 @@ all: 		errtst.obj sysvar.obj cds.obj dpb.obj nibdos.obj \
 msdos.cl1 msdos.cl3:
 	$(MAKE) -C $(dos) msdos.cl1
 
-errtst.obj: 	ERRTST.C \
-  		$(hinc)/types.h  \
+errtst.obj: 	errtst.c \
   		$(hinc)/comsub.h  \
-  		$(hinc)/DPB.H
-	dosemu -t --Fdrive_c ../.. -E "src\domsc.bat src\inc $(subst /,\,$<) $(subst /,\,$@)"
+  		$(hinc)/dpb.h \
+  		$(hinc)/jointype.h
 
-sysvar.obj: 	SYSVAR.C \
-  		$(hinc)/types.h  \
-  		$(hinc)/SYSVAR.H
-	dosemu -t --Fdrive_c ../.. -E "src\domsc.bat src\inc $(subst /,\,$<) $(subst /,\,$@)"
+sysvar.obj: 	sysvar.c \
+  		$(hinc)/sysvar.h \
+  		$(hinc)/jointype.h
 
-cds.obj: 	CDS.C \
-  		$(hinc)/types.h  \
-  		$(hinc)/SYSVAR.H  \
-  		$(hinc)/CDS.H  \
-  		$(hinc)/DPB.H
-	dosemu -t --Fdrive_c ../.. -E "src\domsc.bat src\inc $(subst /,\,$<) $(subst /,\,$@)"
+cds.obj: 	cds.c \
+  		$(hinc)/sysvar.h  \
+  		$(hinc)/cds.h  \
+  		$(hinc)/dpb.h \
+  		$(hinc)/jointype.h
 
-dpb.obj: 	DPB.C \
-  		$(hinc)/DPB.H \
-  		dpb.inc
-	dosemu -t --Fdrive_c ../.. -E "src\domsc.bat src\inc $(subst /,\,$<) $(subst /,\,$@)"
+dpb.obj: 	dpb.c \
+  		$(hinc)/types.h \
+  		$(hinc)/sysvar.h \
+  		$(hinc)/dpb.h \
+  		$(hinc)/cds.h
 
 string.obj:	string.c \
 		$(hinc)/types.h  \
@@ -90,3 +88,31 @@ clean:
 	rm -f *.obj
 	rm -f *.err
 	rm -f *.lst
+
+##############################################################################
+# Temporary until all builds converted to Watcom #
+
+errtstm.obj: 	errtst.c \
+  		$(hinc)/comsub.h  \
+  		$(hinc)/dpb.h \
+  		$(hinc)/jointype.h
+	dosemu -t --Fdrive_c ../.. -E "src\domsc.bat src\inc $(subst /,\,$<) $(subst /,\,$@)"
+
+sysvarm.obj: 	sysvar.c \
+  		$(hinc)/sysvar.h \
+  		$(hinc)/jointype.h
+	dosemu -t --Fdrive_c ../.. -E "src\domsc.bat src\inc $(subst /,\,$<) $(subst /,\,$@)"
+
+cdsm.obj: 	cds.c \
+  		$(hinc)/sysvar.h  \
+  		$(hinc)/cds.h  \
+  		$(hinc)/dpb.h \
+  		$(hinc)/jointype.h
+	dosemu -t --Fdrive_c ../.. -E "src\domsc.bat src\inc $(subst /,\,$<) $(subst /,\,$@)"
+
+dpbm.obj: 	dpb.c \
+  		$(hinc)/types.h \
+  		$(hinc)/sysvar.h \
+  		$(hinc)/dpb.h \
+  		$(hinc)/cds.h
+	dosemu -t --Fdrive_c ../.. -E "src\domsc.bat src\inc $(subst /,\,$<) $(subst /,\,$@)"

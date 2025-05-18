@@ -1,8 +1,8 @@
 SUBST.OBJ+
-..\..\inc\ERRTST.OBJ+
-..\..\inc\SYSVAR.OBJ+
-..\..\inc\CDS.OBJ+
-..\..\inc\DPB.OBJ+
+..\..\inc\ERRTSTM.OBJ+
+..\..\inc\SYSVARM.OBJ+
+..\..\inc\CDSM.OBJ+
+..\..\inc\DPBM.OBJ+
 _MSGRET.OBJ+
 _PARSE.OBJ
 SUBST
