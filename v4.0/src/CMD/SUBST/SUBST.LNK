@@ -7,6 +7,5 @@ _MSGRET.OBJ+
 _PARSE.OBJ
 SUBST
 NUL
-..\..\inc\comsubs.lib+
+..\..\comsubs\comsubsm.lib+
 ..\..\mapper\mapper.lib;
-

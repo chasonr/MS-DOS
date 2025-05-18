@@ -4,6 +4,7 @@ make	=nmake
 
 all:
 	$(MAKE) -C bldtools
+	$(MAKE) -C comsubs
 	$(MAKE) -C MAPPER
 	$(MAKE) -C BOOT
 	$(MAKE) -C BIOS
@@ -15,6 +16,7 @@ all:
 
 clean:
 	$(MAKE) -C bldtools clean
+	$(MAKE) -C comsubs clean
 	$(MAKE) -C MAPPER clean
 	$(MAKE) -C BOOT clean
 	$(MAKE) -C BIOS clean

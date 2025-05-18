@@ -3,6 +3,7 @@
 msg	=../../MESSAGES
 dos	=../../DOS
 inc	=../../INC
+comsubs = ../../comsubs
 hinc	=../../H
 map	=../../MAPPER
 # This is the path from INC or MAP dir's to here.
@@ -71,7 +72,7 @@ join.obj: JOIN.C        \
 OBJS = join.obj $(inc)/errtst.obj $(inc)/sysvar.obj $(inc)/cds.obj \
        $(inc)/dpb.obj _msgret.obj _parse.obj
 
-join.exe: $(OBJS) $(map)/mapper.lib $(inc)/COMSUBS.LIB JOIN.LNK
+join.exe: $(OBJS) $(map)/mapper.lib $(comsubs)/comsubsm.lib JOIN.LNK
 	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\join @join.lnk"
 
 clean:

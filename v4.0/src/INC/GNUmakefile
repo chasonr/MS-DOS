@@ -37,7 +37,7 @@ msdos.cl1 msdos.cl3:
 
 errtst.obj: 	ERRTST.C \
   		$(hinc)/types.h  \
-  		$(hinc)/COMSUB.H  \
+  		$(hinc)/comsub.h  \
   		$(hinc)/DPB.H
 	dosemu -t --Fdrive_c ../.. -E "src\domsc.bat src\inc $(subst /,\,$<) $(subst /,\,$@)"
 

@@ -3,6 +3,7 @@
 msg	=../../MESSAGES
 dos	=../../DOS
 inc	=../../INC
+comsubs = ../../comsubs
 hinc	=../../H
 
 country = usa-ms
@@ -141,7 +142,7 @@ FDISK_OBJS = main.obj mainmenu.obj d_menus.obj c_menus.obj fdisk.obj \
              convert.obj global.obj _parse.obj _msgret.obj fdiskm.obj
 
 fdisk.exe : $(FDISK_OBJS) $(map)/mapper.lib FDISK.LNK fdisk.ctl \
-            $(inc)/COMSUBS.LIB
+            $(comsubs)/comsubsm.lib
 	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\fdisk @fdisk.lnk"
 
 clean:

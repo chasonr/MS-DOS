@@ -4,6 +4,7 @@ cflags	= -AS -Od -Zp $(extcsw)
 msg	=../../MESSAGES
 dos	=../../DOS
 inc	=../../INC
+comsubs = ../../comsubs
 hinc	=../../H
 map	=../../MAPPER
 
@@ -44,13 +45,13 @@ _msgret.obj:	_msgret.asm			\
 		$(inc)/copyrigh.inc
 
 backup.obj:  BACKUP.C  BACKPARS.H BACKUP.H  \
-	     $(hinc)/DOSCALLS.H
+	     $(hinc)/doscalls.h
 	dosemu -t --Fdrive_c ../../.. -E "src\domsc2.bat src\cmd\backup $(subst /,\,$<) $(subst /,\,$@)"
 
 OBJS = backup.obj _parse.obj _msgret.obj
 
-backup.com: $(OBJS) $(map)/mapper.lib $(inc)/COMSUBS.LIB
-	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\backup /NOE /MAP $(subst /,\,backup+_parse+_msgret,,,$(map)/mapper+$(inc)/COMSUBS)"
+backup.com: $(OBJS) $(map)/mapper.lib $(comsubs)/comsubsm.lib
+	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\backup /NOE /MAP $(subst /,\,backup+_parse+_msgret,,,$(map)/mapper+$(comsubs)/comsubsm)"
 	../../bldtools/make-com.rb backup.exe backup.com
 
 clean:

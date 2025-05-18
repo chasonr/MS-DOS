@@ -3,6 +3,7 @@
 msg	=../../MESSAGES
 dos	=../../DOS
 inc	=../../INC
+comsubs = ../../comsubs
 hinc	=../../H
 map	=../../MAPPER
 here	=../CMD/SUBST	  # This is the path from INC or MAP dir's to here.
@@ -67,7 +68,7 @@ subst.obj: SUBST.C      \
 OBJS = subst.obj $(inc)/errtst.obj $(inc)/sysvar.obj $(inc)/cds.obj \
        $(inc)/dpb.obj _msgret.obj _parse.obj
 
-subst.exe: $(OBJS) $(map)/mapper.lib $(inc)/COMSUBS.LIB SUBST.LNK
+subst.exe: $(OBJS) $(map)/mapper.lib $(comsubs)/comsubsm.lib SUBST.LNK
 	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\subst @subst.lnk"
 
 clean:

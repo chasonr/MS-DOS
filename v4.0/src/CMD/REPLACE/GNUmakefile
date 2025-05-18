@@ -3,6 +3,7 @@
 msg	=../../MESSAGES
 dos	=../../DOS
 inc	=../../INC
+comsubs = ../../comsubs
 hinc	=../../H
 
 country = usa-ms
@@ -46,14 +47,14 @@ _replace.obj: _replace.asm
 
 replace.obj: REPLACE.C  \
   REPLACEP.H            \
-  $(hinc)/COMSUB.H
+  $(hinc)/comsub.h
 	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\replace $(subst /,\,$<) $(subst /,\,$@)"
 
 OBJS = replace.obj _replace.obj _msgret.obj _parse.obj
 
 replace.exe: $(OBJS) \
   $(map)/mapper.lib     \
-  $(inc)/COMSUBS.LIB    \
+  $(comsubs)/comsubsm.lib    \
   REPLACE.LNK
 	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\replace /map @replace.lnk"
 

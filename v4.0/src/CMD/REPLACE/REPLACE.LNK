@@ -5,4 +5,4 @@ _PARSE.OBJ
 REPLACE
 REPLACE
 ..\..\mapper\mapper.lib+
-..\..\inc\comsubs.lib /STACK:31620;
+..\..\comsubs\comsubsm.lib /STACK:31620;
