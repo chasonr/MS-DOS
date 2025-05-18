@@ -1,19 +1,19 @@
 
 /*-------------------------------
-/* SOURCE FILE NAME:   RTOLD1.C
-/*-------------------------------
-/*  0 */
+ * SOURCE FILE NAME:   RTOLD1.C
+ *-------------------------------
+ *  0 */
 
+#include <string.h>
+#include <dos.h>                                                      /*;AN000;2*/
+#include <stdio.h>
 #include "rt.h"
 #include "rt1.h"
 #include "rt2.h"
 #include "restpars.h"                                                 /*;AN000;4*/
-#include "string.h"
-#include "dos.h"                                                      /*;AN000;2*/
 #include "comsub.h"             /* common subroutine def'n */
 #include "doscalls.h"
 #include "error.h"
-#include "stdio.h"
 
 extern	BYTE rtswitch;
 extern	BYTE control_flag;
@@ -28,20 +28,20 @@ extern	char response_buff[5];					      /*;AN000;6*/
 struct	file_header_old fheadold;				      /*;AN000;*/
 
 /*****************  START OF SPECIFICATION  ********************************
-/*
-/*  SUBROUTINE NAME :  pathmatch
-/*
-/*  DESCRIPTIVE NAME : Compare two paths and return TRUE or FALSE
-/*		       according to whether they match or not.
-/*
-/*  NOTES: Global characters * and ? are meaningless in the file path name
-/*	   Assume both path pattern and path subject are not end with \
-/*
-/*  INPUT: (PARAMETERS)
-/*	 subject  - the file path to be compared.
-/*	 pattern  - the file path to be compared against.
-/*
-/********************** END OF SPECIFICATIONS *******************************/
+ *
+ *  SUBROUTINE NAME :  pathmatch
+ *
+ *  DESCRIPTIVE NAME : Compare two paths and return TRUE or FALSE
+ *		       according to whether they match or not.
+ *
+ *  NOTES: Global characters * and ? are meaningless in the file path name
+ *	   Assume both path pattern and path subject are not end with \
+ *
+ *  INPUT: (PARAMETERS)
+ *	 subject  - the file path to be compared.
+ *	 pattern  - the file path to be compared against.
+ *
+ ********************** END OF SPECIFICATIONS *******************************/
 WORD pathmatch(patterns,subjects)
 
 BYTE *patterns;  /* the string to be matched with */
@@ -49,7 +49,6 @@ BYTE *subjects;  /* the string to be matched */
 {
     BYTE *pattern;   /* the working pointer to point to the pattern */
     BYTE *subject;   /* the working pointer to point to the subject */
-    int z;
 
     /*save the pointers to both strings*/
     pattern = patterns;
@@ -87,27 +86,26 @@ BYTE *subjects;  /* the string to be matched */
 }
 
 /*****************  START OF SPECIFICATION  ********************************
-/*
-/*  SUBROUTINE NAME :  fspecmatch
-/*
-/*  DESCRIPTIVE NAME : Compare two file spec. and return TRUE or FALSE
-/*		       according to whether they match or not.
-/*
-/*  FUNCTION: This subroutine compare the file names and file extensions
-/*	      to determine whether they are match or not.
-/*	      TRUE is returned if they are match, otherwise, FALSE
-/*	      is returned.
-/*
-/*  NOTES: * and ? are acceptable in the file name and file extension.
-/*
-/********************** END OF SPECIFICATIONS *******************************/
-fspecmatch(patterns, subjects)
+ *
+ *  SUBROUTINE NAME :  fspecmatch
+ *
+ *  DESCRIPTIVE NAME : Compare two file spec. and return TRUE or FALSE
+ *		       according to whether they match or not.
+ *
+ *  FUNCTION: This subroutine compare the file names and file extensions
+ *	      to determine whether they are match or not.
+ *	      TRUE is returned if they are match, otherwise, FALSE
+ *	      is returned.
+ *
+ *  NOTES: * and ? are acceptable in the file name and file extension.
+ *
+ ********************** END OF SPECIFICATIONS *******************************/
+int fspecmatch(patterns, subjects)
 char *patterns;
 char *subjects;
 {
 	char *pattern;
 	char *subject;
-	int z;
 
 	pattern = patterns;
 	subject = subjects;
@@ -180,29 +178,28 @@ char *subjects;
 }  /*end of subroutine */
 
 /*****************  START OF SPECIFICATION  ********************************
-/*
-/*  SUBROUTINE NAME :  switchmatch
-/*
-/*  DESCRIPTIVE NAME : Check the file attributes, and/or file modes
-/*		       against the switches set in the input command
-/*		       line.
-/*
-/*  FUNCTION: this subroutine search the hard disk for the dest
-/*	      file first.  If dest file is found,  the attributs of the
-/*	      destination file will be used for checking.
-/*
-/*	      Check the switches set in the input command line one by
-/*	      one, whenever a  switch not match is found, FALSE is returne
-/*	      In the case a switch is match, TRUE is not returned until al
-/*	      switches is checked.
-/*
-/*
-/********************** END OF SPECIFICATIONS *******************************/
-WORD switchmatch(finfo, srcd, destd, td)
-struct file_info *finfo;
-BYTE srcd;
-BYTE destd;
-struct timedate *td;
+ *
+ *  SUBROUTINE NAME :  switchmatch
+ *
+ *  DESCRIPTIVE NAME : Check the file attributes, and/or file modes
+ *		       against the switches set in the input command
+ *		       line.
+ *
+ *  FUNCTION: this subroutine search the hard disk for the dest
+ *	      file first.  If dest file is found,  the attributs of the
+ *	      destination file will be used for checking.
+ *
+ *	      Check the switches set in the input command line one by
+ *	      one, whenever a  switch not match is found, FALSE is returne
+ *	      In the case a switch is match, TRUE is not returned until al
+ *	      switches is checked.
+ *
+ *
+ ********************** END OF SPECIFICATIONS *******************************/
+WORD switchmatch(
+        struct file_info *finfo,
+        BYTE destd,
+        struct timedate *td)
 {
      WORD   yy;
      WORD   mm;
@@ -213,19 +210,13 @@ struct timedate *td;
      WORD  action;
      unsigned file_pointer;
      WORD retcode;
-     int z;
 
      /*declaration for dosqfileinfo*/
      struct FileStatus fileinfo_buf;
-     WORD destdnum;
      WORD buflen = sizeof(struct FileStatus);
      unsigned attributes;
 
      /*declaration for dosfindfirst */
-     unsigned	 ddirhandle = 0xffff;
-     unsigned	 attribute = NOTV;
-     unsigned	 search_cnt = 1;
-     unsigned	 buf_len = sizeof(struct FileFindBuf);
      BYTE search_string[MAXPATHF+2];
      /*end decleration for ffirst and fnext*/
 
@@ -431,34 +422,28 @@ struct timedate *td;
 } /*end of subroutine switch_match */
 
 /*****************  START OF SPECIFICATION  ********************************
-/*
-/*  SUBROUTINE NAME :  check_flheader_old
-/*
-/*  DESCRIPTIVE NAME : Check the information in the file header of
-/*		       the file to be restored.
-/*
-/*  FUNCTION: For old format only, Open the file to be restored, get
-/*	      header informtion
-/*
-/*
-/********************** END OF SPECIFICATIONS *******************************/
-int check_flheader_old
-     ( finfo,f_name,f_date,f_time,f_attrib,f_len,
-       file_seq_num,srcd,destd,infspec,inpath,dnumwant
-     )
-
-     struct file_info *finfo;
-     unsigned char *f_name;	   /* name string */
-     unsigned f_date;		  /* file's date */
-     unsigned f_time;		  /* file's time */
-     unsigned f_attrib; 	  /* file's attribute */
-     unsigned long f_len;	  /* file length */
-     unsigned int  file_seq_num;
-     BYTE     srcd;
-     BYTE     destd;
-     BYTE     *infspec;
-     BYTE     *inpath;
-     unsigned int  *dnumwant;
+ *
+ *  SUBROUTINE NAME :  check_flheader_old
+ *
+ *  DESCRIPTIVE NAME : Check the information in the file header of
+ *		       the file to be restored.
+ *
+ *  FUNCTION: For old format only, Open the file to be restored, get
+ *	      header informtion
+ *
+ *
+ ********************** END OF SPECIFICATIONS *******************************/
+int check_flheader_old(
+         struct file_info *finfo,
+         unsigned char *f_name,	   /* name string */
+         unsigned f_date,		  /* file's date */
+         unsigned f_time,		  /* file's time */
+         unsigned f_attrib, 	  /* file's attribute */
+         unsigned long f_len,	  /* file length */
+         BYTE     srcd,
+         BYTE     *infspec,
+         BYTE     *inpath,
+         unsigned int  *dnumwant)
 {
      WORD  temp_dnumwant;
      WORD  numread;
@@ -469,9 +454,7 @@ int check_flheader_old
      BYTE name[9];
      BYTE ext[4];
      BYTE spec[13];
-     WORD  i;		 /*loop counter*/
      WORD retcode;
-    int z;
 
    temp_dnumwant = *dnumwant;	/*to fix a bug that dosread change the
 				value of dnumwant */
@@ -573,20 +556,20 @@ int check_flheader_old
 
 
 /*****************  START OF SPECIFICATION  ********************************
-/*
-/*  SUBROUTINE NAME :  readonly_or_changed
-/*
-/*  DESCRIPTIVE NAME : handle the situration that a read only file
-/*		       or is found, or the file has been Revised.
-/*
-/*  FUNCTION: In the case that a readonly file is found, or the file
-/*	      on the destination disk has been Revised since last backup,
-/*	      this subroutine output a warning message to the user, and
-/*	      prompt for user to enter yes or no depending on whether
-/*	      the user wants to proceed restoring the file.
-/*
-/*
-/********************* END OF SPECIFICATIONS ********************************/
+ *
+ *  SUBROUTINE NAME :  readonly_or_changed
+ *
+ *  DESCRIPTIVE NAME : handle the situration that a read only file
+ *		       or is found, or the file has been Revised.
+ *
+ *  FUNCTION: In the case that a readonly file is found, or the file
+ *	      on the destination disk has been Revised since last backup,
+ *	      this subroutine output a warning message to the user, and
+ *	      prompt for user to enter yes or no depending on whether
+ *	      the user wants to proceed restoring the file.
+ *
+ *
+ ********************* END OF SPECIFICATIONS ********************************/
 #define CHECK_YES_NO	  0x6523				      /*;AN000;6*/
 #define YES_NO_RESPTYPE   0xc1					      /*;AN000;6*/
 #define YES 1							      /*;AN000;6*/
@@ -604,7 +587,6 @@ int readonly_or_changed(attrib,destd,fspec,fpath)
 
     char file_to_be_chmode[MAXPATHF+2];
     DWORD dw = 0L;
-    int z;
 
      sublist.value1 = (char far *)fspec;			      /*;AN000;6 */
      sublist.flags1 = LEFT_ALIGN + CHAR_FIELD_ASCIIZ;		      /*;AN000;6 */

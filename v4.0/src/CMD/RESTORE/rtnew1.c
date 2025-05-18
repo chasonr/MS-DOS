@@ -1,14 +1,14 @@
 
 /*------------------------------
-/* SOURCE FILE NAME: RTNEW1.C
-/*------------------------------
-/*  0 */
+ * SOURCE FILE NAME: RTNEW1.C
+ *------------------------------
+ *  0 */
+#include <string.h>
+#include <dos.h>                                                      /*;AN000;2*/
 #include "rt.h"
 #include "rt1.h"
 #include "rt2.h"
 #include "restpars.h"                                                 /*;AN000;4*/
-#include "string.h"
-#include "dos.h"                                                      /*;AN000;2*/
 #include "comsub.h"             /* common subroutine def'n */
 #include "doscalls.h"
 #include "error.h"
@@ -17,14 +17,14 @@
 #define LAST_DIRBLOCK	0xffffffff			     /* !wrw */
 BYTE	got_first_fh;					     /* !wrw */
 
-struct dir_block russ_dir_block;	/* Current directory block   /* !wrw */
+struct dir_block russ_dir_block;	/* Current directory block */   /* !wrw */
 extern BYTE backup_level;      /* Tells which DOS version made the BACKUP*/  /*;AN000;3*/
 
-struct file_header_new russ_file_header;/* Current file_header	     /* !wrw */
-unsigned short tot_num_fh_read_in;	/* Num FH read in so far     /* !wrw */
-unsigned short num_fh_in_buffer;	/* Num FH currently in buff  /* !wrw */
-unsigned short num_fh_in_buf_processed; /* Number of FH in the buffer that have been processed	  /* !wrw */
-struct file_header_new far *fheadnew;	/* Global pointer to FH      /* !wrw */
+struct file_header_new russ_file_header;/* Current file_header */	     /* !wrw */
+unsigned short tot_num_fh_read_in;	/* Num FH read in so far */     /* !wrw */
+unsigned short num_fh_in_buffer;	/* Num FH currently in buff */  /* !wrw */
+unsigned short num_fh_in_buf_processed; /* Number of FH in the buffer that have been processed */	  /* !wrw */
+struct file_header_new far *fheadnew;	/* Global pointer to FH */      /* !wrw */
 
 
 BYTE fileheader_length; 	/*;AN000;3 Length of a file header */
@@ -39,21 +39,21 @@ extern WORD control_bufsize;				     /* !wrw */
 
 /*   0 */
 /*****************  START OF SPECIFICATION  ********************************
-/*
-/*  SUBROUTINE NAME :  findfile_new
-/*
-/*  DESCRIPTIVE NAME : Find a file with matching file name from
-/*		       the file CONTROL.xxx.
-/*
-/*  FUNCTION: For new format only, search through all directory blocks
-/*	      and all file headers until a file header with matched file
-/*	      path, name and extension is found.   also store information
-/*	      into  fhead and finfo if file is found which match the
-/*	      filename and file extension specified in the command line.
-/*
-/*  NOTES: Path name for comparison has to started with \ and end with \.
-/*
-/********************** END OF SPECIFICATIONS *******************************/
+ *
+ *  SUBROUTINE NAME :  findfile_new
+ *
+ *  DESCRIPTIVE NAME : Find a file with matching file name from
+ *		       the file CONTROL.xxx.
+ *
+ *  FUNCTION: For new format only, search through all directory blocks
+ *	      and all file headers until a file header with matched file
+ *	      path, name and extension is found.   also store information
+ *	      into  fhead and finfo if file is found which match the
+ *	      filename and file extension specified in the command line.
+ *
+ *  NOTES: Path name for comparison has to started with \ and end with \.
+ *
+ ********************** END OF SPECIFICATIONS *******************************/
 int findfile_new( finfo, found, done_searching, inpath,
 	     infspec, dirptr, flptr, numentry, dir_path)
 
@@ -125,7 +125,7 @@ BYTE	 *dir_path;
 	   *numentry = (unsigned int)russ_dir_block.numentry;		     /* !wrw */
 
 	   if (got_first_fh == FALSE)					     /* !wrw */
-	    read_in_a_fileheader();		/*####			     /* !wrw */
+	    read_in_a_fileheader();		/*####*/		     /* !wrw */
 
 	   /****************************************************/
 	   /* search all the file headers under this directory */
@@ -258,21 +258,21 @@ BYTE	 *dir_path;
 
 /*   0 */
 /*****************  START OF SPECIFICATION  ********************************
-/*
-/*  SUBROUTINE NAME :  findnext_new
-/*
-/*  DESCRIPTIVE NAME : For new format only, continue at the point
-/*		       findfirst_new or previous findnext_new exit, search
-/*		       the entire file of CONTROL.xxx to find matching file
-/*		       names.
-/*
-/*  FUNCTION: Continue at where findfirst_new or previous findnext_new
-/*	      stop, search the current directory blocks for the matching
-/*	      file path, if fail to find a file, then call findfile to
-/*	      search all directory block.
-/*
-/*
-/********************** END OF SPECIFICATIONS *******************************/
+ *
+ *  SUBROUTINE NAME :  findnext_new
+ *
+ *  DESCRIPTIVE NAME : For new format only, continue at the point
+ *		       findfirst_new or previous findnext_new exit, search
+ *		       the entire file of CONTROL.xxx to find matching file
+ *		       names.
+ *
+ *  FUNCTION: Continue at where findfirst_new or previous findnext_new
+ *	      stop, search the current directory blocks for the matching
+ *	      file path, if fail to find a file, then call findfile to
+ *	      search all directory block.
+ *
+ *
+ ********************** END OF SPECIFICATIONS *******************************/
 int findnext_new(finfo, found, done_searching, in_path,
 	     infspec, dirptr, flptr, numentry, dir_path)
 
@@ -400,19 +400,19 @@ BYTE *dir_path;
 
 /*   0 */
 /*****************  START OF SPECIFICATION  ********************************
-/*
-/*  SUBROUTINE NAME :  findfirst_new
-/*
-/*  DESCRIPTIVE NAME : For new format only, search the entire file
-/*		       of CONTROL.xxx to find matching file names.
-/*
-/*  FUNCTION: search directory blocks one after the other to find the
-/*	      directory block with the matching file path, then search
-/*	      the entire directory block to find the file with matching
-/*	      file name.
-/*
-/*
-/********************** END OF SPECIFICATIONS *******************************/
+ *
+ *  SUBROUTINE NAME :  findfirst_new
+ *
+ *  DESCRIPTIVE NAME : For new format only, search the entire file
+ *		       of CONTROL.xxx to find matching file names.
+ *
+ *  FUNCTION: search directory blocks one after the other to find the
+ *	      directory block with the matching file path, then search
+ *	      the entire directory block to find the file with matching
+ *	      file name.
+ *
+ *
+ ********************** END OF SPECIFICATIONS *******************************/
 int findfirst_new(finfo,found,done_searching,in_path,infspec,dirptr,flptr,numentry,dir_path)
 
 struct file_info *finfo;
@@ -433,7 +433,7 @@ BYTE	 *dir_path;
 	read_in_first_dirblock();					/* !wrw */
 
 	if (got_first_fh == FALSE)				     /* !wrw */
-	  read_in_a_fileheader();	     /*###		     /* !wrw */
+	  read_in_a_fileheader();	     /*###*/		     /* !wrw */
 
 	*found = FALSE;
 	*done_searching = FALSE;
@@ -452,12 +452,12 @@ BYTE	 *dir_path;
 /*   0 */
 /*********************************************************************/
 /*
-/*	SUBROUTINE NAME: read_in_next_dirblock
-/*
-/*	FUNCTION:
-/*		Reads in a directory block
-/*		Figures out if it was put there by DOS 3.3 or 4.0
-/*********************************************************************/
+ *	SUBROUTINE NAME: read_in_next_dirblock
+ *
+ *	FUNCTION:
+ *		Reads in a directory block
+ *		Figures out if it was put there by DOS 3.3 or 4.0
+ *********************************************************************/
 void read_in_next_dirblock()					     /* !wrw */
 {
 
@@ -498,12 +498,12 @@ void read_in_next_dirblock()					     /* !wrw */
 
 /*********************************************************************/
 /*
-/*	SUBROUTINE NAME: read_in_first_dirblock
-/*
-/*	FUNCTION:
-/*		Reads in the first directory block
-/*		Figures out if it was put there by DOS 3.3 or 4.0
-/*********************************************************************/
+ *	SUBROUTINE NAME: read_in_first_dirblock
+ *
+ *	FUNCTION:
+ *		Reads in the first directory block
+ *		Figures out if it was put there by DOS 3.3 or 4.0
+ *********************************************************************/
 
 void read_in_first_dirblock()					     /* !wrw */
 {
@@ -536,11 +536,11 @@ WORD read_count;	/* num bytes read in	 */	     /* !wrw */
 
 /**************************************************************/
 /*
-/*	SUBROUTINE: get_fileheader_length
-/*
-/*	FUNCTION:   Gets the length of a file header
-/*		    Sets BACKUP_LEVEL to indicate which
-/**************************************************************/
+ *	SUBROUTINE: get_fileheader_length
+ *
+ *	FUNCTION:   Gets the length of a file header
+ *		    Sets BACKUP_LEVEL to indicate which
+ **************************************************************/
 void get_fileheader_length()
 {
 	WORD retcode;			/*;AN000;3*/
@@ -596,11 +596,11 @@ void get_fileheader_length()
 /*   0 */
 /**************************************************************/
 /*
-/*	SUBROUTINE: read_in_a_fileheader
-/*
-/*	FUNCTION:   Reads in a file header
-/*
-/**************************************************************/
+ *	SUBROUTINE: read_in_a_fileheader
+ *
+ *	FUNCTION:   Reads in a file header
+ *
+ **************************************************************/
 void read_in_a_fileheader()					     /* !wrw */
 {								     /* !wrw */
 WORD retcode;		/* return code save area */	     /* !wrw */

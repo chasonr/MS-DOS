@@ -1,15 +1,15 @@
 
 /*-----------------------------
-/* SOURCE FILE NAME:  RTDO1.C
-/*-----------------------------
-/*  0 */
+ * SOURCE FILE NAME:  RTDO1.C
+ *-----------------------------
+ *  0 */
 
+#include <string.h>
+#include <dos.h>                                                      /*;AN000;2*/
 #include "rt.h"
 #include "rt1.h"
 #include "rt2.h"
 #include "restpars.h"                                                 /*;AN000;4*/
-#include "string.h"
-#include "dos.h"                                                      /*;AN000;2*/
 #include "comsub.h"             /* common subroutine def'n */
 #include "doscalls.h"
 #include "error.h"
@@ -24,57 +24,53 @@ extern struct FileFindBuf filefindbuf;
 extern struct internat ctry;		  /* data area for get country info */
 extern struct  subst_list sublist;				      /*;AN000;6 Message substitution list */
 /*****************  START OF SPECIFICATION  ********************************
-/*
-/*  SUBROUTINE NAME :  check_bkdisk_new
-/*
-/*  DESCRIPTIVE NAME : For new format only, check to see whether the disk
-/*		       is a backup disk, and whether the disk is in right
-/*		       sequence.
-/*
-/*  FUNCTION: The routine does the following:
-/*	      1. Find the file CONTROL.xxx.  If the file is not there
-/*		 the disk is not a backup disk.
-/*	      2. validate the extension of control.xxx
-/*	      3. Check the sequence number of the disk to make sure
-/*		 its in sequence.
-/*	      4. Open the file CONTROL.xxx.
-/*	      5. Read the file CONTROL.xxx in.
-/*	      6. Fill dinfo with correct information.
-/*	      7. Output a message to the screen to confirm that
-/*		 the disk is going to be restored.
-/*
-/*  NOTES:  This subroutine also take care of situation that user
-/*	    insert a old format diskette while the RESTORE started with
-/*	    new format diskettes.
-/*
-/*	    When the inserted disk does not contain the file CONTROL.xxx,
-/*	    a message "source file does not contains backup files" is
-/*	    output to the user.  If the user wants to change diskette
-/*	    and try again, next diskette will be read.
-/*
-/*	    When disk is out of sequence, a 'warning' is given to user,
-/*	    if the user still wants to proceed the restoring by doing
-/*	    nothing but hit a key, the same diskette will be read again.
-/*	    In case of expanded file, another check for dnum of the expand
-/*	    file will guarantee the disk in sequence.
-/*
-/*
-/********************** END OF SPECIFICATIONS *******************************/
-void check_bkdisk_new(dheadnew, dinfo, srcd, dnumwant,control_bufsize) /* wrw! */
-
-struct disk_header_new far *dheadnew;
-struct disk_info *dinfo;
-BYTE srcd;
-unsigned int *dnumwant;
-unsigned int *control_bufsize;
+ *
+ *  SUBROUTINE NAME :  check_bkdisk_new
+ *
+ *  DESCRIPTIVE NAME : For new format only, check to see whether the disk
+ *		       is a backup disk, and whether the disk is in right
+ *		       sequence.
+ *
+ *  FUNCTION: The routine does the following:
+ *	      1. Find the file CONTROL.xxx.  If the file is not there
+ *		 the disk is not a backup disk.
+ *	      2. validate the extension of control.xxx
+ *	      3. Check the sequence number of the disk to make sure
+ *		 its in sequence.
+ *	      4. Open the file CONTROL.xxx.
+ *	      5. Read the file CONTROL.xxx in.
+ *	      6. Fill dinfo with correct information.
+ *	      7. Output a message to the screen to confirm that
+ *		 the disk is going to be restored.
+ *
+ *  NOTES:  This subroutine also take care of situation that user
+ *	    insert a old format diskette while the RESTORE started with
+ *	    new format diskettes.
+ *
+ *	    When the inserted disk does not contain the file CONTROL.xxx,
+ *	    a message "source file does not contains backup files" is
+ *	    output to the user.  If the user wants to change diskette
+ *	    and try again, next diskette will be read.
+ *
+ *	    When disk is out of sequence, a 'warning' is given to user,
+ *	    if the user still wants to proceed the restoring by doing
+ *	    nothing but hit a key, the same diskette will be read again.
+ *	    In case of expanded file, another check for dnum of the expand
+ *	    file will guarantee the disk in sequence.
+ *
+ *
+ ********************** END OF SPECIFICATIONS *******************************/
+void check_bkdisk_new( /* wrw! */
+        struct disk_header_new far *dheadnew,
+        struct disk_info *dinfo,
+        BYTE srcd,
+        unsigned int *dnumwant)
 {
      WORD dnumok = FALSE;
      WORD disknum;  /*disk number carried by the file name backup.xxx*/
      BYTE fname_to_be_opened[13];
-     WORD numread;
      BYTE temp_array1[4];
      BYTE temp_array2[4];
-     BYTE c;
      WORD read_count;
      WORD action;
 
@@ -267,39 +263,39 @@ unsigned int *control_bufsize;
 } /*end of subroutine */
 
 /*****************  START OF SPECIFICATION  ********************************
-/*
-/*  SUBROUTINE NAME :  check_bkdisk_old
-/*
-/*  DESCRIPTIVE NAME : For old format only, check to see whether the disk
-/*		       is a backup disk, and whether the disk is in right
-/*		       sequence.
-/*
-/*  FUNCTION: The routine does the following:
-/*	      1. Open the file BACKUPID.@@@.  If the file is not there,
-/*		 the disk is not a backup disk.
-/*	      3. Check the sequence number of the disk to make sure
-/*		 its in sequence.
-/*	      4. Fill dinfo with correct information.
-/*	      5. Output a message to the screen to confirm that
-/*		 the disk is going to be restored.
-/*
-/*  NOTES:  This subroutine also take care of situation that user
-/*	    insert a new format diskette while the RESTORE started with
-/*	    old format diskettes.
-/*
-/*	    When the inserted disk does not contain the file BACKUP.@@@,
-/*	    a message "source file does not contains backup files" is
-/*	    output to the user.  If the user wants to change diskette
-/*	    and try again, next diskette will be read.
-/*
-/*	    When disk is out of sequence, a 'warning' is given to user,
-/*	    if the user still wants to proceed the restoring by doing
-/*	    nothing but hit a key, the same diskette will be read again.
-/*	    In case of expanded file, another check for dnum of the expand
-/*	    file will guarantee the disk in sequence.
-/*
-/*
-/********************** END OF SPECIFICATIONS *******************************/
+ *
+ *  SUBROUTINE NAME :  check_bkdisk_old
+ *
+ *  DESCRIPTIVE NAME : For old format only, check to see whether the disk
+ *		       is a backup disk, and whether the disk is in right
+ *		       sequence.
+ *
+ *  FUNCTION: The routine does the following:
+ *	      1. Open the file BACKUPID.@@@.  If the file is not there,
+ *		 the disk is not a backup disk.
+ *	      3. Check the sequence number of the disk to make sure
+ *		 its in sequence.
+ *	      4. Fill dinfo with correct information.
+ *	      5. Output a message to the screen to confirm that
+ *		 the disk is going to be restored.
+ *
+ *  NOTES:  This subroutine also take care of situation that user
+ *	    insert a new format diskette while the RESTORE started with
+ *	    old format diskettes.
+ *
+ *	    When the inserted disk does not contain the file BACKUP.@@@,
+ *	    a message "source file does not contains backup files" is
+ *	    output to the user.  If the user wants to change diskette
+ *	    and try again, next diskette will be read.
+ *
+ *	    When disk is out of sequence, a 'warning' is given to user,
+ *	    if the user still wants to proceed the restoring by doing
+ *	    nothing but hit a key, the same diskette will be read again.
+ *	    In case of expanded file, another check for dnum of the expand
+ *	    file will guarantee the disk in sequence.
+ *
+ *
+ ********************** END OF SPECIFICATIONS *******************************/
 void check_bkdisk_old(dheadold, dinfo, srcd, dnumwant) /* wrw! */
      struct disk_header_old *dheadold;
      struct disk_info *dinfo;
@@ -314,11 +310,8 @@ void check_bkdisk_old(dheadold, dinfo, srcd, dnumwant) /* wrw! */
      char fname_to_be_opened[13];
      int numread;
      int dyear;
-     int dmonth;
-     int dday;
      char temp_array1[4];
      char temp_array2[4];
-     BYTE c;
 
    /********************************************************************/
    /* open and read backupid.@@@.  Store information in backupid.@@@   */
@@ -416,5 +409,3 @@ void check_bkdisk_old(dheadold, dinfo, srcd, dnumwant) /* wrw! */
    *dnumwant = dinfo->disknum + 1;
    return;							      /*;AN000;*/
 } /*end of subroutine */
-
-

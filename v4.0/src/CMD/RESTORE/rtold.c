@@ -1,15 +1,15 @@
 
 /*----------------------------
-/* SOURCE FILE NAME:   RTOLD.C
-/*----------------------------
-/*  0 */
+ * SOURCE FILE NAME:   RTOLD.C
+ *----------------------------
+ *  0 */
 
+#include <string.h>
+#include <dos.h>                                                      /*;AN000;2*/
 #include "rt.h"
 #include "rt1.h"
 #include "rt2.h"
 #include "restpars.h"                                                    /*;AN000;4*/
-#include "string.h"
-#include "dos.h"                                                      /*;AN000;2*/
 #include "comsub.h"             /* common subroutine def'n */
 #include "doscalls.h"
 #include "error.h"
@@ -45,36 +45,25 @@ extern struct  subst_list sublist;				      /*;AN000;6 Message substitution list
 /*									    */
 /*									    */
 /********************** END OF SPECIFICATIONS *******************************/
-void search_src_disk_old(dinfo,finfo,dheadold,dheadnew,fheadnew, /* wrw! */
-		    srcd,destd,buf_size,dnumwant,
-		    inpath,infname,infext,infspec,td)
-
-     struct disk_info *dinfo;
-     struct file_info *finfo;
-     struct disk_header_old *dheadold;
-     struct file_header_new far *fheadnew;
-     struct disk_header_new far *dheadnew;
-     BYTE   srcd;
-     BYTE   destd;
-     unsigned long buf_size;
-     unsigned int *dnumwant;
-     unsigned char *inpath;
-     unsigned char *infname;
-     unsigned char *infext;
-     unsigned char *infspec;
-     struct timedate *td;
-
+void search_src_disk_old( /* wrw! */
+         struct disk_info *dinfo,
+         struct file_info *finfo,
+         struct disk_header_old *dheadold,
+         struct disk_header_new far *dheadnew,
+         BYTE   srcd,
+         BYTE   destd,
+         unsigned long buf_size,
+         unsigned int *dnumwant,
+         unsigned char *inpath,
+         unsigned char *infname,
+         unsigned char *infspec,
+         struct timedate *td)
 {
      BYTE outstring[MAXPATH+MAXFSPEC];
      WORD    file_seq_num=1;
      WORD    first_file_on_diskette = TRUE;
      WORD    first_time_in_loop = TRUE;
-     WORD return_code;
-     DWORD partsize;
-     unsigned int control_bufsize;
      BYTE temp_fname[MAXFNAME];
-     BYTE temp_path[MAXPATH];
-     WORD  temp_dirhandle;
 
 
     /*declaration for dosfindfirst */
@@ -140,7 +129,7 @@ do
 	       retcode = check_flheader_old( finfo, temp_fname,
 		     filefindbuf.write_date, filefindbuf.write_time,
 		     filefindbuf.attributes, filefindbuf.file_size,
-		     file_seq_num, srcd, destd, infspec, inpath, dnumwant);
+		     srcd, infspec, inpath, dnumwant);
 
 	    if (retcode == 0) {
 
@@ -159,7 +148,7 @@ do
 	       /*************************************************************************/
 	    if ((set_reset_test_flag(&control_flag,SWITCHES,TEST) == FALSE) ||
 	       (set_reset_test_flag(&control_flag,SWITCHES,TEST) == TRUE &&
-	       ((retcode = switchmatch(finfo, srcd, destd, td)) == TRUE) )) {
+	       ((retcode = switchmatch(finfo, destd, td)) == TRUE) )) {
 
 	       /*************************************************************************/
 	       /*if dnum in fheadold.disknum is not 1 and is not in sequence, error    */
@@ -198,8 +187,8 @@ do
 	       /*************************************************************************/
 	       /* call restore_a_file to restore the file				*/
 	       /*************************************************************************/
-		restore_a_file(finfo,dinfo,buf_size,&control_bufsize,
-			  fheadnew,dheadold,dheadnew,
+		restore_a_file(finfo,dinfo,buf_size,
+			  dheadold,dheadnew,
 			  srcd,destd,inpath,infname,infspec,dnumwant,&dirhandle);
 
 	       first_file_on_diskette = FALSE;

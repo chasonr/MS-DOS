@@ -3,100 +3,100 @@
 
 /**************************************************************************/
 /*
-/*  MODULE NAME :  RESTORE utility
+ *  MODULE NAME :  RESTORE utility
+ *
+ *  SOURCE FILE NAME: RESTORE.C
+ *
+ *  DESCRIPTIVE NAME : Restore one or more backed-up files from a
+ *		       disk to another disk
+ *
+ *  FUNCTION: Restore files saved by BACKUP utility to their
+ *	      destination disk.  This utility will be able to identify
+ *	      which of the two backup formats was used and to do the
+ *	      restore accordingly.
+ *
+ *  NOTES:  This RESTORE utility recognize two data formats:
+ *	    1. The data format used by BACKUP utility of 3.2 and before.
+ *	    2. The data format used by BACKUP utility of 3.3 and above,
+ *	       and also used by CP/DOS 1.0 and above.
+ *
+ *	    DEPENDENCY:
+ *	    This utility has a dependency on the BACKUP utility to
+ *	    perform file backup correctly using the data structure
+ *	    agreed on.
+ *
+ *	    RESTRICTION:
+ *	    This utility is able to restore the files which are previously
+ *	    backup by the BACKUP utility only.
+ *
+ *  ENTRY POINT: Main
+ *
+ *  INPUT: (PARAMETERS)
+ *
+ *	COMMAND SYNTAX:
+ *	      [d:][path]Restore d: [d:][path][filename][.ext]
+ *	      [/S] [/P] [/B:date] [/A:date] [/E:time][/L:time][/M] [/N]
+ *
+ *	Parameters:
+ *	      The first parameter you specify is the drive designator of
+ *	      the disk containing the backed up files.	The second
+ *	      parameter is the a filespec indicating which files you want
+ *	      to restore.
+ *	Switches:
+ *	      /S - Restore subdirectories too.
+ *	      /P - If any hidden or read-only files match the filespec,
+ *		   prompt the user for permission to restore them.
+ *	      /B - Only restore those files which were last Revised on or
+ *		   before the given date.
+ *	      /A - Only restore those files which were last Revised on or
+ *		   after the given date.
+ *	      /E - Only restore those files which were last Revised at or
+ *		   earlier then the given time.
+ *	      /L - Only restore those files which were last Revised at or
+ *		   later then the given time.
+ *	      /M - Only restore those files which have been Revised since
+ *		   the last backup.
+ *	      /N - Only restore those files which no longer exist on the
+ *		   destination disk.
+ *
+ *  EXIT-ERROR:
+ *	 The restore program sets the ERRORLEVEL in the following manner:
+ *
+ *	   0   Normal completion
+ *	   1   No files were found to backup
+ *	   2   Some files not restored due to sharing conflict
+ *	   3   Terminated by user
+ *	   4   Terminated due to error
+ *
+ *
+ *   SOURCE HISTORY:
+ *
+ *	Modification History:
+ *
+ *	   Code added in DOS 3.3 to allow control file > 64k commented as: */
+  	   /* !wrw */
 /*
-/*  SOURCE FILE NAME: RESTORE.C
-/*
-/*  DESCRIPTIVE NAME : Restore one or more backed-up files from a
-/*		       disk to another disk
-/*
-/*  FUNCTION: Restore files saved by BACKUP utility to their
-/*	      destination disk.  This utility will be able to identify
-/*	      which of the two backup formats was used and to do the
-/*	      restore accordingly.
-/*
-/*  NOTES:  This RESTORE utility recognize two data formats:
-/*	    1. The data format used by BACKUP utility of 3.2 and before.
-/*	    2. The data format used by BACKUP utility of 3.3 and above,
-/*	       and also used by CP/DOS 1.0 and above.
-/*
-/*	    DEPENDENCY:
-/*	    This utility has a dependency on the BACKUP utility to
-/*	    perform file backup correctly using the data structure
-/*	    agreed on.
-/*
-/*	    RESTRICTION:
-/*	    This utility is able to restore the files which are previously
-/*	    backup by the BACKUP utility only.
-/*
-/*  ENTRY POINT: Main
-/*
-/*  INPUT: (PARAMETERS)
-/*
-/*	COMMAND SYNTAX:
-/*	      [d:][path]Restore d: [d:][path][filename][.ext]
-/*	      [/S] [/P] [/B:date] [/A:date] [/E:time][/L:time][/M] [/N]
-/*
-/*	Parameters:
-/*	      The first parameter you specify is the drive designator of
-/*	      the disk containing the backed up files.	The second
-/*	      parameter is the a filespec indicating which files you want
-/*	      to restore.
-/*	Switches:
-/*	      /S - Restore subdirectories too.
-/*	      /P - If any hidden or read-only files match the filespec,
-/*		   prompt the user for permission to restore them.
-/*	      /B - Only restore those files which were last Revised on or
-/*		   before the given date.
-/*	      /A - Only restore those files which were last Revised on or
-/*		   after the given date.
-/*	      /E - Only restore those files which were last Revised at or
-/*		   earlier then the given time.
-/*	      /L - Only restore those files which were last Revised at or
-/*		   later then the given time.
-/*	      /M - Only restore those files which have been Revised since
-/*		   the last backup.
-/*	      /N - Only restore those files which no longer exist on the
-/*		   destination disk.
-/*
-/*  EXIT-ERROR:
-/*	 The restore program sets the ERRORLEVEL in the following manner:
-/*
-/*	   0   Normal completion
-/*	   1   No files were found to backup
-/*	   2   Some files not restored due to sharing conflict
-/*	   3   Terminated by user
-/*	   4   Terminated due to error
-/*
-/*
-/*   SOURCE HISTORY:
-/*
-/*	Modification History:
-/*
-/*	   Code added in DOS 3.3 to allow control file > 64k commented as:
-/*	   /* !wrw */
-/*
-/*	 ;AN000; Code added in DOS 4.0
-/*		;AN000;2  Support for APPEND /X deactivation
-/*		;AN000;3  Support for Extended Attributes
-/*		;AN000;4  Support for PARSE service routines
-/*		;AN000;5  Support for code page file tags
-/*		;AN000;6  Support for MESSAGE retriever
-/*		;AN000;8  Eliminate double prompting on single drive systems
-/*		;AN000;9  Fix for termination on "Unable to MKDIR"
-/*		;AN000;10 Fix for p1620
-/*		;AN001;   Add CR, LF to end of command line
-/*		;AN002;   Make parser errors display the offending parameter
-/*		;AN003;   Only disallow restore of system files in ROOT !!
-/*		;AN004;   Fix parser
-/*		;AN005;   Replace COM_STRRCHR dbcs routine, fixes p5029
-/*****************  END OF SPECIFICATION    *********************************/
+ *	 ;AN000; Code added in DOS 4.0
+ *		;AN000;2  Support for APPEND /X deactivation
+ *		;AN000;3  Support for Extended Attributes
+ *		;AN000;4  Support for PARSE service routines
+ *		;AN000;5  Support for code page file tags
+ *		;AN000;6  Support for MESSAGE retriever
+ *		;AN000;8  Eliminate double prompting on single drive systems
+ *		;AN000;9  Fix for termination on "Unable to MKDIR"
+ *		;AN000;10 Fix for p1620
+ *		;AN001;   Add CR, LF to end of command line
+ *		;AN002;   Make parser errors display the offending parameter
+ *		;AN003;   Only disallow restore of system files in ROOT !!
+ *		;AN004;   Fix parser
+ *		;AN005;   Replace COM_STRRCHR dbcs routine, fixes p5029
+ *****************  END OF SPECIFICATION    *********************************/
 
+#include <dos.h>                                                      /*;AN000;2*/
 #include "rt.h"
 #include "rt1.h"
 #include "rt2.h"
 #include "restpars.h"                                                 /*;AN000;4*/
-#include "dos.h"                                                      /*;AN000;2*/
 #include "comsub.h"             /* common subroutine def'n */
 #include "doscalls.h"
 #include "error.h"
@@ -107,7 +107,6 @@ BYTE srcddir[MAXPATH+3] = {'\0'};
 BYTE rtswitch=0;
 BYTE control_flag=0;
 BYTE control_flag2=0;
-BYTE *buf_pointer;
 
 /*=============================*/
 BYTE srcd;							      /*;AN000;4*/
@@ -132,37 +131,33 @@ struct timedate td;
 
 /*****************  START OF SPECIFICATION  *********************************/
 /*
-/*  SUBROUTINE NAME :  Main
-/*
-/*  DESCRIPTIVE NAME : Main routine for RESTORE utility
-/*
-/*  FUNCTION: Main routine does the following:
-/*	      1. Verifies the DOS version
-/*	      2. Validate the input command line
-/*	      3. Calls dorestore to do the file restore.
-/*
-/*  NOTES:
-/*
-/*  ENTRY POINT: Main
-/*	Linkage: main((argc,argv)
-/*
-/*  INPUT: (PARAMETERS)
-/*	   argc - number of arguments
-/*	   argv - array of pointers to arguments
-/*
-/*  EFFECTS: rtswitch is changed to reflect the switches passed.
-/*
-/********************** END OF SPECIFICATIONS *******************************/
+ *  SUBROUTINE NAME :  Main
+ *
+ *  DESCRIPTIVE NAME : Main routine for RESTORE utility
+ *
+ *  FUNCTION: Main routine does the following:
+ *	      1. Verifies the DOS version
+ *	      2. Validate the input command line
+ *	      3. Calls dorestore to do the file restore.
+ *
+ *  NOTES:
+ *
+ *  ENTRY POINT: Main
+ *	Linkage: main((argc,argv)
+ *
+ *  INPUT: (PARAMETERS)
+ *	   argc - number of arguments
+ *	   argv - array of pointers to arguments
+ *
+ *  EFFECTS: rtswitch is changed to reflect the switches passed.
+ *
+ ********************** END OF SPECIFICATIONS *******************************/
 void main(argc,argv)  /* wrw! */
     int argc;
     char *argv[];
 {
    WORD retcode;
    union REGS inregs,outregs;						/*AN000*/
-   WORD  i;		/*loop counter */
-   WORD  j;		/*arrary subcript */
-   BYTE *c;
-   DWORD drive_map;
    DWORD prev_address;
    WORD  prev_action;
 
@@ -222,7 +217,7 @@ void main(argc,argv)  /* wrw! */
    /************************************************************/
    /* call dorestore (RTDO.C) to actually do the restoring     */
    /************************************************************/
-   dorestore(srcd,destd,inpath,infname,infext,infspec,&td);
+   dorestore(srcd,destd,inpath,infname,infspec,&td);
 
    /************************************************************/
    /* output a msg in the following situations: 	       */

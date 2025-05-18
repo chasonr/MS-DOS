@@ -74,7 +74,7 @@ extern unsigned comcheckdosver();
 /*
  *  return code conversion to message id
  */
-extern unsigned rctomid(
+extern unsigned __cdecl rctomid(
 	unsigned);	   /* return code to converted to msg id */
 
 /*
@@ -138,7 +138,7 @@ extern char *com_strchr(
 /*
  *   convert character to uppercase
  */
-extern int com_toupper(
+extern int __cdecl com_toupper(
    unsigned char );	      /* character to be converted to uppercase */
 
 /*

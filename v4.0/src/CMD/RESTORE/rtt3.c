@@ -1,19 +1,19 @@
 
 /*---------------------------------
-/* SOURCE FILE NAME:  RTT3.C
-/*---------------------------------
-/*  0 */
+ * SOURCE FILE NAME:  RTT3.C
+ *---------------------------------
+ *  0 */
 
+#include <string.h>
+#include <direct.h>
+#include <dos.h>                                                      /*;AN000;2*/
+#include <process.h>                                                  /*;AN000;p972*/
 #include "rt.h"
 #include "rt1.h"
 #include "rt2.h"
-#include "direct.h"
-#include "string.h"
-#include "dos.h"                                                      /*;AN000;2*/
 #include "comsub.h"             /* common subroutine def'n */
 #include "doscalls.h"
 #include "error.h"
-#include "process.h"                                                  /*;AN000;p972*/
 
 extern BYTE filename[12];
 extern BYTE destddir[MAXPATH+3];
@@ -34,23 +34,23 @@ BYTE far *DBCS_ptr;						      /*;AN005;*/
 char  got_dbcs_vector = FFALSE; 				      /*;AN005;*/
 
 /*****************  START OF SPECIFICATION  ********************************
-/*
-/*  SUBROUTINE NAME :  set_reset_test_flag
-/*
-/*  DESCRIPTIVE NAME :	to set a flag, reset a flag, or test a flag.
-/*
-/*  FUNCTION: This subroutine is called when there is a need to set
-/*	      a flag, reset a flag, or test a flag.
-/*  NOTES:
-/*
-/*  INPUT: (PARAMETERS)
-/*	    flag - the flag to be set, reset, or tested.
-/*	    targetbt - the target bit to be set, reset, or tested.
-/*	    choice - = 1 if want to set
-/*		     = 2 if want to reset
-/*		     = 3 if want to test
-/*
-/********************* END OF SPECIFICATIONS ********************************/
+ *
+ *  SUBROUTINE NAME :  set_reset_test_flag
+ *
+ *  DESCRIPTIVE NAME :	to set a flag, reset a flag, or test a flag.
+ *
+ *  FUNCTION: This subroutine is called when there is a need to set
+ *	      a flag, reset a flag, or test a flag.
+ *  NOTES:
+ *
+ *  INPUT: (PARAMETERS)
+ *	    flag - the flag to be set, reset, or tested.
+ *	    targetbt - the target bit to be set, reset, or tested.
+ *	    choice - = 1 if want to set
+ *		     = 2 if want to reset
+ *		     = 3 if want to test
+ *
+ ********************* END OF SPECIFICATIONS ********************************/
 int set_reset_test_flag(flag,targetbt,choice)
 
      BYTE *flag;	/*the flag to be tested against*/
@@ -88,37 +88,37 @@ default:
 
 }
 /*****************  START OF SPECIFICATION  ********************************
-/*
-/*  SUBROUTINE NAME :  separate
-/*
-/*  DESCRIPTIVE NAME : Separate the given input string into 3 parts;
-/*		       which is the path, filename, file extension, and
-/*		       file specification.
-/*
-/*  FUNCTION: The subroutine searches the input string for the last '\',
-/*	      which separates the path and file specification, and then
-/*	      searches the file specification for '.', which separates
-/*	      the filename and file extension.	Also take care the
-/*	      situation of the user enter '.' for file specification.
-/*	      This subroutine also validate the file specification
-/*	      and each path entered by the user by calling common
-/*	      subroutine Comverflnm.
-/*
-/*  NOTE: The input string must start with '\'
-/*	  All the output string are terminated by 00h
-/*
-/*  INPUT: (PARAMETERS)
-/*	   instring - input string to be separated into path, filename,
-/*		      and file extension.
-/*
-/*  OUTPUT:
-/*	   path     - output path name, always starts with '\' and not end
-/*		      with '\'
-/*	   filename - output file name
-/*	   fileext  - output file extension
-/*	   filespec - output file name and file extension
-/*
-/********************** END OF SPECIFICATIONS *******************************/
+ *
+ *  SUBROUTINE NAME :  separate
+ *
+ *  DESCRIPTIVE NAME : Separate the given input string into 3 parts;
+ *		       which is the path, filename, file extension, and
+ *		       file specification.
+ *
+ *  FUNCTION: The subroutine searches the input string for the last '\',
+ *	      which separates the path and file specification, and then
+ *	      searches the file specification for '.', which separates
+ *	      the filename and file extension.	Also take care the
+ *	      situation of the user enter '.' for file specification.
+ *	      This subroutine also validate the file specification
+ *	      and each path entered by the user by calling common
+ *	      subroutine Comverflnm.
+ *
+ *  NOTE: The input string must start with '\'
+ *	  All the output string are terminated by 00h
+ *
+ *  INPUT: (PARAMETERS)
+ *	   instring - input string to be separated into path, filename,
+ *		      and file extension.
+ *
+ *  OUTPUT:
+ *	   path     - output path name, always starts with '\' and not end
+ *		      with '\'
+ *	   filename - output file name
+ *	   fileext  - output file extension
+ *	   filespec - output file name and file extension
+ *
+ ********************** END OF SPECIFICATIONS *******************************/
 void separate(instring,path,filename,fileext,filespec)
 BYTE *instring; 	/* point to beginning of input string */
 BYTE *path;		/* point to beginning of path string  */
@@ -132,11 +132,11 @@ BYTE *filespec; 	/* point to beginning of file spec    */
 
 /*++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 		/* Find last non-DBCS backslash character */
-/*    fptr = com_strrchr(instring,'\\');                              /*;AN000;p2532*/
+/*    fptr = com_strrchr(instring,'\\'); */                            /*;AN000;p2532*/
 
       for (							       /*;AN005;*/
 	   i=strlen(instring);					       /*;AN005;*/
-	   (i>=0) && (!chek_DBCS(instring,i,'\\'));                    /*;AN005;*/
+	   (!chek_DBCS(instring,i,'\\'));                              /*;AN005;*/
 	   i--							       /*;AN005;*/
 	  )							       /*;AN005;*/
        {};							       /*;AN005;*/
@@ -193,18 +193,18 @@ BYTE *filespec; 	/* point to beginning of file spec    */
 
 
 /*****************  START OF SPECIFICATION  ********************************
-/*
-/*  SUBROUTINE NAME :  initbuf
-/*
-/*  DESCRIPTIVE NAME : Initialize buffer for reading and writting.
-/*
-/*  FUNCTION: Allocate up to 64 K bytes buffer for reading and writing
-/*	      data, and make sure its size is divisible by the sector
-/*	      size of the restore drive.
-/*
-/*  NOTES:
-/*
-/********************** END OF SPECIFICATIONS *******************************/
+ *
+ *  SUBROUTINE NAME :  initbuf
+ *
+ *  DESCRIPTIVE NAME : Initialize buffer for reading and writting.
+ *
+ *  FUNCTION: Allocate up to 64 K bytes buffer for reading and writing
+ *	      data, and make sure its size is divisible by the sector
+ *	      size of the restore drive.
+ *
+ *  NOTES:
+ *
+ ********************** END OF SPECIFICATIONS *******************************/
 
 void initbuf(bufsize_long)
     DWORD *bufsize_long;
@@ -234,8 +234,7 @@ void initbuf(bufsize_long)
       usererror(INSUFMEM);
     }
 
-    FP_SEG( buf_pointer ) = selector;
-    FP_OFF( buf_pointer ) = 0 ;
+    buf_pointer = MK_FP(selector, 0);
 
     if (bufsize == 0)
        *bufsize_long = (DWORD)MAXBUF;
@@ -244,21 +243,19 @@ void initbuf(bufsize_long)
 } /*end of subroutine*/
 
 /*****************  START OF SPECIFICATION  ********************************
-/*
-/*  SUBROUTINE NAME :  init_control_buf
-/*
-/*  DESCRIPTIVE NAME : Initialize buffer for control.XXX.
-/*
-/*  FUNCTION: Allocate buffer for reading in control.xxx
-/*
-/*  OUTPUT:
-/*	   control_bufsize - the size of buffer
-/*
-/*
-/********************** END OF SPECIFICATIONS *******************************/
-void init_control_buf(control_file_len,control_bufsize) 	   /* !wrw */
-    DWORD control_file_len;					   /* !wrw */
-    unsigned int  *control_bufsize;				   /* !wrw */
+ *
+ *  SUBROUTINE NAME :  init_control_buf
+ *
+ *  DESCRIPTIVE NAME : Initialize buffer for control.XXX.
+ *
+ *  FUNCTION: Allocate buffer for reading in control.xxx
+ *
+ *  OUTPUT:
+ *	   control_bufsize - the size of buffer
+ *
+ *
+ ********************** END OF SPECIFICATIONS *******************************/
+void init_control_buf(unsigned int *control_bufsize)				   /* !wrw */
 {								   /* !wrw */
     unsigned bufsize;						   /* !wrw */
     WORD retcode;						   /* !wrw */
@@ -271,30 +268,29 @@ void init_control_buf(control_file_len,control_bufsize) 	   /* !wrw */
 			 ( unsigned) 0 );			     /* !wrw */
 
 
-   if ( retcode != 0)		/* If there is insufficient memory /* !wrw */
+   if ( retcode != 0)		/* If there is insufficient memory */ /* !wrw */
    {								   /* !wrw */
      display_it(INSUFFICIENT_MEMORY,STND_ERR_DEV,0,NO_RESPTYPE,(BYTE)UTIL_MSG);      /*;AN000;6*/
      usererror(INSUFMEM);
     }								   /* !wrw */
 
-    FP_SEG( control_buf_pointer ) = control_selector;		   /* !wrw */
-    FP_OFF( control_buf_pointer ) = 0 ; 			   /* !wrw */
+    control_buf_pointer = MK_FP(control_selector, 0);
 
     *control_bufsize = bufsize; 				   /* !wrw */
 
 } /*end of subroutine*/ 					   /* !wrw */
 
 /*****************  START OF SPECIFICATION  ********************************
-/*
-/*  SUBROUTINE NAME :  unexperror
-/*
-/*  DESCRIPTIVE NAME : exit the program because of something really bad
-/*		       occures
-/*
-/*  FUNCTION: Exit the program because of unexpected error
-/*
-/*
-/********************** END OF SPECIFICATIONS *******************************/
+ *
+ *  SUBROUTINE NAME :  unexperror
+ *
+ *  DESCRIPTIVE NAME : exit the program because of something really bad
+ *		       occures
+ *
+ *  FUNCTION: Exit the program because of unexpected error
+ *
+ *
+ ********************** END OF SPECIFICATIONS *******************************/
 void unexperror(retcode)
 WORD retcode;
 {
@@ -303,12 +299,12 @@ WORD retcode;
 }
 
 /*****************  START OF SPECIFICATION  ********************************
-/*
-/*  SUBROUTINE NAME :  usererror
-/*
-/*  DESCRIPTIVE NAME : exit the program because of a user error
-/*
-/********************** END OF SPECIFICATIONS *******************************/
+ *
+ *  SUBROUTINE NAME :  usererror
+ *
+ *  DESCRIPTIVE NAME : exit the program because of a user error
+ *
+ ********************** END OF SPECIFICATIONS *******************************/
 void usererror(retcode)
 WORD retcode;
 {
@@ -317,22 +313,22 @@ WORD retcode;
 }
 
 /*****************  START OF SPECIFICATION  ********************************
-/*
-/*  SUBROUTINE NAME :  exit_routine
-/*
-/*  DESCRIPTIVE NAME : exit the program
-/*
-/*  FUNCTION: 1. output msg if there is a sharing error.
-/*	      2. if PCDOS, convert return codes to error levels
-/*	      3. exit the program
-/*
-/*  NOTES:
-/*
-/*  INPUT: (PARAMETERS)
-/*	 retcode - the reason of error
-/*
-/*
-/********************** END OF SPECIFICATIONS *******************************/
+ *
+ *  SUBROUTINE NAME :  exit_routine
+ *
+ *  DESCRIPTIVE NAME : exit the program
+ *
+ *  FUNCTION: 1. output msg if there is a sharing error.
+ *	      2. if PCDOS, convert return codes to error levels
+ *	      3. exit the program
+ *
+ *  NOTES:
+ *
+ *  INPUT: (PARAMETERS)
+ *	 retcode - the reason of error
+ *
+ *
+ ********************** END OF SPECIFICATIONS *******************************/
 void exit_routine(retcode)
 WORD retcode;
 {
@@ -373,21 +369,21 @@ WORD retcode;
 
 }
 /*****************  START OF SPECIFICATION  ********************************
-/*
-/*  SUBROUTINE NAME :  signal_handler_routine
-/*
-/*  DESCRIPTIVE NAME :	handle the situation that the user terminate
-/*			the program by Control-break.
-/*
-/*  FUNCTION: This subroutine change the directory of the
-/*	      destination disk back to the original directory.
-/*	      If there is a file in the middle of restoring, close
-/*	      the file, deleted the partially restored file, and
-/*	      output a message.
-/*	      Then exit with error level TUSER.
-/*
-/*
-/********************** END OF SPECIFICATIONS *******************************/
+ *
+ *  SUBROUTINE NAME :  signal_handler_routine
+ *
+ *  DESCRIPTIVE NAME :	handle the situation that the user terminate
+ *			the program by Control-break.
+ *
+ *  FUNCTION: This subroutine change the directory of the
+ *	      destination disk back to the original directory.
+ *	      If there is a file in the middle of restoring, close
+ *	      the file, deleted the partially restored file, and
+ *	      output a message.
+ *	      Then exit with error level TUSER.
+ *
+ *
+ ********************** END OF SPECIFICATIONS *******************************/
 void pascal far signal_handler_routine()
 {
    WORD retcode;
@@ -425,33 +421,33 @@ void pascal far signal_handler_routine()
 
 /************************************************************/
 /*
-/*   SUBROUTINE NAME:	   display_it  (added for DOS 4.00)
-/*
-/*   SUBROUTINE FUNCTION:
-/*	   Display the requested message to the standard output device.
-/*
-/*   INPUT:
-/*	   1) (WORD) Number of the message to be displayed.
-/*	   2) (WORD) Handle to be written to.
-/*	   3) (WORD) Substitution Count
-/*	   4) (WORD) Flag indicating user should "Strike any key..."
-/*
-/*   OUTPUT:
-/*	   The message corresponding to the requested msg number will
-/*	   be written to the requested handle.	If requested, substitution
-/*	   text will be inserted as required.  The Substitution List
-/*	   is global and, if used, will be initialized by DISPLAY_MSG
-/*	   before calling this routine.
-/*
-/*   NORMAL EXIT:
-/*	   Message will be successfully written to requested handle.
-/*
-/*   ERROR EXIT:
-/*	   None.  Note that theoretically an error can be returned from
-/*	   SYSDISPMSG, but there is nothing that the application can do.
-/*
-/*
-/************************************************************/
+ *   SUBROUTINE NAME:	   display_it  (added for DOS 4.00)
+ *
+ *   SUBROUTINE FUNCTION:
+ *	   Display the requested message to the standard output device.
+ *
+ *   INPUT:
+ *	   1) (WORD) Number of the message to be displayed.
+ *	   2) (WORD) Handle to be written to.
+ *	   3) (WORD) Substitution Count
+ *	   4) (WORD) Flag indicating user should "Strike any key..."
+ *
+ *   OUTPUT:
+ *	   The message corresponding to the requested msg number will
+ *	   be written to the requested handle.	If requested, substitution
+ *	   text will be inserted as required.  The Substitution List
+ *	   is global and, if used, will be initialized by DISPLAY_MSG
+ *	   before calling this routine.
+ *
+ *   NORMAL EXIT:
+ *	   Message will be successfully written to requested handle.
+ *
+ *   ERROR EXIT:
+ *	   None.  Note that theoretically an error can be returned from
+ *	   SYSDISPMSG, but there is nothing that the application can do.
+ *
+ *
+ ************************************************************/
 #define CLASS		-1	/* Goes in DH register */	      /*;AN000;6*/
 #define NUL_POINTER	0	/* Pointer to nothing */	      /*;AN000;6*/
 
@@ -479,21 +475,21 @@ BYTE	class;							      /*;AN000;6*/
 	return; 						      /*;AN000;6 */
 }								      /*;AN000;6 */
 /*****************  START OF SPECIFICATION  ********************************
-/*
-/*  SUBROUTINE NAME :  com_msg
-/*
-/*  DESCRIPTIVE NAME : the routine to output a message according to
-/*		       the return codes returned from API calls.
-/*
-/*  FUNCTION: 1. if CP/DOS, then call rctomid
-/*
-/*  NOTES:
-/*
-/*  INPUT: (PARAMETERS)
-/*	    retcode - return code used to call rctomid
-/*
-/*
-/********************** END OF SPECIFICATIONS *******************************/
+ *
+ *  SUBROUTINE NAME :  com_msg
+ *
+ *  DESCRIPTIVE NAME : the routine to output a message according to
+ *		       the return codes returned from API calls.
+ *
+ *  FUNCTION: 1. if CP/DOS, then call rctomid
+ *
+ *  NOTES:
+ *
+ *  INPUT: (PARAMETERS)
+ *	    retcode - return code used to call rctomid
+ *
+ *
+ ********************** END OF SPECIFICATIONS *******************************/
 void com_msg(retcode)
 WORD retcode;
 {

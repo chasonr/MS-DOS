@@ -1,16 +1,16 @@
 
 /*----------------------------
-/* SOURCE FILE NAME: rtfile.c
-/*----------------------------
-/*  0 */
+ * SOURCE FILE NAME: rtfile.c
+ *----------------------------
+ *  0 */
 
+#include <string.h>
+#include <stdio.h>
+#include <dos.h>                                                      /*;AN000;2*/
 #include "rt.h"
 #include "rt1.h"
 #include "rt2.h"
 #include "restpars.h"                                                 /*;AN000;4*/
-#include "string.h"
-#include "stdio.h"
-#include "dos.h"                                                      /*;AN000;2*/
 #include "comsub.h"             /* common subroutine def'n */
 #include "doscalls.h"
 #include "error.h"
@@ -53,26 +53,20 @@ extern struct  subst_list sublist;				      /*;AN000;6 Message substitution list
 /*									    */
 /********************** END OF SPECIFICATIONS *******************************/
 
-void restore_a_file(finfo,dinfo,bufsize,control_bufsize,	 /* wrw! */
-	       fheadnew,dheadold,dheadnew,
-	       srcd,destd,inpath,infname,infspec,dnumwant,dirhandle)
-
-    struct file_info *finfo;
-    struct disk_info *dinfo;
-    unsigned long bufsize;
-    unsigned int *control_bufsize;
-    struct file_header_new far *fheadnew;
-    struct disk_header_old *dheadold;
-    struct disk_header_new far *dheadnew;
-    BYTE   srcd;
-    BYTE   destd;
-    unsigned char *inpath;
-    unsigned char *infname;
-    unsigned char *infspec;
-    unsigned int  *dnumwant;
-    unsigned int *dirhandle;
+void restore_a_file(	 /* wrw! */
+        struct file_info *finfo,
+        struct disk_info *dinfo,
+        unsigned long bufsize,
+        struct disk_header_old *dheadold,
+        struct disk_header_new far *dheadnew,
+        BYTE   srcd,
+        BYTE   destd,
+        unsigned char *inpath,
+        unsigned char *infname,
+        unsigned char *infspec,
+        unsigned int  *dnumwant,
+        unsigned int *dirhandle)
 {
-    BYTE c;
     BYTE temp_array1[4];
     BYTE temp_array2[4];
     BYTE temp_fname[MAXFSPEC];
@@ -103,9 +97,7 @@ void restore_a_file(finfo,dinfo,bufsize,control_bufsize,	 /* wrw! */
     WORD   found = FALSE;
     WORD   *dirptr;
     WORD   *flptr;
-    WORD   read_count;
     DWORD  newptr;
-    WORD   next_file_pointer;
     unsigned int dnum;
     DWORD  temp_offset;
 
@@ -318,7 +310,7 @@ void restore_a_file(finfo,dinfo,bufsize,control_bufsize,	 /* wrw! */
 	       if (set_reset_test_flag(&control_flag,OLDNEW,TEST) == TRUE)
 		 check_bkdisk_old(dheadold,dinfo,srcd,dnumwant);
 		else
-		 check_bkdisk_new(dheadnew,dinfo,srcd,dnumwant,control_bufsize);
+		 check_bkdisk_new(dheadnew,dinfo,srcd,dnumwant);
 
 	       /*at this point a real backup diskette which is in correct sequence
 	       number has been found.  In the case of new format, the file
@@ -392,7 +384,7 @@ void restore_a_file(finfo,dinfo,bufsize,control_bufsize,	 /* wrw! */
 		     ( finfo, temp_fname,
 		       filefindbuf.write_date, filefindbuf.write_time,
 		       filefindbuf.attributes, filefindbuf.file_size,
-		       file_seq_num, srcd, destd, infspec, inpath, dnumwant
+		       srcd, infspec, inpath, dnumwant
 		     );
 
 		  if (retcode != 0)
@@ -595,4 +587,3 @@ void restore_a_file(finfo,dinfo,bufsize,control_bufsize,	 /* wrw! */
 	 } /* end of if open destination file get file sharing error */
 
 } /*end of restore_a_file subroutine*/
-

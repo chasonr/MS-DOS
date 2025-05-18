@@ -1,16 +1,16 @@
 
 /*-------------------------------
-/* SOURCE FILE NAME: restpars.c
-/*-------------------------------
-/*  0 */
+ * SOURCE FILE NAME: restpars.c
+ *-------------------------------
+ *  0 */
+#include <string.h>
+#include <ctype.h>
+#include <direct.h>
+#include <dos.h>                                                      /*;AN000;2*/
 #include "rt.h"
 #include "rt1.h"
 #include "rt2.h"
 #include "restpars.h"                                                 /*;AN000;4*/
-#include "direct.h"
-#include "string.h"
-#include "ctype.h"
-#include "dos.h"                                                      /*;AN000;2*/
 #include "comsub.h"             /* common subroutine def'n */
 #include "doscalls.h"
 #include "error.h"
@@ -51,13 +51,13 @@ extern	struct timedate td;
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	parse_command_line
-/*
-/* FUNCTION:
-/*
-/*	Parse the RESTORE command line
-/*
-/**************************************************/
+ * SUBROUTINE NAME:	parse_command_line
+ *
+ * FUNCTION:
+ *
+ *	Parse the RESTORE command line
+ *
+ **************************************************/
 void	parse_command_line(argc,argv)				      /*;AN000;4 */
 int	argc;							      /*;AN000;4 */
 char	*argv[];						      /*;AN000;4 */
@@ -118,7 +118,7 @@ char	*argv[];						      /*;AN000;4 */
 	  parse(&inregs,&outregs);				      /*;AN000;4 Call DOS PARSE service routines*/
 
 	  x=0;			/* Save the parsed parameter */       /*;AN004;*/
-	  for (inregs.x.si; inregs.x.si<outregs.x.si; inregs.x.si++)  /*;AN004;*/
+	  for (; inregs.x.si<outregs.x.si; inregs.x.si++)             /*;AN004;*/
 	   {							      /*;AN004;*/
 	     curr_parm[x] = *(char *)inregs.x.si;		      /*;AN004;*/
 	     x++;						      /*;AN004;*/
@@ -146,7 +146,7 @@ char	*argv[];						      /*;AN000;4 */
 		  outregs.x.dx == (WORD)&date_buff ||		      /*;AN000;4*/
 		  outregs.x.dx == (WORD)&sw_buff		      /*;AN000;4*/
 		)						      /*;AN000;4*/
-	       process_switch(outregs.x.dx,argv[parse_count]);	      /*;AN000;4*//*;AC002;*/
+	       process_switch(outregs.x.dx);            	      /*;AN000;4*//*;AC002;*/
 	   }							      /*;AN000;4*/
 
 	  parse_count++;					      /*;AN000;4*//*;AC002;*/
@@ -156,7 +156,7 @@ char	*argv[];						      /*;AN000;4 */
 	if (strlen(argv[2]) >= 5)				      /*;AN000;p2591*/
 	 check_for_device_names(argv);				      /*;AN000;p2591*/
 
-	check_source_drive(argc,argv);				      /*;AN000;4*/
+	check_source_drive(argv);				      /*;AN000;4*/
 	check_target_filespec(argc,argv);			      /*;AN000;4*/
 
 	return; 						      /*;AN000;4*/
@@ -164,13 +164,13 @@ char	*argv[];						      /*;AN000;4 */
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	parse_error
-/*
-/* FUNCTION:
-/*
-/*	There was a parse error. Display message and die
-/*
-/**************************************************/
+ * SUBROUTINE NAME:	parse_error
+ *
+ * FUNCTION:
+ *
+ *	There was a parse error. Display message and die
+ *
+ **************************************************/
 void	parse_error(msg_num,class)				      /*;AN000;4*//*;AC002;*/
 WORD	msg_num;						      /*;AN000;4*/
 BYTE	class;							      /*;AN000;4*/
@@ -194,13 +194,13 @@ BYTE	class;							      /*;AN000;4*/
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	check_date
-/*
-/* FUNCTION:
-/*
-/*	A date parameter was entered. Validate it
-/*
-/**************************************************/
+ * SUBROUTINE NAME:	check_date
+ *
+ * FUNCTION:
+ *
+ *	A date parameter was entered. Validate it
+ *
+ **************************************************/
 void	check_date(year,month,day)				      /*;AN000;4*//*;AC002;*/
 WORD	year;							      /*;AN000;4*/
 BYTE	month;							      /*;AN000;4*/
@@ -233,27 +233,26 @@ BYTE	day;							      /*;AN000;4*/
 }								      /*;AN000;4*/
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	check_time
-/*
-/* FUNCTION:
-/*
-/*	A time parameter was entered. Validate it
-/*
-/**************************************************/
-void	check_time(hours,minutes,seconds,hundreds)		      /*;AN000;4*//*;AC002;*/
-BYTE	hours;							      /*;AN000;4*/
-BYTE	minutes;						      /*;AN000;4*/
-BYTE	seconds;						      /*;AN000;4*/
-BYTE	hundreds;						      /*;AN000;4*/
+ * SUBROUTINE NAME:	check_time
+ *
+ * FUNCTION:
+ *
+ *	A time parameter was entered. Validate it
+ *
+ **************************************************/
+void	check_time(
+        BYTE	hours,						      /*;AN000;4*/
+        BYTE	minutes,					      /*;AN000;4*/
+        BYTE	seconds)					      /*;AN000;4*/
 {								      /*;AN000;4*/
 
-	if (hours > 23 || hours < 0)				      /*;AC000;4*/
+	if (hours > 23)         				      /*;AC000;4*/
 	 parse_error(INV_TIME,(BYTE)UTILMSG);			      /*;AC000;4*//*;AC002;*/
 
-	if (minutes >= 60 || minutes < 0)			      /*;AC000;4*/
+	if (minutes >= 60)              			      /*;AC000;4*/
 	  parse_error(INV_TIME,(BYTE)UTILMSG);			      /*;AC000;4*//*;AC002;*/
 
-	if (seconds >= 60 || seconds < 0)			      /*;AC000;4*/
+	if (seconds >= 60)              			      /*;AC000;4*/
 	   parse_error(INV_TIME,(BYTE)UTILMSG); 		      /*;AC000;4*//*;AC002;*/
 
 	return; 						      /*;AN000;4*/
@@ -261,13 +260,13 @@ BYTE	hundreds;						      /*;AN000;4*/
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	parse_init
-/*
-/* FUNCTION:
-/*
-/*	Initialize the parser data structures
-/*
-/**************************************************/
+ * SUBROUTINE NAME:	parse_init
+ *
+ * FUNCTION:
+ *
+ *	Initialize the parser data structures
+ *
+ **************************************************/
 #define SSTRING 0x2000			/*;AN000;4*/
 #define FILESPEC 0x0200 		/*;AN000;4 */
 #define CAP_FILETABLE 0x0001		/*;AN000;4 */
@@ -373,13 +372,13 @@ void	parse_init()					/*;AN000;4 */
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	check_for_device_names
-/*
-/* FUNCTION:
-/*
-/*	Make sure user not trying to restore a reserved device name
-/*
-/**************************************************/
+ * SUBROUTINE NAME:	check_for_device_names
+ *
+ * FUNCTION:
+ *
+ *	Make sure user not trying to restore a reserved device name
+ *
+ **************************************************/
 void check_for_device_names(argv)				      /*;AN000;p2591*/
 char	*argv[];						      /*;AN000;p2591*/
 {								      /*;AN000;p2591*/
@@ -428,16 +427,14 @@ char	*argv[];						      /*;AN000;p2591*/
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	check_source_drive
-/*
-/* FUNCTION:
-/*
-/*	Verify drive letter and start building srcddir
-/*
-/**************************************************/
-void check_source_drive(argc,argv)		/*;AN000;4*/
-int	argc;					/*;AN000;4*/
-char	*argv[];				/*;AN000;4*/
+ * SUBROUTINE NAME:	check_source_drive
+ *
+ * FUNCTION:
+ *
+ *	Verify drive letter and start building srcddir
+ *
+ **************************************************/
+void check_source_drive(char *argv[])		/*;AN000;4*/
 {						/*;AN000;4*/
 	WORD  retcode;				/*;AC000;*/
 	WORD  device_handle;
@@ -544,16 +541,16 @@ char	*argv[];				/*;AN000;4*/
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	check_target_filespec
-/*
-/* FUNCTION:
-/*
-/*	Verify the target filespec.
-/*	 1. Validate destination drive, or use default if none specified
-/*	 2. Validate path, or use current dir if not specified
-/*	 3. Validate the file name
-/*
-/**************************************************/
+ * SUBROUTINE NAME:	check_target_filespec
+ *
+ * FUNCTION:
+ *
+ *	Verify the target filespec.
+ *	 1. Validate destination drive, or use default if none specified
+ *	 2. Validate path, or use current dir if not specified
+ *	 3. Validate the file name
+ *
+ **************************************************/
 void check_target_filespec(argc,argv)				      /*;AN000;4*/
 int	argc;							      /*;AN000;4*/
 char	*argv[];						      /*;AN000;4*/
@@ -566,7 +563,6 @@ char	*argv[];						      /*;AN000;4*/
 	DWORD drive_map;
 	BYTE  temp_destddir[MAXPATH+2];
 	BYTE  temp_array1[4];
-	BYTE  temp_array2[4];
 	WORD  default_drive_num;
 	WORD  destd_num;
 	WORD  dirlen = MAXPATH;
@@ -579,7 +575,6 @@ char	*argv[];						      /*;AN000;4*/
 	WORD  j,k,z;
 	BYTE *c;
 	BYTE  backdir;
-	WORD  dnumwant = 1;
 	union REGS qregs;					      /*;AN000;8*/
 
 
@@ -910,17 +905,16 @@ char	*argv[];						      /*;AN000;4*/
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	process_switch
-/*
-/* FUNCTION:
-/*
-/*	Identify the switch (/S,/P,/M,/N,/B:,/A:,/E:,/L:)
-/*	 entered and handle it
-/*
-/**************************************************/
-void process_switch(buff_addr,ptr)				      /*;AN000;4*//*;AC002;*/
-unsigned buff_addr;						      /*;AN000;4*/
-char *ptr;							      /*;AN002;*/
+ * SUBROUTINE NAME:	process_switch
+ *
+ * FUNCTION:
+ *
+ *	Identify the switch (/S,/P,/M,/N,/B:,/A:,/E:,/L:)
+ *	 entered and handle it
+ *
+ **************************************************/
+void process_switch(            				      /*;AN000;4*//*;AC002;*/
+        unsigned buff_addr)					      /*;AN000;4*/
 {								      /*;AN000;4*/
 
 	if (buff_addr == (unsigned)&sw_buff)			      /*;AN000;4*/
@@ -951,7 +945,7 @@ char *ptr;							      /*;AN002;*/
 
 	if (buff_addr == (unsigned)&time_buff)			      /*;AN000;4*/
 	 {							      /*;AN000;4*/
-	   check_time(time_buff.hours,time_buff.minutes,time_buff.seconds,time_buff.hundreds);	  /*;AN000;4*//*;AC002;*/
+	   check_time(time_buff.hours,time_buff.minutes,time_buff.seconds);	  /*;AN000;4*//*;AC002;*/
 
 	   if (time_buff.tb_synonym_ptr == (WORD)&sw2.switch1[0])     /*;AN000;4   /E */
 	     {							      /*;AN000;4*/

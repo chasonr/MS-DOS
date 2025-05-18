@@ -1,16 +1,16 @@
 
 /*------------------------------
-/* SOURCE FILE NAME: rtfile1.c
-/*------------------------------
-/*  0 */
+ * SOURCE FILE NAME: rtfile1.c
+ *------------------------------
+ *  0 */
 
+#include <string.h>
+#include <direct.h>
+#include <dos.h>                                                      /*;AN000;2*/
 #include "rt.h"
 #include "rt1.h"
 #include "rt2.h"
 #include "restpars.h"                                                 /*;AN000;4*/
-#include "direct.h"
-#include "string.h"
-#include "dos.h"                                                      /*;AN000;2*/
 #include "comsub.h"             /* common subroutine def'n */
 #include "doscalls.h"
 #include "error.h"
@@ -29,48 +29,38 @@ extern struct FileFindBuf filefindbuf;
 extern struct file_header_new far *fheadnew;   /*;AN000;3 */
 
 /****************  START OF SPECIFICATION  ********************************
-/*
-/*  SUBROUTINE NAME :  open_dest_file
-/*
-/*  DESCRIPTIVE NAME : open the destination file and build a path to it
-/*		       if necessary.
-/*
-/*  FUNCTION:  Try to change the current directory of the destination disk
-/*	       to be the one the file is to be restored.  If not able to
-/*	       do it because the directory does not exist, call
-/*	       build_path_create_file subroutine to build path,
-/*	       create the destination file and return a handle on it.
-/*	       If file can not be created, find out whether it is caused
-/*	       by file sharing error, or caused by disk full.
-/*
-/*
-/********************** END OF SPECIFICATIONS ******************************/
+ *
+ *  SUBROUTINE NAME :  open_dest_file
+ *
+ *  DESCRIPTIVE NAME : open the destination file and build a path to it
+ *		       if necessary.
+ *
+ *  FUNCTION:  Try to change the current directory of the destination disk
+ *	       to be the one the file is to be restored.  If not able to
+ *	       do it because the directory does not exist, call
+ *	       build_path_create_file subroutine to build path,
+ *	       create the destination file and return a handle on it.
+ *	       If file can not be created, find out whether it is caused
+ *	       by file sharing error, or caused by disk full.
+ *
+ *
+ ********************** END OF SPECIFICATIONS ******************************/
 WORD open_dest_file(finfo,destd)
 struct file_info *finfo;
 BYTE destd;
 {
-    BYTE  fname[MAXFSPEC+2];
     BYTE  path_to_be_chdir[MAXPATH+2];
-    WORD  rc;
 
     WORD retcode;
 
-    /*declaration for dosfindfirst */
-    unsigned	dirhandle = 0xffff;
-    unsigned	attribute = NOTV;
-    unsigned	search_cnt = 1;
-    unsigned	buf_len = sizeof(struct FileFindBuf);
-    BYTE search_string[MAXPATHF+2];
-    /*end decleration for ffirst and fnext*/
-
    /*************************************************************************
-   /*if current directory is not where the file wants to be restored and
-   /* (the file is not to be restored in root or the current directory is
-   /* not root).  This is to avoid building path if the the current
-   /* directory already got updated to be the right directory (in dorestore),
-   /* or both current directory and the requested directory are root
-   /* directory
-   /**************************************************************************/
+    *if current directory is not where the file wants to be restored and
+    * (the file is not to be restored in root or the current directory is
+    * not root).  This is to avoid building path if the the current
+    * directory already got updated to be the right directory (in dorestore),
+    * or both current directory and the requested directory are root
+    * directory
+    **************************************************************************/
 
    if (strcmp(finfo->path,finfo->curdir)!=0)
     {
@@ -117,18 +107,18 @@ BYTE destd;
 
 } /*end of subroutine*/
 /****************  START OF SPECIFICATION  ********************************
-/*
-/*  SUBROUTINE NAME :  build_path_create_file
-/*
-/*  DESCRIPTIVE NAME : Build path for the destination file, and create
-/*		       the file in the current direactory.
-/*
-/*  FUNCTION:  Rebuild the path of the file about to be restored by
-/*	       recreating all subdirectories needed to complete the path.
-/*	       Then chdir to the one which is to reside and create the
-/*	       file.
-/*
-/********************* END OF SPECIFICATIONS ********************************/
+ *
+ *  SUBROUTINE NAME :  build_path_create_file
+ *
+ *  DESCRIPTIVE NAME : Build path for the destination file, and create
+ *		       the file in the current direactory.
+ *
+ *  FUNCTION:  Rebuild the path of the file about to be restored by
+ *	       recreating all subdirectories needed to complete the path.
+ *	       Then chdir to the one which is to reside and create the
+ *	       file.
+ *
+ ********************* END OF SPECIFICATIONS ********************************/
 void build_path_create_file(in_path,destd,fflag,ea_offset)
 BYTE *in_path;
 BYTE destd;
@@ -197,19 +187,18 @@ DWORD ea_offset;					/*;AN000;3*/
 
 /********************************************************/
 /*
-/*  SUBROUTINE NAME: create_the_file
-/*
-/*  DESCRIPTIVE NAME :	Create the target file.
-/*			Use DOS 4.00 Extended Create Function 6C00h
-/*			Remember to handle Extended Attributes!
-/*
-/********************************************************/
+ *  SUBROUTINE NAME: create_the_file
+ *
+ *  DESCRIPTIVE NAME :	Create the target file.
+ *			Use DOS 4.00 Extended Create Function 6C00h
+ *			Remember to handle Extended Attributes!
+ *
+ ********************************************************/
 #define EXTENDEDOPEN 0x6c00					      /*;AN000;3*/
 WORD create_the_file(fflag,ea_offset)				      /*;AN000;3*/
 BYTE	fflag;							      /*;AN000;3*/
 DWORD	ea_offset;						      /*;AN000;3*/
 {								      /*;AN000;3*/
-	WORD	action; 					      /*;AN000;3*/
 	WORD	retcode;					      /*;AN000;3*/
 	union REGS reg; 					      /*;AN000;3*/
 	struct parm_list ea_parmlist;				      /*;AN000;3 Parameter list for extended open*/
@@ -235,8 +224,8 @@ DWORD	ea_offset;						      /*;AN000;3*/
 	  reg.x.di = 0xffff;			/* No parmlist */     /*;AN000;3*/
 
 	intdos(&reg,&reg);					      /*;AN000;3*/
-	if (reg.x.cflag & CARRY)     /* If there was an error	      /*;AN000;3*/
-	 retcode = reg.x.ax;		  /*  then set return code    /*;AN000;3*/
+	if (reg.x.cflag & CARRY)     /* If there was an error */      /*;AN000;3*/
+	 retcode = reg.x.ax;		  /*  then set return code */ /*;AN000;3*/
 
 	dest_file_handle = reg.x.ax;				      /*;AN000;3*/
 
@@ -244,11 +233,11 @@ DWORD	ea_offset;						      /*;AN000;3*/
 }								      /*;AN000;3*/
 /********************************************************/
 /*
-/*  SUBROUTINE NAME: read_the_extended_attributes
-/*
-/*  DESCRIPTIVE NAME :	reads in the extended attributes
-/*
-/********************************************************/
+ *  SUBROUTINE NAME: read_the_extended_attributes
+ *
+ *  DESCRIPTIVE NAME :	reads in the extended attributes
+ *
+ ********************************************************/
 void read_the_extended_attributes(ea_offset)			      /*;AN000;3*/
 DWORD	ea_offset;						      /*;AN000;3*/
 {								      /*;AN000;3*/
@@ -293,15 +282,15 @@ DWORD	ea_offset;						      /*;AN000;3*/
 }								      /*;AN000;3*/
 
 /****************  START OF SPECIFICATION  ********************************
-/*
-/*  SUBROUTINE NAME :  set_attributes_and_close
-/*
-/*  DESCRIPTIVE NAME :	Set the file attributes and close the file
-/*
-/*  FUNCTION: Set the attributes and last write date/time of the file just
-/*	      restored to be like those of the backup file.
-/*
-/********************* END OF SPECIFICATIONS ********************************/
+ *
+ *  SUBROUTINE NAME :  set_attributes_and_close
+ *
+ *  DESCRIPTIVE NAME :	Set the file attributes and close the file
+ *
+ *  FUNCTION: Set the attributes and last write date/time of the file just
+ *	      restored to be like those of the backup file.
+ *
+ ********************* END OF SPECIFICATIONS ********************************/
 int set_attributes_and_close(finfo,destd)
 struct file_info *finfo;
 BYTE destd;
@@ -374,27 +363,27 @@ return(0);	/* wrw! */
 } /*end of subroutine*/
 
 /****************  START OF SPECIFICATION  ********************************
-/*
-/*  SUBROUTINE NAME :  dos_write_error
-/*
-/*  DESCRIPTIVE NAME : Determine the cause of the error during
-/*		       DOS write, and output message according to it.
-/*
-/*  FUNCTION:  If error returned from get free space of the disk
-/*	       is caused by disk full, a message "target disk is
-/*	       full" is output to the user.
-/*	       Otherwise, the error is caused by other reason, and
-/*	       a message "file creation error" is output to the user.
-/*
-/*
-/********************** END OF SPECIFICATIONS *******************************/
+ *
+ *  SUBROUTINE NAME :  dos_write_error
+ *
+ *  DESCRIPTIVE NAME : Determine the cause of the error during
+ *		       DOS write, and output message according to it.
+ *
+ *  FUNCTION:  If error returned from get free space of the disk
+ *	       is caused by disk full, a message "target disk is
+ *	       full" is output to the user.
+ *	       Otherwise, the error is caused by other reason, and
+ *	       a message "file creation error" is output to the user.
+ *
+ *
+ ********************** END OF SPECIFICATIONS *******************************/
 int dos_write_error(buf_size,destd)
 DWORD buf_size;
 BYTE destd;
 {
    DWORD free_space;
    WORD drive_num;
-   struct fsinfo *fsinfo_buf;
+   struct fsinfo fsinfo_buf;
 
    WORD retcode;
 
@@ -405,14 +394,14 @@ BYTE destd;
    retcode = DOSQFSINFO
       ((unsigned)drive_num,	      /* Drive number - 0=default, 1=A, etc */
        (unsigned)1,		      /* File system info required */
-       (char far *)fsinfo_buf,	      /* File system info buffer */
+       (char far *)&fsinfo_buf,	      /* File system info buffer */
        (unsigned)FSINFO_BYTES	      /* File system info buffer size */
       );
 
 
-   free_space = fsinfo_buf->sectors_per_alloc_unit *
-		fsinfo_buf->available_alloc_unit *
-		fsinfo_buf->bytes_per_sector;
+   free_space = fsinfo_buf.sectors_per_alloc_unit *
+		fsinfo_buf.available_alloc_unit *
+		fsinfo_buf.bytes_per_sector;
 
 
    /******************************************************************/

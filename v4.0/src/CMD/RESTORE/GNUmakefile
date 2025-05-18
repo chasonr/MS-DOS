@@ -12,10 +12,16 @@ country = usa-ms
 #######################	dependencies begin here. #########################
 #
 
-.SUFFIXES: .asm .obj
+.SUFFIXES: .c .asm .obj
+
+CC = wcl
+CFLAGS = -q -ms -os -zp=1 -I$(hinc) -wx
 
 AS = jwasm
 AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.c.obj:
+	$(CC) $(CFLAGS) -c -fo=$@ $<
 
 .asm.obj:
 	$(AS) $(AFLAGS) -Fo$@ $<
@@ -45,73 +51,69 @@ _msgret.obj:	_msgret.asm			\
 		$(inc)/versiona.inc		\
 		$(inc)/msgdcl.inc
 
-
-restore.obj :	RESTORE.C RT.H RT1.H RT2.H RESTPARS.H \
+restore.obj :	restore.c rt.h rt1.h rt2.h restpars.h \
 		$(hinc)/comsub.h    $(hinc)/doscalls.h	     \
-		$(hinc)/ERROR.H
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\restore $(subst /,\,$<) $(subst /,\,$@)"
+		$(hinc)/error.h
 
-rtt1.obj :	RTT1.C RT.H RT1.H RT2.H RESTPARS.H \
+rtt1.obj :	rtt1.c rt.h rt1.h rt2.h restpars.h \
 		$(hinc)/comsub.h    $(hinc)/doscalls.h	     \
-		$(hinc)/ERROR.H
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\restore $(subst /,\,$<) $(subst /,\,$@)"
+		$(hinc)/error.h
 
-rtt3.obj :	RTT3.C RT.H RT1.H RT2.H RESTPARS.H \
+rtt3.obj :	rtt3.c rt.h rt1.h rt2.h \
 		$(hinc)/comsub.h    $(hinc)/doscalls.h	     \
-		$(hinc)/ERROR.H
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\restore $(subst /,\,$<) $(subst /,\,$@)"
+		$(hinc)/error.h
 
-rtdo.obj :	RTDO.C	RT.H RT1.H RT2.H RESTPARS.H  \
+rtdo.obj :	rtdo.c	rt.h rt1.h rt2.h restpars.h \
 		$(hinc)/comsub.h    $(hinc)/doscalls.h	     \
-		$(hinc)/ERROR.H
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\restore $(subst /,\,$<) $(subst /,\,$@)"
+		$(hinc)/error.h
 
-rtdo1.obj :	RTDO1.C RT.H RT1.H RT2.H RESTPARS.H \
+rtdo1.obj :	rtdo1.c rt.h rt1.h rt2.h restpars.h \
 		$(hinc)/comsub.h    $(hinc)/doscalls.h	     \
-		$(hinc)/ERROR.H
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\restore $(subst /,\,$<) $(subst /,\,$@)"
+		$(hinc)/error.h
 
-rtnew.obj :	RTNEW.C RT.H RT1.H RT2.H RESTPARS.H \
+rtnew.obj :	rtnew.c rt.h rt1.h rt2.h restpars.h \
 		$(hinc)/comsub.h    $(hinc)/doscalls.h	     \
-		$(hinc)/ERROR.H
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\restore $(subst /,\,$<) $(subst /,\,$@)"
+		$(hinc)/error.h
 
-rtnew1.obj :	RTNEW1.C RT.H RT1.H RT2.H RESTPARS.H \
+rtnew1.obj :	rtnew1.c rt.h rt1.h rt2.h restpars.h \
 		$(hinc)/comsub.h    $(hinc)/doscalls.h	     \
-		$(hinc)/ERROR.H
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\restore $(subst /,\,$<) $(subst /,\,$@)"
+		$(hinc)/error.h
 
-rtold.obj :	RTOLD.C RT.H RT1.H RT2.H RESTPARS.H \
+rtold.obj :	rtold.c rt.h rt1.h rt2.h restpars.h \
 		$(hinc)/comsub.h    $(hinc)/doscalls.h	     \
-		$(hinc)/ERROR.H
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\restore $(subst /,\,$<) $(subst /,\,$@)"
+		$(hinc)/error.h
 
-rtold1.obj :	RTOLD1.C RT.H RT1.H RT2.H RESTPARS.H \
+rtold1.obj :	rtold1.c rt.h rt1.h rt2.h restpars.h \
 		$(hinc)/comsub.h    $(hinc)/doscalls.h	     \
-		$(hinc)/ERROR.H
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\restore $(subst /,\,$<) $(subst /,\,$@)"
+		$(hinc)/error.h
 
-rtfile.obj  :	RTFILE.C RT.H RT1.H RT2.H RESTPARS.H \
+rtfile.obj  :	rtfile.c rt.h rt1.h rt2.h restpars.h \
 		$(hinc)/comsub.h    $(hinc)/doscalls.h	     \
-		$(hinc)/ERROR.H
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\restore $(subst /,\,$<) $(subst /,\,$@)"
+		$(hinc)/error.h
 
-rtfile1.obj :	RTFILE1.C RT.H RT1.H RT2.H RESTPARS.H \
+rtfile1.obj :	rtfile1.c rt.h rt1.h rt2.h restpars.h \
 		$(hinc)/comsub.h    $(hinc)/doscalls.h	     \
-		$(hinc)/ERROR.H
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\restore $(subst /,\,$<) $(subst /,\,$@)"
+		$(hinc)/error.h
 
-restpars.obj :	RESTPARS.C RT.H RT1.H RT2.H RESTPARS.H \
+restpars.obj :	restpars.c rt.h rt1.h rt2.h restpars.h \
 		$(hinc)/comsub.h    $(hinc)/doscalls.h	     \
-		$(hinc)/ERROR.H
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\restore $(subst /,\,$<) $(subst /,\,$@)"
+		$(hinc)/error.h
 
 OBJS = restore.obj restpars.obj rtt1.obj rtt3.obj rtdo.obj rtdo1.obj \
        rtold.obj rtold1.obj rtnew.obj rtnew1.obj rtfile.obj rtfile1.obj \
        _parse.obj _msgret.obj
 
-restore.com: $(OBJS) RESTORE.LNK $(map)/mapper.lib $(comsubs)/comsubsm.lib
-	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\restore /map @restore.lnk"
+restore.com: $(OBJS) $(map)/mapper.lib $(comsubs)/comsubs.lib
+	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
+	echo 'option map=restore.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name restore.exe' >>resp.txt
+	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
+	echo "library $(map)/mapper.lib" >>resp.txt
+	echo "library $(comsubs)/comsubs.lib" >>resp.txt
+	wlink @resp.txt
 	../../bldtools/make-com.rb restore.exe restore.com
 
 clean:

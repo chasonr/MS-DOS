@@ -1,15 +1,15 @@
 
 /*------------------------------
-/* SOURCE FILE NAME:  RTNEW.C
-/*------------------------------
-/*  0 */
+ * SOURCE FILE NAME:  RTNEW.C
+ *------------------------------
+ *  0 */
 
+#include <string.h>
+#include <dos.h>                                                      /*;AN000;2*/
 #include "rt.h"
 #include "rt1.h"
 #include "rt2.h"
 #include "restpars.h"                                                 /*;AN000;4*/
-#include "string.h"
-#include "dos.h"                                                      /*;AN000;2*/
 #include "comsub.h"             /* common subroutine def'n */
 #include "doscalls.h"
 #include "error.h"
@@ -24,47 +24,41 @@ unsigned int numentry;
 extern struct  subst_list sublist;				      /*;AN000;6 Message substitution list */
 
 /*****************  START OF SPECIFICATION  ********************************
-/*
-/*  SUBROUTINE NAME :  search_src_disk_new
-/*
-/*  DESCRIPTIVE NAME : For new format only, search the entire disk for
-/*		       matching files.
-/*
-/*  FUNCTION: Call subroutine findfirst_new and fnext_new to find all the
-/*	      files which match the filename and file extension specified
-/*	      in the command line.
-/*
-/*	      Whenever there is a file found, subroutine filematch
-/*	      is called to match the file path, and file extension.
-/*	      If file path and file extension match the specification,
-/*	      subroutine switchmatch is called to match the file
-/*	      attributes, file modes, time, and date, then file sequence
-/*	      is checked.
-/*
-/*	      If the file matches all the specification, subroutine
-/*	      restore_a_file is called to actually restore the file.
-/*
-/*
-/********************* END OF SPECIFICATIONS ********************************/
-void search_src_disk_new(dinfo,finfo,dheadold,dheadnew,fheadnew, /* wrw! */
-		    srcd,destd,dnumwant,buf_size,
-		    inpath,infname,infspec,control_buf_size,td)
-
-     struct disk_info *dinfo;
-     struct file_info *finfo;
-     struct disk_header_new far *dheadnew;
-     struct file_header_new far *fheadnew;
-     struct disk_header_old *dheadold;
-     BYTE   srcd;
-     BYTE   destd;
-     unsigned int  *dnumwant;  /*num of next disk*/
-     unsigned long buf_size;
-     unsigned *control_buf_size;
-     unsigned char *inpath;
-     unsigned char *infname;
-     unsigned char *infspec;
-     struct timedate *td;
-
+ *
+ *  SUBROUTINE NAME :  search_src_disk_new
+ *
+ *  DESCRIPTIVE NAME : For new format only, search the entire disk for
+ *		       matching files.
+ *
+ *  FUNCTION: Call subroutine findfirst_new and fnext_new to find all the
+ *	      files which match the filename and file extension specified
+ *	      in the command line.
+ *
+ *	      Whenever there is a file found, subroutine filematch
+ *	      is called to match the file path, and file extension.
+ *	      If file path and file extension match the specification,
+ *	      subroutine switchmatch is called to match the file
+ *	      attributes, file modes, time, and date, then file sequence
+ *	      is checked.
+ *
+ *	      If the file matches all the specification, subroutine
+ *	      restore_a_file is called to actually restore the file.
+ *
+ *
+ ********************* END OF SPECIFICATIONS ********************************/
+void search_src_disk_new( /* wrw! */
+         struct disk_info *dinfo,
+         struct file_info *finfo,
+         struct disk_header_old *dheadold,
+         struct disk_header_new far *dheadnew,
+         BYTE   srcd,
+         BYTE   destd,
+         unsigned int  *dnumwant,  /*num of next disk*/
+         unsigned long buf_size,
+         unsigned char *inpath,
+         unsigned char *infname,
+         unsigned char *infspec,
+         struct timedate *td)
 {
      BYTE outstring[MAXPATH+MAXFSPEC];
      WORD  file_seq_num = 1;
@@ -158,7 +152,7 @@ void search_src_disk_new(dinfo,finfo,dheadold,dheadnew,fheadnew, /* wrw! */
        /***********************************************************************/
        if ((set_reset_test_flag(&control_flag,SWITCHES,TEST) == FALSE) ||
 	  (set_reset_test_flag(&control_flag,SWITCHES,TEST) == TRUE &&
-	  ((retcode = switchmatch(finfo, srcd, destd, td)) == TRUE) ))
+	  ((retcode = switchmatch(finfo, destd, td)) == TRUE) ))
 	{
 
 	  /***********************************************************************/
@@ -199,8 +193,8 @@ void search_src_disk_new(dinfo,finfo,dheadold,dheadnew,fheadnew, /* wrw! */
 	     /***********************************************************************/
 	     /* restore the file						    */
 	     /***********************************************************************/
-		restore_a_file(finfo,dinfo,buf_size,control_buf_size,
-			    fheadnew,dheadold,dheadnew,
+		restore_a_file(finfo,dinfo,buf_size,
+			    dheadold,dheadnew,
 			    srcd,destd,inpath,infname,infspec,dnumwant,&my_own_little_dirhandle);      /* wrw! */
 
 		first_file_on_diskette = FALSE;

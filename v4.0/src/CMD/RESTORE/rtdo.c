@@ -1,27 +1,25 @@
 
 /*------------------------------------
-/* SOURCE FILE NAME: RTDO.C
-/*------------------------------------
-/*  0 */
+ * SOURCE FILE NAME: RTDO.C
+ *------------------------------------
+ *  0 */
 
+#include <stdio.h>
+#include <string.h>
+#include <direct.h>
+#include <dos.h>                                                      /*;AN000;2*/
 #include "rt.h"
 #include "rt1.h"
 #include "rt2.h"
 #include "restpars.h"                                                 /*;AN000;4*/
-#include "direct.h"
-#include "stdio.h"
-#include "string.h"
-#include "dos.h"                                                      /*;AN000;2*/
 #include "comsub.h"             /* common subroutine def'n */
 #include "doscalls.h"
 #include "error.h"
 
-BYTE		   *buf_pointer;
 unsigned	   control_file_pointer;
 unsigned	   src_file_handle;
 struct FileFindBuf filefindbuf;
 struct FileFindBuf dfilefindbuf;
-BYTE	      far  *control_buf_pointer;
 unsigned int	   control_bufsize;				       /* !wrw */
 
 extern unsigned    char srcddir[MAXPATH+3];
@@ -32,48 +30,46 @@ extern unsigned    control_file_handle; 			       /* !wrw */
 extern struct	   subst_list sublist;				      /*;AN000;6 Message substitution list */
 
 /*****************  START OF SPECIFICATION  ********************************
-/*
-/*  SUBROUTINE NAME :  Dorestore
-/*
-/*  DESCRIPTIVE NAME : Searching all disks and restore the matching files.
-/*
-/*  FUNCTION: This routine does the following:
-/*	      1. Initialize the buffer
-/*	      2. Change directory to the one which will hold the first
-/*		 files to be restored.
-/*	      3. If the source drive is removable
-/*		 Ouput the message to the screen for user to insert a
-/*		 diskette and hit a key when ready.
-/*	      4. If the target drive is removable
-/*		 Ouput the message to the screen for user to insert a
-/*		 diskette and hit a key when ready.
-/*	      5. Check whether the diskette contains old or new data
-/*		 format.
-/*	      6. ouput "file were backup xx-xx-xx"
-/*
-/*	      For each diskette, do the following:
-/*	      5. Call check_bkdisk_old or check_bkdisk_new to check whethe
-/*		 it is a backup diskette and whether it is in correct
-/*		 sequence number.
-/*	      6. Call search_src_disk_old or search_src_disk_new to search
-/*		 the entire diskette to find matching files and
-/*		 restore them.
-/*
-/*
-/********************** END OF SPECIFICATIONS *******************************/
-void dorestore(srcd,destd,inpath,infname,infext,infspec,dt) /* wrw! */
-BYTE srcd;
-BYTE destd;
-BYTE *inpath;
-BYTE *infname;
-BYTE *infext;
-BYTE *infspec;
-struct timedate *dt;
+ *
+ *  SUBROUTINE NAME :  Dorestore
+ *
+ *  DESCRIPTIVE NAME : Searching all disks and restore the matching files.
+ *
+ *  FUNCTION: This routine does the following:
+ *	      1. Initialize the buffer
+ *	      2. Change directory to the one which will hold the first
+ *		 files to be restored.
+ *	      3. If the source drive is removable
+ *		 Ouput the message to the screen for user to insert a
+ *		 diskette and hit a key when ready.
+ *	      4. If the target drive is removable
+ *		 Ouput the message to the screen for user to insert a
+ *		 diskette and hit a key when ready.
+ *	      5. Check whether the diskette contains old or new data
+ *		 format.
+ *	      6. ouput "file were backup xx-xx-xx"
+ *
+ *	      For each diskette, do the following:
+ *	      5. Call check_bkdisk_old or check_bkdisk_new to check whethe
+ *		 it is a backup diskette and whether it is in correct
+ *		 sequence number.
+ *	      6. Call search_src_disk_old or search_src_disk_new to search
+ *		 the entire diskette to find matching files and
+ *		 restore them.
+ *
+ *
+ ********************** END OF SPECIFICATIONS *******************************/
+void dorestore( /* wrw! */
+        BYTE srcd,
+        BYTE destd,
+        BYTE *inpath,
+        BYTE *infname,
+        BYTE *infspec,
+        struct timedate *dt)
 {
     BYTE string[MAXPATH+2];
     struct disk_header_old dheadold;
     struct disk_header_new dheadnew;
-    struct file_header_new fheadnew;
     struct disk_info dinfo;
     struct file_info finfo;
     unsigned int  control_bufsize;
@@ -82,7 +78,6 @@ struct timedate *dt;
     WORD dmonth;
     WORD dday;
 
-    BYTE c;
     BYTE done;							      /*;AN000;p????*/
     BYTE path_to_be_chdir[MAXPATH];
     WORD srcd_num;
@@ -235,7 +230,7 @@ struct timedate *dt;
 		   (filefindbuf.file_name[10] == NULLC) )	       /*;AN000;p????*/
 		 {						       /*;AN000;p????*/
 		   set_reset_test_flag(&control_flag,OLDNEW,RESET);    /*;AN000;p????*/
-		   init_control_buf((unsigned long)0,&control_bufsize);/*;AN000;p????*/
+		   init_control_buf(&control_bufsize);/*;AN000;p????*/
 		   done = TTRUE;				       /*;AN000;p????*/
 		 }						       /*;AN000;p????*/
 	      }
@@ -296,7 +291,7 @@ struct timedate *dt;
      if (set_reset_test_flag(&control_flag,OLDNEW,TEST) == TRUE)
        check_bkdisk_old(&dheadold, &dinfo, srcd, &dnumwant);
       else
-       check_bkdisk_new((struct disk_header_new far *)&dheadnew, &dinfo, srcd, &dnumwant,&control_bufsize);
+       check_bkdisk_new((struct disk_header_new far *)&dheadnew, &dinfo, srcd, &dnumwant);
 
      /*****************************************************************/
      /* At this point a real backup diskette which is in correct sequence number */
@@ -308,12 +303,12 @@ struct timedate *dt;
      /*if old*/
      if (set_reset_test_flag(&control_flag,OLDNEW,TEST) == TRUE)
 	search_src_disk_old(&dinfo,&finfo,&dheadold,(struct disk_header_new far *)&dheadnew,
-		(struct file_header_new far *)&fheadnew,srcd,destd,bufsize,&dnumwant,
-		inpath,infname,infext,infspec,dt);
+		srcd,destd,bufsize,&dnumwant,
+		inpath,infname,infspec,dt);
      else
 	search_src_disk_new(&dinfo,&finfo,&dheadold,(struct disk_header_new far *)&dheadnew,
-		(struct file_header_new far *)&fheadnew,srcd,destd,&dnumwant,bufsize,
-		inpath,infname,infspec,&control_bufsize,dt);
+		srcd,destd,&dnumwant,bufsize,
+		inpath,infname,infspec,dt);
 
      printf("\n");
      set_reset_test_flag(&control_flag2,OUTOF_SEQ,RESET);

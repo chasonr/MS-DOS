@@ -104,7 +104,7 @@ struct p_result_blk							/*;AN000;4*/
 	 BYTE	p_item_tag;		/* Matched item tag */		/*;AN000;4*/
 	 WORD	p_synonym_ptr;		/* pointer to Synonym list returned *//*;AN000;4*/
 	 DWORD	p_string_ptr;		/* Pointer to string */ 	/*;AN000;4*/
-	};				/*  or drive number in 1st byte /*;AN000;4*/
+	};				/*  or drive number in 1st byte */ /*;AN000;4*/
 
 /****************************************/
 /* RETURN BUFFER FOR SWITCH INFORMATION */
