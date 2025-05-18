@@ -1,11 +1,12 @@
 
-#include "dos.h"                                                        /* AN000 */
+#include <ctype.h>                                                      /* AN000 */
+#include <string.h>                                                     /* AN000 */
+#include <stdio.h>
+#include <conio.h>
+#include <dos.h>                                                        /* AN000 */
 #include "fdisk.h"                                                      /* AN000 */
 #include "subtype.h"                                                    /* AN000 */
 #include "extern.h"                                                     /* AN000 */
-#include "ctype.h"                                                      /* AN000 */
-#include "string.h"                                                     /* AN000 */
-#include "stdio.h"
 #include "fdiskmsg.h"                                                   /* AN000 */
 #include "doscall.h"                                                    /* AN000 */
 
@@ -512,13 +513,11 @@ BEGIN                                                                   /* AN000
 #define MAX_STRING_INPUT_LENGTH 11
                                                                         /* AN000 */
 unsigned char   input;                                                  /* AN000 */
-char   input_value;                                                     /* AN000 */
 char   far *WorkingPtr;                                                 /* AN000 */
 char   far *DeletePtr;                                                  /* AN000 */
 char   Done;                                                            /* AN000 */
 unsigned        Row;                                                    /* AN000 */
 unsigned        Col;                                                    /* AN000 */
-int             i;                                                      /* AN000 */
                                                                         /* AN000 */
                                                                         /* AN000 */
     WorkingPtr = string_ptr;                                            /* AN000 */

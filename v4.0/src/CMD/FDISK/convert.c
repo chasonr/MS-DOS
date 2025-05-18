@@ -1,10 +1,10 @@
 
+#include <string.h>
+#include <ctype.h>
 #include "fdisk.h"                                                      /* AN000 */
 #include "subtype.h"                                                    /* AN000 */
 #include "dos.h"                                                        /* AN000 */
 #include "extern.h"                                                     /* AN000 */
-#include "string.h"
-#include "ctype.h"
 
 
 /******************************************************************************/
@@ -32,7 +32,7 @@
 unsigned  mbytes_to_cylinders(mbytes_in,which_disk)                     /* AN004 */
 
 XFLOAT          mbytes_in;                                              /* AN000 */
-char            which_disk;                                             /* AN004 */
+unsigned char   which_disk;                                             /* AN004 */
 
 
 
@@ -95,7 +95,7 @@ END                                                                     /* AN000
 XFLOAT     cylinders_to_mbytes(cylinders_in,which_disk)                 /* AN004 */
 
 unsigned        cylinders_in;                                           /* AN000 */
-char            which_disk;                                             /* AN004 */
+unsigned char   which_disk;                                             /* AN004 */
 
 BEGIN                                                                   /* AN000 */
 

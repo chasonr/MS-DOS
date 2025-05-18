@@ -1,10 +1,10 @@
 
+#include <stdio.h>                                                      /* AN000 */
 #include "dos.h"                                                        /* AN000 */
 #include "msgret.h"                                                     /* AN000 */
 #include "fdisk.h"                                                      /* AN000 */
 #include "extern.h"                                                     /* AN000 */
 #include "subtype.h"                                                    /* AN000 */
-#include "stdio.h"                                                      /* AN000 */
 
 /*  */
 /******************************************************************************/
@@ -131,8 +131,7 @@ char far        *msg_buff;                                              /* AN012
      regs.h.dh = uc(utility_msg_class);                                 /* AN012 */
      sysgetmsg(&regs,&segregs,&regs);                                   /* AN012 */
 
-     FP_OFF(msg_buff) = regs.x.si;                                      /* AN012 */
-     FP_SEG(msg_buff) = segregs.ds;                                     /* AN012 */
+     msg_buff = MK_FP(regs.x.si, segregs.ds);
 
      Yes = *msg_buff;                                                   /* AN012 */
 
@@ -143,8 +142,7 @@ char far        *msg_buff;                                              /* AN012
           regs.h.dh = uc(utility_msg_class);                            /* AN012 */
           sysgetmsg(&regs,&segregs,&regs);                              /* AN012 */
 
-          FP_OFF(msg_buff) = regs.x.si;                                 /* AN012 */
-          FP_SEG(msg_buff) = segregs.ds;                                /* AN012 */
+          msg_buff = MK_FP(regs.x.si, segregs.ds);
 
           No = *msg_buff;                                               /* AN012 */
 

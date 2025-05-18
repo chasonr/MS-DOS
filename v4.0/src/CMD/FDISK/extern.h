@@ -8,13 +8,13 @@
 
 
 
-extern  char    cur_disk;
+extern  unsigned char   cur_disk;
 extern  FLAG    good_disk[2];
 extern  unsigned char    number_of_drives;
 extern  FLAG    reboot_flag;
 extern  char    errorlevel;
 extern  char    max_partition_size;
-extern  char    sort[24];
+extern  unsigned char   sort[24];
 extern  FLAG    no_fatal_error;                                         /* AC000 */
 extern  char    valid_input;
 extern  unsigned char   video_mode;

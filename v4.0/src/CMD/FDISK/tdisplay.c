@@ -1,12 +1,12 @@
 
+#include <stdio.h>
+#include <string.h>
+#include <memory.h>
 #include "dos.h"                                                        /* AN000 */
 #include "fdisk.h"                                                      /* AN000 */
 #include "extern.h"                                                     /* AN000 */
 #include "subtype.h"                                                    /* AN000 */
 #include "fdiskmsg.h"                                                   /* AN000 */
-#include "stdio.h"
-#include "string.h"
-#include "memory.h"
 
 /*  */
 char table_display()
@@ -15,7 +15,6 @@ BEGIN
 
 
 unsigned    i;
-unsigned    x;
 unsigned    io;
 char       *ThisPartitionType;
 char        ThisPartitionLetter[3];
@@ -131,4 +130,3 @@ char drive_letter;
          END
       return(drive_letter);
 END
-

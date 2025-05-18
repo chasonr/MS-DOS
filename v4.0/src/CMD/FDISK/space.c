@@ -12,11 +12,11 @@ char   type;
 BEGIN
 
 
-char        i;
+unsigned char i;
 char        partition_count;
-char        last_found_partition;
+unsigned char last_found_partition;
 unsigned    temp;
-char        freespace_count;
+unsigned char freespace_count;
 char        any_partition;
 unsigned    temp_size;
 
@@ -198,7 +198,7 @@ BEGIN
 
 char  changed;
 char  temp;
-char   i;
+unsigned char i;
 
         /* Init the sorting parameters */
 
@@ -257,13 +257,13 @@ char find_ext_free_space()
 BEGIN
 
 
-char   i;
+unsigned char i;
 char   partition_count;
-char   last_found_partition;
+unsigned char last_found_partition;
 unsigned    temp;
-char   freespace_count;
+unsigned char freespace_count;
 char   any_partition;
-char   ext_location;
+unsigned char ext_location;
 
         /* Sort the partition table */
         sort_ext_table(c(23));                                          /* AC000 */
@@ -404,7 +404,7 @@ BEGIN
 
 char  changed;
 char  temp;
-char i;
+unsigned char i;
 
         /* Init the sorting parameters */
 

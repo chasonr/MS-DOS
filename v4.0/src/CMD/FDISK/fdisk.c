@@ -55,17 +55,18 @@
 /*        Hope this doesn't mess you up too much - MT 5/20/86  */
 /******************** END OF SPECIFICATIONS ********************/
 
-#include <dos.h>
-#include <fdisk.h>
-#include <subtype.h>
-#include <extern.h>
-#include <doscall.h>
 #include <ctype.h>
 #include <string.h>                                                     /* AN000 */
-#include <fdiskmsg.h>                                                   /* AN000 */
-#include <msgret.h>                                                     /* AN000 */
-#include <process.h>                                                    /* AN000 */
 #include <stdio.h>                                                      /* AN000 */
+#include <conio.h>
+#include <dos.h>
+#include <process.h>                                                    /* AN000 */
+#include "fdisk.h"
+#include "subtype.h"
+#include "extern.h"
+#include "doscall.h"
+#include "fdiskmsg.h"                                                   /* AN000 */
+#include "msgret.h"                                                     /* AN000 */
 
 /*  */
 /**************************************************************************/
@@ -188,8 +189,6 @@ void change_active_partition()
 
 BEGIN
 
-    char   temp;
-    char   default_value;
     char   input;
     unsigned        i;
     unsigned        x;
@@ -500,7 +499,6 @@ void display_partition_information()
 BEGIN
 
     char   input;
-    char    temp;
 
     input = c(NUL);                                                     /* AC000 */
     /* Clear_screen */
@@ -696,13 +694,10 @@ BEGIN
 
 unsigned i;
 unsigned char j;
-unsigned k;
-unsigned l;
 unsigned partition_location;
-char temp;
+unsigned char temp;
 char more_drives_exist;
 char num_logical_drives;
-unsigned insert;
 unsigned index;
 
         /* initialize first drive found to "C" */
@@ -908,7 +903,7 @@ END
 /*  */
 void load_logical_drive(point,drive)
 
-char   point;
+unsigned char   point;
 unsigned char   drive;
 
 BEGIN
@@ -916,11 +911,9 @@ BEGIN
 char        volume_label[13];                                           /* AC000 *//*Used be 11*/
 unsigned    ext_part_num;                                               /* AN000 */
 unsigned    i;
-unsigned    j;                                                          /* AN000 */
 unsigned    k;                                                          /* AN000 */
 unsigned    length;                                                     /* AN000 */
 unsigned    index;
-unsigned    dx_pointer;                                                 /* AN000 */
 unsigned    partition_location;                                         /* AN000 */
 
         /* Check to see if anything is there */

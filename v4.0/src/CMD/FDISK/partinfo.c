@@ -8,7 +8,7 @@
 char find_free_partition()
 
 BEGIN
- char  i;
+ unsigned char  i;
 
     /* Look at all four partition entries for empty partition */
     for (i = c(0); i < c(4);i++)                                        /* AC000 */
@@ -31,7 +31,7 @@ char find_partition_type(type)
 unsigned char type;
 
 BEGIN
- char  i;
+ unsigned char  i;
 
 /*  Look at all four partition entries for system id byte that matches */
  for (i = c(0); i < c(4);i++)                                           /* AC000 */
@@ -56,7 +56,7 @@ XFLOAT get_partition_size(type)                                   /* AC000 */
 unsigned char type;                                                     /* AC000 */
 
 BEGIN
- char  i;
+ unsigned char  i;
 
  /*  Look at all four partition entries for system id byte that matches */
  for (i = c(0); i < c(4);i++)                                           /* AC000 */
@@ -71,6 +71,7 @@ BEGIN
     END
  /* Did not find one, something bad wrong happened */
  internal_program_error();
+ return 0;
 END
 
 /*  */
@@ -102,7 +103,7 @@ char find_partition_location(type)
 unsigned char type;
 
 BEGIN
- char  i;
+ unsigned char  i;
 
 /*  Look at all four partition entries for system id byte that matches */
  for (i = c(0); i < c(4);i++)                                           /* AC000 */
@@ -124,7 +125,7 @@ char find_free_ext()
 
 BEGIN
 
- char   i;
+ unsigned char   i;
 
     /* Look at all 23 extended entries for empty partition */
     for (i = c(0); i < c(23);i++)                                       /* AC000 */
@@ -165,7 +166,7 @@ END
 char get_num_logical_dos_drives()
 BEGIN
 
-char   i;
+unsigned char   i;
 char number;
 
        number = c(0);                                                   /* AC000 */
@@ -191,7 +192,7 @@ char   offset;
 BEGIN
 
 char   number_found;
-char   i;
+unsigned char   i;
 
         number_found = c(0);                                            /* AC000 */
 
@@ -229,7 +230,7 @@ BEGIN
 
 char   number_found;
 char   last_found;
-char   i;
+unsigned char   i;
 
         number_found = c(0);                                            /* AC000 */
         last_found = c(0);                                              /* AC000 */
@@ -258,5 +259,3 @@ char   i;
         internal_program_error();
         return(c(INVALID));                                             /* AC000 */
 END
-
-

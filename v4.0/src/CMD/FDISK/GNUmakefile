@@ -12,10 +12,16 @@ country = usa-ms
 #######################	dependencies begin here. #########################
 #
 
-.SUFFIXES: .asm .obj
+.SUFFIXES: .c .asm .obj
+
+CC = wcl
+CFLAGS = -q -ms -os -zp=1 -I$(hinc) -wx
 
 AS = jwasm
 AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.c.obj:
+	$(CC) $(CFLAGS) -c -fo=$@ $<
 
 .asm.obj:
 	$(AS) $(AFLAGS) -Fo$@ $<
@@ -36,68 +42,48 @@ fdisk5.cl1 : fdisk5.skl $(msg)/$(country).msg
 fdisk.ctl fdisk.cl1 fdisk.cl2 fdisk.cla fdisk.clb: fdisk.skl $(msg)/$(country).msg
 	../../bldtools/buildmsg.rb $(msg)/$(country).msg fdisk.skl
 
-main.obj : MAIN.C \
-           FDISK.H SUBTYPE.H EXTERN.H FDISKMSG.H MSGRET.H DOSCALL.H 
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\fdisk $(subst /,\,$<) $(subst /,\,$@)"
+main.obj : main.c \
+           fdisk.h subtype.h extern.h fdiskmsg.h msgret.h doscall.h 
 
-fdisk.obj : FDISK.C \
-            FDISK.H SUBTYPE.H EXTERN.H FDISKMSG.H DOSCALL.H MSGRET.H
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\fdisk $(subst /,\,$<) $(subst /,\,$@)"
+fdisk.obj : fdisk.c \
+            fdisk.h subtype.h extern.h fdiskmsg.h doscall.h msgret.h
 
-mainmenu.obj : MAINMENU.C FDISK.H SUBTYPE.H EXTERN.H FDISKMSG.H 
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\fdisk $(subst /,\,$<) $(subst /,\,$@)"
+mainmenu.obj : mainmenu.c fdisk.h subtype.h extern.h fdiskmsg.h 
 
-display.obj : DISPLAY.C \
-              FDISK.H SUBTYPE.H EXTERN.H FDISKMSG.H DOSCALL.H
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\fdisk $(subst /,\,$<) $(subst /,\,$@)"
+display.obj : display.c \
+              fdisk.h subtype.h extern.h fdiskmsg.h doscall.h
 
-d_menus.obj : D_MENUS.C FDISK.H SUBTYPE.H EXTERN.H FDISKMSG.H 
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\fdisk $(subst /,\,$<) $(subst /,\,$@)"
+d_menus.obj : d_menus.c fdisk.h subtype.h extern.h fdiskmsg.h 
 
-c_menus.obj : C_MENUS.C FDISK.H SUBTYPE.H EXTERN.H FDISKMSG.H 
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\fdisk $(subst /,\,$<) $(subst /,\,$@)"
+c_menus.obj : c_menus.c fdisk.h subtype.h extern.h fdiskmsg.h 
 
-input.obj : INPUT.C FDISK.H SUBTYPE.H EXTERN.H FDISKMSG.H DOSCALL.H
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\fdisk $(subst /,\,$<) $(subst /,\,$@)"
+input.obj : input.c fdisk.h subtype.h extern.h fdiskmsg.h doscall.h
 
-tdisplay.obj : TDISPLAY.C FDISK.H SUBTYPE.H EXTERN.H FDISKMSG.H 
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\fdisk $(subst /,\,$<) $(subst /,\,$@)"
+tdisplay.obj : tdisplay.c fdisk.h subtype.h extern.h fdiskmsg.h 
 
-vdisplay.obj : VDISPLAY.C FDISK.H SUBTYPE.H EXTERN.H FDISKMSG.H 
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\fdisk $(subst /,\,$<) $(subst /,\,$@)"
+vdisplay.obj : vdisplay.c fdisk.h subtype.h extern.h fdiskmsg.h 
 
-space.obj : SPACE.C FDISK.H SUBTYPE.H EXTERN.H
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\fdisk $(subst /,\,$<) $(subst /,\,$@)"
+space.obj : space.c fdisk.h subtype.h extern.h
 
-partinfo.obj : PARTINFO.C FDISK.H SUBTYPE.H EXTERN.H 
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\fdisk $(subst /,\,$<) $(subst /,\,$@)"
+partinfo.obj : partinfo.c fdisk.h subtype.h extern.h 
 
-makepart.obj : MAKEPART.C FDISK.H SUBTYPE.H EXTERN.H 
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\fdisk $(subst /,\,$<) $(subst /,\,$@)"
+makepart.obj : makepart.c fdisk.h subtype.h extern.h 
 
-video.obj : VIDEO.C FDISK.H EXTERN.H SUBTYPE.H FDISKMSG.H DOSCALL.H
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\fdisk $(subst /,\,$<) $(subst /,\,$@)"
+video.obj : video.c fdisk.h extern.h subtype.h fdiskmsg.h doscall.h
 
-int13.obj : INT13.C FDISK.H SUBTYPE.H EXTERN.H FDISKMSG.H
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\fdisk $(subst /,\,$<) $(subst /,\,$@)"
+int13.obj : int13.c fdisk.h subtype.h extern.h fdiskmsg.h
 
-diskout.obj : DISKOUT.C FDISK.H SUBTYPE.H EXTERN.H
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\fdisk $(subst /,\,$<) $(subst /,\,$@)"
+diskout.obj : diskout.c fdisk.h subtype.h extern.h
 
-fdparse.obj : FDPARSE.C FDISK.H SUBTYPE.H EXTERN.H PARSE.H MSGRET.H 
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\fdisk $(subst /,\,$<) $(subst /,\,$@)"
+fdparse.obj : fdparse.c fdisk.h subtype.h extern.h parse.h msgret.h 
 
-convert.obj : CONVERT.C FDISK.H SUBTYPE.H EXTERN.H 
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\fdisk $(subst /,\,$<) $(subst /,\,$@)"
+convert.obj : convert.c fdisk.h subtype.h extern.h 
 
-global.obj : GLOBAL.C FDISK.H
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\fdisk $(subst /,\,$<) $(subst /,\,$@)"
+global.obj : global.c fdisk.h
 
 fdiskm.obj : fdiskm.c
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\fdisk $(subst /,\,$<) $(subst /,\,$@)"
 
-messages.obj : MESSAGES.C MSGRET.H EXTERN.H SUBTYPE.H FDISK.H
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\fdisk $(subst /,\,$<) $(subst /,\,$@)"
+messages.obj : messages.c msgret.h extern.h subtype.h fdisk.h
 
 
 # Handle the FDISK MASM source
@@ -141,9 +127,16 @@ FDISK_OBJS = main.obj mainmenu.obj d_menus.obj c_menus.obj fdisk.obj \
              makepart.obj int13.obj diskout.obj messages.obj fdparse.obj \
              convert.obj global.obj _parse.obj _msgret.obj fdiskm.obj
 
-fdisk.exe : $(FDISK_OBJS) $(map)/mapper.lib FDISK.LNK fdisk.ctl \
-            $(comsubs)/comsubsm.lib
-	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\fdisk @fdisk.lnk"
+fdisk.exe : $(FDISK_OBJS) $(map)/mapper.lib fdisk.ctl
+	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
+	echo 'option map=fdisk.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name fdisk.exe' >>resp.txt
+	for x in $(FDISK_OBJS); do echo "file $$x" >>resp.txt; done
+	echo "library $(map)/mapper.lib" >>resp.txt
+	wlink @resp.txt
 
 clean:
 	rm -f *.obj

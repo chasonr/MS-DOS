@@ -53,18 +53,18 @@
 /*        Hope this doesn't mess you up too much - MT 5/20/86  */
 /******************** END OF SPECIFICATIONS ********************/
 
-#include <dos.h>                                                        /* AN000 */
-#include <fdisk.h>                                                      /* AN000 */
-#include <subtype.h>                                                    /* AN000 */
-#include <doscall.h>                                                    /* AN000 */
 #include <ctype.h>                                                      /* AN000 */
-#include <extern.h>                                                     /* AN000 */
 #include <signal.h>                                                     /* AN000 */
 #include <string.h>                                                     /* AN000 */
-#include <fdiskmsg.h>                                                   /* AN000 */
-#include <msgret.h>                                                     /* AN000 */
 #include <process.h>                                                    /* AN001 */
 #include <stdio.h>                                                      /* AN000 */
+#include "dos.h"                                                        /* AN000 */
+#include "fdisk.h"                                                      /* AN000 */
+#include "subtype.h"                                                    /* AN000 */
+#include "doscall.h"                                                    /* AN000 */
+#include "extern.h"                                                     /* AN000 */
+#include "fdiskmsg.h"                                                   /* AN000 */
+#include "msgret.h"                                                     /* AN000 */
 
 /*  */
 /******************* START OF SPECIFICATIONS *******************/
@@ -151,14 +151,11 @@
 /*                                                                        */
 /**************************************************************************/
 /*  */
-void main(argc,argv)                                                    /* AC000 */
-
-int     argc;                                                           /* AN000 */
-char    *argv[];                                                        /* AN000 */
+void main(void)                                                         /* AC000 */
 
 BEGIN
 
-    char       temp;                                                    /* AN000 */
+    unsigned char  temp;                                                /* AN000 */
     unsigned   input;
 
     /* DISABLE CNTL-BREAK HERE */
@@ -173,7 +170,7 @@ BEGIN
     BEGIN                                                               /* AN000 */
 
         /* Parse the command line for syntax and switches */
-        if(parse_command_line(argc,argv))                               /* AN000 */
+        if(parse_command_line())                                        /* AN000 */
 
         BEGIN                                                           /* AN000 */
         /* check to see if switches were set */

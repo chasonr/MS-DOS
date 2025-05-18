@@ -1,9 +1,9 @@
 
+#include <string.h>                                                     /* AN000 */
 #include "dos.h"                                                        /* AN000 */
 #include "fdisk.h"                                                      /* AN000 */
 #include "extern.h"                                                     /* AN000 */
 #include "parse.h"                                                      /* AN000 */
-#include "string.h"                                                     /* AN000 */
 #include "subtype.h"                                                    /* AN000 */
 #include "msgret.h"                                                     /* AN000 */
 
@@ -27,10 +27,7 @@
 /******************************************************************************/
 
 
-char parse_command_line(argc,argv)                                      /* AN000 */
-
-char *argv[];                                /* array of pointer arguments AN000 */
-int  argc;
+char parse_command_line()                                               /* AN000 */
 
 BEGIN                                                                   /* AN000 */
 
@@ -49,8 +46,7 @@ BEGIN                                                                   /* AN000
         regs.h.ah = (unsigned char) 0x62;
         intdosx(&regs, &regs, &segregs);
 
-        FP_OFF(cmdline) = 0x81;
-        FP_SEG(cmdline) = regs.x.bx;
+        cmdline = MK_FP(0x81, regs.x.bx);
 
         i = 0;
         while ( *cmdline != (char) '\x0d' ) cmd_line[i++] = *cmdline++;
@@ -285,12 +281,10 @@ char    far *Cmd_Ptr;                                                   /* AN010
 
         BEGIN                                                           /* AN010 */
         segread(&segregs);                                              /* AN010 */
-        FP_SEG(Cmd_Ptr) = segregs.ds;                                   /* AN010 */
-        FP_OFF(Cmd_Ptr) = regs.x.si;                                    /* AN010 */
+        Cmd_Ptr = MK_FP(segregs.ds, regs.x.si);
         *Cmd_Ptr        = '\0';                                         /* AN010 */
 
-        FP_SEG(sublistp[0].value) = segregs.ds;                         /* AN010 */
-        FP_OFF(sublistp[0].value) = Parse_Ptr;                          /* AN010 */
+        sublistp[0].value = MK_FP(segregs.ds, Parse_Ptr);
         sublistp[0].size      = Sublist_Length;                         /* AN010 */
         sublistp[0].reserved  = Reserved;                               /* AN010 */
         sublistp[0].id        = 0;                                      /* AN010 */

@@ -10,12 +10,11 @@ void write_info_to_disk()
 
 BEGIN
 
-char            i;
+unsigned char   i;
 unsigned char   j;
 unsigned        extended_location;
-char            extended_index;
-char            temp;
-char            first_found;
+unsigned char   extended_index;
+unsigned char   temp;
 char            changed_flag;
 char            temp_disk;
 
@@ -46,7 +45,7 @@ char            temp_disk;
                 /* the logical drive based on the start of the extended partition, but there isn't one */
                 /* because it has already been deleted already. Bad things happen - PTM P941  */
 
-                if (find_partition_type(uc(EXTENDED)));                 /* AC000 */
+                if (find_partition_type(uc(EXTENDED)))                  /* AC000 */
                    BEGIN
                     /* See if any extended partitions need to be updated */
                     changed_flag = FALSE;
@@ -122,12 +121,8 @@ BEGIN
 
 unsigned        char i;
 unsigned        j;
-unsigned        x;
-unsigned        temp;
 unsigned long   long_temp;
 unsigned        index;
-char            location;
-unsigned        byte_temp;
 
         /* Clean out the boot_record */
         for (j=u(0);j < u(BYTES_PER_SECTOR); j++)                       /* AC000 */
@@ -198,16 +193,15 @@ END
 /*  */
 char write_ext_boot_to_disk(entry,disk)
 
-char entry;
+unsigned char entry;
 unsigned char disk;
 BEGIN
 
-char            i;
+unsigned char   i;
 unsigned        j;
 unsigned long   long_temp;
-unsigned        index;
-char            location;
-char            next_drive;
+unsigned char   location;
+unsigned char   next_drive;
 char            pointer;
 char            write;
 

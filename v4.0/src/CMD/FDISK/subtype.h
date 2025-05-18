@@ -89,7 +89,7 @@ char     table_drive_letter(void);
 /*************************************************************/
 /* FDISK.C ROUTINES                                          */
 /*************************************************************/
-void     main(int,char * []);
+void     main(void);
 void     load_logical_drive(char,unsigned char);
 void     init_partition_tables(void);
 char     check_valid_environment(void);
@@ -108,7 +108,7 @@ void     dos_create_partition(void);
 void     create_partition(void);
 void     do_main_menu(void);
 void     internal_program_error(void);
-void     reboot(void);
+void __cdecl reboot(void);
 
 /*************************************************************/
 /* CONVERT ROUTINES                                          */
@@ -126,11 +126,11 @@ FLAG     check_format(char);                                            /* AN002
 /*************************************************************/
 /* PARSE ROUTINES                                            */
 /*************************************************************/
-char     parse_command_line(int,char * []);                             /* AN000 */
+char     parse_command_line(void);                                      /* AN000 */
 void     parse_init(void);                                              /* AN000 */
 void     check_disk_validity(void);                                     /* AN000 */
 void     process_switch(void);                                          /* AN000 */
-void     parse(union REGS *, union REGS *);                             /* AN000 */
+void __cdecl parse(union REGS *, union REGS *);                             /* AN000 */
 void     Parse_msg(int,int,unsigned char);                              /* AN010 */
 
 
@@ -139,20 +139,7 @@ void     Parse_msg(int,int,unsigned char);                              /* AN010
 /*************************************************************/
 char     preload_messages(void);                                        /* AN000 */
 void     display_msg(int,int,int,int *,char,char);                      /* AN000 AC014 */
-void     sysloadmsg(union REGS *, union REGS *);                        /* AN000 */
-void     sysdispmsg(union REGS *, union REGS *);                        /* AN000 */
-void     sysgetmsg(union REGS *, struct SREGS *, union REGS *);         /* AN012 */
+void __cdecl sysloadmsg(union REGS *, union REGS *);                        /* AN000 */
+void __cdecl sysdispmsg(union REGS *, union REGS *);                        /* AN000 */
+void __cdecl sysgetmsg(union REGS *, struct SREGS *, union REGS *);         /* AN012 */
 char     get_yes_no_values(void);                                       /* AN012 */
-
-
-/*************************************************************/
-/* C ROUTINES                                                */
-/*************************************************************/
-
-int      getch(void);
-void     putch(int);
-
-int      int86x(int, union REGS *, union REGS *, struct SREGS *);
-int      int86(int, union REGS *, union REGS *);
-int      intdos(union REGS *, union REGS *);
-

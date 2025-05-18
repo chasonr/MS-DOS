@@ -1,22 +1,22 @@
 
+#include <string.h>                                                     /* AN000 */
 #include "dos.h"                                                        /* AN000 */
 #include "fdisk.h"                                                      /* AN000 */
 #include "extern.h"                                                     /* AN000 */
 #include "subtype.h"                                                    /* AN000 */
-#include "string.h"                                                     /* AN000 */
 
 /*  */
 
 void make_partition(size,free_pointer,bootable,type)
 
 unsigned        size;
-char            free_pointer;
+unsigned char   free_pointer;
 unsigned char   bootable;
 char            type;
 
 BEGIN
 
-char table_pointer;
+unsigned char table_pointer;
 unsigned i;
 unsigned char   temp;
 unsigned long   total_sectors;
@@ -167,12 +167,11 @@ END
 char make_volume(size,free_pointer)
 
 unsigned    size;
-char   free_pointer;
+unsigned char free_pointer;
 
 BEGIN
 
-char table_pointer;
-unsigned i;
+unsigned char table_pointer;
 unsigned ext_part_num;                                                  /* AN000 */
 unsigned char   temp;
 unsigned long   total_sectors;

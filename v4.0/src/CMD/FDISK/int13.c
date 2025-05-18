@@ -1,12 +1,12 @@
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "dos.h"                                                        /* AN000 */
 #include "fdisk.h"                                                      /* AN000 */
 #include "extern.h"                                                     /* AN000 */
 #include "subtype.h"                                                    /* AN000 */
 #include "fdiskmsg.h"                                                   /* AN000 */
-
-#include "string.h"
-#include "stdio.h"
-#include "stdlib.h"
 
 /* int     printf(char *, ...); */
 
@@ -74,8 +74,6 @@ unsigned char   which_disk;
 
 BEGIN
 
-char i;
-char j;
 char far *buffer_pointer = boot_record;
 
         /* Setup read, always on a cylinder boundary */
@@ -120,12 +118,11 @@ END
 /*  */
 unsigned verify_tracks(pointer,type)
 
-char pointer;
+unsigned char pointer;
 char type;
 
 BEGIN
 unsigned        i;
-unsigned        location;
 unsigned        sectors_per_fat;
 unsigned        cur_cyl;
 unsigned        verify_cyl;
@@ -136,7 +133,6 @@ char   retry;
 unsigned        char   cur_head;                                        /* AC004 */
 
 char far *buffer_pointer = boot_record;
-char head;
 
 
 
@@ -398,9 +394,9 @@ struct  SREGS   *SegRegs;
 
 BEGIN
 
-        char    *WritePtr;
-
 #ifdef DEBUG
+
+        char    *WritePtr;
 
         switch(InRegs->h.ah)
               {

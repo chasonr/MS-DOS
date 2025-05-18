@@ -1,13 +1,13 @@
 
 
+#include <stdio.h>                                                      /* AN000 */
+#include <ctype.h>                                                      /* AN000 */
 #include "dos.h"                                                        /* AN000 */
 #include "fdisk.h"                                                      /* AN000 */
 #include "subtype.h"                                                    /* AN000 */
-#include "stdio.h"                                                      /* AN000 */
 #include "extern.h"                                                     /* AN000 */
 #include "doscall.h"                                                    /* AN000 */
 #include "fdiskmsg.h"                                                   /* AN000 */
-#include "ctype.h"                                                      /* AN000 */
 
 /*  */
 /******************* START OF SPECIFICATIONS *******************/

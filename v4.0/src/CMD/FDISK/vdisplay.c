@@ -1,12 +1,12 @@
 
+#include <string.h>
+#include <stdio.h>
+#include <memory.h>
 #include "dos.h"                                                        /* AN000 */
 #include "fdisk.h"                                                      /* AN000 */
 #include "extern.h"                                                     /* AN000 */
 #include "subtype.h"                                                    /* AN000 */
 #include "fdiskmsg.h"                                                   /* AN000 */
-#include "string.h"
-#include "stdio.h"
-#include "memory.h"
 
 /*  */
 char volume_display()
@@ -14,7 +14,6 @@ char volume_display()
 BEGIN
 
 unsigned    i;
-unsigned    x;
 char        drive_found;
 char        drive_letter;
 char        drive_num;
@@ -176,5 +175,3 @@ unsigned    insert_offset;
         return(drive_letter);
 
 END
-
-

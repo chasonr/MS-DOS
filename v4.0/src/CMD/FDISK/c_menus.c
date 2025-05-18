@@ -1,10 +1,10 @@
 
+#include <stdio.h>
 #include "dos.h"                                                        /* AN000 */
 #include "fdisk.h"                                                      /* AN000 */
 #include "extern.h"                                                     /* AN000 */
 #include "subtype.h"                                                    /* AN000 */
 #include "fdiskmsg.h"                                                   /* AN000 */
-#include "stdio.h"
 
 /*  */
 /******************* START OF SPECIFICATIONS *******************/
@@ -268,7 +268,7 @@ void dos_create_partition()
 BEGIN
 
     char   input;
-    char   temp;
+    unsigned char temp;
     char   second_disk_flag;                                            /* AN000 */
 
 
@@ -444,8 +444,7 @@ BEGIN
 
     unsigned  input;
     unsigned  default_entry;
-    char      temp;
-    char      location;
+    unsigned char temp;
 
     input = u(NUL);                                                     /* AC000 */
     /* clear off screen */
@@ -645,7 +644,7 @@ BEGIN
 
     unsigned  input;
     unsigned  default_entry;
-    char      temp;
+    unsigned char temp;
 
 
     input = u(NUL);                                                    /* AC000 */
@@ -884,11 +883,8 @@ BEGIN
 
     unsigned  input;
     unsigned  default_entry;
-    char  temp;
     char  drive_letter;
-    char  default_value;
-    char  location;
-    char  previous_location;
+    unsigned char  location;
     char  ext_location;
     unsigned char  i;
     char  defined_drives;
