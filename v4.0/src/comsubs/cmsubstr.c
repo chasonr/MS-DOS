@@ -5,7 +5,7 @@
 #include "comsub.h"
 #include "compriv.h"
 
-static const char *sccs_id = "@(#)cmsubstr.c	1.1 86/06/17";
+/* static const char *sccs_id = "@(#)cmsubstr.c	1.1 86/06/17"; */
 
 unsigned char *
 com_substr(unsigned char *str1, unsigned char *str2)

@@ -207,7 +207,7 @@ handle_fnd1	equ	4eh
 exec_proc	equ	4bh
 ext_handle_opn	equ	6ch								  ;AN003;
 
-break	macro			; this is a dummy break macro so PDB.INC
+break	macro	subtitle	; this is a dummy break macro so PDB.INC
 	endm			; won't blow up in the build
 
 ;	define some things for PDB (PSP)						  ;AN002;

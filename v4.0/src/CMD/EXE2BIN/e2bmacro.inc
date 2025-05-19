@@ -30,10 +30,10 @@ MESSAGE macro   Message_Name                    ;                               
 ;*****************************************************************************
 ;
 
-Procedure       macro   Proc_Name
+Procedure       macro   Proc_Name,Distance
 
 Public  Proc_Name
-Proc_Name    proc
+Proc_Name    proc Distance
 
         endm
 ;-----------------------------------------------------------------------------

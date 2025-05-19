@@ -162,10 +162,10 @@ DUMP_BYTE_REG	MACRO	DUMPSEG, DUMPOFFREG, BYTELENGTH 		  ;3.30
 
 else
 		; if test is not defined then make macro into null statements
-Message macro
+Message macro	Bits,msg
 ENDM
 
-MNUM	macro
+MNUM	macro	Bits,num
 ENDM
 
 ZWAIT	macro

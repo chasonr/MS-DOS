@@ -397,7 +397,7 @@ KanjiScan:
 	LODSB					; get trailing byte
 	CMP	AX,8140h			; is it Kanji space
 	JNZ	KanjiScan			; no, go get next
-	MOV	[SI-2],2020h			; replace with spaces
+	MOV	WORD PTR [SI-2],2020h		; replace with spaces
 	JMP	KanjiScan			; go get next char
 
 KanjiQuote:

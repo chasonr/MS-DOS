@@ -421,13 +421,13 @@ c:
 	POPF
 ENDM
 else
-fmt macro
+fmt macro   typ,lev,fmts,args
 endm
 endif
 
 Break   <DOSAssume - validate assumes>
 
-AsmVar  Debug,$temp
+AsmVar  Debug
 
 IF debug
 DOSAssume   Macro   reg,reglist,message
@@ -534,7 +534,7 @@ Table   ends
     ENDIF
 ENDM
 ELSE
-Assert  Macro
+Assert  Macro   kind, objs, message
 ENDM
 ENDIF
 

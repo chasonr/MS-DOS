@@ -287,7 +287,7 @@ DoParse:
 	lodsw					;AN000; bypass drive
 
 dir_no_drive:
-	cmp	[si],".."
+	cmp	word ptr [si],".."
 	jnz	DoRealParse
 	cmp	byte ptr [si+2],0
 	jnz	DoRealParse

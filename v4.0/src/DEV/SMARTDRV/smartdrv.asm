@@ -176,7 +176,7 @@ ENDIF
 ;;
 BiosSeg	segment at 40h		;; Used to locate 6300 PLUS reset address
 	org	00a2h
-RealLoc1 dd	0
+RealLoc1 dd	?
 BiosSeg	ends
 ;
 R_Mode_IDT  segment at 0h

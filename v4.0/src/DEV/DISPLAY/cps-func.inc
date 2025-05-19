@@ -246,7 +246,7 @@ DB_3:   POP     CX                      ;
         PUSH    CS                      ;
         POP     ES                      ; INITIALIZE ES=CS
         MOV     [DI].FLAG,FLAG_RESTART  ; SETUP UP MAIN TABLE FOR F-PARSER.SRC
-        MOV     [DI].BUFFER_LEN,0       ; PREPARING FOR START OF DESIGNATION
+        MOV     WORD PTR [DI].BUFFER_LEN,0 ; PREPARING FOR START OF DESIGNATION
         MOV     [DI].NUM_FTBLK,DX       ; DX=#DESG TO PARSE OUT
                                         ;
         LEA     SI,CPD_CLASS            ; SET DI TO POINT TO (EGA,LCD) CLASSES

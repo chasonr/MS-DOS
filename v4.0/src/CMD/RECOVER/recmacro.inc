@@ -49,10 +49,10 @@ Extended_Message macro				;				;AN000;
 ;*****************************************************************************
 ;
 
-Procedure	macro	Proc_Name		;				;AN000;
+Procedure	macro	Proc_Name,Distance	;				;AN000;
 						;
 Public	Proc_Name				;				;AN000;
-Proc_Name    proc				;				;AN000;
+Proc_Name    proc Distance			;				;AN000;
 						;
 	endm					;				;AN000;
 ;-----------------------------------------------------------------------------

@@ -3,7 +3,7 @@
 #include <stddef.h>
 #include "compriv.h"
 
-static const char *sccs_id = "@(#)cmstrchr.c	1.1 86/06/17";
+/* static const char *sccs_id = "@(#)cmstrchr.c	1.1 86/06/17"; */
 
 char *
 com_strchr(

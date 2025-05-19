@@ -52,7 +52,7 @@ WRITE   PROC                            ;
         LES     DI,DWORD PTR BUF.RH_PTRO; RESTORE ES:DI AS REQUEST HEADER PTR
         LEA     SI,FTABLE               ; GET BASE ADDRESS OF PARSER TABLE
                                         ;
-        MOV     DS:[SI].FLAG,0          ; NO RESTART
+        MOV     WORD PTR DS:[SI].FLAG,0 ; NO RESTART
         MOV     AX,RH.RH3_CNT           ;
         MOV     DS:[SI].BUFFER_LEN,AX   ; LENGTH OF REQUEST PACKET
                                         ;
