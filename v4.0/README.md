@@ -43,5 +43,5 @@ Then type `nmake`, and if you are using DOSBox, go get yourself some lunch.
 
 This step runs on the host system. You will need a Ruby interpreter. Run
 `make-disks.rb`. This script creates one set of install images. There should
-be four images for 360K floppies, two for 720K floppies, one for a 1.2M floppy
+be five images for 360K floppies, two for 720K floppies, one for a 1.2M floppy
 and one for a 1.44M floppy.

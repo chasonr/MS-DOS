@@ -2,13 +2,10 @@
 
 require 'set'
 
-# dos40.img is the image file
-ImageName = "dos40.img"
-
 # These are the lists of files to include on the disks:
 
-# 360 KB Disk 1
-Distribution360_1 = [
+# 360 KB install disk
+Distribution360_install = [
     # These two must be first
     'src/BIOS/io.sys',
     'src/DOS/msdos.sys',
@@ -30,8 +27,21 @@ Distribution360_1 = [
     'src/CMD/SYS/sys.com',
 ]
 
-# 360 KB Disk 2
-Distribution360_2 = [
+# 360 KB select disk
+Distribution360_select = [
+    'src/CMD/BACKUP/backup.com',
+    'src/DEV/DISPLAY/EGA/ega.cpi',
+    'src/CMD/FORMAT/format.com',
+    'src/DEV/DISPLAY/LCD/lcd.cpi',
+    'src/CMD/MODE/mode.com',
+    'src/CMD/RESTORE/restore.com',
+    'src/SELECT/select.dat',
+    'src/SELECT/select.exe',
+    'src/DEV/XMA2EMS/xma2ems.sys',
+]
+
+# 360 KB operating disk #1
+Distribution360_operating_1 = [
     'src/CMD/COMMAND/command.com',
     'src/CMD/ASSIGN/assign.com',
     'src/CMD/ATTRIB/attrib.exe',
@@ -52,12 +62,12 @@ Distribution360_2 = [
     'src/CMD/SORT/sort.exe',
     'src/CMD/SUBST/subst.exe',
     'src/CMD/TREE/tree.com',
-    'src/DEV/VDISK/vdisk.sys',
+    'src/DEV/VDISK/vdisk.sys', # extra
     'src/CMD/XCOPY/xcopy.exe',
 ]
 
-# 360 KB Disk 3
-Distribution360_3 = [
+# 360 KB operating disk #2
+Distribution360_operating_2 = [
     'src/CMD/COMMAND/command.com',
     'src/MEMM/MEMM/emm386.sys',
     'src/CMD/EXE2BIN/exe2bin.exe',
@@ -69,8 +79,8 @@ Distribution360_3 = [
     'src/DEV/XMA2EMS/xma2ems.sys',
 ]
 
-# 360 KB Disk 4
-Distribution360_4 = [
+# 360 KB operating disk #3
+Distribution360_operating_3 = [
     # These two must be first
     'src/BIOS/io.sys',
     'src/DOS/msdos.sys',
@@ -99,8 +109,8 @@ Distribution360_4 = [
     # Missing: readme.txt
 ]
 
-# 720 KB Disk 1
-Distribution720_1 = [
+# 720 KB install
+Distribution720_install = [
     # These two must be first
     'src/BIOS/io.sys',
     'src/DOS/msdos.sys',
@@ -142,8 +152,8 @@ Distribution720_1 = [
     'src/DEV/XMA2EMS/xma2ems.sys',
 ] # free: 19K
 
-# 720 KB Disk 2
-Distribution720_2 = [
+# 720 KB operating
+Distribution720_operating = [
     'src/CMD/APPEND/append.exe',
     'src/CMD/ASSIGN/assign.com',
     'src/CMD/ATTRIB/attrib.exe',
@@ -175,10 +185,10 @@ Distribution720_2 = [
     'src/CMD/SORT/sort.exe',
     'src/CMD/SUBST/subst.exe',
     'src/CMD/TREE/tree.com',
-    'src/DEV/VDISK/vdisk.sys',
+    'src/DEV/VDISK/vdisk.sys', # extra
     'src/CMD/XCOPY/xcopy.exe',
     # Missing: readme.txt
-    'src/DEV/XMAEM/xmaem.sys',
+    'src/DEV/XMAEM/xmaem.sys', # extra
 ] # free: 31K
 
 # 1.2 MB and 1.44 MB
@@ -245,10 +255,10 @@ Distribution1440 = [
     'src/CMD/SUBST/subst.exe',
     'src/CMD/SYS/sys.com',
     'src/CMD/TREE/tree.com',
-    'src/DEV/VDISK/vdisk.sys',
+    'src/DEV/VDISK/vdisk.sys', # extra
     'src/CMD/XCOPY/xcopy.exe',
     'src/DEV/XMA2EMS/xma2ems.sys',
-    'src/DEV/XMAEM/xmaem.sys',
+    'src/DEV/XMAEM/xmaem.sys', # extra
     # Missing: himem.sys
     # Missing: gwbasic.exe
     # Missing: link.exe
@@ -673,37 +683,43 @@ end
 
 build_disk_image(
     name: "dos40-360kb-install.img",
-    file_list: Distribution360_1,
+    file_list: Distribution360_install,
     floppy: floppy_360kb,
     label: "INSTALL" )
 
 build_disk_image(
+    name: "dos40-360kb-select.img",
+    file_list: Distribution360_select,
+    floppy: floppy_360kb,
+    label: "SELECT" )
+
+build_disk_image(
     name: "dos40-360kb-operating-1.img",
-    file_list: Distribution360_2,
+    file_list: Distribution360_operating_1,
     floppy: floppy_360kb,
     label: "OPERATING1" )
 
 build_disk_image(
     name: "dos40-360kb-operating-2.img",
-    file_list: Distribution360_3,
+    file_list: Distribution360_operating_2,
     floppy: floppy_360kb,
     label: "OPERATING2" )
 
 build_disk_image(
     name: "dos40-360kb-operating-3.img",
-    file_list: Distribution360_4,
+    file_list: Distribution360_operating_3,
     floppy: floppy_360kb,
     label: "OPERATING3" )
 
 build_disk_image(
     name: "dos40-720kb-install.img",
-    file_list: Distribution720_1,
+    file_list: Distribution720_install,
     floppy: floppy_720kb,
     label: "INSTALL" )
 
 build_disk_image(
     name: "dos40-720kb-operating-1.img",
-    file_list: Distribution720_2,
+    file_list: Distribution720_operating,
     floppy: floppy_720kb,
     label: "OPERATING" )
 
