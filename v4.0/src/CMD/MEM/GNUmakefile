@@ -50,12 +50,9 @@ mem.obj:        mem.c                           \
                 parse.h
 	$(CC) $(CFLAGS) -c -fo=$@ $<
 
-	#dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\mem $(subst /,\,$<) $(subst /,\,$@)"
-
 OBJS = mem.obj _msgret.obj _parse.obj
 
 mem.exe: $(OBJS)
-#	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\mem mem+_msgret+_parse,mem.exe,,,;"
 	echo 'system dos' >resp.txt
 	echo 'option packcode=0' >>resp.txt
 	echo 'option packdata=0' >>resp.txt
