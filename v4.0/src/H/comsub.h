@@ -74,7 +74,7 @@ extern unsigned comcheckdosver();
 /*
  *  return code conversion to message id
  */
-extern unsigned __cdecl rctomid(
+extern unsigned rctomid(
 	unsigned);	   /* return code to converted to msg id */
 
 /*
@@ -93,8 +93,8 @@ extern unsigned far pascal REALOPEN(
 /*
  *   search the first substring occurrence in a string
  */
-extern unsigned char __cdecl
-*com_substr(
+extern unsigned char *
+com_substr(
    unsigned char *,	      /* source string */
    unsigned char *);	      /* target string */
 
@@ -138,7 +138,7 @@ extern char *com_strchr(
 /*
  *   convert character to uppercase
  */
-extern int __cdecl com_toupper(
+extern int com_toupper(
    unsigned char );	      /* character to be converted to uppercase */
 
 /*

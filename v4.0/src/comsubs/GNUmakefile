@@ -9,7 +9,7 @@ all: $(LIB) $(MLIB)
 .SUFFIXES: .c .obj
 
 CC = wcl
-CFLAGS = -q -ms -os -zp=1 -I$(INC) -wx -ecc
+CFLAGS = -q -ms -os -zp=1 -I$(INC) -wx
 
 .c.obj:
 	$(CC) $(CFLAGS) -c -fo=$@ $<

@@ -18,7 +18,7 @@ country = usa-ms
 .SUFFIXES: .c .asm .obj
 
 CC = wcl
-CFLAGS = -q -ms -os -zp=1 -I$(hinc) -wx -ecc
+CFLAGS = -q -ms -os -zp=1 -I$(hinc) -wx
 
 AS = jwasm
 AFLAGS = -q -Zm -Zg -I$(inc) -Fl

@@ -8,7 +8,6 @@
 #include "jointype.h"
 #include "errtst.h"
 
-extern unsigned char *com_substr() ;            /* ;AN000; DBCS enabled */
 extern char getdrv() ;
 
 union REGS inregs, outregs;                     /* ;AN000; Regs for Int21 */

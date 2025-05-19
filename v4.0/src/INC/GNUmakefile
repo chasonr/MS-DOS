@@ -12,7 +12,7 @@ hinc	=../H
 .SUFFIXES: .c .asm .obj
 
 CC = wcl
-CFLAGS = -q -ms -os -zp=1 -I$(hinc) -wx -ecc
+CFLAGS = -q -ms -os -zp=1 -I$(hinc) -wx
 
 AS = jwasm
 AFLAGS = -q -Zm -Zg -I$(dos) -Fl -Sa
@@ -89,31 +89,3 @@ clean:
 	rm -f *.obj
 	rm -f *.err
 	rm -f *.lst
-
-##############################################################################
-# Temporary until all builds converted to Watcom #
-
-errtstm.obj: 	errtst.c \
-  		$(hinc)/comsub.h  \
-  		$(hinc)/dpb.h \
-  		$(hinc)/jointype.h
-	dosemu -t --Fdrive_c ../.. -E "src\domsc.bat src\inc $(subst /,\,$<) $(subst /,\,$@)"
-
-sysvarm.obj: 	sysvar.c \
-  		$(hinc)/sysvar.h \
-  		$(hinc)/jointype.h
-	dosemu -t --Fdrive_c ../.. -E "src\domsc.bat src\inc $(subst /,\,$<) $(subst /,\,$@)"
-
-cdsm.obj: 	cds.c \
-  		$(hinc)/sysvar.h  \
-  		$(hinc)/cds.h  \
-  		$(hinc)/dpb.h \
-  		$(hinc)/jointype.h
-	dosemu -t --Fdrive_c ../.. -E "src\domsc.bat src\inc $(subst /,\,$<) $(subst /,\,$@)"
-
-dpbm.obj: 	dpb.c \
-  		$(hinc)/types.h \
-  		$(hinc)/sysvar.h \
-  		$(hinc)/dpb.h \
-  		$(hinc)/cds.h
-	dosemu -t --Fdrive_c ../.. -E "src\domsc.bat src\inc $(subst /,\,$<) $(subst /,\,$@)"
