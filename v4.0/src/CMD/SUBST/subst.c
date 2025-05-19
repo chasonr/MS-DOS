@@ -260,7 +260,7 @@ char *v[] ;
             p_filespec[fchar] = (char)*fptr ;                                  /* ;AN000;P copy from rslt field buf */
             fchar++ ;                                                          /* ;AN000;P */
           }                                                                    /* ;AN000;P */
-          strcpy(fix_es_reg,NULL) ;                                            /* ;AN000;P (Set es reg correct) */
+          strcpy(fix_es_reg, "") ;                                             /* ;AN000;P (Set es reg correct) */
           pflspec_flg = TRUE ;                                                 /* ;AN000;P and set the flag */
           for (; inregs.x.si < outregs.x.si ; inregs.x.si++)       /* ;AN002; Copy whatever */
           {                                                                    /* ;AN002; parser just parsed */
@@ -325,7 +325,7 @@ char *v[] ;
     dispmsg_terminate(MSG_PARMNUM,cmdln_switch) ;                              /* ;AN000;P display error msg & exit utility */
 
   GetVars(&SysVars) ;
-  strcpy(fix_es_reg,NULL) ;                                                    /* ;AN000;P (Set es reg correct) */
+  strcpy(fix_es_reg, "") ;                                                     /* ;AN000;P (Set es reg correct) */
 
   if (c == 1)                                                                  /* display all tree aliases */
     Display() ;
@@ -334,7 +334,7 @@ char *v[] ;
     {
       if (!fDelete(p_drive))
         dispmsg_terminate(MSG_BADPARM,cmdln_drive) ;                           /* :AC002; */
-      strcpy(fix_es_reg,NULL) ;                                                /* ;AN000;P (Set es reg correct) */
+      strcpy(fix_es_reg, "") ;                                                 /* ;AN000;P (Set es reg correct) */
     }
     else
       Insert(p_drive,p_filespec) ;                                             /* ;AC000;P */
@@ -350,7 +350,7 @@ char *p ;
   char *p2 ;
 
   p2 = p-1 ;
-  while (*(p2 = strbscan(p1 = p2+1,"\\")) != NULL) ;
+  while (*(p2 = strbscan(p1 = p2+1,"\\")) != '\0') ;
 
   /* p1 points to char after last path sep.                */
   /* If this is a NULL, p already has a trailing path sep. */
@@ -397,9 +397,9 @@ char *v ;
   CDS.flags = drive >= SysVars.cDrv ? FALSE : CDSINUSE ;
   CDS.pDPB = drive >= SysVars.cDrv ? 0L : GetDPB(drive) ;
 
-  strcpy(fix_es_reg,NULL) ;                                                    /* ;AN000;P (Set es reg correct) */
+  strcpy(fix_es_reg, "") ;                                                     /* ;AN000;P (Set es reg correct) */
   fPutCDS(drive, &CDS) ;
-  strcpy(fix_es_reg,NULL) ;                                                    /* ;AN000;P (Set es reg correct) */
+  strcpy(fix_es_reg, "") ;                                                     /* ;AN000;P (Set es reg correct) */
   return(TRUE) ;
 }
 /*컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴*/
@@ -436,7 +436,7 @@ void Insert(char *s, char *d)
   if (fNet(drives))                                                            /* Src can't be net drive, is reuse of CDS */
     dispmsg_terminate(MSG_NETERR, "") ;                                        /* ;AC000;M */
 
-  strcpy(fix_es_reg,NULL);                                                     /* ;AN000;P (Set es reg correct) */
+  strcpy(fix_es_reg, "") ;                                                     /* ;AN000;P (Set es reg correct) */
   if (fNet(drived))                                                            /* Dest can't be a net drive either */
     dispmsg_terminate(MSG_NETERR, "") ;                                        /* ;AC000;M */
 
@@ -444,7 +444,7 @@ void Insert(char *s, char *d)
   /* get CDS for source; or source is current drive; or drive is net,       */
   /* splices or substed already; or destination is not physical             */
 
-  strcpy(fix_es_reg,NULL) ;                                                    /* ;AN000;P (Set es reg correct) */
+  strcpy(fix_es_reg, "") ;                                                     /* ;AN000;P (Set es reg correct) */
   if (drives < 0 || drives >= SysVars.cCDS ||
      drives == drived                      ||
      !fGetCDS(drives, &CDS)                ||
@@ -452,13 +452,13 @@ void Insert(char *s, char *d)
      TESTFLAG(CDS.flags,CDSNET|CDSSPLICE|CDSLOCAL))
     dispmsg_terminate(MSG_BADPARM,cmdln_drive) ;                               /* ;AC000;M */
 
-  strcpy(fix_es_reg,NULL) ;                                                    /* ;AN000;P (Set es reg correct) */
+  strcpy(fix_es_reg, "") ;                                                     /* ;AN000;P (Set es reg correct) */
   if (drived < 0 || drived >= SysVars.cCDS ||
      strlen(d) >= DIRSTRLEN                ||
      !fPhysical(drived))
     dispmsg_terminate(MSG_BADPARM,cmdln_flspec) ;                              /* ;AC000;M */
 
-  strcpy(fix_es_reg,NULL) ;                                                    /* ;AN000;P (Set es reg correct) */
+  strcpy(fix_es_reg, "") ;                                                     /* ;AN000;P (Set es reg correct) */
   if (strlen(d) != 3)                                                          /* Chop trailing \ if not at root */
     d[strlen(d)-1] = 0 ;
 
@@ -470,10 +470,10 @@ void Insert(char *s, char *d)
   if ((CDS.pDPB = GetDPB(drived)) == -1L)
     dispmsg_terminate(MSG_BADPARM,cmdln_flspec) ;                              /* ;AC000;M */
 
-  strcpy(fix_es_reg,NULL) ;                                                    /* ;AN000;P (Set es reg correct) */
+  strcpy(fix_es_reg, "") ;                                                     /* ;AN000;P (Set es reg correct) */
   CDS.ID = -1L ;
   fPutCDS(drives, &CDS) ;
-  strcpy(fix_es_reg,NULL) ;                                                    /* ;AN000;P (Set es reg correct) */
+  strcpy(fix_es_reg, "") ;                                                     /* ;AN000;P (Set es reg correct) */
   return ;                                                                     /* ;AN000; */
 }
 /*컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴*/
