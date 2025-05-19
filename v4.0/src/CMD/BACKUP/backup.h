@@ -1,17 +1,17 @@
 /*0  */
 /*-----------------------------------------------------------
-/*-
-/*- FILE:     BACKUP.H
-/*-
-/*- PURPOSE: For the BACKUP utility, this file has the required
-/*-	     BACKUP defines, message numbers, structures,
-/*-	     and subroutine declarations.
-/*-
-/*---------------------------------------------------------*/
+ *-
+ *- FILE:     BACKUP.H
+ *-
+ *- PURPOSE: For the BACKUP utility, this file has the required
+ *-	     BACKUP defines, message numbers, structures,
+ *-	     and subroutine declarations.
+ *-
+ *---------------------------------------------------------*/
 
 /*----------------------
-/*- Utility #DEFINES...
-/*----------------------*/
+ *- Utility #DEFINES...
+ *----------------------*/
 
 #define DHLENGTH 139	/* Length, in bytes, of a Disk Header */
 #define DBLENGTH  70	/* Length, in bytes, of a Directory Block */
@@ -177,7 +177,7 @@
 #define LOGFILE_TARGET_FULL  32 	/*;AN000;6*/
 #define PRESS_ANY_KEY	     33 	/*;AN000;6*/
 #define CRLF		     34 	/*;AN000;6*/
-#define CANT_FORMAT_HARDFILE 35 	/*;AN000;/*
+#define CANT_FORMAT_HARDFILE 35 	/*;AN000;*/
 
 /*------------------------------------*/
 /*-	   MESSAGE CLASSES	     -*/
@@ -367,9 +367,6 @@ struct File_Header
 /*----------------------------------------------------*/
 /*-	SUBROUTINE DECLARATIONS 		     -*/
 /*----------------------------------------------------*/
-	int cdecl	sprintf(char *, char *, ...);
-	int cdecl	 printf(char *,...);
-
 	void	alloc_buffer(void);
 	void	alloc_first_node(void);
 	struct	node * alloc_node(unsigned int);
@@ -470,33 +467,13 @@ struct File_Header
 	void	terminate(void);
 	void	update_db_entries(WORD);
 	void	update_fh_entries(void);
-/*****	void	write_extended_attributes(void);		/*;AN000;3*/
-	WORD	write_till_target_full(WORD,WORD);
+/*****	void	write_extended_attributes(void);*/		/*;AN000;3*/
+	WORD	write_till_target_full(WORD);
 	void	write_to_control_file(char far *,WORD);
 	void	write_to_target(WORD);
 	void	xlat(char *,char *);				/*;AN000;*/
 
-extern	void	sysloadmsg(union REGS *, union REGS *); 	/*;AN000;6*/
-extern	void	update_logfile(union REGS *, union REGS *);	/*;AN000;9*/
-extern	void	sysdispmsg(union REGS *, union REGS *); 	/*;AN000;6*/
-extern	void	parse	  (union REGS *, union REGS *); 	/*;AN000;4*/
-
-/*-------------------------------*/
-/*-	From COMSUB.H		 */
-/*-------------------------------*/
-
-/*   convert character to uppercase */
-extern int com_toupper(
-   unsigned char );	      /* character to be converted to uppercase */
-
-
-/*   search the first occurrence of a character in a string */
-extern char *com_strchr(
-   unsigned char *,	      /* a source string */
-   unsigned char );	      /* a character to be searched */
-
-/*   search the last charater occurrence in a string */
-extern unsigned char
-*com_strrchr(
-   unsigned char *,	      /* source string */
-   unsigned char );	     /* target string */
+extern void __cdecl sysloadmsg(union REGS const *, union REGS *); 	/*;AN000;6*/
+extern void __cdecl update_logfile(union REGS const *, union REGS *);	/*;AN000;9*/
+extern void __cdecl sysdispmsg(union REGS const *, union REGS *); 	/*;AN000;6*/
+extern void __cdecl parse	  (union REGS const *, union REGS *); 	/*;AN000;4*/

@@ -1,95 +1,97 @@
 /* 0 */
 
 /************************************************************
-/*
-/* UTILITY NAME:      BACKUP.COM
-/*
-/* SOURCE FILE NAME:  BACKUP.C
-/*
-/* DESCRIPTIVE NAME:
-/*	      DOS  Backup Utility Program
-/*
-/* STATUS:    BACKUP utility, DOS Version 4.00
-/*	      Written using the C programming language.
-/*
-/*
-/* COMPILER/LINKER INVOCATION:
-/*
-/*	cc /AS /Os /Zep /W3 /DLINT_ARGS /UDEBUG backup.c;
-/*	link backup,,,mapper+comsubs
-/*
-/*   Note: You MUST(!) use the PACKED option (/Zp) to make sure data structures
-/*	   are not aligned !!!
-/*
-/* FUNCTION:
-/*     BACKUP will back up files from one disk(ette) to another. Accepts
-/*     global characters, other parameters are defined to allow a more
-/*     restrictive BACKUP procedure.  Compacts data into one large file and
-/*     a control file containing directory information. Allows FORMATTING
-/*     target diskette, intelligent error recovery, and proper handling of
-/*     file sharing and sharing errors. Optionally creates a log file for
-/*     tracking purposes.  Sets errorlevels on termination to indicate
-/*     result.
-/*
-/* RESTRICTIONS:
-/*     The BACKUP Utility program will be version checked to run ONLY on
-/*     DOS version 4.00.  BACKUP performs a file by file backup using the
-/*     DOS file system, ie. it is not an image type backup.
-/*
-/*
-/* SYNTAX:
-/*
-/*    BACKUP [d:][path] filename [.ext]] d: [/S] [/F[:size]]
-/*    [/L[:fn]] [/M] [/A] [T:hh:mm:ss] [/D:mm-dd-yy]
-/*
-/*     [/F[:size]] undocumented
-/*
-/*   SOURCE HISTORY:
-/*
-/*	New for DOS 3.3 and OS/2
-/*
-/*	Modification History:
-/*
-/*	 ;AN000; Code added in DOS 4.0
-/*		6-05-87   RW
-/*		 ;AN000;1  No BACKUP of SYSTEM files
-/*		 ;AN000;2  Support for APPEND /X deactivation
-/*		 ;AN000;3  Support for Extended Attributes
-/*		 ;AN000;4  Support for PARSE service routines
-/*		 ;AN000;5  Support for code page file tags
-/*		 ;AN000;6  Support for MESSAGE retriever
-/*		 ;AN000;7  Allow logfile to go on BACKUP target drive
-/*		 ;AN000;8  Eliminate double prompting on single diskette drive systems
-/*		 ;AN000;9  Put error message in logfile on share error
-/*		 ;AN000;10 Make diskette formatting the default (DCR 177)
-/*		 ;AN000;d178 DCR 178  Find FORMAT.COM before beginning
-/*		 ;AN001; DCR 434 - Allow /F:size to specify format size
-/*		 ;AN002; Don't use "C" routines to find PATH in environment
-/*		 ;AN003; Make BACKUP handle UNC format returned from XLAT
-/*		 ;AN004; Add CR, LF to end of command line (p3646)
-/*		 ;AN005; Make sure no bogus BACKUP and CONTROL files are left in case of error exit
-/*		 ;AN006; Make sure we don't try to BACKUP logfile
-/*		 ;AN007; Make sure ABORT responses to critical errors are aborted
-/*		 ;AN008; Make PARSE errors messages display the offending parameter
-/*		 ;AN009; Fix parser
-/*		 ;AN010; Don't find FORMAT.COM on target drive
-/*		 ;AN011; Make BACKUP handle disk full properly on fixed disk
-/*****************************************************************
+ *
+ * UTILITY NAME:      BACKUP.COM
+ *
+ * SOURCE FILE NAME:  BACKUP.C
+ *
+ * DESCRIPTIVE NAME:
+ *	      DOS  Backup Utility Program
+ *
+ * STATUS:    BACKUP utility, DOS Version 4.00
+ *	      Written using the C programming language.
+ *
+ *
+ * COMPILER/LINKER INVOCATION:
+ *
+ *	cc /AS /Os /Zep /W3 /DLINT_ARGS /UDEBUG backup.c;
+ *	link backup,,,mapper+comsubs
+ *
+ *   Note: You MUST(!) use the PACKED option (/Zp) to make sure data structures
+ *	   are not aligned !!!
+ *
+ * FUNCTION:
+ *     BACKUP will back up files from one disk(ette) to another. Accepts
+ *     global characters, other parameters are defined to allow a more
+ *     restrictive BACKUP procedure.  Compacts data into one large file and
+ *     a control file containing directory information. Allows FORMATTING
+ *     target diskette, intelligent error recovery, and proper handling of
+ *     file sharing and sharing errors. Optionally creates a log file for
+ *     tracking purposes.  Sets errorlevels on termination to indicate
+ *     result.
+ *
+ * RESTRICTIONS:
+ *     The BACKUP Utility program will be version checked to run ONLY on
+ *     DOS version 4.00.  BACKUP performs a file by file backup using the
+ *     DOS file system, ie. it is not an image type backup.
+ *
+ *
+ * SYNTAX:
+ *
+ *    BACKUP [d:][path] filename [.ext]] d: [/S] [/F[:size]]
+ *    [/L[:fn]] [/M] [/A] [T:hh:mm:ss] [/D:mm-dd-yy]
+ *
+ *     [/F[:size]] undocumented
+ *
+ *   SOURCE HISTORY:
+ *
+ *	New for DOS 3.3 and OS/2
+ *
+ *	Modification History:
+ *
+ *	 ;AN000; Code added in DOS 4.0
+ *		6-05-87   RW
+ *		 ;AN000;1  No BACKUP of SYSTEM files
+ *		 ;AN000;2  Support for APPEND /X deactivation
+ *		 ;AN000;3  Support for Extended Attributes
+ *		 ;AN000;4  Support for PARSE service routines
+ *		 ;AN000;5  Support for code page file tags
+ *		 ;AN000;6  Support for MESSAGE retriever
+ *		 ;AN000;7  Allow logfile to go on BACKUP target drive
+ *		 ;AN000;8  Eliminate double prompting on single diskette drive systems
+ *		 ;AN000;9  Put error message in logfile on share error
+ *		 ;AN000;10 Make diskette formatting the default (DCR 177)
+ *		 ;AN000;d178 DCR 178  Find FORMAT.COM before beginning
+ *		 ;AN001; DCR 434 - Allow /F:size to specify format size
+ *		 ;AN002; Don't use "C" routines to find PATH in environment
+ *		 ;AN003; Make BACKUP handle UNC format returned from XLAT
+ *		 ;AN004; Add CR, LF to end of command line (p3646)
+ *		 ;AN005; Make sure no bogus BACKUP and CONTROL files are left in case of error exit
+ *		 ;AN006; Make sure we don't try to BACKUP logfile
+ *		 ;AN007; Make sure ABORT responses to critical errors are aborted
+ *		 ;AN008; Make PARSE errors messages display the offending parameter
+ *		 ;AN009; Fix parser
+ *		 ;AN010; Don't find FORMAT.COM on target drive
+ *		 ;AN011; Make BACKUP handle disk full properly on fixed disk
+ *****************************************************************/
 
 				/* "C" supplied include files */
+#include <stdio.h>
+#include <stdlib.h>		/*;AN000;d178*/
+#include <string.h>
 #include <process.h>
 #include <malloc.h>
 #include <direct.h>		/*;AN000;*/
-#include <string.h>
 #include <dos.h>
-#include <stdlib.h>		/*;AN000;d178*/
 
-#include <doscalls.h>		/* OS/2 Include file */
+#include "comsub.h"
+#include "doscalls.h"		/* OS/2 Include file */
 
 #include "backup.h"             /* BACKUP structures, defines, ...*/
 #include "backpars.h"           /* DEFINEs and STRUCTs for the DOS Parse service routines */
 
-#include <version.h>			/* symbol defns to determine degree of compatibility */
+#include "version.h"			/* symbol defns to determine degree of compatibility */
 
       /**********************************/
       /*	DATA STRUCTURES 	*/
@@ -200,9 +202,9 @@
       /**********************************/
       /*     EXTENDED ATTRIBUTES	*/
       /**********************************/
-/*EAEA	BYTE	ext_attrib_flg = FALSE; 	/*;AN000;3 Indicates there are extended attributes*/
-/*EAEA	WORD	ext_attrib_len; 		/*;AN000;3 Length of extended attributes*/
-/*EAEA	BYTE	ext_attrib_buff[EXTATTBUFLEN];	/*;AN000;3 Buffer for extended attributes*/
+/*EAEA	BYTE	ext_attrib_flg = FALSE; */ 	/*;AN000;3 Indicates there are extended attributes*/
+/*EAEA	WORD	ext_attrib_len; */ 		/*;AN000;3 Length of extended attributes*/
+/*EAEA	BYTE	ext_attrib_buff[EXTATTBUFLEN]; */ /*;AN000;3 Buffer for extended attributes*/
 	BYTE	ext_attrib_buff[3];		/*;AN000;3 Buffer for extended attributes*/
 	struct	parm_list ea_parmlist;		/*;AN000;3 Parameter list for extended open*/
 
@@ -232,16 +234,20 @@
 
 	BYTE	return_code = RETCODE_NO_ERROR; /* Save area for DOS ErrorLevel */
 
+extern void __cdecl parse(union REGS const *inregs, union REGS *outregs);
+extern void __cdecl sysloadmsg(union REGS const *inregs, union REGS *outregs);
+extern void __cdecl sysdispmsg(union REGS const *inregs, union REGS *outregs);
+
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	main
-/*
-/* FUNCTION:
-/*
-/*	Backs up files from source to target drive
-/*
-/***************************************************/
-main(argc,argv)
+ * SUBROUTINE NAME:	main
+ *
+ * FUNCTION:
+ *
+ *	Backs up files from source to target drive
+ *
+ ***************************************************/
+int main(argc,argv)
 int	argc;
 char	*argv[];
 {
@@ -266,14 +272,14 @@ char	*argv[];
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	init
-/*
-/* FUNCTION:
-/*	Preload messages
-/*	Check DOS version
-/*	Mundane initializization of data structures
-/*
-/**************************************************/
+ * SUBROUTINE NAME:	init
+ *
+ * FUNCTION:
+ *	Preload messages
+ *	Check DOS version
+ *	Mundane initializization of data structures
+ *
+ **************************************************/
 void	init()					/*;AN000;6*/
 {						/*;AN000;6*/
 
@@ -319,13 +325,13 @@ void	init()					/*;AN000;6*/
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	parser
-/*
-/* FUNCTION:
-/*
-/*	Parse the command line
-/*
-/**************************************************/
+ * SUBROUTINE NAME:	parser
+ *
+ * FUNCTION:
+ *
+ *	Parse the command line
+ *
+ **************************************************/
 void	parser(argc,argv)					      /*;AN000;4*/
 int	argc;							      /*;AN000;4*/
 char	*argv[];						      /*;AN000;4*/
@@ -358,7 +364,7 @@ char	*argv[];						      /*;AN000;4*/
 	  parse(&inregs,&outregs);				      /*;AN000;4 Call DOS SYSPARSE service routines*/
 
 	  x=0;			/* Save the parsed parameter */       /*;AN009;*/
-	  for (inregs.x.si; inregs.x.si<outregs.x.si; inregs.x.si++)  /*;AN009;*/
+	  for (; inregs.x.si<outregs.x.si; inregs.x.si++)             /*;AN009;*/
 	   {							      /*;AN009;*/
 	     curr_parm[x] = *(char *)inregs.x.si;		      /*;AN009;*/
 	     x++;						      /*;AN009;*/
@@ -410,14 +416,14 @@ char	*argv[];						      /*;AN000;4*/
 }	/* end parser */					      /*;AN000;4*/
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	parse_error
-/*
-/* FUNCTION:
-/*
-/*	There was a parse error.  Display appropriate
-/*	error message and terminate.
-/*
-/**************************************************/
+ * SUBROUTINE NAME:	parse_error
+ *
+ * FUNCTION:
+ *
+ *	There was a parse error.  Display appropriate
+ *	error message and terminate.
+ *
+ **************************************************/
 void	parse_error(ax,dx)					      /*;AN000;4*/
 WORD	ax;							      /*;AN000;4*/
 WORD	dx;							      /*;AN000;4*/
@@ -445,13 +451,13 @@ WORD	dx;							      /*;AN000;4*/
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	check_date
-/*
-/* FUNCTION:
-/*
-/*	A date parameter was entered. Validate it
-/*
-/**************************************************/
+ * SUBROUTINE NAME:	check_date
+ *
+ * FUNCTION:
+ *
+ *	A date parameter was entered. Validate it
+ *
+ **************************************************/
 void	check_date(year,month,day)				      /*;AN000;4*/
 WORD	year;							      /*;AN000;4*/
 BYTE	month;							      /*;AN000;4*/
@@ -487,29 +493,29 @@ BYTE	day;							      /*;AN000;4*/
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	check_time
-/*
-/* FUNCTION:
-/*
-/*	A time parameter was entered. Validate it
-/*
-/**************************************************/
+ * SUBROUTINE NAME:	check_time
+ *
+ * FUNCTION:
+ *
+ *	A time parameter was entered. Validate it
+ *
+ **************************************************/
 void	check_time(hours,minutes,seconds,hundreds)		      /*;AN000;4*/
 BYTE	hours;							      /*;AN000;4*/
 BYTE	minutes;						      /*;AN000;4*/
 BYTE	seconds;						      /*;AN000;4*/
 BYTE	hundreds;						      /*;AN000;4*/
 {								      /*;AN000;4*/
-	if (hours > 23 || hours < 0)				      /*;AC000;4*/
+	if (hours > 23)				                      /*;AC000;4*/
 	 error_exit(INV_TIME);					      /*;AC000;4*/
 
-	if (minutes >= 60 || minutes < 0)			      /*;AC000;4*/
+	if (minutes >= 60)			                      /*;AC000;4*/
 	 error_exit(INV_TIME);					      /*;AC000;4*/
 
-	if (seconds >= 60 || seconds < 0)			      /*;AC000;4*/
+	if (seconds >= 60)			                      /*;AC000;4*/
 	 error_exit(INV_TIME);					      /*;AC000;4*/
 
-	if (hundreds > 99 || hundreds < 0)			      /*;AC000;4*/
+	if (hundreds > 99)			                      /*;AC000;4*/
 	 error_exit(INV_TIME);					      /*;AC000;4*/
 
 	do_time = TRUE; 					      /*;AN000;4*/
@@ -519,13 +525,13 @@ BYTE	hundreds;						      /*;AN000;4*/
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	parse_init
-/*
-/* FUNCTION:
-/*
-/*	Initialize the parser data structures
-/*
-/**************************************************/
+ * SUBROUTINE NAME:	parse_init
+ *
+ * FUNCTION:
+ *
+ *	Initialize the parser data structures
+ *
+ **************************************************/
 void	parse_init()						/*;AN000;4*/
 {		/* Initialize PARMS data structure */		/*;AN000;4*/
 	parms.parmsx_ptr = (WORD)&parmsx;			/*;AN000;4*/
@@ -669,21 +675,19 @@ void	parse_init()						/*;AN000;4*/
 }								/*;AN000;4*/
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	find_format
-/*
-/* FUNCTION:
-/*
-/*	Search for the FORMAT utility.	If found, then
-/*	build a full path to it from the root. If not
-/*	found, tell the user and terminate.
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	find_format
+ *
+ * FUNCTION:
+ *
+ *	Search for the FORMAT utility.	If found, then
+ *	build a full path to it from the root. If not
+ *	found, tell the user and terminate.
+ *
+ ***************************************************/
 void find_format()						      /*;AN000;d178*/
 {								      /*;AN000;d178*/
 	BYTE	found_it= FALSE;				      /*;AN000;d178*/
-	BYTE	no_more = FALSE;				      /*;AN000;d178*/
 	int	findex,pindex;					/*;AN002;*/
-	BYTE	done = FALSE;					/*;AN002;*/
 	char	path[130];					/*;AN002;*/
 
 			/*******************************/
@@ -751,14 +755,14 @@ void find_format()						      /*;AN000;d178*/
 }								      /*;AN000;d178*/
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	get_path
-/*
-/* FUNCTION:
-/*	Finds the environment pointer in the PSP, and
-/*	searches the envirnment for a PATH statement.
-/*	If found, copies it to the buffer address passed in.
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	get_path
+ *
+ * FUNCTION:
+ *	Finds the environment pointer in the PSP, and
+ *	searches the envirnment for a PATH statement.
+ *	If found, copies it to the buffer address passed in.
+ *
+ ***************************************************/
 void get_path(p)						/*;AN002;*/
 char *p;							/*;AN002;*/
 {								/*;AN002;*/
@@ -767,7 +771,6 @@ char *p;							/*;AN002;*/
 	BYTE	got_path = FALSE;				/*;AN002;*/
 	BYTE	done = FALSE;					/*;AN002;*/
 	union	REGS xregs;					/*;AN002;*/
-	char	path[130];					/*;AN002;*/
 
 			/* First find PSP */
 	xregs.x.ax = 0x6200;	    /* Get PSP Address */	/*;AN002;*/
@@ -819,15 +822,15 @@ char *p;							/*;AN002;*/
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	xlat
-/*
-/* FUNCTION:
-/*
-/*	Performs name translate function.  Calls DOS function
-/*	call 60h to build full path from root using the "src"
-/*	passed in, places resultant path at "tgt".
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	xlat
+ *
+ * FUNCTION:
+ *
+ *	Performs name translate function.  Calls DOS function
+ *	call 60h to build full path from root using the "src"
+ *	passed in, places resultant path at "tgt".
+ *
+ ***************************************************/
 void xlat(tgt,src)						     /*;AN000;*/
 char * tgt;							     /*;AN000;*/
 char * src;							     /*;AN000;*/
@@ -844,20 +847,19 @@ char * src;							     /*;AN000;*/
 }								     /*;AN000;*/
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	check_drive_validity
-/*
-/* FUNCTION:
-/*
-/*	Verify that at least the target drive letter is
-/*	is entered. Verify that they are valid drives.
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	check_drive_validity
+ *
+ * FUNCTION:
+ *
+ *	Verify that at least the target drive letter is
+ *	is entered. Verify that they are valid drives.
+ *
+ ***************************************************/
 void check_drive_validity(argc,argv)
 int	argc;
 char	*argv[];
 {
 	char	*t;
-	int	i;
 	BYTE	specified_drive;
 
 	if (argc < 2)
@@ -927,13 +929,13 @@ char	*argv[];
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	check_for_device_names
-/*
-/* FUNCTION:
-/*
-/*	Make sure user not trying to restore a reserved device name
-/*
-/**************************************************/
+ * SUBROUTINE NAME:	check_for_device_names
+ *
+ * FUNCTION:
+ *
+ *	Make sure user not trying to restore a reserved device name
+ *
+ **************************************************/
 #define INVPARM 10						      /*;AN000;4*/
 void check_for_device_names(argv)				      /*;AN000;p2592*/
 char	*argv[];						      /*;AN000;p2592*/
@@ -985,22 +987,20 @@ char	*argv[];						      /*;AN000;p2592*/
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	check_path_validity
-/*
-/* FUNCTION:
-/*
-/*	Verify that the path entered by the user exists.
-/*	Build a full path from the root, place it in
-/*	src_drive_path.  Extract filespec and place it
-/*	in user_filespec.
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	check_path_validity
+ *
+ * FUNCTION:
+ *
+ *	Verify that the path entered by the user exists.
+ *	Build a full path from the root, place it in
+ *	src_drive_path.  Extract filespec and place it
+ *	in user_filespec.
+ *
+ ***************************************************/
 void check_path_validity(argv)
 char	*argv[];
 {
 	WORD	dhandle;
-	char	temppath[PATHLEN+20];
-	char	temppath2[PATHLEN+20];
 	char	globals = FALSE;
 	int	x;						/*;AN000;p2943*/
 	char	*foo,*foo2;					/*;AN003;*/
@@ -1053,7 +1053,7 @@ char	*argv[];
 	if (source_removable)		/* If backing up from a diskette */
 	 {
 	  display_msg(INSERTSOURCE);	/* Ask user for diskette and wait for input*/
-	/*wait_for_keystroke(); 	/* Let user "Strike any key when ready" */
+	/*wait_for_keystroke();*/ 	/* Let user "Strike any key when ready" */
 	 }
 
 
@@ -1118,15 +1118,15 @@ char	*argv[];
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	alloc_buffers
-/*
-/* FUNCTION:
-/*	Attempt to allocate a (64k-1) buffer. If
-/*	fails, decrement buff size by 512 and keep
-/*	trying. If can't get at least a 2k buffer,
-/*	give up.
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	alloc_buffers
+ *
+ * FUNCTION:
+ *	Attempt to allocate a (64k-1) buffer. If
+ *	fails, decrement buff size by 512 and keep
+ *	trying. If can't get at least a 2k buffer,
+ *	give up.
+ *
+ ***************************************************/
 void alloc_buffer()
 {
 	alloc_seg();
@@ -1147,14 +1147,14 @@ void alloc_buffer()
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	process_switch
-/*
-/* FUNCTION:
-/*
-/*	Identify the parameter and set program control
-/*	flags as appropriate.
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	process_switch
+ *
+ * FUNCTION:
+ *
+ *	Identify the parameter and set program control
+ *	flags as appropriate.
+ *
+ ***************************************************/
 void process_switch()						      /*;AN000;4*/
 {								      /*;AN000;4*/
 	char	far * y;					      /*;AN000;4*/
@@ -1232,14 +1232,14 @@ void process_switch()						      /*;AN000;4*/
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	save_current_dirs
-/*
-/* FUNCTION:
-/*
-/*	Save the current directory on default drive.
-/*	Later when we terminate we must restore it.
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	save_current_dirs
+ *
+ * FUNCTION:
+ *
+ *	Save the current directory on default drive.
+ *	Later when we terminate we must restore it.
+ *
+ ***************************************************/
 void save_current_dirs()
 {
 
@@ -1250,18 +1250,16 @@ void save_current_dirs()
 }	/* end save_current_dirs */
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	open_logfile
-/*
-/* FUNCTION:
-/*	User specified the /L parameter for a BACKUP
-/*	log file. First try to open it. If it doesn't
-/*	exist then create it.
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	open_logfile
+ *
+ * FUNCTION:
+ *	User specified the /L parameter for a BACKUP
+ *	log file. First try to open it. If it doesn't
+ *	exist then create it.
+ *
+ ***************************************************/
 void open_logfile()
 {
-	int	x;					/*;AN000;7*/
-
 	handle_logfile =				/*;AN000;5*/
 	 extended_open					/*;AN000;5*/
 	  (OPEN_IT,					/* Flag;AN000;5*/
@@ -1295,13 +1293,13 @@ void open_logfile()
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	set_vectors
-/*
-/* FUNCTION:
-/*	Hook control break and critical vector to
-/*	allow BACKUP to gracefully terminate.
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	set_vectors
+ *
+ * FUNCTION:
+ *	Hook control break and critical vector to
+ *	allow BACKUP to gracefully terminate.
+ *
+ ***************************************************/
 void set_vectors()
 {
 
@@ -1314,14 +1312,14 @@ void set_vectors()
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	check_appendX
-/*
-/* FUNCTION:
-/*	Check APPEND /X status.  If it is not active,
-/*	do nothing. If it is active, then turn it off
-/*	and set flag indicating that we must reset it later.
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	check_appendX
+ *
+ * FUNCTION:
+ *	Check APPEND /X status.  If it is not active,
+ *	do nothing. If it is active, then turn it off
+ *	and set flag indicating that we must reset it later.
+ *
+ ***************************************************/
 void check_appendX()				/*;AN000;2*/
 {						/*;AN000;2*/
 	union REGS gregs;			/*;AN000;2 Register set */
@@ -1331,8 +1329,8 @@ void check_appendX()				/*;AN000;2*/
 
 		/*****************************************************/
 		/*  1) See if append is active
-		/*  2) If so, figure out if DOS or PCNET version
-		/*****************************************************/
+		 *  2) If so, figure out if DOS or PCNET version
+		 *****************************************************/
 	if (gregs.h.al == 0)			/*;AN000;2 Zero if not installed*/
 	  append_indicator = NOT_INSTALLED;	/*;AN000;2 */
 	 else					/*;AN000;2 See which APPEND it is*/
@@ -1348,9 +1346,9 @@ void check_appendX()				/*;AN000;2*/
 
 		/*****************************************************/
 		/*  If it is the DOS append
-		/*    1) Get the current append functions (returned in BX)
-		/*    2) Reset append with /X support off
-		/*****************************************************/
+		 *    1) Get the current append functions (returned in BX)
+		 *    2) Reset append with /X support off
+		 *****************************************************/
 	if (append_indicator == DOS_APPEND)	/*;AN000;2*/
 	 {					/*;AN000;2*/
 	    gregs.x.ax = GET_STATE;		/*;AN000;2 Get active APPEND functions*/
@@ -1368,13 +1366,13 @@ void check_appendX()				/*;AN000;2*/
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	get_drive_types
-/*
-/* FUNCTION:
-/*	For the source and target drives, figure out
-/*	if they are removable or not.
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	get_drive_types
+ *
+ * FUNCTION:
+ *	For the source and target drives, figure out
+ *	if they are removable or not.
+ *
+ ***************************************************/
 void get_drive_types()	/* Check if the source and target drive are removable*/
 {
 #define REMOVABLE 0
@@ -1417,13 +1415,13 @@ void get_drive_types()	/* Check if the source and target drive are removable*/
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	do_backup
-/*
-/* FUNCTION:
-/*
-/*	BACKUP all files that should be backed up
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	do_backup
+ *
+ * FUNCTION:
+ *
+ *	BACKUP all files that should be backed up
+ *
+ ***************************************************/
 void do_backup()
 {
 	set_default_dir();		/* Set default dir to one where source files are */
@@ -1454,14 +1452,14 @@ void do_backup()
 }	/* end do_backup */
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	find_first_file
-/*
-/* FUNCTION:
-/*
-/*	Find the first file conforming to user entered spec.
-/*	If necessary, look on other directory levels also.
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	find_first_file
+ *
+ * FUNCTION:
+ *
+ *	Find the first file conforming to user entered spec.
+ *	If necessary, look on other directory levels also.
+ *
+ ***************************************************/
 void find_first_file()
 {
 	char loop_done = FALSE;
@@ -1490,13 +1488,13 @@ void find_first_file()
 
 /***********************************************/
 /*
-/* SUBROUTINE NAME:	find_next_file
-/*
-/* FUNCTION:
-/*
-/*	Find the next file conforming to user entered spec
-/*
-/************************************************/
+ * SUBROUTINE NAME:	find_next_file
+ *
+ * FUNCTION:
+ *
+ *	Find the next file conforming to user entered spec
+ *
+ ************************************************/
 void find_next_file()
 {
 	char loop_done = FALSE;
@@ -1522,15 +1520,15 @@ void find_next_file()
 
 /***********************************************/
 /*
-/* SUBROUTINE NAME:	find_the_first
-/*
-/* FUNCTION:
-/*
-/*	Find the first file conforming to user entered spec.
-/*	Searches in current directory, if one not found then
-/*	goes to the next level and repeats.
-/*
-/************************************************/
+ * SUBROUTINE NAME:	find_the_first
+ *
+ * FUNCTION:
+ *
+ *	Find the first file conforming to user entered spec.
+ *	Searches in current directory, if one not found then
+ *	goes to the next level and repeats.
+ *
+ ************************************************/
 void find_the_first()
 {
 	char loop_done = FALSE;
@@ -1570,13 +1568,13 @@ void find_the_first()
 }	/* end find_the_first */
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	find_the_next
-/*
-/* FUNCTION:
-/*
-/*	Find the next file conforming to user entered spec
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	find_the_next
+ *
+ * FUNCTION:
+ *
+ *	Find the next file conforming to user entered spec
+ *
+ ***************************************************/
 void find_the_next()
 {
 	char loop_done = FALSE;
@@ -1614,13 +1612,13 @@ void find_the_next()
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	change_levels
-/*
-/* FUNCTION:
-/*	Change directory to next one in the linked list
-/*	of directories to be processed.
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	change_levels
+ *
+ * FUNCTION:
+ *	Change directory to next one in the linked list
+ *	of directories to be processed.
+ *
+ ***************************************************/
 void change_levels()
 {
 	new_directory = FALSE;
@@ -1630,13 +1628,13 @@ void change_levels()
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	alloc_node
-/*
-/* FUNCTION:
-/*	Allocates a node for the linked list of subdirectories
-/*	to be processed.
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	alloc_node
+ *
+ * FUNCTION:
+ *	Allocates a node for the linked list of subdirectories
+ *	to be processed.
+ *
+ ***************************************************/
 struct node * alloc_node(path_len)
 unsigned int path_len;
 {
@@ -1662,18 +1660,19 @@ unsigned int path_len;
 	 else
 	   return(pointer);
 
+        return NULL;
 }	/* end alloc_node */
 
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	alloc_first_node
-/*
-/* FUNCTION:
-/*
-/*	Allocate the first node in the linked list.
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	alloc_first_node
+ *
+ * FUNCTION:
+ *
+ *	Allocate the first node in the linked list.
+ *
+ ***************************************************/
 void alloc_first_node()
 {
 #if defined(DEBUG)
@@ -1691,14 +1690,14 @@ printf("\nINSERTING FIRST NODE=%s",src_drive_path);
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	insert_node
-/*
-/* FUNCTION:
-/*
-/*	Insert next node in the linked list of subdirectories
-/*	to be processed.
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	insert_node
+ *
+ * FUNCTION:
+ *
+ *	Insert next node in the linked list of subdirectories
+ *	to be processed.
+ *
+ ***************************************************/
 void insert_node(path_addr)
 char *path_addr;
 {
@@ -1720,13 +1719,13 @@ printf("\nINSERTING NODE=%s",*path_addr);
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	remove_node
-/*
-/* FUNCTION:
-/*	CHDIR to the next level to be processed.
-/*	Release the node for that directory
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	remove_node
+ *
+ * FUNCTION:
+ *	CHDIR to the next level to be processed.
+ *	Release the node for that directory
+ *
+ ***************************************************/
 void remove_node()
 {
 	struct node *temp;
@@ -1756,14 +1755,14 @@ void remove_node()
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	find_all_subdirs
-/*
-/* FUNCTION:
-/*	User entered "/S" parameter. Search for all
-/*	subdirectory entries at this level. Place
-/*	them all in the linked list of directories to
-/*	be processed.
-/***************************************************/
+ * SUBROUTINE NAME:	find_all_subdirs
+ *
+ * FUNCTION:
+ *	User entered "/S" parameter. Search for all
+ *	subdirectory entries at this level. Place
+ *	them all in the linked list of directories to
+ *	be processed.
+ ***************************************************/
 void find_all_subdirs()
 {
 	WORD	dhandle;
@@ -1802,14 +1801,14 @@ void find_all_subdirs()
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	get_first_target
-/*
-/* FUNCTION:
-/*	We are ready for the target disk. If it is a
-/*	diskette, ask user to put one in. Remember
-/*	to correctly handle /A if user wants it.
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	get_first_target
+ *
+ * FUNCTION:
+ *	We are ready for the target disk. If it is a
+ *	diskette, ask user to put one in. Remember
+ *	to correctly handle /A if user wants it.
+ *
+ ***************************************************/
 void get_first_target()
 {
 	if (target_removable)
@@ -1828,14 +1827,14 @@ void get_first_target()
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	get_next_target
-/*
-/* FUNCTION:
-/*	We are ready for the next target diskette.
-/*	Ask user to insert it.	Format if required.
-/*	Create files, reset variables.
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	get_next_target
+ *
+ * FUNCTION:
+ *	We are ready for the next target diskette.
+ *	Ask user to insert it.	Format if required.
+ *	Create files, reset variables.
+ *
+ ***************************************************/
 void get_next_target()
 {
 
@@ -1864,16 +1863,16 @@ void get_next_target()
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	see_if_it_should_be_backed_up
-/*
-/* FUNCTION:
-/*	We found a file, its directory information is
-/*	at the DTA structure. Don't backup a subdirectory
-/*	or volume label. If /M specified, only backup files
-/*	with archive bit set. Don't BACKUP 0 length files.
-/*	If /D: and/or /T: specified, only backup appropriate files.
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	see_if_it_should_be_backed_up
+ *
+ * FUNCTION:
+ *	We found a file, its directory information is
+ *	at the DTA structure. Don't backup a subdirectory
+ *	or volume label. If /M specified, only backup files
+ *	with archive bit set. Don't BACKUP 0 length files.
+ *	If /D: and/or /T: specified, only backup appropriate files.
+ *
+ ***************************************************/
 void see_if_it_should_be_backed_up()
 {
 	BYTE	temp[PATHLEN+20];	/*;AN006;*/
@@ -1944,13 +1943,13 @@ void see_if_it_should_be_backed_up()
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	get_diskette
-/*
-/* FUNCTION:
-/*	Get the diskette from user. If unformatted
-/*	and user entered /F, then try to FORMAT it.
-/*	Create target files on root of diskette.
-/**************************************************/
+ * SUBROUTINE NAME:	get_diskette
+ *
+ * FUNCTION:
+ *	Get the diskette from user. If unformatted
+ *	and user entered /F, then try to FORMAT it.
+ *	Create target files on root of diskette.
+ **************************************************/
 void get_diskette()
 {
 	union REGS qregs;					      /*;AN000;8*/
@@ -1971,7 +1970,7 @@ void get_diskette()
 
 	got_first_target = TRUE;	/*;AN000;*/
 
-      /*wait_for_keystroke();		/* Let user "Strike any key when ready" */
+      /*wait_for_keystroke();*/		/* Let user "Strike any key when ready" */
 
 				/* If single drive system, eliminates double prompting */
 				/* for user to "Insert diskette for drive %1" */
@@ -1997,13 +1996,13 @@ void get_diskette()
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	get_hardfile
-/*
-/* FUNCTION:
-/*	Target is a hardfile. FORMATTING hardfile is
-/*	not allowed by BACKUP.	Create target files
-/*	in BACKUP directory of disk.
-/***************************************************/
+ * SUBROUTINE NAME:	get_hardfile
+ *
+ * FUNCTION:
+ *	Target is a hardfile. FORMATTING hardfile is
+ *	not allowed by BACKUP.	Create target files
+ *	in BACKUP directory of disk.
+ ***************************************************/
 void get_hardfile()
 {
 	char	dirname[15];
@@ -2014,7 +2013,7 @@ void get_hardfile()
 	   if (!do_add)
 	    {
 	     display_msg(FERASEMSG);
-	   /*wait_for_keystroke();	/* Let user "Strike any key when ready" */
+	   /*wait_for_keystroke();*/	/* Let user "Strike any key when ready" */
 	    }
 	   delete_files(BACKUPDIR);	/* Delete \BACKUP\*.* of target drive if not do_add */
 	  }
@@ -2033,23 +2032,22 @@ void get_hardfile()
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:    check_last_target
-/*
-/* FUNCTION:
-/*	User entered /A parameter. Make sure that
-/*	we are not adding to a BACKUP diskette created
-/*	with the disgusting old BACKUP format.
-/*	Make sure there is a BACKUP.xxx and CONTROL.xxx
-/*	file out there.  Make sure it was the last target
-/*	and get the sequence number.
-/***************************************************/
+ * SUBROUTINE NAME:    check_last_target
+ *
+ * FUNCTION:
+ *	User entered /A parameter. Make sure that
+ *	we are not adding to a BACKUP diskette created
+ *	with the disgusting old BACKUP format.
+ *	Make sure there is a BACKUP.xxx and CONTROL.xxx
+ *	file out there.  Make sure it was the last target
+ *	and get the sequence number.
+ ***************************************************/
 void check_last_target()
 {
 	WORD	dhandle;
 	WORD	bytes_read;
 	BYTE	flag;
 	char	path[25];
-	char	current_file[25];
 
 	struct	FileFindBuf tempdta;
 
@@ -2113,13 +2111,13 @@ void check_last_target()
 }	/* end check_last_target */
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	format_target
-/*
-/* FUNCTION:
-/*	See if the target is formatted. If not, try
-/*	to format it.
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	format_target
+ *
+ * FUNCTION:
+ *	See if the target is formatted. If not, try
+ *	to format it.
+ *
+ ***************************************************/
 void format_target()
 {
 #define HOOK	0
@@ -2177,13 +2175,13 @@ void format_target()
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	set_default_dir
-/*
-/* FUNCTION:
-/*
-/*
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	set_default_dir
+ *
+ * FUNCTION:
+ *
+ *
+ *
+ ***************************************************/
 void set_default_dir()
 {
        if (com_strchr(src_drive_path,BACKSLASH) != NUL) /* if there IS a backslash... */
@@ -2212,18 +2210,17 @@ void set_default_dir()
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	label_target_drive
-/*
-/* FUNCTION:
-/*	Create volume label BACKUP.xxx on target
-/*	diskette drive.
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	label_target_drive
+ *
+ * FUNCTION:
+ *	Create volume label BACKUP.xxx on target
+ *	diskette drive.
+ *
+ ***************************************************/
 void label_target_drive()	/* Create Volume label BACKUP.XXX on target   */
 {
 
 	char	fsbuf[20];
-	WORD	handle;
 
 	build_ext(diskettes_complete + 1);
 
@@ -2236,13 +2233,13 @@ void label_target_drive()	/* Create Volume label BACKUP.XXX on target   */
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	build_ext
-/*
-/* FUNCTION:
-/*
-/*
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	build_ext
+ *
+ * FUNCTION:
+ *
+ *
+ *
+ ***************************************************/
 void build_ext(num)
 int	num;
 {
@@ -2259,13 +2256,13 @@ int	num;
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	create_target
-/*
-/* FUNCTION:
-/*
-/*
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	create_target
+ *
+ * FUNCTION:
+ *
+ *
+ *
+ ***************************************************/
 void create_target()
 {
 	char	path[25];
@@ -2325,13 +2322,13 @@ void create_target()
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	open_target
-/*
-/* FUNCTION:
-/*
-/*
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	open_target
+ *
+ * FUNCTION:
+ *
+ *
+ *
+ ***************************************************/
 void open_target()	/* Done only if /A and it is the first target */
 {
 
@@ -2389,16 +2386,16 @@ void open_target()	/* Done only if /A and it is the first target */
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	delete_files
-/*
-/* FUNCTION:
-/*	Delete all files in the root directory of target
-/*	diskette, or in the BACKUP directory of the target
-/*	hardfile.  If error occurs deleting file, try to
-/*	reset the attribute to 0 and try it again.
-/*
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	delete_files
+ *
+ * FUNCTION:
+ *	Delete all files in the root directory of target
+ *	diskette, or in the BACKUP directory of the target
+ *	hardfile.  If error occurs deleting file, try to
+ *	reset the attribute to 0 and try it again.
+ *
+ *
+ ***************************************************/
 void delete_files(dirlevel)
 char	dirlevel;
 {
@@ -2459,13 +2456,13 @@ char	dirlevel;
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	exist
-/*
-/* FUNCTION:
-/*	Does a FIND FIRST of the filespec passed at PATH_ADDR.
-/*	If so, returns TRUE, otherwise returns FALSE.
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	exist
+ *
+ * FUNCTION:
+ *	Does a FIND FIRST of the filespec passed at PATH_ADDR.
+ *	If so, returns TRUE, otherwise returns FALSE.
+ *
+ ***************************************************/
 WORD exist(path_addr)	     /* Return TRUE if specified epath exists, FALSE other */
 char *path_addr;
 {
@@ -2493,16 +2490,16 @@ char *path_addr;
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	open_source_file
-/*
-/* FUNCTION:
-/*	Try to open the source file at the DTA structure.
-/*	If after MAX_RETRY_OPEN_COUNT attempts you cannot
-/*	open it, then display an appropriate message and
-/*	continue. If it was opened, then get the files
-/*	extended attributes.
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	open_source_file
+ *
+ * FUNCTION:
+ *	Try to open the source file at the DTA structure.
+ *	If after MAX_RETRY_OPEN_COUNT attempts you cannot
+ *	open it, then display an appropriate message and
+ *	continue. If it was opened, then get the files
+ *	extended attributes.
+ *
+ ***************************************************/
 void open_source_file()
 {
 	int	num_attempts = 0;
@@ -2540,12 +2537,12 @@ void open_source_file()
 	       source_opened = TRUE;			/* Set flag indicating file is opened */
 	       done = TRUE;				/* We are done in this loop */
 
-/*EAEAEAEAEA   get_extended_attributes(handle_source);	/*;AN000;3 Get extended attributes for this file  */
+/*EAEAEAEAEA   get_extended_attributes(handle_source);*/ /*;AN000;3 Get extended attributes for this file  */
 
 	       put_new_fh();				/* Write the file header to the control file */
 
-/*EAEAEAEAE    if (ext_attrib_flg)			/*;AN000;3 If the file has extended attributes */
-/*EAEAEAEAE	write_extended_attributes();		/*;AN000;3then write them to BACKUP file */
+/*EAEAEAEAE    if (ext_attrib_flg)*/			/*;AN000;3 If the file has extended attributes */
+/*EAEAEAEAE	write_extended_attributes();*/		/*;AN000;3then write them to BACKUP file */
 	     }
 	 }
 	while (!done);
@@ -2555,13 +2552,13 @@ void open_source_file()
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	file_sharing_error
-/*
-/* FUNCTION:
-/*
-/*	Handle the file sharing error that just occurred
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	file_sharing_error
+ *
+ * FUNCTION:
+ *
+ *	Handle the file sharing error that just occurred
+ *
+ ***************************************************/
 void file_sharing_error()					      /*;AN000;9*/
 {								      /*;AN000;9*/
 	union	REGS	reg;					      /*;AN000;9*/
@@ -2576,7 +2573,7 @@ void file_sharing_error()					      /*;AN000;9*/
 	   reg.x.bx = handle_logfile;				      /*;AN000;9*/
 #define MSG_LEN 33						      /*;AN000;9*/
 	   reg.x.cx = (WORD)MSG_LEN;				      /*;AN000;9*/
-	   update_logfile(&reg,&reg);	/* In source file _msgret.sal /*;AN000;9*/
+	   update_logfile(&reg,&reg);	/* In source file _msgret.sal*/ /*;AN000;9*/
 	 }							      /*;AN000;9*/
 
 	return; 						      /*;AN000;9*/
@@ -2584,13 +2581,13 @@ void file_sharing_error()					      /*;AN000;9*/
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	far_ptr
-/*
-/* FUNCTION:
-/*
-/*
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	far_ptr
+ *
+ * FUNCTION:
+ *
+ *
+ *
+ ***************************************************/
 char far *far_ptr(seg,off)
 WORD	seg;
 WORD	off;
@@ -2605,13 +2602,13 @@ WORD	off;
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	do_copy
-/*
-/* FUNCTION:
-/*	Copy the source file to the BACKUP.xxx file
-/*	If there are extended attributes, write them
-/*	to the BACKUP.xxx file.
-/***************************************************/
+ * SUBROUTINE NAME:	do_copy
+ *
+ * FUNCTION:
+ *	Copy the source file to the BACKUP.xxx file
+ *	If there are extended attributes, write them
+ *	to the BACKUP.xxx file.
+ ***************************************************/
 void do_copy()
 {
 	WORD	bytes_read;
@@ -2656,55 +2653,57 @@ void do_copy()
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	write_extended_attributes
-/*
-/* FUNCTION:
-/*	There are extended attributes for the file
-/*	just backed up.  Write the length of the
-/*	extended attributes to the BACKUP.xxx file,
-/*	then write the extended attributes the that file.
-/*
-/**************************************************/
-/*#define WRITE_LENGTH 2
-/*
-/*void write_extended_attributes()				  /*;AN000;3*/
-/*{								  /*;AN000;3*/
-/*	  WORD	  written;					  /*;AN000;3*/
-/*			  /*******************************************/
-/*			  /* Write the length of extended attributes */
-/*			  /*******************************************/
-/*	  written =
-/*	   handle_write
-/*	    (
-/*	     handle_target,
-/*	     WRITE_LENGTH,
-/*	     (char far *)&ext_attrib_len
-/*	    );							  /*;AN000;3*/
-/*
-/*	  if (written == WRITE_LENGTH ) 			  /*;AN000;3*/
-/*	   data_file_tot_len += WRITE_LENGTH;			  /*;AN000;3*/
-/*
-/*			  /*********************************/
-/*			  /* Write the extended attributes */
-/*			  /*********************************/
-/*	  written = handle_write(handle_target,ext_attrib_len,(char far *)ext_attrib_buff);  /*;AN000;3*/
-/*	  if (written == ext_attrib_len)			  /*;AN000;3*/
-/*	   data_file_tot_len += (DWORD)written; 		  /*;AN000;3*/
-/*
-/*	  ext_attrib_buff[0] = 0;				  /*;AN000;3*/
-/*	  ext_attrib_buff[1] = 0;				  /*;AN000;3*/
-/*	  return;						  /*;AN000;3*/
-/*}								  /*;AN000;3*/
+ * SUBROUTINE NAME:	write_extended_attributes
+ *
+ * FUNCTION:
+ *	There are extended attributes for the file
+ *	just backed up.  Write the length of the
+ *	extended attributes to the BACKUP.xxx file,
+ *	then write the extended attributes the that file.
+ *
+ **************************************************/
+#if 0
+#define WRITE_LENGTH 2
+
+void write_extended_attributes()				  /*;AN000;3*/
+{								  /*;AN000;3*/
+	  WORD	  written;					  /*;AN000;3*/
+			  /*******************************************/
+			  /* Write the length of extended attributes */
+			  /*******************************************/
+	  written =
+	   handle_write
+	    (
+	     handle_target,
+	     WRITE_LENGTH,
+	     (char far *)&ext_attrib_len
+	    );							  /*;AN000;3*/
+
+	  if (written == WRITE_LENGTH ) 			  /*;AN000;3*/
+	   data_file_tot_len += WRITE_LENGTH;			  /*;AN000;3*/
+
+			  /*********************************/
+			  /* Write the extended attributes */
+			  /*********************************/
+	  written = handle_write(handle_target,ext_attrib_len,(char far *)ext_attrib_buff);  /*;AN000;3*/
+	  if (written == ext_attrib_len)			  /*;AN000;3*/
+	   data_file_tot_len += (DWORD)written; 		  /*;AN000;3*/
+
+	  ext_attrib_buff[0] = 0;				  /*;AN000;3*/
+	  ext_attrib_buff[1] = 0;				  /*;AN000;3*/
+	  return;						  /*;AN000;3*/
+}								  /*;AN000;3*/
+#endif
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	show_path
-/*
-/* FUNCTION:
-/*	Display to stdout the full path from root.
-/*	If we are logging, put full path there too.
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	show_path
+ *
+ * FUNCTION:
+ *	Display to stdout the full path from root.
+ *	If we are logging, put full path there too.
+ *
+ ***************************************************/
 void show_path()
 {
 	char	done_path[PATHLEN+20];
@@ -2739,13 +2738,13 @@ void show_path()
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	reset_archive_bit
-/*
-/* FUNCTION:
-/*	Sets the attribute of the source file to what
-/*	it was before, except the archive bit is reset.
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	reset_archive_bit
+ *
+ * FUNCTION:
+ *	Sets the attribute of the source file to what
+ *	it was before, except the archive bit is reset.
+ *
+ ***************************************************/
 void reset_archive_bit(path_addr)
 char *path_addr;
 #define ARCHIVE_MASK 223
@@ -2761,13 +2760,13 @@ char *path_addr;
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	write_to_target
-/*
-/* FUNCTION:
-/*	Write a specified # of bytes to
-/*	target. Handle disk full conditions
-/*	and everything else.
-/***************************************************/
+ * SUBROUTINE NAME:	write_to_target
+ *
+ * FUNCTION:
+ *	Write a specified # of bytes to
+ *	target. Handle disk full conditions
+ *	and everything else.
+ ***************************************************/
 void write_to_target(bytes_to_write)
 WORD bytes_to_write;
 {
@@ -2785,13 +2784,13 @@ WORD bytes_to_write;
 	  }
 	 else
 	  {
-	   written = write_till_target_full(bytes_to_write,0); /* Fill up current target */
+	   written = write_till_target_full(0);         /* Fill up current target */
 	   bytes_written += written;			/* Update # bytes written */
 	   part_size += (DWORD)written; 		/* Update size of this part. */
 	   cumul_part_size += (DWORD)written;		/* Update size of this part. */
 	   data_file_tot_len += (DWORD)written; 	/* Update length of BACKUP.xxx file */
 	   close_out_current_target();			/* Update CONTROL.xxx file, close files */
-	   get_next_target();				/* Get next diskette from user *
+	   get_next_target();				/* Get next diskette from user */
 							/* Write rest of buffer */
 	   written = handle_write(handle_target,bytes_to_write-bytes_written,far_ptr(selector,bytes_written));
 	   bytes_written += written;			/* Update # bytes written */
@@ -2805,16 +2804,14 @@ WORD bytes_to_write;
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	write_till_target_full
-/*
-/* FUNCTION:
-/*	Find out how much space is left on the disk,
-/*	and use it all up.
-/*
-/***************************************************/
-WORD write_till_target_full(bytes_to_write,begin_offset)
-WORD bytes_to_write;
-WORD begin_offset;
+ * SUBROUTINE NAME:	write_till_target_full
+ *
+ * FUNCTION:
+ *	Find out how much space is left on the disk,
+ *	and use it all up.
+ *
+ ***************************************************/
+WORD write_till_target_full(WORD begin_offset)
 {
 	WORD written;
 	WORD bfree;
@@ -2827,13 +2824,13 @@ WORD begin_offset;
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	close_out_current_target
-/*
-/* FUNCTION:
-/*	Update CONTROL.xxx file, close it, close BACKUP.xxx,
-/*	make files READONLY, die if backing up to hardfile.
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	close_out_current_target
+ *
+ * FUNCTION:
+ *	Update CONTROL.xxx file, close it, close BACKUP.xxx,
+ *	make files READONLY, die if backing up to hardfile.
+ *
+ ***************************************************/
 void close_out_current_target()
 {
 	BYTE   last = LAST_TARGET;	/*;AN011;*/
@@ -2892,13 +2889,13 @@ void close_out_current_target()
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	mark_as_not_last_target
-/*
-/* FUNCTION:
-/*	Sets the field in the disk header indicating
-/*	this is not the last target
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	mark_as_not_last_target
+ *
+ * FUNCTION:
+ *	Sets the field in the disk header indicating
+ *	this is not the last target
+ *
+ ***************************************************/
 void mark_as_not_last_target()
 {
 	BYTE	last = NOT_LAST_TARGET;
@@ -2930,15 +2927,15 @@ void mark_as_not_last_target()
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	mark_as_last_target
-/*
-/* FUNCTION:
-/*	Sets the field in the disk header indicating
-/*	this is the last target.  Also updates the
-/*	directory block to indicate the number of
-/*	files that are backed up.
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	mark_as_last_target
+ *
+ * FUNCTION:
+ *	Sets the field in the disk header indicating
+ *	this is the last target.  Also updates the
+ *	directory block to indicate the number of
+ *	files that are backed up.
+ *
+ ***************************************************/
 void mark_as_last_target()
 {
 	BYTE   last = LAST_TARGET;
@@ -2959,13 +2956,13 @@ void mark_as_last_target()
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	update_db_entries
-/*
-/* FUNCTION:
-/*
-/*
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	update_db_entries
+ *
+ * FUNCTION:
+ *
+ *
+ *
+ ***************************************************/
 void update_db_entries(entries)
 WORD	entries;
 {
@@ -2984,17 +2981,17 @@ WORD	entries;
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	update_fh_entries
-/*
-/* FUNCTION:
-/*	Update following fields in Current File Header:
-/*
-/*	FH_Flags: Indicate file successfully processed.
-/*		  Indicate if this is last part or not.
-/*
-/*	FH_PartSize: Indicate number of bytes written
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	update_fh_entries
+ *
+ * FUNCTION:
+ *	Update following fields in Current File Header:
+ *
+ *	FH_Flags: Indicate file successfully processed.
+ *		  Indicate if this is last part or not.
+ *
+ *	FH_PartSize: Indicate number of bytes written
+ *
+ ***************************************************/
 void update_fh_entries()
 {
 	BYTE	flag;
@@ -3004,9 +3001,9 @@ void update_fh_entries()
 	 else
 	  flag = (BYTE)(NOTLASTPART + SUCCESSFUL);
 
-/*EAEA	if (ext_attrib_flg)			/*;AN000;3 If there are extended attributes */
-/*EAEA	 if (span_seq_num == 1) 		/*;AN000;3  If its the first part of file */
-/*EAEA	  flag += EXT_ATTR;			/*;AN000;3   set flag indicating extended attributes exist */
+/*EAEA	if (ext_attrib_flg)*/			/*;AN000;3 If there are extended attributes */
+/*EAEA	 if (span_seq_num == 1)*/ 		/*;AN000;3  If its the first part of file */
+/*EAEA	  flag += EXT_ATTR;*/			/*;AN000;3   set flag indicating extended attributes exist */
 
 	if (!target_removable)				/*;AN011;*/
 	 if (disk_full) 				/*;AN011;*/
@@ -3031,13 +3028,13 @@ void update_fh_entries()
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	mark_files_read_only
-/*
-/* FUNCTION:
-/*	Set the READ-ONLY attribute on BACKUP.xxx and CONTROL.xx
-/*
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	mark_files_read_only
+ *
+ * FUNCTION:
+ *	Set the READ-ONLY attribute on BACKUP.xxx and CONTROL.xx
+ *
+ *
+ ***************************************************/
 void mark_files_read_only()
 {
 	char path[25];
@@ -3067,13 +3064,13 @@ void mark_files_read_only()
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	put_disk_header
-/*
-/* FUNCTION:
-/*
-/*
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	put_disk_header
+ *
+ * FUNCTION:
+ *
+ *
+ *
+ ***************************************************/
 void put_disk_header()
 {
 	struct Disk_Header dh;
@@ -3094,13 +3091,13 @@ void put_disk_header()
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	put_new_db
-/*
-/* FUNCTION:
-/*
-/*
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	put_new_db
+ *
+ * FUNCTION:
+ *
+ *
+ *
+ ***************************************************/
 void put_new_db()
 {
 	struct	Dir_Block db;
@@ -3128,13 +3125,13 @@ void put_new_db()
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	put_new_fh
-/*
-/* FUNCTION:
-/*	We are about to backup a file. Write the
-/*	file header to the control file.
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	put_new_fh
+ *
+ * FUNCTION:
+ *	We are about to backup a file. Write the
+ *	file header to the control file.
+ *
+ ***************************************************/
 void put_new_fh()
 {
 	struct	File_Header fh;
@@ -3160,17 +3157,17 @@ void put_new_fh()
 	fh.FH_Attribute = dta.attributes;	/* FILE ATTRIBUTE FROM DIRECTORY */
 	fh.FH_FTime	= dta.write_time;	/* TIME WHEN FILE WAS LAST MODIFIED */
 	fh.FH_FDate	= dta.write_date;	/* DATE WHEN FILE WAS LAST MODIFIED */
-/*EAEA	fh.FH_EA_offset = 0;			/*;AN000;3 Otherwise set to zero */
+/*EAEA	fh.FH_EA_offset = 0;*/			/*;AN000;3 Otherwise set to zero */
 	fh.FH_Flags	= LASTPART + SUCCESSFUL;
 
-/*EAEA	if (ext_attrib_flg)				/*;AN000;3 If there are extended attributes */
-/*EAEA	 if (!file_spans_target)			/*;AN000;3*/
-/*EAEA	  if (span_seq_num == 1)			/*;AN000;3  If its the first part of file */
-/*EAEA	   {						/*;AN000;3*/
-/*EAEA	    fh.FH_Flags += EXT_ATTR;			/*;AN000;3  set flag indicating extended attributes exist */
-/*EAEA	    fh.FH_EA_offset = data_file_tot_len;	/*;AN000;3 OFFSET WHERE EXTENDED ATTRIBUTES BEGIN */
-/*EAEA	    fh.FH_BeginOffset += ext_attrib_len+2;	/*;AN000;3*/
-/*EAEA	   }						/*;AN000;3*/
+/*EAEA	if (ext_attrib_flg)*/				/*;AN000;3 If there are extended attributes */
+/*EAEA	 if (!file_spans_target)*/			/*;AN000;3*/
+/*EAEA	  if (span_seq_num == 1)*/			/*;AN000;3  If its the first part of file */
+/*EAEA	   {*/						/*;AN000;3*/
+/*EAEA	    fh.FH_Flags += EXT_ATTR;*/			/*;AN000;3  set flag indicating extended attributes exist */
+/*EAEA	    fh.FH_EA_offset = data_file_tot_len;*/	/*;AN000;3 OFFSET WHERE EXTENDED ATTRIBUTES BEGIN */
+/*EAEA	    fh.FH_BeginOffset += ext_attrib_len+2;*/	/*;AN000;3*/
+/*EAEA	   }*/						/*;AN000;3*/
 
 	if (file_spans_target)
 	  {
@@ -3187,13 +3184,13 @@ void put_new_fh()
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	write_to_control_file
-/*
-/* FUNCTION:
-/*	Write to the control file and update
-/*	counters
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	write_to_control_file
+ *
+ * FUNCTION:
+ *	Write to the control file and update
+ *	counters
+ *
+ ***************************************************/
 void write_to_control_file(address,len)
 char far * address;
 unsigned short len;
@@ -3208,13 +3205,13 @@ unsigned short len;
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	control_break_handler
-/*
-/* FUNCTION:
-/*	Set errorlevel and call routines to
-/*	close files and terminate.
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	control_break_handler
+ *
+ * FUNCTION:
+ *	Set errorlevel and call routines to
+ *	close files and terminate.
+ *
+ ***************************************************/
 void control_break_handler()
 {
 	return_code = RETCODE_CTL_BREAK;
@@ -3225,39 +3222,39 @@ void control_break_handler()
 
 /************************************************************/
 /*
-/*   SUBROUTINE NAME:	   display_it
-/*
-/*   SUBROUTINE FUNCTION:
-/*	   Display the requested message to the standard output device.
-/*
-/*   INPUT:
-/*	   1) (WORD) Number of the message to be displayed.
-/*	   2) (WORD) Handle to be written to.
-/*	   3) (WORD) Substitution Count
-/*	   4) (WORD) Flag indicating user should "Strike any key..."
-/*	   5) (WORD) Num indicating message class
-/*
-/*   OUTPUT:
-/*	   The message corresponding to the requested msg number will
-/*	   be written to the requested handle.	If requested, substitution
-/*	   text will be inserted as required.  The Substitution List
-/*	   is global and, if used, will be initialized by DISPLAY_MSG
-/*	   before calling this routine.
-/*
-/*   NORMAL EXIT:
-/*	   Message will be successfully written to requested handle.
-/*
-/*   ERROR EXIT:
-/*	   None.  Note that theoretically an error can be returned from
-/*	   SYSDISPMSG, but there is nothing that the application can do.
-/*
-/*   INTERNAL REFERENCES:
-/*	   System Display Message service routine SYSDISPMSG
-/*
-/*   EXTERNAL REFERENCES:
-/*	   None
-/*
-/************************************************************/
+ *   SUBROUTINE NAME:	   display_it
+ *
+ *   SUBROUTINE FUNCTION:
+ *	   Display the requested message to the standard output device.
+ *
+ *   INPUT:
+ *	   1) (WORD) Number of the message to be displayed.
+ *	   2) (WORD) Handle to be written to.
+ *	   3) (WORD) Substitution Count
+ *	   4) (WORD) Flag indicating user should "Strike any key..."
+ *	   5) (WORD) Num indicating message class
+ *
+ *   OUTPUT:
+ *	   The message corresponding to the requested msg number will
+ *	   be written to the requested handle.	If requested, substitution
+ *	   text will be inserted as required.  The Substitution List
+ *	   is global and, if used, will be initialized by DISPLAY_MSG
+ *	   before calling this routine.
+ *
+ *   NORMAL EXIT:
+ *	   Message will be successfully written to requested handle.
+ *
+ *   ERROR EXIT:
+ *	   None.  Note that theoretically an error can be returned from
+ *	   SYSDISPMSG, but there is nothing that the application can do.
+ *
+ *   INTERNAL REFERENCES:
+ *	   System Display Message service routine SYSDISPMSG
+ *
+ *   EXTERNAL REFERENCES:
+ *	   None
+ *
+ ************************************************************/
 void	display_it(msg_number,handle,subst_count,waitflag,class)/*;AN000;6*/
 
 int	msg_number;			/*;AN000;6*/
@@ -3279,15 +3276,15 @@ BYTE	class;				/*;AN000;6 1=DOSerror, 2=PARSE,-1=Utility msg*/
 }					/*;AN000;6*/
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	display_msg
-/*
-/* FUNCTION:
-/*	Display the messages referenced by
-/*	variable MSG_NUM to either STDOUT or
-/*	STDERR. In some cases insert text into
-/*	the body of the message.
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	display_msg
+ *
+ * FUNCTION:
+ *	Display the messages referenced by
+ *	variable MSG_NUM to either STDOUT or
+ *	STDERR. In some cases insert text into
+ *	the body of the message.
+ *
+ ***************************************************/
 
 void display_msg(msg_num)
 int msg_num;
@@ -3436,13 +3433,13 @@ int msg_num;
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	error_exit
-/*
-/* FUNCTION:
-/*	Display appropriate error message, set
-/*	the return code, and call clean_up_and_exit.
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	error_exit
+ *
+ * FUNCTION:
+ *	Display appropriate error message, set
+ *	the return code, and call clean_up_and_exit.
+ *
+ ***************************************************/
 void error_exit(error_type)
 int	error_type;
 {
@@ -3455,13 +3452,13 @@ int	error_type;
 
 /*************************************************/
 /*
-/* SUBROUTINE NAME:	restore_default_directories
-/*
-/* FUNCTION:
-/*	Restore the original current directory on
-/*	the source drive.
-/*
-/***************************************************/
+ * SUBROUTINE NAME:	restore_default_directories
+ *
+ * FUNCTION:
+ *	Restore the original current directory on
+ *	the source drive.
+ *
+ ***************************************************/
 void restore_default_directories()
 {
 	char path[PATHLEN+20];
@@ -3474,15 +3471,15 @@ void restore_default_directories()
 
 /**************************************************/
 /*
-/* SUBROUTINE NAME:	clean_up_and_exit
-/*
-/* FUNCTION:
-/*	Update BACKUP and CONTROL files.
-/*	Close open files.
-/*	Mark BACKUP, CONTROL file read only
-/*	Restore default drive and directories
-/*	Deallocate buffers
-/***************************************************/
+ * SUBROUTINE NAME:	clean_up_and_exit
+ *
+ * FUNCTION:
+ *	Update BACKUP and CONTROL files.
+ *	Close open files.
+ *	Mark BACKUP, CONTROL file read only
+ *	Restore default drive and directories
+ *	Deallocate buffers
+ ***************************************************/
 void clean_up_and_exit()
 {
 	char	name[15];		     /*;AN000;p2652*/
@@ -4286,61 +4283,63 @@ void datetime() 		/* Put date and time in logfile */
 
 
 /*************************************************/
-/*void get_extended_attributes(handle)					/*;AN000;3*/
-/*WORD handle;								/*;AN000;3*/
-/*{									/*;AN000;3*/
-/*#if defined(DEBUG)
-/*	  printf("\nGET EXTENDED ATTRIBUTE LENGTH...");
-/*#endif
-/*	  ext_attrib_flg = TRUE;     /*Assume ext attrib exist*/	/*;AN000;3*/
-/*
-/*					  /* GET EXTENDED ATTRIBUTE LENGTH */
-/*	  inregs.x.ax = 0x5702; 					/*;AN000;3*/
-/*	  inregs.x.bx = handle; 					/*;AN000;3*/
-/*	  inregs.x.cx = 0;						/*;AN000;3*/
-/*	  inregs.x.si = 0xffff; 					/*;AN000;3*/
-/*	  intdos(&inregs,&outregs);					/*;AN000;3*/
-/*
-/*#if defined(DEBUG)
-/*	  if (outregs.x.cflag & CARRY)
-/*	      printf("ERROR, RC=%04Xh",outregs.x.ax);
-/*	     else
-/*	      printf("SUCCESSFUL, LEN=%04Xh",outregs.x.cx);
-/*#endif
-/*
-/*	  if (!(outregs.x.cflag & CARRY))				/*;AN000;3*/
-/*	    ext_attrib_len = outregs.x.cx;				/*;AN000;3*/
-/*	   else 							/*;AN000;3*/
-/*	    ext_attrib_flg = FALSE;					/*;AN000;3 Set flag indicating no extended attributes*/
-/*
-/*
-/*#if defined(DEBUG)
-/*	  printf("\nGET EXTENDED ATTRIBUTES...");
-/*#endif
-/*
-/*					  /* GET EXTENDED ATTRIBUTES */
-/*	  if (ext_attrib_flg)
-/*	   {								/*;AN000;3*/
-/*	     inregs.x.ax = 0x5702;					/*;AN000;3*/
-/*	     inregs.x.bx = handle;					/*;AN000;3*/
-/*	     inregs.x.cx = outregs.x.cx;				/*;AN000;3*/
-/*	     inregs.x.di = (unsigned)&ext_attrib_buff[0];		/*;AN000;3*/
-/*	     inregs.x.si = 0xffff;					/*;AN000;3*/
-/*	     intdos(&inregs,&outregs);					/*;AN000;3*/
-/*
-/*	     if (outregs.x.cflag & CARRY)				/*;AN000;3*/
-/*	       ext_attrib_flg = FALSE;					/*;AN000;3*/
-/*
-/*#if defined(DEBUG)
-/*	  if (outregs.x.cflag & CARRY)
-/*	      printf("ERROR, RC=%04Xh",outregs.x.ax);
-/*	     else
-/*	      printf("SUCCESSFUL");
-/*#endif
-/*	   }
-/*
-/*	  return;							/*;AN000;3*/
-/*}	  /* end get_extended_attributes */				/*;AN000;3*/
+#if 0
+void get_extended_attributes(handle)					/*;AN000;3*/
+WORD handle;								/*;AN000;3*/
+{									/*;AN000;3*/
+#if defined(DEBUG)
+	  printf("\nGET EXTENDED ATTRIBUTE LENGTH...");
+#endif
+	  ext_attrib_flg = TRUE;     /*Assume ext attrib exist*/	/*;AN000;3*/
+
+					  /* GET EXTENDED ATTRIBUTE LENGTH */
+	  inregs.x.ax = 0x5702; 					/*;AN000;3*/
+	  inregs.x.bx = handle; 					/*;AN000;3*/
+	  inregs.x.cx = 0;						/*;AN000;3*/
+	  inregs.x.si = 0xffff; 					/*;AN000;3*/
+	  intdos(&inregs,&outregs);					/*;AN000;3*/
+
+#if defined(DEBUG)
+	  if (outregs.x.cflag & CARRY)
+	      printf("ERROR, RC=%04Xh",outregs.x.ax);
+	     else
+	      printf("SUCCESSFUL, LEN=%04Xh",outregs.x.cx);
+#endif
+
+	  if (!(outregs.x.cflag & CARRY))				/*;AN000;3*/
+	    ext_attrib_len = outregs.x.cx;				/*;AN000;3*/
+	   else 							/*;AN000;3*/
+	    ext_attrib_flg = FALSE;					/*;AN000;3 Set flag indicating no extended attributes*/
+
+
+#if defined(DEBUG)
+	  printf("\nGET EXTENDED ATTRIBUTES...");
+#endif
+
+					  /* GET EXTENDED ATTRIBUTES */
+	  if (ext_attrib_flg)
+	   {								/*;AN000;3*/
+	     inregs.x.ax = 0x5702;					/*;AN000;3*/
+	     inregs.x.bx = handle;					/*;AN000;3*/
+	     inregs.x.cx = outregs.x.cx;				/*;AN000;3*/
+	     inregs.x.di = (unsigned)&ext_attrib_buff[0];		/*;AN000;3*/
+	     inregs.x.si = 0xffff;					/*;AN000;3*/
+	     intdos(&inregs,&outregs);					/*;AN000;3*/
+
+	     if (outregs.x.cflag & CARRY)				/*;AN000;3*/
+	       ext_attrib_flg = FALSE;					/*;AN000;3*/
+
+#if defined(DEBUG)
+	  if (outregs.x.cflag & CARRY)
+	      printf("ERROR, RC=%04Xh",outregs.x.ax);
+	     else
+	      printf("SUCCESSFUL");
+#endif
+	   }
+
+	  return;							/*;AN000;3*/
+}	  /* end get_extended_attributes */				/*;AN000;3*/
+#endif
 /**************************************************/
 #define EXTENDEDOPEN	0x6c00					      /*;AN000;3*/
 
@@ -4370,8 +4369,8 @@ WORD	mode;							      /*;AN000;3*/
 	inreg.x.di = (WORD)&ea_parmlist;			      /*;AN000;3*/
 
 	intdos(&inreg,&outreg); 				      /*;AN000;3*/
-	if (outreg.x.cflag & CARRY)	/* If there was an error      /*;AN000;3*/
-	 rc = outreg.x.ax;		/*  then set return code      /*;AN000;3*/
+	if (outreg.x.cflag & CARRY)	/* If there was an error*/    /*;AN000;3*/
+	 rc = outreg.x.ax;		/*  then set return code*/    /*;AN000;3*/
 
 #if defined(DEBUG)
 	if (outreg.x.cflag & CARRY)
@@ -4382,4 +4381,3 @@ WORD	mode;							      /*;AN000;3*/
 
 	return(outreg.x.ax);					      /*;AN000;3*/
 }	/* end extended_open */ 				      /*;AN000;3*/
-

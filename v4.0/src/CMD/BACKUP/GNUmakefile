@@ -14,10 +14,16 @@ country = usa-ms
 #######################	dependencies begin here. #########################
 #
 
-.SUFFIXES: .asm .obj
+.SUFFIXES: .c .asm .obj
+
+CC = wcl
+CFLAGS = -q -ms -os -zp=1 -I$(hinc) -wx
 
 AS = jwasm
 AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.c.obj:
+	$(CC) $(CFLAGS) -c -fo=$@ $<
 
 .asm.obj:
 	$(AS) $(AFLAGS) -Fo$@ $<
@@ -25,7 +31,7 @@ AFLAGS = -q -Zm -Zg -I$(inc) -Fl
 all: backup.com
 
 $(map)/mapper.lib:
-	$(MAKE) -C $(map)/mapper.lib:
+	$(MAKE) -C $(map)/mapper.lib
 
 backup.ctl backup.cl1 backup.cl2 backup.cla:	backup.skl			\
 		$(msg)/$(country).msg		
@@ -44,14 +50,22 @@ _msgret.obj:	_msgret.asm			\
 		$(inc)/versiona.inc		\
 		$(inc)/copyrigh.inc
 
-backup.obj:  BACKUP.C  BACKPARS.H BACKUP.H  \
-	     $(hinc)/doscalls.h
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc2.bat src\cmd\backup $(subst /,\,$<) $(subst /,\,$@)"
+backup.obj:  backup.c  backpars.h backup.h  \
+	     $(hinc)/comsub.h $(hinc)/doscalls.h $(hinc)/version.h
 
 OBJS = backup.obj _parse.obj _msgret.obj
 
-backup.com: $(OBJS) $(map)/mapper.lib $(comsubs)/comsubsm.lib
-	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\backup /NOE /MAP $(subst /,\,backup+_parse+_msgret,,,$(map)/mapper+$(comsubs)/comsubsm)"
+backup.com: $(OBJS) $(map)/mapper.lib $(comsubs)/comsubs.lib
+	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
+	echo 'option map=backup.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name backup.exe' >>resp.txt
+	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
+	echo "library $(comsubs)/comsubs.lib" >>resp.txt
+	echo "library $(map)/mapper.lib" >>resp.txt
+	wlink @resp.txt
 	../../bldtools/make-com.rb backup.exe backup.com
 
 clean:
