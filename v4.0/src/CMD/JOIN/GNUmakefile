@@ -15,27 +15,33 @@ country = usa-ms
 #######################	dependencies begin here. #########################
 #
 
-.SUFFIXES: .asm .obj
+.SUFFIXES: .c .asm .obj
+
+CC = wcl
+CFLAGS = -q -ms -os -zp=1 -I$(hinc) -wx -ecc
 
 AS = jwasm
 AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.c.obj:
+	$(CC) $(CFLAGS) -c -fo=$@ $<
 
 .asm.obj:
 	$(AS) $(AFLAGS) -Fo$@ $<
 
 all: join.exe
 
-$(inc)/errtstm.obj:
-	$(MAKE) -C $(inc) errtstm.obj
+$(inc)/errtst.obj:
+	$(MAKE) -C $(inc) errtst.obj
 
-$(inc)/sysvarm.obj:
-	$(MAKE) -C $(inc) sysvarm.obj
+$(inc)/sysvar.obj:
+	$(MAKE) -C $(inc) sysvar.obj
 
-$(inc)/cdsm.obj:
-	$(MAKE) -C $(inc) cdsm.obj
+$(inc)/cds.obj:
+	$(MAKE) -C $(inc) cds.obj
 
-$(inc)/dpbm.obj:
-	$(MAKE) -C $(inc) dpbm.obj
+$(inc)/dpb.obj:
+	$(MAKE) -C $(inc) dpb.obj
 
 $(inc)/comsubs.lib:
 	$(MAKE) -C $(inc) comsubs.lib
@@ -62,18 +68,27 @@ _parse.obj: _parse.asm  \
   $(inc)/parse.asm      \
   $(inc)/psdata.inc
 
-join.obj: JOIN.C        \
-  JOINPARS.H            \
+join.obj: join.c        \
+  joinpars.h            \
   $(hinc)/cds.h          \
   $(hinc)/jointype.h     \
-  $(hinc)/sysvar.h
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\join $(subst /,\,$<) $(subst /,\,$@)"
+  $(hinc)/sysvar.h       \
+  $(hinc)/errtst.h
 
-OBJS = join.obj $(inc)/errtstm.obj $(inc)/sysvarm.obj $(inc)/cdsm.obj \
-       $(inc)/dpbm.obj _msgret.obj _parse.obj
+OBJS = join.obj $(inc)/errtst.obj $(inc)/sysvar.obj $(inc)/cds.obj \
+       $(inc)/dpb.obj _msgret.obj _parse.obj
 
-join.exe: $(OBJS) $(map)/mapper.lib $(comsubs)/comsubsm.lib JOIN.LNK
-	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\join @join.lnk"
+join.exe: $(OBJS) $(map)/mapper.lib $(comsubs)/comsubs.lib
+	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
+	echo 'option map=join.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name join.exe' >>resp.txt
+	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
+	echo "library $(comsubs)/comsubs.lib" >>resp.txt
+	echo "library $(map)/mapper.lib" >>resp.txt
+	wlink @resp.txt
 
 clean:
 	rm -f *.obj
