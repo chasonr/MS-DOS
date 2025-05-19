@@ -100,8 +100,10 @@
 /*                                                                        */
 /**************************************************************************/
 
+#include <stdlib.h>
+#include <string.h>
+#include <dos.h>                                                               /* ;AN000;M Used for the REGS union */
 #include "comsub.h"                                                            /* ;AN000;P DBCS functions */
-#include "dos.h"                                                               /* ;AN000;M Used for the REGS union */
 #include "replacep.h"                                                          /* ;AN000;P Parser structures */
 
 /* ------------- ERRORLEVEL CODES ---------------*/
@@ -192,7 +194,6 @@
 #define INACTIVE          0x0000                                               /* ;AN000;A Append/x inactive status */
 #define MAX               256                                                  /* ;AC000; */
 #define MAXMINUS1         255                                                  /* ;AC000; */
-#define NULL              0
 #define SATTRIB           0
 #define SUBDIR            0x10
 #define TATTRIB           SUBDIR
@@ -268,15 +269,63 @@ unsigned segment ;
 unsigned update     = FALSE ;                                                  /* ;AN000;U /U switch */
 unsigned wait       = FALSE ;                                                  /* /W switch */
 unsigned x_status   = 0 ;                                                      /* ;AN000;A Original append/x state */
-unsigned _psp ;
 
 long oldint24 ;                                                                /* ;AN000; Rcv cntrl from, then ret to */
 
-extern crit_err_handler() ;                                                    /* ;AN000; Assembler routine */
-extern ctl_brk_handler() ;                                                     /* ;AN000; Assembler routine */
+extern void __cdecl crit_err_handler(void) ;                                   /* ;AN000; Assembler routine */
+extern void __cdecl ctl_brk_handler(void) ;                                    /* ;AN000; Assembler routine */
 
 unsigned Check_Appendx_Install ();
 unsigned Check_Appendx ();
+
+extern void __cdecl parse(union REGS const *inregs, union REGS *outregs);
+extern void __cdecl sysloadmsg(union REGS const *inregs, union REGS *outregs);
+extern void __cdecl sysdispmsg(union REGS const *inregs, union REGS *outregs);
+
+void display_exit() ;                                                        /* ;AN000; forward declaration */
+void display_msg() ;                                                         /* ;AN000; forward declaration */
+void dta_restore() ;                                                         /* ;AN000; forward declaration */
+void dta_save() ;                                                            /* ;AN000; forward declaration */
+void load_msg() ;                                                            /* ;AN000; forward declaration */
+void parser_prep() ;                                                         /* ;AN000; forward declaration */
+void putbyte() ;                                                             /* ;AC000; forward declaration */
+void putdword() ;                                                            /* ;AC000; forward declaration */
+void putword() ;                                                             /* ;AC000; forward declaration */
+void __cdecl restore(void) ;                                                 /* ;AN000; forward declaration */
+void set_appendx() ;                                                         /* ;AN000; forward declaration */
+void setup_crit_err() ;                                                      /* ;AN000; forward declaration */
+void setup_ctl_brk() ;                                                       /* ;AN000; forward declaration */
+
+char *com_strchr() ;                                                         /* ;AN000; To search for DBCS "\\" */
+char getbyte() ;                                                             /* ;AC000; forward declaration */
+
+int same() ;                                                                 /* ;AN000; forward declaration */
+
+unsigned char *com_strrchr() ;                                               /* ;AN000; To search for DBCS "\\" */
+
+unsigned check_appendx() ;                                                   /* ;AN000; forward declaration */
+unsigned check_appendx_install() ;                                           /* ;AN000; forward declaration */
+unsigned dallocate() ;                                                       /* ;AN000; forward declaration */
+unsigned dchmod() ;                                                          /* ;AN000; forward declaration */
+unsigned dclose() ;                                                          /* ;AN000; forward declaration */
+unsigned dcompare() ;                                                        /* ;AN000; forward declaration */
+unsigned dcreate() ;                                                         /* ;AN000; forward declaration */
+unsigned ddelete() ;                                                         /* ;AN000; forward declaration */
+unsigned dexit() ;                                                           /* ;AN000; forward declaration */
+unsigned dfree() ;                                                           /* ;AN000; forward declaration */
+unsigned doadd() ;                                                           /* ;AN000; forward declaration */
+unsigned docopy() ;                                                          /* ;AN000; forward declaration */
+unsigned dodir() ;                                                           /* ;AN000; forward declaration */
+unsigned dopen() ;                                                           /* ;AN000; forward declaration */
+unsigned dread() ;                                                           /* ;AN000; forward declaration */
+unsigned dsearchf() ;                                                        /* ;AN000; forward declaration */
+unsigned dsearchn() ;                                                        /* ;AN000; forward declaration */
+unsigned dwrite() ;                                                          /* ;AN000; forward declaration */
+unsigned findfile() ;                                                        /* ;AN000; forward declaration */
+unsigned get_ext_attr() ;                                                    /* ;AN000; forward declaration */
+unsigned getword() ;                                                         /* ;AC000; forward declaration */
+
+long getdword() ;                                                            /* ;AC000; forward declaration */
 
 /*컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�*/
 
@@ -333,51 +382,6 @@ void main(argc, argv)                                                          /
 int  argc ;
 char *argv[] ;
 {
-  void display_exit() ;                                                        /* ;AN000; forward declaration */
-  void display_msg() ;                                                         /* ;AN000; forward declaration */
-  void dta_restore() ;                                                         /* ;AN000; forward declaration */
-  void dta_save() ;                                                            /* ;AN000; forward declaration */
-  void load_msg() ;                                                            /* ;AN000; forward declaration */
-  void parser_prep() ;                                                         /* ;AN000; forward declaration */
-  void putbyte() ;                                                             /* ;AC000; forward declaration */
-  void putdword() ;                                                            /* ;AC000; forward declaration */
-  void putword() ;                                                             /* ;AC000; forward declaration */
-  void restore() ;                                                             /* ;AN000; forward declaration */
-  void set_appendx() ;                                                         /* ;AN000; forward declaration */
-  void setup_crit_err() ;                                                      /* ;AN000; forward declaration */
-  void setup_ctl_brk() ;                                                       /* ;AN000; forward declaration */
-
-  char *com_strchr() ;                                                         /* ;AN000; To search for DBCS "\\" */
-  char getbyte() ;                                                             /* ;AC000; forward declaration */
-
-  int same() ;                                                                 /* ;AN000; forward declaration */
-
-  unsigned char *com_strrchr() ;                                               /* ;AN000; To search for DBCS "\\" */
-
-  unsigned check_appendx() ;                                                   /* ;AN000; forward declaration */
-  unsigned check_appendx_install() ;                                           /* ;AN000; forward declaration */
-  unsigned dallocate() ;                                                       /* ;AN000; forward declaration */
-  unsigned dchmod() ;                                                          /* ;AN000; forward declaration */
-  unsigned dclose() ;                                                          /* ;AN000; forward declaration */
-  unsigned dcompare() ;                                                        /* ;AN000; forward declaration */
-  unsigned dcreate() ;                                                         /* ;AN000; forward declaration */
-  unsigned ddelete() ;                                                         /* ;AN000; forward declaration */
-  unsigned dexit() ;                                                           /* ;AN000; forward declaration */
-  unsigned dfree() ;                                                           /* ;AN000; forward declaration */
-  unsigned doadd() ;                                                           /* ;AN000; forward declaration */
-  unsigned docopy() ;                                                          /* ;AN000; forward declaration */
-  unsigned dodir() ;                                                           /* ;AN000; forward declaration */
-  unsigned dopen() ;                                                           /* ;AN000; forward declaration */
-  unsigned dread() ;                                                           /* ;AN000; forward declaration */
-  unsigned dsearchf() ;                                                        /* ;AN000; forward declaration */
-  unsigned dsearchn() ;                                                        /* ;AN000; forward declaration */
-  unsigned dwrite() ;                                                          /* ;AN000; forward declaration */
-  unsigned findfile() ;                                                        /* ;AN000; forward declaration */
-  unsigned get_ext_attr() ;                                                    /* ;AN000; forward declaration */
-  unsigned getword() ;                                                         /* ;AC000; forward declaration */
-
-  long getdword() ;                                                            /* ;AC000; forward declaration */
-
   struct filedata files[500] ;                                                 /* ;AC000; 256 is true limit, but */
                                                                                /* 500 to accomodate segment wrap */
   char save[MAXMINUS1] ;
@@ -422,7 +426,7 @@ char *argv[] ;
           p_sfilespec[fchar] = (char)*fptr ;                                   /* ;AN000;P get the character */
           fchar++ ;                                                            /* ;AN000;P Move the char ptr */
         }                                                                      /* ;AN000;P */
-        strcpy(fix_es_reg,NULL) ;                                              /* ;AN000;P (Set es reg correct) */
+        strcpy(fix_es_reg, "") ;                                               /* ;AN000;P (Set es reg correct) */
         have_source = TRUE ;                                                   /* ;AN000;P Set the flag */
         fchar       = 0 ;                                                      /* ;AN000;P Reset char ptr */
       }                                                                        /* ;AN000;P */
@@ -435,17 +439,17 @@ char *argv[] ;
             p_path[fchar] = (char)*fptr ;                                      /* ;AN000;P get the character */
             fchar++ ;                                                          /* ;AN000;P Move the char ptr */
           }                                                                    /* ;AN000;P */
-          strcpy(fix_es_reg,NULL) ;                                            /* ;AN000;P (Set es reg correct) */
+          strcpy(fix_es_reg, "") ;                                             /* ;AN000;P (Set es reg correct) */
           have_target = TRUE ;                                                 /* ;AN000;P Set the flag */
         }                                                                      /* ;AN000;P */
         else                                                                   /* ;AN000;P */
         {                                                                      /* ;AN000;P */
-          for (inregs.x.si;inregs.x.si<outregs.x.si;inregs.x.si++)             /* ;AN006; Copy whatever */
+          for (;inregs.x.si<outregs.x.si;inregs.x.si++)                        /* ;AN006; Copy whatever */
           {                                                                    /* ;AN006; parser just parsed */
             cmdln_switch[index] = *(char *)inregs.x.si ;                       /* ;AN006; */
             index++ ;                                                          /* ;AN006; */
           }                                                                    /* ;AN006; */
-          strcpy(switch_buffer,rslt2.P_SYNONYM_Ptr) ;                          /* ;AN000;P Else copy switch into buf */
+          strcpy(switch_buffer,(char const *)rslt2.P_SYNONYM_Ptr) ;            /* ;AN000;P Else copy switch into buf */
           switch (switch_buffer[1])                                            /* ;AN000;P Verify which switch */
           {                                                                    /* ;AN000;P */
             case 'A'   :  if (!add)                                            /* ;AN000;P /A switch */
@@ -485,7 +489,7 @@ char *argv[] ;
     else                                                                       /* ;AN000;P */
       if (outregs.x.ax != P_RC_EOL)                                            /* ;AN000;P Is the parser */
       {                                                                        /* ;AN006; */
-        for (inregs.x.si ; inregs.x.si < outregs.x.si ; inregs.x.si++)         /* ;AN006; Copy whatever */
+        for (; inregs.x.si < outregs.x.si ; inregs.x.si++)                     /* ;AN006; Copy whatever */
         {                                                                      /* ;AN006; parser just parsed */
           cmdln_invalid[index] = *(char *)inregs.x.si ;                        /* ;AN006; */
           index++ ;                                                            /* ;AN006; */
@@ -498,7 +502,7 @@ char *argv[] ;
                                break ;                                         /* ;AN000;P More_to_parse = FALSE */
           case P_Not_In_SW  :  display_exit(MSG_BADSWTCH,cmdln_invalid,ERRLEVEL11) ;/* ;AN005;P Invalid switch */
                                break ;                                         /* ;AN000;P More_to_parse = FALSE */
-          case P_Op_Missing :  display_msg(MSG_NOSOURCE) ;                     /* ;AN000;P Source required */
+          case P_Op_Missing :  display_msg(MSG_NOSOURCE, "") ;                 /* ;AN000;P Source required */
                                dexit(ERRLEVEL11) ;                             /* ;AN000;P */
                                break ;                                         /* ;AN000;P More_to_parse = FALSE */
         }                                                                      /* ;AN000;P */
@@ -513,7 +517,7 @@ char *argv[] ;
 
   if ((add && descending) || (add && update))                                  /* ;AC000;P A+S or A+U */
   {
-    display_msg(MSG_INCOMPAT) ;                                                /* ;AN000;P Incompatible switches */
+    display_msg(MSG_INCOMPAT, "") ;                                            /* ;AN000;P Incompatible switches */
     dexit(ERRLEVEL11) ;                                                        /* ;AC000; */
   }
 
@@ -529,7 +533,7 @@ char *argv[] ;
 
   if (status != 0)                                                             /* If can't alloc at all */
   {                                                                            /* something's wrong */
-    display_msg(MSG_NOMEM) ;                                                   /* ;AC000; no space for copies */
+    display_msg(MSG_NOMEM, "") ;                                               /* ;AC000; no space for copies */
     dexit(ERRLEVEL8) ;                                                         /* ;AC000; */
   }
 
@@ -541,7 +545,7 @@ char *argv[] ;
 
   if (wait)
   {
-    display_msg(MSG_START) ;                                                   /* ;AC000; Press any key... */
+    display_msg(MSG_START, "") ;                                               /* ;AC000; Press any key... */
     inregs.x.ax = 0x0C08 ;                                                     /* ;AC000; */
     intdos(&inregs,&outregs) ;                                                 /* ;AC000; */
     status = (outregs.x.cflag & CARRY) ;                                       /* ;AC000; */
@@ -566,7 +570,7 @@ char *argv[] ;
     {                                                                          /* Insert current drive letter */
       source[0] = 'A' + (outregs.x.ax & 0xff) ;                                /* ;AC000; */
       source[1] = ':' ;
-      source[2] = NULL ;
+      source[2] = '\0' ;
       strcat(source,save) ;
     }
   }
@@ -669,12 +673,12 @@ char *argv[] ;
         if (i <= 0)
         {
           i = 0;
-          source[0] = NULL ;
+          source[0] = '\0' ;
         }
         dbcs_search[0] = source[i-1] ;                                         /* ;AN000; Copy char to srch for DBCS */
         dbcs_search[1] = source[i] ;                                           /* ;AN000; Copy char to srch for DBCS */
         if ( ((com_strchr(dbcs_search,'\\'))!= NULL) || (source[i] == ':') )   /* ;AN000; */
-          source[i+1] = NULL ;                                                 /* ;AN000; */
+          source[i+1] = '\0' ;                                                 /* ;AN000; */
 
         /* fixup the target path */
 
@@ -687,7 +691,7 @@ char *argv[] ;
           {
             target[0] = 'A' + (outregs.x.ax & 0xff) ;                          /* ;AC000; */
             target[1] = ':' ;
-            target[2] = NULL ;
+            target[2] = '\0' ;
           }
         }
 
@@ -715,7 +719,7 @@ char *argv[] ;
           {
             target[0] = 'A' + (outregs.x.ax & 0xff) ;                          /* ;AC000; */
             target[1] = ':' ;
-            target[2] = NULL ;
+            target[2] = '\0' ;
             strcat(target,save) ;
           }
         }
@@ -746,8 +750,8 @@ char *argv[] ;
             else                                                               /* ;AN004; */
               if (save[1] == '.')                                              /* ;AN004; If tgt is parent dir */
               {                                                                /* ;AN004; */
-                target[strlen(target)-1] = NULL ;                              /* ;AN004; then delete end backslash */
-                *((unsigned char *)com_strrchr(target,'\\')+1) = NULL ;        /* ;AN004; del curdir name from path */
+                target[strlen(target)-1] = '\0' ;                              /* ;AN004; then delete end backslash */
+                *((unsigned char *)com_strrchr(target,'\\')+1) = '\0' ;        /* ;AN004; del curdir name from path */
               }                                                                /* ;AN004; */
           }                                                                    /* ;AN004; */
         }
@@ -793,12 +797,12 @@ char *argv[] ;
 
   if (add)
     if (counted == 0)
-      display_msg(MSG_NONEADDE) ;                                              /* ;AC000; no files added */
+      display_msg(MSG_NONEADDE, "");                                           /* ;AC000; no files added */
     else
       display_msg(MSG_SOMEADDE,(char *)&counted) ;                             /* ;AC000; %1 files added */
   else
     if (counted == 0)
-      display_msg(MSG_NONEREPL) ;                                              /* ;AC000; no files replaced */
+      display_msg(MSG_NONEREPL, "");                                           /* ;AC000; no files replaced */
     else
       display_msg(MSG_SOMEREPL,(char *)&counted) ;                             /* ;AC000; %1 files replaced */
 
@@ -917,7 +921,6 @@ struct   filedata *file ;
 unsigned time ;
 unsigned date ;
 {
-  char     *s,*t ;
   char     source[MAX] ;
   char     target[MAX] ;
   unsigned source_handle ;
@@ -1010,7 +1013,7 @@ unsigned date ;
   }
 
   if (ea_flag)                                                                 /* ;AN000;EA If extd attrs exist */
-    status = dcreate(target,&eaparm_list) ;                                    /* ;AN000;EA   open trgt w/extd attrs */
+    status = dcreate(target,(unsigned)&eaparm_list) ;                          /* ;AN000;EA   open trgt w/extd attrs */
   else                                                                         /* ;AN000;EA */
     status = dcreate(target,-1) ;                                              /* ;AC000;EA Create the target file */
 
@@ -1133,7 +1136,7 @@ unsigned s ;
     status = outregs.x.ax ;                                                    /* ;AC000;   get returned error */
   else                                                                         /* ;AC000; else                 */
     status = (outregs.x.cflag & CARRY) ;                                       /* ;AC000;   set status to NOERROR */
-  strcpy(fix_es_reg,NULL) ;                                                    /* ;AN000; */
+  strcpy(fix_es_reg, "") ;                                                     /* ;AN000; */
   return(status) ;
 }
 /*컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴*/
@@ -1301,7 +1304,7 @@ unsigned a ;
     t->size      = getdword(_psp,0x80+26) ;
     for (i = 0; i < 15; i++)
       t->name[i] = getbyte(_psp,0x80+30+i) ;
-    strcpy(fix_es_reg,NULL) ;                                                  /* ;AN000; */
+    strcpy(fix_es_reg, "") ;                                                   /* ;AN000; */
   }
   return(status) ;
 }
@@ -1327,7 +1330,7 @@ struct filedata *t ;
     t->size      = getdword(_psp,0x80+26) ;
     for (i = 0; i < 15; i++)
       t->name[i] = getbyte(_psp,0x80+30+i) ;
-    strcpy(fix_es_reg,NULL) ;                                                  /* ;AN000; */
+    strcpy(fix_es_reg, "") ;                                                   /* ;AN000; */
   }
   return(status) ;
 }
@@ -1351,7 +1354,7 @@ unsigned l ;
 
   for (i = 0; i < l; i++)
     *(t+i) = getbyte(_psp,0x80+i) ;
-  strcpy(fix_es_reg,NULL) ;                                                    /* ;AN000; */
+  strcpy(fix_es_reg, "") ;                                                     /* ;AN000; */
   return ;                                                                     /* ;AC000; */
 }
 /*컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴*/
@@ -1364,7 +1367,7 @@ unsigned l ;
 
   for (i = 0; i < l; i++)
     putbyte(_psp,0x80+i,*(t+i)) ;
-  strcpy(fix_es_reg,NULL) ;                                                    /* ;AN000; */
+  strcpy(fix_es_reg, "") ;                                                     /* ;AN000; */
   return ;                                                                     /* ;AC000; */
 }
 /*컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴*/
@@ -1375,9 +1378,8 @@ unsigned int moffset ;                                                         /
 {                                                                              /* ;AN000; */
   char far * cPtr ;                                                            /* ;AN000; */
 
-  FP_SEG(cPtr) = msegment ;                                                    /* ;AN000; */
-  FP_OFF(cPtr) = moffset ;                                                     /* ;AN000; */
-  strcpy(fix_es_reg,NULL) ;                                                    /* ;AN000; */
+  cPtr = MK_FP(msegment, moffset);
+  strcpy(fix_es_reg, "") ;                                                     /* ;AN000; */
   return(*cPtr) ;                                                              /* ;AN000; */
 }                                                                              /* ;AN000; */
 /*컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴*/
@@ -1388,9 +1390,8 @@ unsigned int moffset ;                                                         /
 {                                                                              /* ;AN000; */
   unsigned far * uPtr ;                                                        /* ;AN000; */
 
-  FP_SEG(uPtr) = msegment ;                                                    /* ;AN000; */
-  FP_OFF(uPtr) = moffset ;                                                     /* ;AN000; */
-  strcpy(fix_es_reg,NULL) ;                                                    /* ;AN000; */
+  uPtr = MK_FP(msegment, moffset);
+  strcpy(fix_es_reg, "") ;                                                     /* ;AN000; */
   return(*uPtr) ;                                                              /* ;AN000; */
 }                                                                              /* ;AN000; */
 /*컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴*/
@@ -1401,9 +1402,8 @@ unsigned int moffset ;                                                         /
 {                                                                              /* ;AN000; */
   long far * lPtr ;                                                            /* ;AN000; */
 
-  FP_SEG(lPtr) = msegment ;                                                    /* ;AN000; */
-  FP_OFF(lPtr) = moffset ;                                                     /* ;AN000; */
-  strcpy(fix_es_reg,NULL) ;                                                    /* ;AN000; */
+  lPtr = MK_FP(msegment, moffset);
+  strcpy(fix_es_reg, "") ;                                                     /* ;AN000; */
   return(*lPtr) ;                                                              /* ;AN000; */
 }                                                                              /* ;AN000; */
 /*컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴*/
@@ -1415,10 +1415,9 @@ char     value ;                                                               /
 {                                                                              /* ;AN000; */
   char far * cPtr ;                                                            /* ;AN000; */
 
-  FP_SEG(cPtr) = msegment ;                                                    /* ;AN000; */
-  FP_OFF(cPtr) = moffset ;                                                     /* ;AN000; */
+  cPtr = MK_FP(msegment, moffset);
   *cPtr        = value ;                                                       /* ;AN000; */
-  strcpy(fix_es_reg,NULL) ;                                                    /* ;AN000; */
+  strcpy(fix_es_reg, "") ;                                                     /* ;AN000; */
   return ;                                                                     /* ;AN000; */
 }                                                                              /* ;AN000; */
 /*컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴*/
@@ -1430,10 +1429,9 @@ unsigned value ;                                                               /
 {                                                                              /* ;AN000; */
   unsigned far * uPtr ;                                                        /* ;AN000; */
 
-  FP_SEG(uPtr) = msegment ;                                                    /* ;AN000; */
-  FP_OFF(uPtr) = moffset ;                                                     /* ;AN000; */
+  uPtr = MK_FP(msegment, moffset);
   *uPtr        = value ;                                                       /* ;AN000; */
-  strcpy(fix_es_reg,NULL) ;                                                    /* ;AN000; */
+  strcpy(fix_es_reg, "") ;                                                     /* ;AN000; */
   return ;                                                                     /* ;AN000; */
 }                                                                              /* ;AN000; */
 /*컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴*/
@@ -1445,10 +1443,9 @@ long     value ;                                                               /
 {                                                                              /* ;AN000; */
   long far * lPtr ;                                                            /* ;AN000; */
 
-  FP_SEG(lPtr) = msegment ;                                                    /* ;AN000; */
-  FP_OFF(lPtr) = moffset ;                                                     /* ;AN000; */
+  lPtr = MK_FP(msegment, moffset);
   *lPtr        = value ;                                                       /* ;AN000; */
-  strcpy(fix_es_reg,NULL) ;                                                    /* ;AN000; */
+  strcpy(fix_es_reg, "") ;                                                     /* ;AN000; */
   return ;                                                                     /* ;AN000; */
 }                                                                              /* ;AN000; */
 /*컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴*/
@@ -1540,7 +1537,6 @@ void display_msg(msg_num,outline)                                              /
 int  msg_num ;                                                                 /* ;AN000;M Message number #define'd */
 char *outline ;                                                                /* ;AN000;M String for replacemnt parm */
 {                                                                              /* ;AN000;M */
-  unsigned status ;                                                            /* ;AN000;M Receives carry flag if set */
   unsigned char function ;                                                     /* ;AN000;M Y/N response or press key? */
   unsigned int message,                                                        /* ;AN000;M Message number to display */
                msg_class,                                                      /* ;AN000;M Which class of messages? */
@@ -1775,7 +1771,7 @@ char *outline ;                                                                /
                          break ;                                               /* ;AN000;M */
   }                                                                            /* ;AN000;M */
 
-  strcpy(fix_es_reg,NULL) ;                                                    /* ;AN000;P (Set es reg correct) */
+  strcpy(fix_es_reg, "") ;                                                     /* ;AN000;P (Set es reg correct) */
   if (outregs.x.cflag & CARRY)                                                 /* ;AN000;M Is the carry flag set? */
   {                                                                            /* ;AN000;M Setup regs for extd-err */
     inregs.x.bx = STDERR ;                                                     /* ;AN000;M */
@@ -1817,7 +1813,7 @@ unsigned size_buffer ;                                                         /
   inregs.x.si = -1 ;                                                           /* ;AN000;EA Select all attributes */
   intdosx(&inregs,&outregs,&segregs) ;                                         /* ;AN000;EA Int 21 */
   status = (outregs.x.cflag & CARRY) ;                                         /* ;AN000;EA Make the call */
-  strcpy(fix_es_reg,NULL) ;                                                    /* ;AN000; */
+  strcpy(fix_es_reg, "") ;                                                     /* ;AN000; */
   return(status) ;                                                             /* ;AN000;EA */
 }                                                                              /* ;AN000;EA */
 /*컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴*/
@@ -2014,7 +2010,7 @@ void setup_crit_err()                                                          /
   intdosx(&inregs,&outregs,&segregs) ;                                         /* ;AN000; Int 21 */
   oldint24 = outregs.x.bx ;                                                    /* ;AN000; Save orig offset */
   *((unsigned *)(&oldint24)+1) = segregs.es ;                                  /* ;AN000; */
-  strcpy(fix_es_reg,NULL) ;                                                    /* ;AN000; */
+  strcpy(fix_es_reg, "") ;                                                     /* ;AN000; */
 
   /* set the crit err vector to point to us */
   segread(&segregs) ;                                                          /* ;AN000; */
@@ -2022,7 +2018,7 @@ void setup_crit_err()                                                          /
   inregs.x.dx = (unsigned)crit_err_handler ;                                   /* ;AN000; Offset points to us */
   segregs.ds  = segregs.cs ;                                                   /* ;AN000; */
   intdosx(&inregs,&outregs,&segregs) ;                                         /* ;AN000; Int 21 */
-  strcpy(fix_es_reg,NULL) ;                                                    /* ;AN000; */
+  strcpy(fix_es_reg, "") ;                                                     /* ;AN000; */
   return ;                                                                     /* ;AN000; */
 }                                                                              /* ;AN000; */
 /*컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴*/
@@ -2038,7 +2034,7 @@ void setup_crit_err()                                                          /
 /*                                                                        */
 /**************************************************************************/
 
-void restore()                                                                 /* ;AN000; */
+void __cdecl restore(void)                                                     /* ;AN000; */
 {                                                                              /* ;AN000; */
   /* restore append/x status */
   if (append_installed)                                                        /* ;AN000;A */

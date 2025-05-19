@@ -12,10 +12,16 @@ country = usa-ms
 #######################	dependencies begin here. #########################
 #
 
-.SUFFIXES: .asm .obj
+.SUFFIXES: .c .asm .obj
+
+CC = wcl
+CFLAGS = -q -ms -os -zp=1 -I$(hinc) -wx
 
 AS = jwasm
 AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.c.obj:
+	$(CC) $(CFLAGS) -c -fo=$@ $<
 
 .asm.obj:
 	$(AS) $(AFLAGS) -Fo$@ $<
@@ -45,18 +51,25 @@ _parse.obj: _parse.asm  \
 
 _replace.obj: _replace.asm
 
-replace.obj: REPLACE.C  \
-  REPLACEP.H            \
+replace.obj: replace.c  \
+  replacep.h            \
   $(hinc)/comsub.h
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\replace $(subst /,\,$<) $(subst /,\,$@)"
 
 OBJS = replace.obj _replace.obj _msgret.obj _parse.obj
 
 replace.exe: $(OBJS) \
   $(map)/mapper.lib     \
-  $(comsubs)/comsubsm.lib    \
-  REPLACE.LNK
-	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\replace /map @replace.lnk"
+  $(comsubs)/comsubs.lib
+	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
+	echo 'option map=replace.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name replace.exe' >>resp.txt
+	echo "library $(comsubs)/comsubs.lib" >>resp.txt
+	echo "library $(map)/mapper.lib" >>resp.txt
+	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
+	wlink @resp.txt
 
 clean:
 	rm -f *.obj
