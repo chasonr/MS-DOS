@@ -100,7 +100,6 @@ _sysloadmsg proc near								;AN000;
 
 ;-------------------------------------------------------------------
 	call	sysloadmsg		; call the message retriever		;AN000;
-        nop ; RLCTEMP
 ;-------------------------------------------------------------------
 
 	pop	bp			; restore base pointer			;AN000;
@@ -158,7 +157,6 @@ _sysgetmsg proc near								;AN000;
 
 ;-------------------------------------------------------------------
 	call	sysgetmsg		; call the message retriever		;AN000;
-        nop ; RLCTEMP
 ;-------------------------------------------------------------------
 
 	pop	bp			; restore base pointer			;AN000;
@@ -215,7 +213,6 @@ _sysdispmsg proc near								;AN000;
 
 ;-------------------------------------------------------------------
 	call	sysdispmsg		; call the message retriever		;AN000;
-        nop ; RLCTEMP
 ;-------------------------------------------------------------------
 
 	pop	bp			; restore base pointer			;AN000;

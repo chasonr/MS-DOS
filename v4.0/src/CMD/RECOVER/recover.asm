@@ -830,7 +830,6 @@ $$DO41:
 		mov lastbs,di							;an024;bgb
 		mov di,lastchar 						;an024;bgb
 		jmp sja 	    ;zero = not a leading byte			;an024;bgb
-        nop ; RLCTEMP
 ;	    $ENDIF								;an024;bgb
 $$IF44:
 ;	$ENDIF									;an024;bgb
@@ -844,7 +843,6 @@ $$EN41:
 	int	21h								;an008;bgb
 	mov	old_drive,al							;an008;bgb
 	jmp	same_dir		; no dir separator char. found, the
-        nop ; RLCTEMP
 					; file is in the current directory
 					; of the corresponding drive. Ergo,
 					; the FCB contains the data already.
@@ -944,7 +942,6 @@ noname: 				;AC000;bgb
 	pop	ax		 ;reset stack					;an024;bgb
 	pop	ax		 ;reset stack					;an024;bgb
 	jmp	int_23
-        nop ; RLCTEMP
 ;****************************************************************************
 ; we're finished with parsing here, do the main function of recover.
 drvok:
@@ -956,7 +953,6 @@ drvok:
 	    lea     dx,no_mem_arg	;					;an013;bgb
 	    call    printerr							;an013;bgb
 	    jmp     rabort							;an013;bgb
-        nop ; RLCTEMP
 ;	$ENDIF				;fat could be read from disk		;an013;bgb
 $$IF48:
 
@@ -966,7 +962,6 @@ $$IF48:
 	    lea     dx,FATErrRead	;					       ;AC000;bgb
 	    call    printerr
 	    jmp     rabort
-        nop ; RLCTEMP
 ;	$ENDIF				;fat could be read from disk	   ;AN000;bgb
 $$IF50:
 See_If_File:				;					;AN000;

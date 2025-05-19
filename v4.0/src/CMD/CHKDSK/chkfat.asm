@@ -853,7 +853,6 @@ ENTMADE:    restorereg <ax,di,si>					     ;ac048;bgb;an049;bgb
 ;	    $IF     Z			;neither are zero		     ;an049;bgb
 	    JNZ $$IF41
 		jmp	RET100		    ; yes,we are done			    ;ac048;bgb;an049;bgb
-	nop ; RLCTEMP
 ;	    $endif							     ;an049;bgb
 $$IF41:
 	    call    NEXTORPH		;get the cluster of the next one	;ac048;bgb

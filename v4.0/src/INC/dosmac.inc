@@ -4,9 +4,6 @@
 ; Macro file for MSDOS.
 ;
 
-ifndef __JWASM__
-TRUE    EQU 0FFFFh
-endif
 ifndef TRUE
 TRUE    EQU 0FFFFh
 endif
@@ -71,11 +68,6 @@ InvokeFn  MACRO   name
 	CALL    name
 ENDM
 .xcref  InvokeFn
-ifndef __JWASM__
-Invoke MACRO name
-    InvokeFn name
-endm
-endif
 
 PAGE
 ;

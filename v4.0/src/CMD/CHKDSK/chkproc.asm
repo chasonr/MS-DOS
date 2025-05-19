@@ -202,7 +202,6 @@ CANTREC:    INC     [DOTSNOGOOD]						;ac048;bgb
 ;	    $endif								;ac048;bgb
 $$IF5:
 	    jmp     dotgoon							;ac048;bgb
-	nop ; RLCTEMP
 ;	$endif									;ac048;bgb
 $$IF4:
 
@@ -308,7 +307,6 @@ CANTREC2:
 	JZ	DOTSBAD2
 	MOV	DX,OFFSET DG:NORECDDOT
 	JMP	DOTSBAD
-	nop ; RLCTEMP
 
 NULLDIRERR label far	    ;dir is empty
 	CMP	[NOISY],OFF			;				;AC000;
@@ -407,8 +405,6 @@ $$IF16:
 	JNC $$IF18
 ;;;;;;;;;;;;JC	    nulldirerr			    ; Not spliced, error
 	    jmp     nulldirerr
-	nop ; RLCTEMP
-	nop ; RLCTEMP
 ;	$endif
 $$IF18:
 JOINERR:
@@ -499,8 +495,6 @@ CHKDOTDOT:					;Come here after . failure
 	OR	AL,AL
 	JZ	DOTDOTOK
 	 JMP	NODDOT				;No ..
-	nop ; RLCTEMP
-	nop ; RLCTEMP
 DOTDOTOK:
 	MOV	SI,OFFSET DG:DIRBUF + DIRNAM
 	MOV	DI,OFFSET DG:DDOTENT
@@ -509,8 +503,6 @@ DOTDOTOK:
 ;	$if	nz
 	JZ $$IF23
 	    jmp     noddot
-	nop ; RLCTEMP
-	nop ; RLCTEMP
 ;;; ;;;;;;;;JNZ     NODDOT			    ;No ..
 ;	$endif
 $$IF23:
@@ -548,7 +540,6 @@ DDLINKOK:
 ;	$if	z
 	JNZ $$IF25
 	    jmp     DDSIZOK
-	nop ; RLCTEMP
 ;	$endif
 $$IF25:
 BADDDSIZ:					;.. size should be 0
@@ -645,15 +636,11 @@ hidenfile:
 	adc	word ptr hidcnt+2,0	;add high word if > 64k files	     ;an049;bgb
 	add	hidsiz,cx		;it was this many bytes 	     ;an049;bgb
 	JMP	ddsizok 			;Next
-	nop ; RLCTEMP
-	nop ; RLCTEMP
 NORMFILE:
 	add	word ptr filcnt,1	;inc file counter		     ;an049;bgb
 	adc	word ptr filcnt+2,0	;add high word if >64k files	     ;an049;bgb
 	add	filsiz,cx		;add in size of file		     ;an049;bgb
 	JMP	ddsizok 			;Next
-	nop ; RLCTEMP
-	nop ; RLCTEMP
 
 
 ;***************************************************************************
@@ -682,8 +669,6 @@ CONVDIR:				;yes, dir size truncated
 	POP	BX			;Get my SRCH FCB pointer back
 	POP	[ERRSUB]		;restore from prev dir
 	JMP	ddsizok 			;Next
-	nop ; RLCTEMP
-	nop ; RLCTEMP
 DPROC2:
 	add	dirsiz,cx		;add in siz of clusters 		;an049;bgb
 ; put 4 words on the stack - for next call to dirproc?
@@ -711,8 +696,6 @@ DPROC2:
 	CMP	[DOTSNOGOOD],0
 	JNZ	ASKCONV
 	JMP	ddsizok 			;Next
-	nop ; RLCTEMP
-	nop ; RLCTEMP
 ;newdir error routines
 CANTTARG:
 ;cant chdir
@@ -723,8 +706,6 @@ CANTTARG:
 	mov	fTrunc,TRUE and 0FFh
 	call	printf_crlf
 	JMP	ddsizok 			;Next
-	nop ; RLCTEMP
-	nop ; RLCTEMP
 BogusDir:
 ;bad dir entry
 	ADD	SP,8				; clean off stack
@@ -737,8 +718,6 @@ ASKCONV:
 ;	$if	nz
 	JZ $$IF31
 	    jmp    ddsizok
-	nop ; RLCTEMP
-	nop ; RLCTEMP
 ;;;;;;;;;;;;JNZ     DDSIZOK			    ;Leave on second pass
 ;	$endif
 $$IF31:
@@ -755,8 +734,6 @@ PRINTTRMES:
 ;	$if	nz
 	JZ $$IF35
 	    jmp    ddsizok
-	nop ; RLCTEMP
-	nop ; RLCTEMP
 ;;;;;;;;;;; JNZ     DDSIZOK			    ;Leave on second pass
 ;	$endif
 $$IF35:

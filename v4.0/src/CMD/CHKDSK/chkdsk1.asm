@@ -315,7 +315,6 @@ RDOK:	;**Check_for_FAT_ID**********************************************
 	JZ $$IF18
 ;;;;;;;;;;;;JZ	    IDOK
 	    JMP     ALLDONE		    ;User said stop
-	nop ; RLCTEMP
 ;	$ENDIF
 $$IF18:
 ;   $ENDIF
@@ -385,7 +384,6 @@ doagain: MOV	 AL,[DIRCHAR]		 ;try to find '\' in path name
 	    JMP SHORT $$EN22
 $$IF22:
 		jmp	GotPath 	;found a '\' and not dbcs		;an055;bgb
-	nop ; RLCTEMP
 ;	    $ENDIF								;an055;bgb
 $$EN22:
 ;	$ENDIF									;an055;bgb

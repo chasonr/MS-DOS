@@ -1167,11 +1167,6 @@ $MIF75:
 $MIF91:
 
 	  MOV	  $M_RT.$M_SIZE,$M_NULL 		     ;;AN004;; Reset variable
-ifdef __JWASM__
-ifndef NO_TEMPS
-        nop ; RLCTEMP
-endif
-endif
 	  RET						     ;;AN000;; Return
 							     ;;
 $M_FIND_SPECIFIED_MSG ENDP				     ;;AN000;;
@@ -1858,11 +1853,6 @@ $MIF173:
 ;	$LEAVE	C,LONG					     ;;AN000;; Fail if carry was set
 	JNC $MXL3
 	JMP $MEN165
-ifdef __JWASM__
-ifndef NO_TEMPS
-        nop ; RLCTEMP
-endif
-endif
 $MXL3:
 	  PUSH	  CX					     ;;AN000;;
 

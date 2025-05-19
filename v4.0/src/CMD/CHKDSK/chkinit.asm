@@ -953,7 +953,6 @@ ELSE
 ;			$IF   NE
 			JE $$IF56
 			jmp   baddrv
-	nop ; RLCTEMP
 ;			$ENDIF
 $$IF56:
 ;		  $ENDIF
