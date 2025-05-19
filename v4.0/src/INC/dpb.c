@@ -11,8 +11,7 @@ extern struct sysVarsType SysVars ;
 
 /* Walk the DPB list trying to find the appropriate DPB */
 
-long GetDPB(i)
-int i ;
+long GetDPB(int i)
 {
         struct DPBType DPB ;
         struct DPBType *pd = &DPB ;
@@ -34,5 +33,3 @@ int i ;
         } ;
         return (long)dptr ;
 }
-
-

@@ -14,27 +14,33 @@ country = usa-ms
 #######################	dependencies begin here. #########################
 #
 
-.SUFFIXES: .asm .obj
+.SUFFIXES: .c .asm .obj
+
+CC = wcl
+CFLAGS = -q -ms -os -zp=1 -I$(hinc) -wx -ecc
 
 AS = jwasm
 AFLAGS = -q -Zm -Zg -I$(inc) -Fl
+
+.c.obj:
+	$(CC) $(CFLAGS) -c -fo=$@ $<
 
 .asm.obj:
 	$(AS) $(AFLAGS) -Fo$@ $<
 
 all: subst.exe
 
-$(inc)/errtstm.obj:
-	$(MAKE) -C $(inc) errtstm.obj
+$(inc)/errtst.obj:
+	$(MAKE) -C $(inc) errtst.obj
 
-$(inc)/sysvarm.obj:
-	$(MAKE) -C $(inc) sysvarm.obj
+$(inc)/sysvar.obj:
+	$(MAKE) -C $(inc) sysvar.obj
 
-$(inc)/cdsm.obj:
-	$(MAKE) -C $(inc) cdsm.obj
+$(inc)/cds.obj:
+	$(MAKE) -C $(inc) cds.obj
 
-$(inc)/dpbm.obj:
-	$(MAKE) -C $(inc) dpbm.obj
+$(inc)/dpb.obj:
+	$(MAKE) -C $(inc) dpb.obj
 
 $(map)/mapper.lib:
 	$(MAKE) -C $(map) mapper.lib
@@ -58,18 +64,28 @@ _parse.obj: _parse.asm  \
   $(inc)/parse.asm      \
   $(inc)/psdata.inc
 
-subst.obj: SUBST.C      \
-  SUBSTPAR.H            \
+subst.obj: subst.c      \
+  substpar.h            \
   $(hinc)/cds.h          \
+  $(hinc)/dpb.h          \
   $(hinc)/jointype.h     \
-  $(hinc)/sysvar.h
-	dosemu -t --Fdrive_c ../../.. -E "src\domsc.bat src\cmd\subst $(subst /,\,$<) $(subst /,\,$@)"
+  $(hinc)/sysvar.h       \
+  $(hinc)/errtst.h
 
-OBJS = subst.obj $(inc)/errtstm.obj $(inc)/sysvarm.obj $(inc)/cdsm.obj \
-       $(inc)/dpbm.obj _msgret.obj _parse.obj
+OBJS = subst.obj $(inc)/errtst.obj $(inc)/sysvar.obj $(inc)/cds.obj \
+       $(inc)/dpb.obj _msgret.obj _parse.obj
 
-subst.exe: $(OBJS) $(map)/mapper.lib $(comsubs)/comsubsm.lib SUBST.LNK
-	dosemu -t --Fdrive_c ../../.. -E "src\dolink src\cmd\subst @subst.lnk"
+subst.exe: $(OBJS) $(map)/mapper.lib $(comsubs)/comsubs.lib
+	echo 'system dos' >resp.txt
+	echo 'option packcode=0' >>resp.txt
+	echo 'option packdata=0' >>resp.txt
+	echo 'option map=subst.map' >>resp.txt
+	echo 'option nocaseexact' >>resp.txt
+	echo 'name subst.exe' >>resp.txt
+	echo "library $(comsubs)/comsubs.lib" >>resp.txt
+	echo "library $(map)/mapper.lib" >>resp.txt
+	for x in $(OBJS); do echo "file $$x" >>resp.txt; done
+	wlink @resp.txt
 
 clean:
 	rm -f *.obj

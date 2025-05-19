@@ -88,13 +88,18 @@
 /*                                                                        */
 /**************************************************************************/
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <dos.h>
+#include <fcntl.h>
+#include <io.h>
 #include "cds.h"
-#include "dos.h"
-#include "fcntl.h"
+#include "dpb.h"
 #include "jointype.h"
-#include "string.h"
 #include "substpar.h"                                                          /* ;AN000; Parser structures */
 #include "sysvar.h"
+#include "errtst.h"
 
 /*컴컴컴컴컴컴컴컴컴컴컴� PARSE EQUATES 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴*/
 #define ASCII_DRIVE       'A'-1                                                /* ;AN000;P Convert to Ascii drive */
@@ -107,7 +112,6 @@
 #define MAXPOSITION       2                                                    /* ;AN000;P Max positionals in cmdline */
 #define MINPOSITION       0                                                    /* ;AN000;P Min positionals in cmdline */
 #define NOCAPPING         0x0000                                               /* ;AN000;P Do not cap result */
-#define NULL              0
 #define SWITCH_OPT        0x0000                                               /* ;AN000;P Optional switch */
 
 /*컴컴컴컴컴컴컴컴컴컴컴� MESSAGE EQUATES 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴*/
@@ -140,7 +144,6 @@
 /*컴컴컴컴컴컴컴컴컴컴컴� MISCELLANEOUS 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴*/
 extern long GetDPB() ;
 extern char fDelete() ;                                                        /* SM '87 compiler required extern */
-extern char *malloc() ;                                                        /* SM '87 compiler required extern */
 extern char *strbscan() ;                                                      /* SM '87 compiler required extern */
 
 char cmdln_drive[64]   = {0} ;                                                 /* ;AN002; Save user's input in   */
@@ -158,6 +161,16 @@ int index ;                                                                    /
 
 struct sysVarsType SysVars ;
 
+void Insert(char *s, char *d);
+void Display(void);
+void load_msg(void);
+void display_msg(int msg_num, char *outline);
+void Parser_Prep(char *source);
+
+extern void __cdecl parse(union REGS const *inregs, union REGS *outregs);
+extern void __cdecl sysdispmsg(union REGS const *inregs, union REGS *outregs);
+extern void __cdecl sysloadmsg(union REGS const *inregs, union REGS *outregs);
+
 /*컴컴컴컴컴컴컴컴컴컴컴� PARSE STRUCTURES 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�*/
 struct p_parms  p_p ;                                                          /* ;AN000;P # of extras & pts to descrptn */
 struct p_parmsx p_px ;                                                         /* ;AN000;P min/max parms & pts to controls */
@@ -170,6 +183,8 @@ struct p_result_blk rslt3 ;                                                    /
 struct noval novals = {0} ;                                                    /* ;AN000;P Value list not used */
 
 union REGS inregs, outregs ;                                                   /* ;AN000;P Define register variables */
+
+void dispmsg_terminate(int msg_num, char *outline);
 
 /**************************************************************************/
 /*                                                                        */
@@ -196,7 +211,7 @@ union REGS inregs, outregs ;                                                   /
 /*                                                                        */
 /**************************************************************************/
 
-main(c, v)
+int main(c, v)
 int c ;
 char *v[] ;
 {
@@ -231,7 +246,7 @@ char *v[] ;
         p_drive[0] += (char)ASCII_DRIVE ;                                      /* ;AN000;P */
         p_drive[1] = COLON ;                                                   /* ;AN000;P */
         pdrive_flg = TRUE ;                                                    /* ;AN000;P and set the flag */
-        for (inregs.x.si ; inregs.x.si < outregs.x.si ; inregs.x.si++)         /* ;AN002; Copy whatever */
+        for (; inregs.x.si < outregs.x.si ; inregs.x.si++)         /* ;AN002; Copy whatever */
         {                                                                      /* ;AN002; parser just parsed */
           cmdln_drive[index] = *(char *)inregs.x.si ;                          /* ;AN002; */
           index++ ;                                                            /* ;AN002; */
@@ -247,7 +262,7 @@ char *v[] ;
           }                                                                    /* ;AN000;P */
           strcpy(fix_es_reg,NULL) ;                                            /* ;AN000;P (Set es reg correct) */
           pflspec_flg = TRUE ;                                                 /* ;AN000;P and set the flag */
-          for (inregs.x.si ; inregs.x.si < outregs.x.si ; inregs.x.si++)       /* ;AN002; Copy whatever */
+          for (; inregs.x.si < outregs.x.si ; inregs.x.si++)       /* ;AN002; Copy whatever */
           {                                                                    /* ;AN002; parser just parsed */
             cmdln_flspec[index] = *(char *)inregs.x.si ;                       /* ;AN002; */
             index++ ;                                                          /* ;AN002; */
@@ -255,7 +270,7 @@ char *v[] ;
         }                                                                      /* ;AN000;P */
         else                                                                   /* ;AN000;P */
         {                                                                      /* ;AN000;P */
-          for (inregs.x.si ; inregs.x.si < outregs.x.si ; inregs.x.si++)       /* ;AN002; Copy whatever */
+          for (; inregs.x.si < outregs.x.si ; inregs.x.si++)       /* ;AN002; Copy whatever */
           {                                                                    /* ;AN002; parser just parsed */
             cmdln_switch[index] = *(char *)inregs.x.si ;                       /* ;AN002; */
             index++ ;                                                          /* ;AN002; */
@@ -269,7 +284,7 @@ char *v[] ;
     else                                                                       /* ;AN000;P */
       if (outregs.x.ax != P_RC_EOL)                                            /* ;AN000;P there must be an error */
       {                                                                        /* ;AN000;P */
-        for (inregs.x.si ; inregs.x.si < outregs.x.si ; inregs.x.si++)         /* ;AN002; Copy whatever */
+        for (; inregs.x.si < outregs.x.si ; inregs.x.si++)         /* ;AN002; Copy whatever */
         {                                                                      /* ;AN002; parser just parsed */
           cmdln_invalid[index] = *(char *)inregs.x.si ;                        /* ;AN002; */
           index++ ;                                                            /* ;AN002; */
@@ -342,7 +357,7 @@ char *p ;
 
   if (*p1 != NULL)
     if ((p1 = malloc(strlen(p)+2)) == NULL)
-      dispmsg_terminate(MSG_NOMEM) ;                                           /* ;AN000;M */
+      dispmsg_terminate(MSG_NOMEM, "") ;                                       /* ;AN000;M */
     else
     {
       strcpy(p1, p) ;
@@ -389,8 +404,7 @@ char *v ;
 }
 /*컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴*/
 
-Insert(s, d)
-char *s, *d ;
+void Insert(char *s, char *d)
 {
   struct CDSType CDS ;
   int drives, drived ;
@@ -411,7 +425,7 @@ char *s, *d ;
   if (open(buf,O_BINARY) != -1)
     dispmsg_terminate(MSG_BADPARM,cmdln_flspec) ;                              /* ;AC000;M */
   else
-    if (access(buf,NULL) == -1)
+    if (access(buf,0) == -1)
       dispmsg_terminate(MSG_BADPATH,cmdln_flspec) ;                            /* ;AC000;M */
 
   s = BackFix(s) ;
@@ -420,11 +434,11 @@ char *s, *d ;
   drived = *d - 'A' ;
 
   if (fNet(drives))                                                            /* Src can't be net drive, is reuse of CDS */
-    dispmsg_terminate(MSG_NETERR) ;                                            /* ;AC000;M */
+    dispmsg_terminate(MSG_NETERR, "") ;                                        /* ;AC000;M */
 
   strcpy(fix_es_reg,NULL);                                                     /* ;AN000;P (Set es reg correct) */
   if (fNet(drived))                                                            /* Dest can't be a net drive either */
-    dispmsg_terminate(MSG_NETERR) ;                                            /* ;AC000;M */
+    dispmsg_terminate(MSG_NETERR, "") ;                                        /* ;AC000;M */
 
   /* If src or dest invalid; or dest too long; or drives the same; or can't */
   /* get CDS for source; or source is current drive; or drive is net,       */
@@ -464,7 +478,7 @@ char *s, *d ;
 }
 /*컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴*/
 
-Display()                                                                      /* Display current list of substs */
+void Display(void)                                                             /* Display current list of substs */
 {
   struct CDSType CDS ;
   int i ;
@@ -494,7 +508,7 @@ Display()                                                                      /
 /*                                                                        */
 /**************************************************************************/
 
-load_msg()                                                                     /* ;AN000;M */
+void load_msg(void)                                                            /* ;AN000;M */
 {                                                                              /* ;AN000;M */
   sysloadmsg(&inregs,&outregs) ;                                               /* ;AN000;M Load utility messages */
   if (outregs.x.cflag & CARRY)                                                 /* ;AN000;M If problem loading msgs */
@@ -524,9 +538,9 @@ load_msg()                                                                     /
 /*                                                                        */
 /**************************************************************************/
 
-display_msg(msg_num,outline)                                                   /* ;AN000;M */
-int msg_num ;                                                                  /* ;AN000;M Message number #define'd */
-char *outline ;                                                                /* ;AN001; Substitution parameter */
+void display_msg(
+        int msg_num,                                                           /* ;AN000;M Message number #define'd */
+        char *outline)                                                         /* ;AN001; Substitution parameter */
 {                                                                              /* ;AN000;M */
   unsigned char function ;                                                     /* ;AN000;M Y/N response or press key? */
   unsigned int message,                                                        /* ;AN000;M Message number to display */
@@ -657,9 +671,7 @@ char *outline ;                                                                /
 /*                                                                        */
 /**************************************************************************/
 
-dispmsg_terminate(msg_num,outline)                                             /* ;AN000;P */
-int msg_num ;                                                                  /* ;AN000;P Message number #define'd */
-char *outline ;                                                                /* ;AN001; Substitution parameter */
+void dispmsg_terminate(int msg_num, char *outline)                                             /* ;AN000;P */
 {                                                                              /* ;AN000;P */
   display_msg(msg_num,outline) ;                                               /* ;AN000;P First, display the msg */
   exit(ERRORLEVEL1) ;                                                          /* ;AN000;P Then, terminate utility */
@@ -679,8 +691,8 @@ char *outline ;                                                                /
 /*                                                                        */
 /**************************************************************************/
 
-Parser_Prep(source)                                                            /* ;AN000;P */
-char *source ;                                                                 /* ;AN000;P Commandline */
+void Parser_Prep(
+        char *source)                                                          /* ;AN000;P Commandline */
 {                                                                              /* ;AN000;P */
   p_p.p_parmsx_address    = &p_px ;                                            /* ;AN000;P Address of extended parm list */
   p_p.p_num_extra         = 0 ;                                                /* ;AN000;P No extra declarations */

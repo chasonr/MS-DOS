@@ -17,7 +17,7 @@
         long     nextDPB ;      /* pointer to next dpb                     */
         unsigned clusFree ;     /* cluster number of last alloc            */
         unsigned FreeCnt ;      /* count of free clusters, -1 if unk       */
-/*      char     SyncFlg ;      /* sync flags, (see below)                 */
+/*      char     SyncFlg ; */   /* sync flags, (see below)                 */
         } ;
 
 /*      Definitions of SyncFlg values from DPB.INC  */
@@ -27,4 +27,4 @@
 #define DPB_FBUSY  4        /* some process is reading FAT         */
 #define DPB_FWANT  8        /* some process waiting to read FAT    */
 
-
+long GetDPB(int i);

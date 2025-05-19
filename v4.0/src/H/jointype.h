@@ -2,7 +2,6 @@
 /*  types.h - basic types
  */
 
-#define NULL 0
 #define MAXPATHLEN 80		/* JOIN.C		*/
 #define MAXARG 80		/* ERRTST.C		*/
 #define CURDISK 0x19		/* ERRTST.C		*/

@@ -20,6 +20,8 @@ struct CDSType
 #define CDSSPLICE       0x2000
 #define CDSLOCAL        0x1000
 
-extern char fGetCDS() ;
-extern char fPutCDS() ;
-
+char fGetCDS(int i, struct CDSType *pLCDS);
+char fPutCDS(int i, struct CDSType *pLCDS);
+char fPhysical(int i);
+char fNet(int i);
+char fShared(int i);

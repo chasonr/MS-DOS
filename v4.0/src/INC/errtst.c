@@ -1,8 +1,12 @@
 /*  0  */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <dos.h>
 #include "comsub.h"
 #include "dpb.h"
-#include <dos.h>
 #include "jointype.h"
+#include "errtst.h"
 
 extern unsigned char *com_substr() ;            /* ;AN000; DBCS enabled */
 extern char getdrv() ;
@@ -12,15 +16,13 @@ struct SREGS segregs;                           /* ;AN000; Segment regs for Int2
 
 #define GET_DBCS_VEC   0x6300                   /* ;AN000; Int21 Get DBCS Vector */
 #define DBLNULL        "00"                     /* ;AN000; */
-#define NULL           0                        /* ;AN000; */
 
 #define KANJI   TRUE
 
 /* return FALSE if drive is valid AND the path is not a prefix of a non-root
  * current directory.
  */
-char fPathErr(p)
-char *p ;
+char fPathErr(char *p)
 {
         char buf[MAXARG] ;
         int d ;
@@ -65,17 +67,14 @@ char *p ;
 }
 
 
-strpre(pre, tot)
-        char    *pre;
-        char    *tot;
+int strpre(char *pre, char *tot)
 {
         return(!strncmp(pre, tot, strlen(pre)));
 }
 
 
 
-Fatal(p)
-char *p ;
+void Fatal(char *p)
 {
         printf("%s\n", p) ;
         exit(1) ;
@@ -84,10 +83,7 @@ char *p ;
 
 
 
-ffirst(pb, attr, pfbuf)
-char *pb ;
-int attr ;
-struct findType *pfbuf ;
+int ffirst(char *pb, int attr, struct findType *pfbuf)
 {
         union REGS regs ;
 
@@ -107,8 +103,7 @@ struct findType *pfbuf ;
         return (regs.x.cflag ? -1 : 0) ;
 }
 
-fnext (pfbuf)
-struct findType *pfbuf;
+int fnext(struct findType *pfbuf)
 {
     union REGS regs;
 
@@ -123,9 +118,7 @@ struct findType *pfbuf;
 }
 
 
-char *strbscan(str, class)
-char *str ;
-char *class ;
+char *strbscan(char *str, char *class)
 {
         char *p ;
 
@@ -140,9 +133,7 @@ char *class ;
 /* curdir.c - return text of current directory for a particular drive */
 
 
-curdir (dst, drive)
-char *dst ;
-int drive ;
+int curdir(char *dst, int drive)
 {
     union REGS regs ;
 
@@ -184,9 +175,7 @@ int drive ;
  *          current directory path.
  *
  */
-int rootpath(relpath, fullpath)
-char *relpath ;
-char *fullpath ;
+int rootpath(char *relpath, char *fullpath)
 {
         int drivenum ;
         char tempchar;
@@ -242,7 +231,7 @@ char *fullpath ;
                 else if (strcmp(follow+1, "..") == 0) {
                         *lead = tempchar ;
                         tempchar = *follow ;
-                        *follow = NULL ;
+                        *follow = '\0';
                         p2 = fullpath - 1 ;
                         while(*(p2=strbscan(p1=p2+1,"\\")) != NULL) ;
                         /* p1 now points to the start of the previous element */
@@ -268,7 +257,7 @@ char *fullpath ;
 /* getdrv - return current drive as a character */
 
 
-char getdrv()
+char getdrv(void)
 {
     union REGS regs ;
 
@@ -277,8 +266,7 @@ char getdrv()
     return(regs.h.al) ;
 }
 
-testkanj(c)
-unsigned char c;
+int testkanj(unsigned char c)
 {
   char   fix_es_reg[1];                         /* ;AN000; Fixes es reg after "far" */
   char far * fptr;                              /* ;AN000; Pts to DBCS vector */
@@ -307,4 +295,3 @@ unsigned char c;
   strcpy(fix_es_reg,NULL);                      /* ;AN000; Repair ES reg */
   return(got_dbcs);                             /* ;AN000; */
 }
-

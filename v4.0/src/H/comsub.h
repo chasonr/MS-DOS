@@ -93,7 +93,7 @@ extern unsigned far pascal REALOPEN(
 /*
  *   search the first substring occurrence in a string
  */
-extern unsigned char
+extern unsigned char __cdecl
 *com_substr(
    unsigned char *,	      /* source string */
    unsigned char *);	      /* target string */

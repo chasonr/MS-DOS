@@ -4,8 +4,7 @@
 #include <dos.h>
 #include "jointype.h"
 
-GetVars(pSVars)
-struct sysVarsType *pSVars ;
+void GetVars(struct sysVarsType *pSVars)
 {
         struct sysVarsType far *vptr ;
         int i ;
@@ -27,8 +26,7 @@ struct sysVarsType *pSVars ;
 
 
 
-PutVars(pSVars)
-struct sysVarsType *pSVars ;
+void PutVars(struct sysVarsType *pSVars)
 {
         struct sysVarsType far *vptr ;
         int i ;
@@ -46,4 +44,3 @@ struct sysVarsType *pSVars ;
                 *((char far *)vptr+i) = *((char *)pSVars+i) ;
 
 }
-

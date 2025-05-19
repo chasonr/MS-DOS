@@ -8,9 +8,7 @@
 
 extern struct sysVarsType SysVars ;
 
-char fGetCDS(i, pLCDS)
-int i ;
-struct CDSType *pLCDS ;
+char fGetCDS(int i, struct CDSType *pLCDS)
 {
         struct CDSType far *cptr ;
         int j ;
@@ -30,9 +28,7 @@ struct CDSType *pLCDS ;
 
 
 
-char fPutCDS(i, pLCDS)
-int i ;
-struct CDSType *pLCDS ;
+char fPutCDS(int i, struct CDSType *pLCDS)
 {
         struct CDSType far *cptr ;
         int j ;
@@ -54,8 +50,7 @@ struct CDSType *pLCDS ;
  * equal to the original drive.
  */
 
-char fPhysical(i)
-int i ;
+char fPhysical(int i)
 {
         struct DPBType DPB ;
         struct DPBType *pd = &DPB ;
@@ -88,8 +83,7 @@ int i ;
  *  Removed extra net check.
  */
 
-char fNet(i)
-int i ;
+char fNet(int i)
 {
         union REGS ir ;
         register union REGS *iregs = &ir ;      /* Used for DOS calls      */
@@ -105,7 +99,7 @@ int i ;
 
 /***    M000
         return(TESTFLAG(CDS.flags,CDSNET) || TESTFLAG(iregs->x.dx,0x1000)) ;
-/***/
+***/
         return(TESTFLAG(CDS.flags,CDSNET)) ;
 }
 
@@ -113,8 +107,7 @@ int i ;
 /* return TRUE if the specified drive is a shared drive.  i is a 0-based
  * quantity
  */
-char fShared(i)
-int i ;
+char fShared(int i)
 {
         struct CDSType CDS ;
         union REGS ir ;
@@ -129,4 +122,3 @@ int i ;
 
         return TESTFLAG(CDS.flags,CDSNET) || TESTFLAG(iregs->x.dx,0x0200) ;
 }
-

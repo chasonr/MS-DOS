@@ -36,6 +36,7 @@ msdos.cl1 msdos.cl3:
 	$(MAKE) -C $(dos) msdos.cl1
 
 errtst.obj: 	errtst.c \
+  		$(hinc)/errtst.h  \
   		$(hinc)/comsub.h  \
   		$(hinc)/dpb.h \
   		$(hinc)/jointype.h
